@@ -1,0 +1,133 @@
+:CODE START
+0805
+:CODE END
+8000
+:DATA BYTES
+1162-1191
+1A1D-1A34
+3FE9-3FEA
+3FFF-6294
+6294-6695
+6820-6829
+7722-7723
+7CC6-7CC7
+:WORDS
+:POINTERS
+:HILOLOOKUP
+:LOHILOOKUP
+:DATA TEXT
+6695-6820
+6829-7722
+7723-7C3F
+7CC7-7CEF
+7D8F-7E1D
+:BLANK LINES
+127E
+:REMOVED BYTES
+:FULL COMMENTS
+1A1D junk
+3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
+:SIDE COMMENTS
+0824 Continue a game?
+082C #char_Y
+0900 $zp_string_number
+091C $zp_string_number
+1007 #char_Y
+100B #char_N
+11B7 #<font_data
+11BD #>font_data
+11F3 #<row8_table
+11F9 #>row8_table
+1260 #char_cursor
+127A #char_space
+3F21 #opcode_JMP
+3F30 #char_D
+3F35 #char_E
+3F3A #char_A
+3F3F #char_T
+3F44 #char_H
+:USER LABELS
+0006 col8
+0007 row8
+0008 screen_ptr
+0009 screen_ptr+1
+000C string_ptr
+000D string_ptr+1
+000E src
+000F src+1
+0010 dst
+0011 dst+1
+0013 row_ptr
+0014 row_ptr+1
+0015 line_count
+0017 clock
+0018 clock+1
+0019 count
+001A count+1
+03F8 DOS_hook_monitor
+03F9 DOS_hook_monitor+1
+03FA DOS_hook_monitor+2
+0843 new_game
+0855 clear_hgr2
+085F @next_page
+0860 -
+08E2 print_display_string
+08E5 print_string
+08EE @next_char
+08F9 +
+0900 get_display_string
+090E @scan
+0912 @next_char
+091C @found_string
+0938 warm_start
+0C02 memcpy
+0C04 @next_byte
+0C0E +
+0C14 +
+0C23 @check_done
+0FE9 input_char
+0FEC -
+0FF7 input_Y_or_N
+0FFA -
+100F +
+1162 row8_table
+11A4 print_char
+11CC @next_line
+11EF get_rowcol_addr
+1243 blink_cursor
+1249 +
+1253 done_cursor
+1254 show_cursor
+1262 render_cursor
+126E clear_cursor
+3F00 relocate_data
+3F30 @write_DEATH
+3F4E vector_reset
+4000 screen_HGR2
+6294 font_data
+6695 verb_table
+6773 noun_table
+6820 junk_string
+6829 display_string_table
+77C0 intro_text
+7B57 junk_intro
+7C00 save_text
+C000 hw_KEYBOARD
+C010 hw_STROBE
+C050 hw_GRAPHICS
+C052 hw_FULLSCREEN
+C055 hw_PAGE2
+C057 hw_HIRES
+:DISABLED HILO LABELS
+3F21
+3F30
+3F35
+3F3A
+3F3F
+:USER HILO
+:TAB SIZE
+0008
+:LOAD OFFSET
+0000
+:SYSTEM
+Atari 8bit
