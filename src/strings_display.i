@@ -1,3 +1,4 @@
+	.feature  string_escapes
 ; STRING $01 (1)
 	msbstring "Inventory:"
 ; STRING $02 (2)
@@ -121,7 +122,7 @@
 ; STRING $3d (61)
 	msbstring "what was the name of the monster?"
 ; STRING $3e (62)
-	msbstring "it says "the magic word is camelot"."
+	msbstring "it says \"the magic word is camelot\"."
 ; STRING $3f (63)
 	msbstring "The monster grabs the frisbee, throws "
 ; STRING $40 (64)

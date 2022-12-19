@@ -39,10 +39,11 @@ def sections(it, is_start):
 
 def write(fname, seq):
     with open(fname, 'wt') as out:
+        out.write('\t.feature  string_escapes\n')
         for i,s in sections(seq, lambda c: c & 0x80):
             ba = bytearray(s)
             ba[0] &= 0x7F
-            text = ba.decode('ascii')
+            text = ba.decode('ascii').replace('"', '\\"')
             out.write(f'; STRING ${i:02x} ({i})\n')
             if len(text) <= 40:
                 out.write(f'\tmsbstring "{text}"\n')

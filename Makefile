@@ -23,7 +23,7 @@ CC65=cl65
 AS65=ca65
 LD65=ld65
 CC65FLAGS=-Oirs -t $(TARGET)
-AS65FLAGS=-t $(TARGET) -I . -I src/include --debug-info
+AS65FLAGS=-t $(TARGET) -I . --debug-info
 LD65FLAGS=
 
 %.o: %.c
