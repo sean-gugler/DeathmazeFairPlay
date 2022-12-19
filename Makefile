@@ -67,6 +67,10 @@ $(FOLDERS):
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
 
+strings: tools/strings.py
+	$^ files/original/DEATHMAZE_B\#060805
+
+
 # Dependencies
 
 DEPS = $(patsubst %.s,%.d,$(wildcard src/*/*.s src/*/*/*.s))
@@ -100,6 +104,7 @@ GENERATED += $(FONT)
 .PHONY: \
 	all \
 	font \
+	strings \
 	clean $(CLEAN) \
 	distclean $(DISTCLEAN)
 
