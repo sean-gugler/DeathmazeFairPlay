@@ -48,11 +48,9 @@ def write(fname, seq):
             if len(text) <= 40:
                 out.write(f'\tmsbstring "{text}"\n')
             else:
-                op = 'msbstring'
                 j = text.find('Copyright')
                 for k in range(j%40, len(text), 40):
-                    out.write(f'\t{op} "{text[k:k+40]}"\n')
-                    op = '.byte    '
+                    out.write(f'\t.byte "{text[k:k+40]}"\n')
 
 def main(argv):
     args = usage(argv)
