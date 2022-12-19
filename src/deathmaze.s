@@ -17,7 +17,6 @@ a0A = $0a
 a0B = $0b
 string_ptr = $0c
 ;string_ptr+1 = $0d
-Lstring_ptr = $000c
 src = $0e
 ;src+1 = $0f
 dst = $10
@@ -109,38 +108,38 @@ p0615 = $0615
 p0801 = $0801
 p0802 = $0802
 
-p4015 = $6015
-p40AF = $60AF
-p40B1 = $60B1
-p40B4 = $60B4
-p40D8 = $60D8
-p40D9 = $60D9
-p4131 = $6131
-p4132 = $6132
-p4133 = $6133
-p4134 = $6134
-p4156 = $6156
-p4200 = $6200
-p4204 = $6204
-p4211 = $6211
-p4384 = $6384
-p4387 = $6387
-p438E = $638E
-p4607 = $6607
-p4707 = $6707
-p5C50 = $7C50
-p5C54 = $7C54
-p5C61 = $7C61
-p5D05 = $7D05
-p5DAF = $7DAF
-p5DB4 = $7DB4
-p5E4F = $7E4F
-p5E50 = $7E50
-p5E56 = $7E56
-p5E65 = $7E65
-p5EAC = $7EAC
-p5EAF = $7EAF
-p5EB6 = $7EB6
+p4015 = $4015
+p40AF = $40AF
+p40B1 = $40B1
+p40B4 = $40B4
+p40D8 = $40D8
+p40D9 = $40D9
+p4131 = $4131
+p4132 = $4132
+p4133 = $4133
+p4134 = $4134
+p4156 = $4156
+p4200 = $4200
+p4204 = $4204
+p4211 = $4211
+p4384 = $4384
+p4387 = $4387
+p438E = $438E
+p4607 = $4607
+p4707 = $4707
+p5C50 = $5C50
+p5C54 = $5C54
+p5C61 = $5C61
+p5D05 = $5D05
+p5DAF = $5DAF
+p5DB4 = $5DB4
+p5E4F = $5E4F
+p5E50 = $5E50
+p5E56 = $5E56
+p5E65 = $5E65
+p5EAC = $5EAC
+p5EAF = $5EAF
+p5EB6 = $5EB6
 
 ;
 ; **** EXTERNAL JUMPS ****
@@ -268,9 +267,9 @@ b08B4:
 b08C3:
 	sta (p0A),y
 	jsr print_char
-	inc Lstring_ptr
+	inc a:string_ptr
 	bne b08D0
-	inc Lstring_ptr+1
+	inc a:string_ptr+1
 b08D0:
 	inc a0A
 	bne b08D6
@@ -292,9 +291,9 @@ print_string:
 	and #$7f
 @next_char:
 	jsr print_char
-	inc string_ptr
+	inc a:string_ptr
 	bne :+
-	inc string_ptr+1
+	inc a:string_ptr+1
 :	ldy #$00
 	lda (string_ptr),y
 	bpl @next_char
@@ -303,17 +302,17 @@ print_string:
 get_display_string:
 	sta zp_string_number
 	ldx #<display_string_table
-	stx string_ptr
+	stx a:string_ptr
 	ldx #>display_string_table
-	stx string_ptr+1
+	stx a:string_ptr+1
 	ldy #$00
 @scan:
 	lda (string_ptr),y
 	bmi @found_string
 @next_char:
-	inc string_ptr
+	inc a:string_ptr
 	bne @scan
-	inc string_ptr+1
+	inc a:string_ptr+1
 	bne @scan
 @found_string:
 	dec zp_string_number
@@ -903,9 +902,9 @@ b0CDD:
 	jsr get_rowcol_addr
 	lda #>p0C79
 b0D16:
-	sta string_ptr+1
+	sta a:string_ptr+1
 	lda #<p0C79
-	sta string_ptr
+	sta a:string_ptr
 b0D1E:
 	lda #$80
 	ldy #$50
@@ -4805,9 +4804,9 @@ b2885:
 	jsr s2788
 	lda #$0e
 	sta a61A5
-	lda #<src+1
+	lda #$0f
 	sta src
-	lda #>src+1
+	lda #$00
 	sta src+1
 	jsr s1A34
 	jsr s28D9
@@ -6457,9 +6456,9 @@ j3493:
 
 b3499:
 	jsr s105F
-	ldx #<p0609
+	ldx #$09
 	stx src
-	ldx #>p0609
+	ldx #$06
 	stx src+1
 	jsr s1A34
 	lda count+1
@@ -6472,9 +6471,9 @@ b3499:
 	jsr s0892
 	lda #$51
 	jsr s08A4
-	ldx #>screen_ptr+1
+	ldx #$00
 	stx src+1
-	ldx #<screen_ptr+1
+	ldx #$09
 	stx src
 	jsr s1A34
 	ldx #$07
@@ -6923,17 +6922,17 @@ b3813:
 	beq b386C
 	cmp #$13
 	bne b380C
-	ldx #<p0604
+	ldx #$04
 	stx src
-	ldx #>p0604
+	ldx #$06
 	stx src+1
 	jsr s1A34
 	lda count+1
 	cmp #$07
 	bpl b3842
-	ldx #<p060E
+	ldx #$0e
 	stx src
-	ldx #>p060E
+	ldx #$06
 	stx src+1
 	jsr s1A34
 	lda count+1
@@ -6941,14 +6940,14 @@ b3813:
 	bmi b380C
 	bpl b3864
 b3842:
-	ldx #<p04
+	ldx #$04
 	stx src
-	ldx #>p04
+	ldx #$00
 	stx src+1
 	jsr s1A34
-	ldx #>dst+1
+	ldx #$00
 	stx src+1
-	ldx #<dst+1
+	ldx #$11
 	stx src
 	jsr s1A34
 	ldx #$07
@@ -7393,9 +7392,9 @@ j3BA5:
 	jsr s25E3
 	lda #$77
 	jsr print_display_string
-	ldx #<dst+1
+	ldx #$11
 	stx src
-	ldx #>dst+1
+	ldx #$00
 	stx src+1
 	jsr s1A34
 	ldx #$07
@@ -7419,9 +7418,9 @@ b3BD8:
 	jsr s25E3
 	lda #$77
 	jsr print_display_string
-	ldx #>src+1
+	ldx #$00
 	stx src+1
-	ldx #<src+1
+	ldx #$0f
 	stx src
 	jsr s1A34
 	ldx #$01
@@ -8339,9 +8338,9 @@ s7C3F:
 	ldx #$00
 	stx zp_col
 	stx zp_row
-	ldx #<text_savegame
+	ldx #<text_loadgame
 	stx string_ptr
-	ldx #>text_savegame
+	ldx #>text_loadgame
 	stx string_ptr+1
 	jsr print_string
 	jsr s7C94
