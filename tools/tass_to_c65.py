@@ -125,9 +125,9 @@ def main(argv):
                         st_count = 0 if label == 'string_table' else None
 
                 if m := text.match(code):
-                    literal = m.group(1)
+                    s = m.group(1)
                     # .replace('"', '\\"')
-                    out += f'.byte {literal}\n'
+                    out += f'.byte {s}\n'
 
                 # JSR j_primm  ;b'left\n\x00'
                 # .BYTE $EC,$E5,$E6,$F4,$8D,$00
@@ -136,6 +136,7 @@ def main(argv):
                 # as potential marker at end of a text string
                 elif m := data.match(code):
                     bytelist.extend(m.group(1).lower().split(','))
+                    """
                     try:
                         while (i := bytelist.index('$00')) >= 0:
                             st = ''.join(Text[b] for b in bytelist[:i])
@@ -158,6 +159,7 @@ def main(argv):
                     except (ValueError):
                         # print('ValueError', len(bytelist))
                         pass
+                    """
                     continue
 
                 # Branch with convenience label '+' or '-'
