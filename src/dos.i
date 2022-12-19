@@ -6,6 +6,9 @@ RWTS_IOBPH = $49   ; I/O Block Pointer, HI byte
 DOS_data_prologue_3 = $4e
 
 DOS_hook_cout = $03ea
+DOS_hook_monitor = $03f8
+;DOS_hook_monitor+1 = $03f9
+;DOS_hook_monitor+2 = $03fa
 
 DOS_BREAK  = $9d58
 DOS_ASIBSW = $aaae
