@@ -57,6 +57,14 @@ $(FOLDERS):
 	mkdir -p $@
 
 
+# Game files.
+
+%.test: $$(wildcard $$(@D)/$$(*F).cfg)
+	echo $(@D)/$(*F).cfg $^
+
+%.prg: %.o src/loadaddr.o $$(or $$(wildcard $$(@D)/$$(*F).cfg),src/main.cfg)
+	$(LD65) -m $*.map -C $(filter %.cfg,$^) -Ln $*.lab \
+		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
 
 # Dependencies
