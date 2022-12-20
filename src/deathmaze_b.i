@@ -36,3 +36,4 @@ item_exec_reset_game = $09
 opcode_JMP = $4c
 
 torch_low = $0a
+torch_lifespan = $96

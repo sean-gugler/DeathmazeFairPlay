@@ -568,10 +568,10 @@ b0B00:
 b0B0C:
 	lda a61AD
 	and #$02
-	beq b0B18
+	beq done_timer
 	ldx #$08
 	stx a61A5
-b0B18:
+done_timer:
 	rts
 
 s0B19:
@@ -589,26 +589,25 @@ j0B2E:
 	lda a6194
 	cmp #$05
 	beq @dec_food
-	lda gs_torch_time+1
+	lda gs_torch_time
 	beq @dec_food
-	dec gs_torch_time+1
+	dec gs_torch_time
 	bne @dec_food
 	dec gs_torches_lit
 	ldx #$00
-	stx a619E
+	stx gs_room_lit
 	jsr s10DC
 	ldx #$0a
 	stx a61A5
 @dec_food:
-	dec gs_fed+1
-	lda gs_fed+1
+	dec gs_food_time_lo
+	lda gs_food_time_lo
 	cmp #$ff
-	bne b0B5C
-	dec gs_fed
-b0B5C:
-	lda gs_fed
-	ora gs_fed+1
-	bne b0B18
+	bne :+
+	dec gs_food_time_hi
+:	lda gs_food_time_hi
+	ora gs_food_time_lo
+	bne done_timer
 j0B64:
 	jsr clear_hgr2
 	lda #$35     ;Died of starvation!
@@ -620,14 +619,14 @@ j0B64:
 	jmp game_over
 
 print_timers:
-	lda gs_fed
+	lda gs_food_time_hi
 	bne :+
-	lda gs_fed+1
+	lda gs_food_time_lo
 	cmp #food_low
 	bcs :+
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
-:	lda gs_torch_time+1
+:	lda gs_torch_time
 	beq rts_bb2
 	cmp #torch_low
 	bcs rts_bb2
@@ -684,7 +683,7 @@ b0BD3:
 	lda a6194
 	cmp #$05
 	beq b0BAB
-	lda a619E
+	lda gs_room_lit
 	beq b0BAB
 	ldx #$0d
 	stx src+1
@@ -729,7 +728,7 @@ p0C2A:
 	bcc b0C31
 	jsr s1015
 b0C31:
-	lda a619E
+	lda gs_room_lit
 	beq b0C3E
 	ldx #$00
 	stx a61B3
@@ -1206,9 +1205,9 @@ b0F52:
 	jmp s0CCA
 
 b0F5A:
-	lda a619E
+	lda gs_room_lit
 	beq b0F63
-	lda #$8b
+	lda #$8b     ;Look at your monitor.
 	bne b0F65
 b0F63:
 	lda #$8a     ;It's awfully dark.
@@ -1327,8 +1326,8 @@ input_Y_or_N:
 s1015:
 	jsr clear_maze_window
 	jsr s17BF
-	lda a619E
-	beq b1044
+	lda gs_room_lit
+	beq @done
 	jsr s12A6
 	jsr s1DDF
 	lda src+1
@@ -1340,12 +1339,12 @@ b102F:
 	stx src+1
 	jsr item_exec
 	lda a619B
-	beq b1044
+	beq @done
 	sta src
 	ldx #$06
 	stx src+1
 	jsr s1E5A
-b1044:
+@done:
 	rts
 
 wait5:
@@ -2991,7 +2990,7 @@ code08_count_inv:
 	iny
 	dec count+1
 	bne @check_carried
-	lda gs_torch_time+1
+	lda gs_torch_time
 	bne @add_one
 	lda gs_torches_unlit
 	beq @done
@@ -4473,7 +4472,7 @@ b2682:
 	sta src+1
 	jsr item_exec
 	lda #$01
-	sta a619E
+	sta gs_room_lit
 	jsr s1015
 	lda #$71     ;The ring is activated and
 	jsr print_to_line1
@@ -4553,8 +4552,8 @@ s2723:
 	cmp #$05
 	beq b2742
 	lda #$00
-	sta gs_torch_time+1
-	sta a619E
+	sta gs_torch_time
+	sta gs_room_lit
 	jsr s2788
 	lda #$0a
 	sta a61A5
@@ -4659,9 +4658,9 @@ b27EB:
 	lda dst+1
 	sta src
 	jsr item_exec
-	lda gs_fed
+	lda gs_food_time_hi
 	sta src+1
-	lda gs_fed+1
+	lda gs_food_time_lo
 	sta src
 	lda #<pAA
 	sta count
@@ -4674,9 +4673,9 @@ b27EB:
 	lda count+1
 	adc src+1
 	sta src+1
-	sta gs_fed
+	sta gs_food_time_hi
 	lda src
-	sta gs_fed+1
+	sta gs_food_time_lo
 	lda #$58
 	bne b27CF
 s281D:
@@ -4684,7 +4683,7 @@ s281D:
 	cmp #$05
 	bne b2836
 	lda #$00
-	sta a619E
+	sta gs_room_lit
 	lda a61AC
 	beq b2836
 	lda #$0a
@@ -4891,7 +4890,7 @@ b29A5:
 	dec gs_torches_lit
 	jsr s2788
 	lda #$00
-	sta a619E
+	sta gs_room_lit
 	sta gs_torches_lit
 	lda #$0a
 	sta a61A5
@@ -4922,11 +4921,11 @@ b29D9:
 b29E8:
 	lda count+1
 	cmp #$07
-	bne b29F1
+	bne cmd_light
 	jmp j0BAD
 
-b29F1:
-	lda a619E
+cmd_light:
+	lda gs_room_lit
 	bne b2A02
 	lda #$88     ;You have no fire.
 	jsr print_to_line2
@@ -4961,8 +4960,8 @@ b2A16:
 	lda #$07
 	sta src+1
 	jsr item_exec
-	lda #$96
-	sta gs_torch_time+1
+	lda #torch_lifespan
+	sta gs_torch_time
 	rts
 
 b2A43:
@@ -5446,13 +5445,13 @@ b2D85:
 	lda gd_direct_object
 	cmp #$1c
 	bne b2DC3
-	lda a619E
+	lda gs_room_lit
 	bne b2DA5
 	ldx #$01
 	stx a61A2
 	bne b2DC3
 b2DA5:
-	dec a619E
+	dec gs_room_lit
 	ldx #$00
 	stx a61A2
 	inc gs_torches_unlit
@@ -5961,9 +5960,9 @@ b3136:
 
 b313F:
 	jsr s1015
-	ldx gs_fed
+	ldx gs_food_time_hi
 	stx src+1
-	ldx gs_fed+1
+	ldx gs_food_time_lo
 	stx src
 	lda src+1
 	bne b315D
@@ -5987,9 +5986,9 @@ b315D:
 	lda src+1
 	sbc count+1
 	sta src+1
-	sta gs_fed
+	sta gs_food_time_hi
 	lda src
-	sta gs_fed+1
+	sta gs_food_time_lo
 b317A:
 	jsr s0FDC
 	jsr clear_maze_window
@@ -6003,7 +6002,7 @@ b317A:
 
 b3190:
 	ldx #$05
-	stx gs_fed+1
+	stx gs_food_time_lo
 	bne b317A
 j3197:
 	dec src+1
@@ -6786,7 +6785,7 @@ b377D:
 	bcc b3787
 	jsr s1015
 b3787:
-	lda a619E
+	lda gs_room_lit
 	beq b3794
 	ldx #$00
 	stx a61B3
@@ -7155,7 +7154,7 @@ b3A3F:
 b3A49:
 	cmp #$13
 	bne b3A3C
-	lda a619E
+	lda gs_room_lit
 	beq b3A3C
 	ldx #<p0604
 	stx src
@@ -7405,7 +7404,7 @@ j3C37:
 	stx src+1
 	cmp #$01
 	bne b3C55
-	lda a619E
+	lda gs_room_lit
 	beq b3C55
 	lda a619A
 	and #$e0
@@ -9069,10 +9068,14 @@ a619C:
 	.byte $10
 gd_direct_object:
 	.byte $17
-a619E:
+gs_room_lit:
 	.byte $01
-gs_fed:
-	.byte $00,$80,$80
+gs_food_time_hi:
+	.byte $00
+gs_food_time_lo:
+	.byte $80
+gs_torch_time:
+	.byte $80
 a61A2:
 	.byte $00
 a61A3:

@@ -85,6 +85,7 @@
 0F0D #'?'
 0F34 #char_ClearLine
 0F52 what?
+0F5F Look at your monitor.
 0F63 It's awfully dark.
 1007 #'Y'
 100B #'N'
@@ -153,6 +154,7 @@
 29F6 You have no fire.
 2A29 The torch is lit and the
 2A2E old torch dies and vanishes!
+2A3D #torch_lifespan
 2A63 With who? The monster?
 2A8C A high shrill note comes
 2A91 from the flute!
@@ -346,7 +348,9 @@
 0925 -
 0938 warm_start
 0A4A @beheaded
-0B4F @burn_food
+0B18 done_timer
+0B4F @dec_food
+0B5C +
 0B77 print_timers
 0B88 +
 0BB2 rts_bb2
@@ -362,6 +366,7 @@
 0FF7 input_Y_or_N
 0FFA -
 100F +
+1044 @done
 1045 wait5
 1049 @dec16
 104D -
@@ -450,6 +455,7 @@
 2768 +
 28FC +
 2902 +
+29F1 cmd_light
 31B9 +
 31BC save_to_tape
 3E65 text_congrats
@@ -465,9 +471,10 @@
 6197 gs_torches_lit
 6198 gs_torches_unlit
 619D gd_direct_object
-619F gs_fed
-61A0 gs_fed+1
-61A1 gs_torch_time+1
+619E gs_room_lit
+619F gs_food_time_hi
+61A0 gs_food_time_lo
+61A1 gs_torch_time
 61BB gs_item_loc_inv
 61BC gs_item_loc_map
 61DB gs_item_inventory+20
