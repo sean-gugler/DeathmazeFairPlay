@@ -3,7 +3,7 @@
 :CODE END
 8000
 :DATA BYTES
-1162-1191
+1162-1192
 1A1D-1A34
 1E36-1E5A
 2052-206A
@@ -15,7 +15,6 @@
 32CA-3319
 3345-3347
 3E36-3E49
-3E65-3E89
 3ED2-3ED3
 3FE9-3FEA
 3FFF-6294
@@ -32,6 +31,7 @@
 :DATA TEXT
 1F13-1F1B
 2262-2272
+3E65-3E89
 6695-6820
 6829-7722
 7723-7C3F
@@ -39,34 +39,266 @@
 7D8F-7E1D
 :BLANK LINES
 127E
+1AFE
+1B25
+1C3B
+26AB
 :REMOVED BYTES
 :FULL COMMENTS
+0CCA (end cruft)
 1A1D junk
+1A9F clear screen region
+1AB5 print inventory
+1C55 Skip over snake
+1C6D Go back and check snake
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
+7D8F 1-based indexing via 'A'
 :SIDE COMMENTS
 0824 Continue a game?
 082C #'Y'
+0833 Press any key
+0843 #item_exec_reset_game
+08DC #char_ClearLine
 0900 $zp_string_number
 091C $zp_string_number
-1007 #char_Y
-100B #char_N
+0923 #' '
+09D9 Splat!
+0A55 Invisible guillotine
+0B67 Died of starvation!
+0B7F #food_low
+0B83 Stomach is growling
+0B8D #torch_low
+0B91 Torch is dying
+0BAD Body has vanished
+0C61 The ground beneath your feet
+0C66 begins to shake!
+0C7B A disgusting odor permeates
+0C80 the hallway!
+0C92 The monster attacks you and
+0C97 you are his next meal!
+0C9F It is the monster's mother!
+0CA4 She slashes you to bits!
+0DB8 #' '
+0DF0 #' '
+0E9A I'm sorry, but I can't
+0EDA What in tarnation is a
+0F0D #'?'
+0F34 #char_ClearLine
+0F52 what?
+0F63 It's awfully dark.
+1007 #'Y'
+100B #'N'
+105A Little sense.
+106B #char_ClearLine
+1075 #char_ClearLine
+108A Oh no! A pit!
+109B AAAAAAHH!
+10B1 WHAM!
+10BF Victim of the maze!
+10C4 Play again?
+10CC #'Y'
+1142 I don't see that here.
+1192 #char_newline
+1196 #char_ClearLine
 11B7 #<font
 11BD #>font
 11F3 #<row8_table
 11F9 #>row8_table
+1231 #' '
 1260 #char_cursor
-127A #char_space
+127A #' '
+1A42 #<gs_item_inventory-2
+1A48 #>gs_item_inventory
+1AAA char_ClearLine
+1ACC Inventory:
+1B30 Torches:
+1B40 Lit:
+1B52 #'0'
+1B62 Unlit:
+1B67 #' '
+1B70 #'0'
+1B7F clamp max inventory row
+1BA2 Box
+1BEC #gs_size-1
+1C98 clamp min 0
+1CA7 #<gs_item_inventory
+2612 #' '
+2679 Having fun?
+26A2 The ring is activated and
+26A7 shines light everywhere!
+26D2 A deafening roar envelopes
+26D7 you. Your ears are ringing!
+2713 You break the
+271E and it disappears!
+277A It vanishes in a
+277F burst of flames!
+27BD You eat the
+27C2 #' '
+27CD and you get heartburn!
+2876 and it vanishes!
+287B and is eaten by
+2880 the monster!
+28A9 and the monster grabs it,
+28AE gets tangled, and topples over!
+28BC returns and hits you
+28C1 in the eye!
+28D4 Food fight!
+28E0 The
+2902 magically sails
+2907 around a nearby corner
+292D The monster grabs the frisbee, throws
+2932 it back, and it saws your head off!
+2965 The hallway is too crowded.
+29D4 With what? Air?
+29F6 You have no fire.
+2A29 The torch is lit and the
+2A2E old torch dies and vanishes!
+2A63 With who? The monster?
+2A8C A high shrill note comes
+2A91 from the flute!
+2AEF Thunderbolts shoot out above you!
+2AF4 The staff thunders with uselss energy!
+2B07 OK...if you really want to,
+2B0C you are wearing it.
+2B3C I don't see that here.
+2B50 A close inspection reveals
+2BDC Inside the box there is a
+2C5B You unlock the door...
+2C6C But you have no key.
+2C79 You unlock the door...
+2C7E and the key begins to tick!
+2D2A The calculator displays
+2D2F #' '
+2DDD You have been teleported!
+2DE2 The calculator vanishes.
+2DF9 A draft blows your torch out.
+2ED6 The calculator displays 317.
+2F30 It is currently impossible.
+2FB7 I don't see that here.
+2FE4 OK...
+30B1 You have rammed your head into a steel
+30B6 wall and bashed your brains out!
+3100 You will do no such thing!
+3180 WHAM!
+31A0 It is currently impossible.
+31A8 Save the game?
+31B2 #'Y'
+31BC Prepare cassette
+31C1 Press any key
+31E6 Are you sure you want to quit?
+3244 Try examining things.
+324F Type instructions.
+3258 Invert and telephone.
+33E8 Splat!
+3401 To everything
+340C Turn turn turn
+3411 There is a season
+341C Turn turn turn
+3461 A vampire bat attacks you!
+3483 The bat drains you!
+3491 It looks very dangerous!
+34B4 What a mess! The vampire bat
+34B9 drinks the blood and dies!
+3513 A vicious dog attacks you!
+3539 He rips your throat out!
+3547 It displays 317.2!
+357A and it vanishes!
+357F You have killed it.
+3597 The dagger disappears!
+35C4 and is eaten by
+35C9 the monster!
+35D4 The dog chases the sneaker!
+35DF and is eaten by
+35E4 the monster!
+3602 The ground beneath your feet
+3607 begins to shake!
+3619 A disgusting odor permeates
+361E the hallway!
+362C The monster attacks you and
+3631 you are his next meal!
+363E Never raid a monster's lair
+369E The ground beneath your feet
+36A3 begins to shake!
+36C3 A disgusting odor permeates
+36C8 the hallway as it darkens!
+36D3 It is the monster's mother!
+36E9 She has been seduced!
+3711 She tiptoes up to you!
+3716 She slashes you to bits!
+3725 It looks very dangerous!
+3756 She tiptoes up to you!
+375B You slash her to bits!
+3763 The body has vanished!
+37B7 The ground beneath your feet
+37BC begins to shake!
+37D1 A disgusting odor permeates
+37D6 the hallway!
+37E8 The monster attacks you and
+37ED you are his next meal!
+37F5 It is the monster's mother!
+37FA She slashes you to bits!
+385F The dagger disappears!
+3864 You have killed it.
+386C It looks very dangerous!
+38DD Tick tick
+3924 The key blows up the whole maze!
+399F The elevator is moving!
+39A7 You are deposited at the next level.
+39C5 You are trapped in a fake
+39CA elevator. There is no escape!
+39F3 Glitch!
+3A78 The dagger disappears!
+3A80 The monster is dead and
+3A85 much blood is spilt!
+3ACC It is now full of blood.
+3AD4 It looks very dangerous!
+3AE2 The body has vanished!
+3B3B Wham!
+3B40 Your head smashes into the ceiling!
+3B4B You fall on the snake!
+3B83 You can't be serious!
+3BA8 The
+3BAD snake
+3BB2 has vanished
+3BDD The
+3BE2 wool
+3BE7 has vanished
+3C1D You will do no such thing!
+3C6A Splat!
+3CA6 Don't make unnecessary turns.
+3D7C You fall through the floor
+3D81 #char_newline
+3D86 onto a bed of spikes!
+3E1B Before I let you go free
+3E20 what was the name of the monster?
+3E92 Correct! You have survived!
+3E97 #char_newline
+3EB8 You have turned into a pillar of salt!
+3EBD #char_newline
+3EC2 Don't say I didn't warn you!
+3ECA It is currently impossible.
 3F21 #opcode_JMP
-3F30 #char_D
-3F35 #char_E
-3F3A #char_A
-3F3F #char_T
-3F44 #char_H
+3F30 #'D'
+3F35 #'E'
+3F3A #'A'
+3F3F #'T'
+3F44 #'H'
+7C56 #'D'
+7C60 Prepare your cassette
+7C7D #'T'
+7CA4 #'T'
+7CA8 #'D'
+7D4F #char_newline
+7D5F char_newline
+7D64 Press any key
+7E5F #char_newline
 :USER LABELS
 0006 zp_col
 0007 zp_row
 0008 screen_ptr
 0009 screen_ptr+1
+000A text_ptr
+000B text_ptr+1
 000C string_ptr
 000D string_ptr+1
 000E src
@@ -76,17 +308,32 @@
 0013 row_ptr
 0014 row_ptr+1
 0015 line_count
+0016 zp_counter
 0017 clock
 0018 clock+1
 0019 count
 001A count+1
+003C tape_addr_start
+003D tape_addr_start+1
+003E tape_addr_end
+003F tape_addr_end+1
+03D9 DOS_call_rwts
 03F8 DOS_hook_monitor
 03F9 DOS_hook_monitor+1
 03FA DOS_hook_monitor+2
+0805 main
+080C new_session
 0843 new_game
 0855 clear_hgr2
 085F @next_page
 0860 -
+0872 load_from_tape
+0892 print_to_line1
+08A4 print_to_line2
+08B4 print_to_line
+08C3 @next_char
+08D0 +
+08D6 +
 08E2 print_display_string
 08E5 print_string
 08EE @next_char
@@ -95,33 +342,137 @@
 090E @scan
 0912 @next_char
 091C @found_string
+0921 clear_text_buf
+0925 -
 0938 warm_start
+0A4A @beheaded
+0B4F @burn_food
+0B77 print_timers
+0B88 +
+0BB2 rts_bb2
 0C02 memcpy
 0C04 @next_byte
 0C0E +
 0C14 +
 0C23 @check_done
+0C7A text_buffer1
+0CA2 text_buffer2
 0FE9 input_char
 0FEC -
 0FF7 input_Y_or_N
 0FFA -
 100F +
+1045 wait5
+1049 @dec16
+104D -
+105A nonsense
+105F clear_status_lines
+107C pit
+10B9 game_over
+10C4 play_again
+10D3 +
+1142 @not_here
 1162 row8_table
+1192 char_out
+119D +
 11A4 print_char
 11CC @next_line
 11EF get_rowcol_addr
+120C control_newline
+1217 +
+121E clear_to_end_line
+1226 clear_up_to_3F
+1229 clear_N
+1231 -
 1243 blink_cursor
 1249 +
 1253 done_cursor
 1254 show_cursor
 1262 render_cursor
 126E clear_cursor
+127E clear_maze_window
+1286 @clear_row
+128E @clear_raster
+1292 -
+1A34 item_exec
+1A5F set_item_code
+1A69 +
+1A6E code06_get_item_stat
+1A7E code05_drop_item
+1A93 code07_draw_inv
+1A9B draw_inventory
+1AA7 -
+1ADC @check_item_known
+1AE7 +
+1AEE next_known_item
+1AF4 +
+1AFA +
+1B0A @check_item_closed
+1B15 next_closed_item
+1B1B +
+1B21 +
+1B76 print_known_item
+1B81 +
+1B9C print_closed_item
+1BB5 code08_count_inv
+1BCD @check_carried
+1BD5 +
+1BE5 @add_one
+1BE7 @done
+1BE8 code09_new_game
+1BFE -
+1C06 code0A
+1C0D code0B_inside_box
+1C14 +
+1C31 @next_location
+1C35 not_at_feet
+1C4B @next_carried
+1C63 @next_other
+1C7E item_at_feet
+1C94 return_item_num
+1C9A +
+1CAF code0C
+1CE8 code0D
+1CF6 code0E
+1D0D code_default
+1D0E code0A_impl
 1F13 string_elevator
 2262 string_square
+25E3 print_noun
+25EF @find_string
+25F3 @next_char
+25FB @found_start
+2603 @print_char
+260C +
+2651 +
+265A +
+267B @print_line2
+2768 +
+28FC +
+2902 +
+31B9 +
+31BC save_to_tape
+3E65 text_congrats
+3EA7 @infinite_loop
 3F00 relocate_data
 3F30 @write_DEATH
 3F4E vector_reset
 4000 screen_HGR2
+613D data_new_game
+6193 game_state
+6195 gs_player_xyH
+6196 gs_player_xyL
+6197 gs_torches_lit
+6198 gs_torches_unlit
+619D gd_direct_object
+619F gs_fed
+61A0 gs_fed+1
+61A1 gs_torch_time+1
+61BB gs_item_loc_inv
+61BC gs_item_loc_map
+61DB gs_item_inventory+20
+61DD gs_item_inventory+22
+6292 game_state_end
 6294 font
 6695 verb_table
 6773 noun_table
@@ -129,19 +480,49 @@
 6829 display_string_table
 77C0 intro_text
 7B57 junk_intro
-7C00 text_savegame
-7C1F text_loadgame
+7C00 text_save_device
+7C1F text_load_device
+7C3F load_disk_or_tape
+7C5D prompt_tape
+7C66 save_disk_or_tape
+7C84 prepare_tape_save
+7C94 input_T_or_D
+7C97 -
+7CAC +
+7CC7 text_insert_disk
+7CEF save_to_disk
+7CFF prepare_disk_save
+7D0C load_from_disk
+7D4F prompt_insert_disk
+7D8F string_disk_error
+7E1D disk_error_fatal
+7E23 disk_error_retry
+7E27 disk_error
+7E2D +
+7E34 +
+7E3B +
+7E42 +
+7E44 @print_message
+7E71 +
 C000 hw_KEYBOARD
 C010 hw_STROBE
 C050 hw_GRAPHICS
+C051 hw_TEXT
 C052 hw_FULLSCREEN
+C054 hw_PAGE1
 C055 hw_PAGE2
 C057 hw_HIRES
+FECD rom_WRITE_TAPE
+FEFD rom_READ_TAPE
+FF69 rom_MONITOR
 :DISABLED HILO LABELS
+0892
+08A4
 0A4D
 0B69
 0D8E
 0F29
+1045
 1060
 107F
 10A6
@@ -179,6 +560,7 @@ C057 hw_HIRES
 1B29
 1B35
 1B57
+1BC3
 1EA4
 1EB3
 1EC2
@@ -207,25 +589,40 @@ C057 hw_HIRES
 2402
 254C
 2559
+268F
 289B
+2A68
 2A96
+2AC6
 3182
 3324
 33E0
 349C
 34BE
+3566
+356A
+35A5
+3640
+36B2
+36D8
 381E
 382F
 3842
 384D
 38C1
+39F5
 3BB7
 3BEC
+3C62
+3D74
+3E4C
+3EB0
 3F21
 3F30
 3F35
 3F3A
 3F3F
+7E42
 7EA7
 7EBF
 7ECE

@@ -2,6 +2,19 @@
 
 	.include "msbstring.i"
 
+	.include "apple.i"
+	.include "dos.i"
+
+;	.feature string_escapes
+
+item_carried_closed    = $06
+item_carried_open      = $07
+item_carried_open2     = $08
+
+char_cursor = $00
+
+zp_string_number = $11
+
 ;
 ; **** ZP FIELDS ****
 ;
@@ -13,8 +26,8 @@ zp_col = $06
 zp_row = $07
 screen_ptr = $08
 ;screen_ptr+1 = $09
-a0A = $0a
-a0B = $0b
+text_ptr = $0a
+;text_ptr+1 = $0b
 string_ptr = $0c
 ;string_ptr+1 = $0d
 src = $0e
@@ -24,15 +37,15 @@ dst = $10
 row_ptr = $13
 ;row_ptr+1 = $14
 line_count = $15
-a16 = $16
+zp_counter = $16
 clock = $17
 ;clock+1 = $18
 count = $19
 ;count+1 = $1a
-a3C = $3c
-a3D = $3d
-a3E = $3e
-a3F = $3f
+tape_addr_start = $3c
+;tape_addr_start+1 = $3d
+tape_addr_end = $3e
+;tape_addr_end+1 = $3f
 aBC = $bc
 aBD = $bd
 aBE = $be
@@ -44,7 +57,7 @@ aEF = $ef
 ; **** ZP POINTERS ****
 ;
 ;screen_ptr = $08
-p0A = $0a
+;text_ptr = $0a
 ;string_ptr = $0c
 ;src = $0e
 ;dst = $10
@@ -65,8 +78,6 @@ a0125 = $0125
 a0126 = $0126
 a0127 = $0127
 a018F = $018f
-aC051 = $c051
-aC054 = $c054
 aC056 = $c056
 ;
 ; **** POINTERS ****
@@ -75,7 +86,6 @@ p01 = $0001
 p04 = $0004
 p05 = $0005
 p50 = $0050
-p68 = $0068
 pAA = $00aa
 p00F4 = $00f4
 p00F6 = $00f6
@@ -86,89 +96,40 @@ p0206 = $0206
 p0307 = $0307
 p0308 = $0308
 p0309 = $0309
-p030B = $030b
-p0311 = $0311
 p0400 = $0400
 p0402 = $0402
-p0500 = $0500
 p0508 = $0508
 p0601 = $0601
 p0602 = $0602
 p0603 = $0603
 p0604 = $0604
 p0607 = $0607
-p0608 = $0608
 p0609 = $0609
 p060A = $060a
-p060C = $060c
 p060E = $060e
-p0611 = $0611
 p0612 = $0612
 p0615 = $0615
 p0801 = $0801
 p0802 = $0802
-
-p4015 = $4015
-p40AF = $40AF
-p40B1 = $40B1
-p40B4 = $40B4
-p40D8 = $40D8
-p40D9 = $40D9
-p4131 = $4131
-p4132 = $4132
-p4133 = $4133
-p4134 = $4134
-p4156 = $4156
-p4200 = $4200
-p4204 = $4204
-p4211 = $4211
-p4384 = $4384
-p4387 = $4387
-p438E = $438E
-p4607 = $4607
-p4707 = $4707
-p5C50 = $5C50
-p5C54 = $5C54
-p5C61 = $5C61
-p5D05 = $5D05
-p5DAF = $5DAF
-p5DB4 = $5DB4
-p5E4F = $5E4F
-p5E50 = $5E50
-p5E56 = $5E56
-p5E65 = $5E65
-p5EAC = $5EAC
-p5EAF = $5EAF
-p5EB6 = $5EB6
-
 ;
 ; **** EXTERNAL JUMPS ****
 ;
-e03D9 = $03d9
 eFD35 = $fd35
 eFDED = $fded
-eFECD = $fecd
-eFEFD = $fefd
-eFF69 = $ff69
 ;
 ; **** USER LABELS ****
 ;
 
-	.include "apple.i"
-	.include "dos.i"
 
-char_cursor = $00
-
-zp_string_number = $11
 
 	.segment "MAIN"
 
-j0805:
+main:
 	cli
 	ldx #$00
 	stx clock
 	stx clock+1
-j080C:
+new_session:
 	jsr relocate_data
 	stx zp_col
 	bit hw_PAGE2
@@ -183,19 +144,19 @@ j080C:
 	jsr input_Y_or_N
 	cmp #'Y'
 	bne new_game
-	jsr s7C3F
-	lda #$96
+	jsr load_disk_or_tape
+	lda #$96     ;Press any key
 	nop
 	nop
-	jsr s08A4
+	jsr print_to_line2
 	jsr input_char
-	jsr s0872
+	jsr load_from_tape
 	jmp j084A
 
 new_game:
-	ldx #$09
+	ldx #item_exec_reset_game
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 j084A:
 	ldx #$1b
 	stx a619C
@@ -222,64 +183,62 @@ clear_hgr2:
 	nop
 	nop
 	nop
-s0872:
-	ldx #<p6193
-	stx a3C
-	ldx #>p6193
-	stx a3D
-	ldx #>p6292
-	stx a3F
-	ldx #<p6292
-	stx a3E
-	jsr eFEFD
+load_from_tape:
+	ldx #<game_state
+	stx tape_addr_start
+	ldx #>game_state
+	stx tape_addr_start+1
+	ldx #>game_state_end
+	stx tape_addr_end+1
+	ldx #<game_state_end
+	stx tape_addr_end
+	jsr rom_READ_TAPE
 	jsr clear_hgr2
 	jsr s1015
 	jsr s7D1C
 	nop
-	jmp s1A34
+	jmp item_exec
 
-s0892:
-	ldx #<p1600
+print_to_line1:
+	ldx #$00
 	stx zp_col
-	ldx #>p1600
+	ldx #$16
 	stx zp_row
-	ldx #<p0C7A
-	stx a0A
-	ldx #>p0C7A
-	stx a0B
-	bne b08B4
-s08A4:
-	ldx #<p1700
+	ldx #<text_buffer1
+	stx text_ptr
+	ldx #>text_buffer1
+	stx text_ptr+1
+	bne print_to_line
+print_to_line2:
+	ldx #$00
 	stx zp_col
-	ldx #>p1700
+	ldx #$17
 	stx zp_row
-	ldx #<p0CA2
-	stx a0A
-	ldx #>p0CA2
-	stx a0B
-b08B4:
+	ldx #<text_buffer2
+	stx text_ptr
+	ldx #>text_buffer2
+	stx text_ptr+1
+print_to_line:
 	jsr get_display_string
 	jsr get_rowcol_addr
-	jsr s0921
+	jsr clear_text_buf
 	ldy #$00
 	lda (string_ptr),y
 	and #$7f
-b08C3:
-	sta (p0A),y
+@next_char:
+	sta (text_ptr),y
 	jsr print_char
 	inc a:string_ptr
-	bne b08D0
+	bne :+
 	inc a:string_ptr+1
-b08D0:
-	inc a0A
-	bne b08D6
-	inc a0B
-b08D6:
-	ldy #$00
+:	inc text_ptr
+	bne :+
+	inc text_ptr+1
+:	ldy #$00
 	lda (string_ptr),y
-	bpl b08C3
-	lda #$1e
-	jsr s1192
+	bpl @next_char
+	lda #char_ClearLine
+	jsr char_out
 	rts
 
 print_display_string:
@@ -319,13 +278,12 @@ get_display_string:
 	bne @next_char
 	rts
 
-s0921:
+clear_text_buf:
 	ldy #$27
-	lda #$20
-b0925:
-	sta (p0A),y
+	lda #' '
+:	sta (text_ptr),y
 	dey
-	bpl b0925
+	bpl :-
 	rts
 
 j092B:
@@ -345,7 +303,7 @@ b0943:
 	jmp warm_start
 
 s0949:
-	ldx p6193
+	ldx game_state
 	stx count+1
 	cmp #$5b
 	beq b099D
@@ -360,46 +318,46 @@ s0956:
 	lda count+1
 	cmp #$04
 	beq b0969
-	inc p6193
+	inc game_state
 	bne b096E
 b0969:
 	ldx #$01
-	stx p6193
+	stx game_state
 b096E:
 	jsr s1015
-	jsr s0B77
+	jsr print_timers
 	rts
 
 b0975:
 	lda count+1
 	cmp #$01
 	beq b0980
-	dec p6193
+	dec game_state
 	bpl b096E
 b0980:
 	ldx #$04
-	stx p6193
+	stx game_state
 	bne b096E
 b0987:
 	lda count+1
 	cmp #$03
 	bmi b0995
-	dec p6193
-	dec p6193
+	dec game_state
+	dec game_state
 	bpl b096E
 b0995:
-	inc p6193
-	inc p6193
+	inc game_state
+	inc game_state
 	bpl b096E
 b099D:
 	lda a6194
 	cmp #$03
 	bne b09C9
-	lda a6195
+	lda gs_player_xyH
 	cmp #$07
 	bne b09C9
-	lda a6196
-	ldx p6193
+	lda gs_player_xyL
+	ldx game_state
 	stx count+1
 	cmp #$08
 	beq b09C3
@@ -417,50 +375,48 @@ b09C9:
 	lda a619A
 	and #$e0
 	bne b09DF
-	jsr s127E
+	jsr clear_maze_window
 	lda #$09
 	sta zp_col
 	sta zp_row
-	lda #$7c
+	lda #$7c     ;Splat!
 	jsr print_display_string
 	rts
 
 b09DF:
-	ldx p6193
+	ldx game_state
 	dex
 	beq b09FA
 	dex
 	beq b09F5
 	dex
 	beq b09F0
-	dec a6196
+	dec gs_player_xyL
 	bpl b09FD
 b09F0:
-	inc a6195
+	inc gs_player_xyH
 	bpl b09FD
 b09F5:
-	inc a6196
+	inc gs_player_xyL
 	bpl b09FD
 b09FA:
-	dec a6195
+	dec gs_player_xyH
 b09FD:
 	jsr s0A10
 	lda a61A5
 	beq b0A06
 	rts
 
-p0A08=*+$02
 b0A06:
 	jsr s0B19
-p0A09:
 	jsr s1015
-	jsr s0B77
+	jsr print_timers
 	rts
 
 s0A10:
-	lda a6196
+	lda gs_player_xyL
 	sta count
-	lda a6195
+	lda gs_player_xyH
 	sta count+1
 	lda a6194
 	cmp #$03
@@ -496,18 +452,18 @@ b0A3D:
 b0A43:
 	lda count
 	cmp #$0a
-	beq b0A4A
+	beq @beheaded
 	rts
 
-b0A4A:
+@beheaded:
 	jsr clear_hgr2
 	lda #$00
 	sta zp_col
 	lda #$09
 	sta zp_row
-	lda #$29
+	lda #$29     ;Invisible guillotine
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
 b0A5D:
 	lda count
@@ -541,16 +497,16 @@ b0A87:
 	cmp #$08
 	bne b0A63
 	ldx #$03
-	stx p6193
+	stx game_state
 	stx a6194
 	ldx #<p0508
-	stx a6195
+	stx gs_player_xyH
 	ldx #>p0508
-	stx a6196
+	stx gs_player_xyL
 	ldx #$00
 	stx a61A3
 	stx a61A4
-	jsr s107C
+	jsr pit
 	rts
 
 b0AAF:
@@ -630,72 +586,71 @@ b0B26:
 j0B2E:
 	lda a6194
 	cmp #$05
-	beq b0B4F
-	lda a61A1
-	beq b0B4F
-	dec a61A1
-	bne b0B4F
-	dec a6197
+	beq @dec_food
+	lda gs_torch_time+1
+	beq @dec_food
+	dec gs_torch_time+1
+	bne @dec_food
+	dec gs_torches_lit
 	ldx #$00
 	stx a619E
 	jsr s10DC
 	ldx #$0a
 	stx a61A5
-b0B4F:
-	dec a61A0
-	lda a61A0
+@dec_food:
+	dec gs_fed+1
+	lda gs_fed+1
 	cmp #$ff
 	bne b0B5C
-	dec a619F
+	dec gs_fed
 b0B5C:
-	lda a619F
-	ora a61A0
+	lda gs_fed
+	ora gs_fed+1
 	bne b0B18
 j0B64:
 	jsr clear_hgr2
-	lda #$35
+	lda #$35     ;Died of starvation!
 	ldx #$07
 	stx zp_col
 	ldx #$02
 	stx zp_row
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
-s0B77:
-	lda a619F
-	bne b0B88
-	lda a61A0
-	cmp #$0a
-	bcs b0B88
-	lda #$32
-	jsr s0892
-b0B88:
-	lda a61A1
-	beq b0BB2
-	cmp #$0a
-	bcs b0BB2
-	lda #$33
-	jsr s08A4
+print_timers:
+	lda gs_fed
+	bne :+
+	lda gs_fed+1
+	cmp #food_low
+	bcs :+
+	lda #$32     ;Stomach is growling
+	jsr print_to_line1
+:	lda gs_torch_time+1
+	beq rts_bb2
+	cmp #torch_low
+	bcs rts_bb2
+	lda #$33     ;Torch is dying
+	jsr print_to_line2
 	rts
 
 s0B97:
-	lda a619D
+	lda gd_direct_object
 	cmp #$12
 	bpl b0BB3
 	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$07
-	bpl b0BB2
+	bpl rts_bb2
 b0BAB:
 	pla
 	pla
 j0BAD:
-	lda #$7b
+	lda #$7b     ;Body has vanished
 b0BAF:
-	jsr s08A4
-b0BB2:
+	jsr print_to_line2
+rts_bb2:
 	rts
 
 b0BB3:
@@ -705,7 +660,7 @@ b0BB3:
 	beq b0BD3
 	ldx #$0b
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	cmp #$00
 	beq b0BAB
 	rts
@@ -713,7 +668,7 @@ b0BB3:
 b0BC7:
 	ldx #$0c
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	cmp #$00
 	beq b0BAB
 	rts
@@ -721,9 +676,9 @@ b0BC7:
 b0BD3:
 	ldx #$0e
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	cmp #$00
-	bne b0BB2
+	bne rts_bb2
 	lda a6194
 	cmp #$05
 	beq b0BAB
@@ -731,10 +686,10 @@ b0BD3:
 	beq b0BAB
 	ldx #$0d
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	cmp #$00
-	bne b0BB2
-	lda a6197
+	bne rts_bb2
+	lda gs_torches_lit
 	cmp #$01
 	bne b0BAB
 	pla
@@ -797,10 +752,10 @@ b0C59:
 	beq b0C56
 b0C5E:
 	jsr s3626
-	lda #$43
-	jsr s0892
-	lda #$44
-	jsr s08A4
+	lda #$43     ;The ground beneath your feet
+	jsr print_to_line1
+	lda #$44     ;begins to shake!
+	jsr print_to_line2
 	inc a61B3
 	jmp j3608
 
@@ -809,12 +764,12 @@ b0C71:
 	bne b0C88
 	jsr s3626
 p0C79=*+$01
-p0C7A=*+$02
+text_buffer1=*+$02
 	inc a61B3
-	lda #$45
-	jsr s0892
-	lda #$47
-	jsr s08A4
+	lda #$45     ;A disgusting odor permeates
+	jsr print_to_line1
+	lda #$47     ;the hallway!
+	jsr print_to_line2
 	jmp j3608
 
 b0C88:
@@ -822,28 +777,28 @@ b0C88:
 	lda a6194
 	cmp #$05
 	beq b0C9F
-	lda #$36
-	jsr s0892
-	lda #$37
-	jsr s08A4
-	jmp j10B9
+	lda #$36     ;The monster attacks you and
+	jsr print_to_line1
+	lda #$37     ;you are his next meal!
+	jsr print_to_line2
+	jmp game_over
 
 b0C9F:
-	lda #$48
-p0CA2=*+$01
-	jsr s0892
-	lda #$4b
+	lda #$48     ;It is the monster's mother!
+text_buffer2=*+$01
+	jsr print_to_line1
+	lda #$4b     ;She slashes you to bits!
 b0CA6:
-	jsr s08A4
-	jmp j10B9
+	jsr print_to_line2
+	jmp game_over
 
 	dex
 	bne b0D1E
-	lda a619D
+	lda gd_direct_object
 	cmp #$11
 	beq b0CBD
 b0CB6:
-	jsr s105F
+	jsr clear_status_lines
 	lda #$20
 	bne b0CA6
 b0CBD:
@@ -853,6 +808,8 @@ b0CBD:
 	cmp #$13
 	bne b0CB6
 	ldx #$04
+
+; (end cruft)
 s0CCA:
 	bit hw_STROBE
 b0CCD:
@@ -865,9 +822,9 @@ b0CCD:
 	and #$5f
 b0CDD:
 	pha
-	lda #>p0C7A
+	lda #>text_buffer1
 	sta src+1
-	lda #<p0C7A
+	lda #<text_buffer1
 	sta src
 	lda #>p0C2A
 	sta dst+1
@@ -878,7 +835,7 @@ b0CDD:
 	lda #<p50
 	sta count
 	jsr memcpy
-	jsr s105F
+	jsr clear_status_lines
 	nop
 	nop
 	nop
@@ -1000,9 +957,9 @@ b0DB2:
 	lda (count),y
 	cmp #$80
 	bmi b0DBA
-	lda #$20
+	lda #' '
 b0DBA:
-	jsr s1192
+	jsr char_out
 	inc src+1
 	ldy src+1
 	dec src
@@ -1037,8 +994,8 @@ j0DE8:
 	jsr clear_cursor
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$20
-	jsr s1192
+	lda #' '
+	jsr char_out
 	dec zp_col
 	jsr get_rowcol_addr
 	ldy dst+1
@@ -1068,7 +1025,7 @@ b0E23:
 	lda row_ptr
 b0E25:
 	pha
-	jsr s1192
+	jsr char_out
 	pla
 	inc dst+1
 	ldy dst+1
@@ -1124,21 +1081,21 @@ b0E7A:
 	bne b0E8B
 b0E84:
 	lda #$00
-	sta a619D
+	sta gd_direct_object
 	beq b0E93
 b0E8B:
 	jsr s0F6B
 	lda dst
-	sta a619D
+	sta gd_direct_object
 b0E93:
 	lda a619C
 	cmp #$1d
 	bcc b0EC2
-	lda #$8d
-	jsr s08A4
-	lda #<p0C7A
+	lda #$8d     ;I'm sorry, but I can't
+	jsr print_to_line2
+	lda #<text_buffer1
 	sta count
-	lda #>p0C7A
+	lda #>text_buffer1
 	sta count+1
 	ldy #$00
 b0EA9:
@@ -1147,7 +1104,7 @@ b0EA9:
 	lda (count),y
 	cmp #$20
 	beq b0EB9
-	jsr s1192
+	jsr char_out
 	pla
 	tay
 	iny
@@ -1161,7 +1118,7 @@ b0EB9:
 b0EC2:
 	cmp #$14
 	bcs b0F16
-	lda a619D
+	lda gd_direct_object
 	beq b0F16
 	cmp #$40
 	beq b0EDA
@@ -1169,16 +1126,16 @@ b0EC2:
 	bcc b0EDA
 	sec
 	sbc #$1c
-	sta a619D
+	sta gd_direct_object
 b0ED9:
 	rts
 
 b0EDA:
-	lda #$8f
-	jsr s08A4
-	lda #<p0C7A
+	lda #$8f     ;What in tarnation is a
+	jsr print_to_line2
+	lda #<text_buffer1
 	sta count
-	lda #>p0C7A
+	lda #>text_buffer1
 	sta count+1
 	ldy #$00
 b0EE9:
@@ -1199,14 +1156,14 @@ b0EFD:
 	lda (count),y
 	cmp #$20
 	beq b0F0D
-	jsr s1192
+	jsr char_out
 	pla
 	tay
 	iny
 	bne b0EFD
 b0F0D:
-	lda #$3f
-	jsr s1192
+	lda #'?'
+	jsr char_out
 	pla
 	jmp s0CCA
 
@@ -1216,17 +1173,17 @@ b0F16:
 	bcs b0ED9
 	cmp #$0e
 	beq b0F5A
-	lda #>p0C7A
+	lda #>text_buffer1
 	sta count+1
-	lda #<p0C7A
+	lda #<text_buffer1
 	sta count
 	lda #$00
 	sta zp_col
 	lda #$17
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$1e
-	jsr s1192
+	lda #char_ClearLine
+	jsr char_out
 	ldy #$00
 	sty dst+1
 	lda (count),y
@@ -1237,12 +1194,12 @@ b0F43:
 	cmp #$20
 	beq b0F52
 b0F49:
-	jsr s1192
+	jsr char_out
 	inc dst+1
 	ldy dst+1
 	bne b0F43
 b0F52:
-	lda #$56
+	lda #$56     ;what?
 	jsr print_display_string
 	jmp s0CCA
 
@@ -1252,9 +1209,9 @@ b0F5A:
 	lda #$8b
 	bne b0F65
 b0F63:
-	lda #$8a
+	lda #$8a     ;It's awfully dark.
 b0F65:
-	jsr s08A4
+	jsr print_to_line2
 	jmp s0CCA
 
 s0F6B:
@@ -1366,7 +1323,7 @@ input_Y_or_N:
 	rts
 
 s1015:
-	jsr s127E
+	jsr clear_maze_window
 	jsr s17BF
 	lda a619E
 	beq b1044
@@ -1379,7 +1336,7 @@ s1015:
 b102F:
 	ldx #$0a
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda a619B
 	beq b1044
 	sta src
@@ -1389,85 +1346,83 @@ b102F:
 b1044:
 	rts
 
-s1045:
-	ldx #>p0500
+wait5:
+	ldx #$05
 	stx dst
-b1049:
-	ldx #<p0500
+@dec16:
+	ldx #$00
 	stx src+1
-b104D:
-	dec src
-	bne b104D
+:	dec src
+	bne :-
 	dec src+1
-	bne b104D
+	bne :-
 	dec dst
-	bne b1049
+	bne @dec16
 	rts
 
-j105A:
-	lda #$55
-	jmp s08A4
+nonsense:
+	lda #$55     ;Little sense.
+	jmp print_to_line2
 
-s105F:
+clear_status_lines:
 	pha
 	ldx #$00
 	stx zp_col
 	ldx #$16
 	stx zp_row
 	jsr get_rowcol_addr
-	lda #$1e
-	jsr s1192
+	lda #char_ClearLine
+	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$1e
-	jsr s1192
+	lda #char_ClearLine
+	jsr char_out
 	pla
 	rts
 
-s107C:
-	jsr s127E
+pit:
+	jsr clear_maze_window
 	ldx #$05
 	stx zp_col
 	ldx #$08
 	stx zp_row
 	jsr get_rowcol_addr
-	lda #$a7
+	lda #$a7     ;Oh no! A pit!
 	jsr print_display_string
 	jsr s0FDC
 	ldx #$05
 	stx zp_col
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$2c
+	lda #$2c     ;AAAAAAHH!
 	jsr print_display_string
-	jsr s1045
-	jsr s127E
+	jsr wait5
+	jsr clear_maze_window
 	ldx #$09
 	stx zp_col
 	ldx #$08
 	stx zp_row
 	jsr get_rowcol_addr
-	lda #$2d
+	lda #$2d     ;WHAM!
 	jsr print_display_string
-	jmp s1045
+	jmp wait5
 
-j10B9:
-	jsr s1045
-	jsr s105F
-	lda #$34
-	jsr s0892
-j10C4:
-	lda #$39
-	jsr s08A4
+game_over:
+	jsr wait5
+	jsr clear_status_lines
+	lda #$34     ;Victim of the maze!
+	jsr print_to_line1
+play_again:
+	lda #$39     ;Play again?
+	jsr print_to_line2
 	jsr input_Y_or_N
-	cmp #$59
-	bne b10D3
-	jmp j080C
+	cmp #'Y'
+	bne :+
+	jmp new_session
 
-b10D3:
-	bit aC054
-	bit aC051
-	jmp eFF69
+:	bit hw_PAGE1
+	bit hw_TEXT
+	jmp rom_MONITOR
 
 s10DC:
 	lda a61A6
@@ -1478,14 +1433,14 @@ b10E1=*+$02
 	rts
 
 	sta f61,x
-	jsr s107C
+	jsr pit
 	jsr s1015
 	jmp j3493
 
 	rts
 
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$06
 	cmp count+1
 	beq b110D
@@ -1502,37 +1457,37 @@ b110D:
 	sta src
 	pla
 	sta src+1
-	lda a619D
+	lda gd_direct_object
 	cmp #$13
 	beq b111D
 	jmp j2E72
 
 b111D:
-	inc a6198
+	inc gs_torches_unlit
 	jmp j2E72
 
 	dec src+1
 	bne b1148
 	lda src
 	cmp #$11
-	beq b1142
+	beq @not_here
 	cmp #$15
 	bpl b1134
-	jmp j105A
+	jmp nonsense
 
 b1134:
 	cmp #$1a
 	bmi b113B
-	jmp j105A
+	jmp nonsense
 
 b113B:
 	cmp #$17
-	bne b1142
-	jmp j105A
+	bne @not_here
+	jmp nonsense
 
-b1142:
-	lda #$90
-	jsr s08A4
+@not_here:
+	lda #$90     ;I don't see that here.
+	jsr print_to_line2
 	rts
 
 b1148:
@@ -1542,10 +1497,9 @@ b1148:
 	stx src
 	ldx #>p0602
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$08
-b115C=*+$01
 	beq b1160
 	jmp j0BAD
 
@@ -1559,19 +1513,17 @@ b1164:
 	.byte $40,$a8,$41,$28,$41,$a8,$42,$28
 	.byte $42,$a8,$43,$28,$43,$a8,$40,$50
 	.byte $40,$d0,$41,$50,$41,$d0,$42,$50
-	.byte $42,$d0,$43,$50,$43
-s1192=*+$01
-	bne b115C
-	asl
-	beq b120C
-	cmp #$1e
-	bne b119D
-	jmp j121E
+	.byte $42,$d0,$43,$50,$43,$d0
+char_out:
+	cmp #char_newline
+	beq control_newline
+	cmp #char_ClearLine
+	bne :+
+	jmp clear_to_end_line
 
-b119D:
-	cmp #$c0
+:	cmp #$c0
 	bcc print_char
-	jmp j1226
+	jmp clear_up_to_3F
 
 print_char:
 	sta row_ptr
@@ -1633,37 +1585,35 @@ get_rowcol_addr:
 	sta screen_ptr+1
 	rts
 
-b120C:
+control_newline:
 	jsr clear_cursor
 	lda #$17
 	cmp zp_row
-	beq b1217
+	beq :+
 	inc zp_row
-b1217:
-	lda #$00
+:	lda #$00
 	sta zp_col
 	jmp get_rowcol_addr
 
-j121E:
+clear_to_end_line:
 	lda #$28
 	sec
 	sbc zp_col
-	jmp j1229
+	jmp clear_N
 
-j1226:
+clear_up_to_3F:
 	sec
 	sbc #$c0
-j1229:
-	sta a16
+clear_N:
+	sta zp_counter
 	lda zp_col
 	pha
 	lda zp_row
 	pha
-b1231:
-	lda #$20
+:	lda #' '
 	jsr print_char
-	dec a16
-	bne b1231
+	dec zp_counter
+	bne :-
 	pla
 	sta zp_row
 	pla
@@ -1710,30 +1660,29 @@ clear_cursor:
 	lda #' '
 	bne render_cursor
 
-s127E:
+clear_maze_window:
 	lda #$00
 	sta zp_col
 	lda #$14
 	sta zp_row
-b1286:
+@clear_row:
 	jsr get_rowcol_addr
 	clc
 	lda #$08
 	sta count
-b128E:
+@clear_raster:
 	lda #$00
 	ldy #$16
-b1292:
-	sta (screen_ptr),y
+:	sta (screen_ptr),y
 	dey
-	bpl b1292
+	bpl :-
 	lda #$04
 	adc screen_ptr+1
 	sta screen_ptr+1
 	dec count
-	bne b128E
+	bne @clear_raster
 	dec zp_row
-	bpl b1286
+	bpl @clear_row
 	rts
 
 s12A6:
@@ -1751,7 +1700,7 @@ s12A6:
 	lda #>p4133
 	sta screen_ptr+1
 	lda #$05
-	jsr s1192
+	jsr char_out
 	jmp j135C
 
 b12C3:
@@ -1816,7 +1765,7 @@ b131E:
 	sta screen_ptr
 	ldy #$0d
 	jsr s1777
-	jmp p1600
+	jmp j1600
 
 b133F:
 	lda #>screen_HGR2
@@ -1846,7 +1795,7 @@ j135C:
 	lda #<p4132
 	sta screen_ptr
 	lda #$04
-	jsr s1192
+	jsr char_out
 b1376:
 	lda #>p4131
 	sta screen_ptr+1
@@ -1876,7 +1825,7 @@ b139C:
 	lda #<p4132
 	sta screen_ptr
 	lda #$04
-	jsr s1192
+	jsr char_out
 b13AF:
 	lda #$0a
 	sta zp_col
@@ -1901,7 +1850,7 @@ j13C5:
 	lda #<p4134
 	sta screen_ptr
 	lda #$03
-	jsr s1192
+	jsr char_out
 b13DF:
 	lda #>p4133
 	sta screen_ptr+1
@@ -1918,7 +1867,6 @@ b13DF:
 	lda #$09
 	sta zp_row
 	lda #$03
-p1400=*+$01
 	ldy #$03
 	jsr s17A7
 	jmp j1430
@@ -1933,7 +1881,7 @@ b1407:
 	lda #<p4134
 	sta screen_ptr
 	lda #$03
-	jsr s1192
+	jsr char_out
 b141A:
 	lda #$0c
 	sta zp_col
@@ -2161,7 +2109,7 @@ b15A5:
 	lda #$03
 	ldy #$0d
 	jsr s17A7
-	jmp p1600
+	jmp j1600
 
 b15D1:
 	pla
@@ -2188,7 +2136,7 @@ b15E6:
 	sta zp_row
 	ldy #$03
 	jsr s1795
-p1600:
+j1600:
 	lda a6199
 	and #$02
 	bne b1644
@@ -2321,7 +2269,6 @@ j16E8:
 	sta zp_row
 	lda #$04
 	ldy #$15
-p1700=*+$02
 	jsr s17A7
 	lda #>p3FFF
 	sta screen_ptr+1
@@ -2398,7 +2345,7 @@ s177F:
 b1782:
 	jsr get_rowcol_addr
 	lda #$02
-	jsr s1192
+	jsr char_out
 	dec zp_col
 	dec zp_col
 	inc zp_row
@@ -2412,7 +2359,7 @@ s1795:
 b1798:
 	jsr get_rowcol_addr
 	lda #$01
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec count+1
 	bne b1798
@@ -2439,9 +2386,9 @@ b17AC:
 s17BF:
 	ldy #$00
 	lda #<p6000
-	sta a0A
+	sta text_ptr
 	lda #>p6000
-	sta a0B
+	sta text_ptr+1
 	ldx a6194
 	lda #$00
 	clc
@@ -2452,28 +2399,28 @@ j17CF:
 	jmp j17CF
 
 b17D7:
-	adc a0A
-	sta a0A
-	ldx a6195
+	adc text_ptr
+	sta text_ptr
+	ldx gs_player_xyH
 j17DE:
 	dex
 	beq b17EA
-	inc a0A
-	inc a0A
-	inc a0A
+	inc text_ptr
+	inc text_ptr
+	inc text_ptr
 	jmp j17DE
 
 b17EA:
-	lda a6196
+	lda gs_player_xyL
 	cmp #$05
 	bmi b17FF
 	cmp #$09
 	bmi b17FA
-	inc a0A
+	inc text_ptr
 	sec
 	sbc #$04
 b17FA:
-	inc a0A
+	inc text_ptr
 	sec
 	sbc #$04
 b17FF:
@@ -2492,7 +2439,7 @@ b180A:
 	stx dst+1
 	stx a6199
 	stx a619A
-	ldx p6193
+	ldx game_state
 	dex
 	bne b181F
 	jmp j1910
@@ -2506,7 +2453,7 @@ b1825:
 	dex
 	beq b18A7
 j1828:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count+1
 	bne b184C
 	inc count
@@ -2516,7 +2463,7 @@ j1828:
 	lda count+1
 	cmp #$80
 	bne b1845
-	dec a0A
+	dec text_ptr
 	lda #$02
 	sta count+1
 	jmp j1828
@@ -2531,13 +2478,13 @@ b184C:
 	jsr s1A10
 	lsr count+1
 j1853:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count+1
 	beq b185C
 	inc a619A
 b185C:
 	ldy #$03
-	lda (p0A),y
+	lda (text_ptr),y
 	ldy #$00
 	and count+1
 	beq b1869
@@ -2563,7 +2510,7 @@ b1869:
 b188E:
 	lda #$40
 	sta count+1
-	inc a0A
+	inc text_ptr
 	jmp j1853
 
 b1897:
@@ -2583,10 +2530,10 @@ b18A7:
 	lsr count+1
 b18A9:
 	clc
-	lda a0A
+	lda text_ptr
 	adc #$03
-	sta a0A
-	lda (p0A),y
+	sta text_ptr
+	lda (text_ptr),y
 	and count+1
 	bne b18BE
 	inc count
@@ -2604,10 +2551,10 @@ b18BE:
 	bcc b18D0
 	ror count
 b18D0:
-	dec a0A
-	dec a0A
-	dec a0A
-	lda (p0A),y
+	dec text_ptr
+	dec text_ptr
+	dec text_ptr
+	lda (text_ptr),y
 	and count+1
 	beq b18DF
 	inc a619A
@@ -2615,12 +2562,12 @@ b18DF:
 	lda count
 	cmp #$80
 	beq b18EA
-	lda (p0A),y
+	lda (text_ptr),y
 	jmp j18EE
 
 b18EA:
 	iny
-	lda (p0A),y
+	lda (text_ptr),y
 	dey
 j18EE:
 	and count
@@ -2644,16 +2591,16 @@ b1900:
 j1910:
 	lsr count+1
 j1912:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count+1
 	bne b1929
 	inc count
 	lda count
 	cmp #$05
 	beq b1929
-	dec a0A
-	dec a0A
-	dec a0A
+	dec text_ptr
+	dec text_ptr
+	dec text_ptr
 	jmp j1912
 
 b1929:
@@ -2667,7 +2614,7 @@ b1929:
 	bcc b193B
 	ror count
 b193B:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count+1
 	beq b1944
 	inc a6199
@@ -2675,9 +2622,9 @@ b1944:
 	lda count
 	cmp #$80
 	bne b194C
-	inc a0A
+	inc text_ptr
 b194C:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count
 	beq b1955
 	inc a619A
@@ -2685,10 +2632,10 @@ b1955:
 	lda count
 	cmp #$80
 	beq b195D
-	inc a0A
+	inc text_ptr
 b195D:
-	inc a0A
-	inc a0A
+	inc text_ptr
+	inc text_ptr
 	jsr s1A10
 	cmp dst+1
 	beq b1900
@@ -2708,14 +2655,14 @@ j197C:
 	bne b198B
 	lda #$80
 	sta count+1
-	inc a0A
+	inc text_ptr
 	jmp j198F
 
 b198B:
 	lsr count+1
 	lsr count+1
 j198F:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count+1
 	bne b19B3
 	inc count
@@ -2725,7 +2672,7 @@ j198F:
 	lda count+1
 	cmp #$02
 	bne b19AC
-	inc a0A
+	inc text_ptr
 	lda #$80
 	sta count+1
 	jmp j198F
@@ -2743,20 +2690,20 @@ b19B3:
 	jmp j19C4
 
 b19BE:
-	dec a0A
+	dec text_ptr
 	lda #$01
 	sta count+1
 j19C4:
 	lda count
 	jsr s1A10
 j19C9:
-	lda (p0A),y
+	lda (text_ptr),y
 	and count+1
 	beq b19D2
 	inc a6199
 b19D2:
 	ldy #$03
-	lda (p0A),y
+	lda (text_ptr),y
 	ldy #$00
 	and count+1
 	beq b19DF
@@ -2785,7 +2732,7 @@ b19EF:
 b1A07:
 	lda #$01
 	sta count+1
-	dec a0A
+	dec text_ptr
 	jmp j19C9
 
 s1A10:
@@ -2801,45 +2748,44 @@ s1A10:
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00
-s1A34:
+item_exec:
 	lda src+1
 	cmp #$07
-	bpl b1A93
+	bpl code07_draw_inv
 	asl src
 	pha
 	lda #$00
 	sta src+1
 	clc
-	lda #$b9
+	lda #<gs_item_inventory-2
 	adc src
 	sta src
-	lda #$61
+	lda #>gs_item_inventory
 	adc src+1
 	sta src+1
 	pla
 	cmp #$05
-	bpl b1A6E
+	bpl code06_get_item_stat
 	cmp #$00
-	beq b1A5F
+	beq set_item_code
 	sec
 	sbc #$01
-	beq b1A5F
+	beq set_item_code
 	clc
 	adc #$05
-b1A5F:
+set_item_code:
 	ldy #$00
 	sta (src),y
 	inc src
-	bne b1A69
+	bne :+
 	inc src+1
-b1A69:
-	lda #$00
+:	lda #$00
 	sta (src),y
 	rts
 
-b1A6E:
+code06_get_item_stat:
 	cmp #$05
-	beq b1A7E
+	beq code05_drop_item
 	ldy #$00
 	lda (src),y
 	sta count+1
@@ -2848,306 +2794,307 @@ b1A6E:
 	sta count
 	rts
 
-b1A7E:
+code05_drop_item:
 	lda a6194
 	ldy #$00
 	sta (src),y
-	lda a6195
+	lda gs_player_xyH
 	asl
 	asl
 	asl
 	asl
-	ora a6196
+	ora gs_player_xyL
 	iny
 	sta (src),y
 	rts
 
-b1A93:
+code07_draw_inv:
 	sec
 	sbc #$07
-	beq b1A9B
-	jmp j1BB5
+	beq draw_inventory
+	jmp code08_count_inv
 
-b1A9B:
+draw_inventory:
 	lda #$0f
 	sta count+1
+
+; clear screen region
 	lda #$19
 	sta zp_col
 	lda #$03
 	sta zp_row
-b1AA7:
-	jsr get_rowcol_addr
-	lda #$1e
-	jsr s1192
+:	jsr get_rowcol_addr
+	lda #$1e     ;char_ClearLine
+	jsr char_out
 	inc zp_row
 	dec count+1
-	bne b1AA7
+	bne :-
+
+; print inventory
 	lda #$14
 	sta count+1
-	lda #<p61BB
+	lda #<gs_item_loc_inv
 	sta src
-	lda #>p61BB
+	lda #>gs_item_loc_inv
 	sta src+1
 	lda #$1a
 	sta zp_col
 	lda #$03
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$01
+	lda #$01     ;Inventory:
 	jsr print_display_string
 	lda #$1b
 	sta zp_col
 	lda #$04
 	sta zp_row
 	jsr get_rowcol_addr
-b1ADC:
+@check_item_known:
 	ldy #$00
 	lda (src),y
 	cmp #$08
-	bne b1AE7
-	jmp j1B76
+	bne :+
+	jmp print_known_item
 
-b1AE7:
-	cmp #$07
-	bne b1AEE
-	jmp j1B76
+:	cmp #$07
+	bne next_known_item
+	jmp print_known_item
 
-b1AEE:
+next_known_item:
 	inc src
-	bne b1AF4
+	bne :+
 	inc src+1
-b1AF4:
-	inc src
-	bne b1AFA
+:	inc src
+	bne :+
 	inc src+1
-b1AFA:
-	dec count+1
-	bne b1ADC
-	lda #<p61BB
+:	dec count+1
+	bne @check_item_known
+
+	lda #<gs_item_loc_inv
 	sta src
-	lda #>p61BB
+	lda #>gs_item_loc_inv
 	sta src+1
 	lda #$17
 	sta count+1
-b1B0A:
+@check_item_closed:
 	ldy #$00
 	lda (src),y
 	cmp #$06
-	bne b1B15
-	jmp j1B9C
+	bne next_closed_item
+	jmp print_closed_item
 
-b1B15:
+next_closed_item:
 	inc src
-	bne b1B1B
+	bne :+
 	inc src+1
-b1B1B:
-	inc src
-	bne b1B21
+:	inc src
+	bne :+
 	inc src+1
-b1B21:
-	dec count+1
-	bne b1B0A
+:	dec count+1
+	bne @check_item_closed
+
 	lda #$1a
 	sta zp_col
 	lda #$10
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$02
+	lda #$02     ;Torches:
 	jsr print_display_string
 	lda #$1b
 	sta zp_col
 	lda #$11
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$03
+	lda #$03     ;Lit:
 	jsr print_display_string
 	inc zp_col
 	inc zp_col
 	inc zp_col
 	jsr get_rowcol_addr
-	lda a6197
+	lda gs_torches_lit
 	clc
-	adc #$30
-	jsr s1192
+	adc #'0'
+	jsr char_out
 	lda #$1b
 	sta zp_col
 	lda #$12
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$04
+	lda #$04     ;Unlit:
 	jsr print_display_string
-	lda #$20
-	jsr s1192
-	lda a6198
+	lda #' '
+	jsr char_out
+	lda gs_torches_unlit
 	clc
-	adc #$30
-	jsr s1192
+	adc #'0'
+	jsr char_out
 	rts
 
-j1B76:
+print_known_item:
 	lda #$15
 	sec
 	sbc count+1
 	cmp #$12
-	bmi b1B81
-	lda #$12
-b1B81:
-	sta row_ptr
+	bmi :+
+	lda #$12     ;clamp max inventory row
+:	sta row_ptr
 	lda zp_col
 	pha
 	lda zp_row
 	pha
 	lda row_ptr
-	jsr s25E3
+	jsr print_noun
 	pla
 	sta zp_row
 	inc zp_row
 	pla
 	sta zp_col
 	jsr get_rowcol_addr
-	jmp b1AEE
+	jmp next_known_item
 
-j1B9C:
+print_closed_item:
 	lda zp_col
 	pha
 	lda zp_row
 	pha
-	lda #$14
-	jsr s25E3
+	lda #$14     ;Box
+	jsr print_noun
 	pla
 	sta zp_row
 	inc zp_row
 	pla
 	sta zp_col
 	jsr get_rowcol_addr
-	jmp b1B15
+	jmp next_closed_item
 
-j1BB5:
+code08_count_inv:
 	sta count+1
 	dec count+1
-	bne b1BE8
-	lda #>p61BB
+	bne code09_new_game
+	lda #>gs_item_loc_inv
 	sta src+1
-	lda #<p61BB
+	lda #<gs_item_loc_inv
 	sta src
-	lda #>p1400
+	lda #$14
 	sta count+1
-	lda #<p1400
+	lda #$00
 	sta count
 	ldy #$00
-b1BCD:
+@check_carried:
 	lda (src),y
 	cmp #$06
-	bmi b1BD5
+	bmi :+
 	inc count
-b1BD5:
-	iny
+:	iny
 	iny
 	dec count+1
-	bne b1BCD
-	lda a61A1
-	bne b1BE5
-	lda a6198
-	beq b1BE7
-b1BE5:
+	bne @check_carried
+	lda gs_torch_time+1
+	bne @add_one
+	lda gs_torches_unlit
+	beq @done
+@add_one:
 	inc count
-b1BE7:
+@done:
 	rts
 
-b1BE8:
+code09_new_game:
 	dec count+1
-	bne b1C06
-	ldy #$55
-	lda #>p613D
+	bne code0A
+	ldy #gs_size-1
+	lda #>data_new_game
 	sta src+1
-	lda #<p613D
+	lda #<data_new_game
 	sta src
-	lda #<p6193
+	lda #<game_state
 	sta dst
-	lda #>p6193
+	lda #>game_state
 	sta dst+1
-b1BFE:
-	lda (src),y
+:	lda (src),y
 	sta (dst),y
 	dey
-	bpl b1BFE
+	bpl :-
 	rts
 
-b1C06:
+code0A:
 	dec count+1
-	bne b1C0D
-	jmp j1D0E
+	bne code0B_inside_box
+	jmp code0A_impl
 
-b1C0D:
+code0B_inside_box:
 	dec count+1
-	beq b1C14
-	jmp j1CAF
+	beq :+
+	jmp code0C
 
-b1C14:
-	lda a6195
+:	lda gs_player_xyH
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc a6196
+	adc gs_player_xyL
 	sta dst+1
-	lda #>p61BC
+	lda #>gs_item_loc_map
 	sta src+1
-	lda #<p61BC
+	lda #<gs_item_loc_map
 	sta src
 	lda #$17
 	sta count+1
 	ldy #$00
 	lda dst+1
-b1C31:
+@next_location:
 	cmp (src),y
-	beq b1C7E
-j1C35:
+	beq item_at_feet
+not_at_feet:
 	iny
 	iny
 	dec count+1
-	bne b1C31
-	lda #>p61BB
+	bne @next_location
+
+	lda #>gs_item_loc_inv
 	sta src+1
-	lda #<p61BB
+	lda #<gs_item_loc_inv
 	sta src
 	lda #$10
 	sta count+1
 	lda #$06
 	ldy #$00
-b1C4B:
+@next_carried:
 	cmp (src),y
-	beq b1C94
+	beq return_item_num
 	iny
 	iny
 	dec count+1
-	bne b1C4B
-	lda #>p61DD
+	bne @next_carried
+
+; Skip over snake
+	lda #>gs_item_inventory+22
 	sta src+1
-	lda #<p61DD
+	lda #<gs_item_inventory+22
 	sta src
 	lda #$06
 	sta count+1
 	ldy #$00
-b1C63:
+@next_other:
 	cmp (src),y
-	beq b1C94
+	beq return_item_num
 	iny
 	iny
 	dec count+1
-	bne b1C63
-	ldx #>p61DB
+	bne @next_other
+
+; Go back and check snake
+	ldx #>gs_item_inventory+20
 	stx src+1
-	ldx #<p61DB
+	ldx #<gs_item_inventory+20
 	stx src
 	ldy #$00
 	cmp (src),y
-	beq b1C94
+	beq return_item_num
 	lda #$00
 	rts
 
-b1C7E:
+item_at_feet:
 	dec src
 	lda (src),y
 	sta row_ptr
@@ -3155,34 +3102,33 @@ b1C7E:
 	dey
 	lda row_ptr
 	cmp a6194
-	beq b1C94
+	beq return_item_num
 	iny
 	lda dst+1
-	jmp j1C35
+	jmp not_at_feet
 
-b1C94:
+return_item_num:
 	clc
 	tya
-	bpl b1C9A
-	lda #$00
-b1C9A:
-	adc src
+	bpl :+
+	lda #$00     ;clamp min 0
+:	adc src
 	sta src
 	lda #$00
 	adc src+1
 	sta src+1
 	sec
 	lda src
-	sbc #$bb
+	sbc #<gs_item_inventory
 	clc
 	ror
 	clc
 	adc #$01
 	rts
 
-j1CAF:
+code0C:
 	dec count+1
-	bne b1CE8
+	bne code0D
 	lda #>p0308
 	sta dst+1
 	lda #<p0308
@@ -3196,7 +3142,7 @@ b1CC3:
 	pha
 	lda src
 	pha
-	jsr s1A34
+	jsr item_exec
 	lda dst
 	cmp count+1
 	beq b1CE1
@@ -3217,17 +3163,17 @@ b1CE1:
 	lda src
 	rts
 
-b1CE8:
+code0D:
 	dec count+1
-	bne b1CF6
+	bne code0E
 	lda #>p0307
 	sta dst+1
 	lda #<p0307
 	sta dst
 	bne b1D02
-b1CF6:
+code0E:
 	dec count+1
-	bne b1D0D
+	bne code_default
 	lda #>p0308
 	sta dst+1
 	lda #<p0308
@@ -3238,10 +3184,10 @@ b1D02:
 	lda #<p0615
 	sta src
 	jsr b1CC3
-b1D0D:
+code_default:
 	rts
 
-j1D0E:
+code0A_impl:
 	lda a619A
 	and #$e0
 	lsr
@@ -3256,9 +3202,9 @@ j1D0E:
 	sbc #$01
 b1D21:
 	sta count+1
-	lda a6195
+	lda gs_player_xyH
 	sta dst+1
-	lda a6196
+	lda gs_player_xyL
 	sta dst
 	lda a6194
 	sta count
@@ -3275,7 +3221,7 @@ j1D3B:
 	lda #$00
 	sta src
 j1D43:
-	lda p6193
+	lda game_state
 	jsr s1DC7
 	jsr s1D69
 	dec count+1
@@ -3316,9 +3262,9 @@ s1D69:
 	clc
 	adc dst
 	pha
-	lda #>p61BC
+	lda #>gs_item_loc_map
 	sta src+1
-	lda #<p61BC
+	lda #<gs_item_loc_map
 	sta src
 	lda #$17
 	sta dst+1
@@ -3387,7 +3333,7 @@ b1DDC:
 	rts
 
 s1DDF:
-	lda p6193
+	lda game_state
 	asl
 	asl
 	asl
@@ -3395,13 +3341,13 @@ s1DDF:
 	clc
 	adc a6194
 	sta dst+1
-	lda a6195
+	lda gs_player_xyH
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc a6196
+	adc gs_player_xyL
 	sta dst
 	lda #>p60A5
 	sta src+1
@@ -3461,9 +3407,9 @@ s1E5A:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #>p1E36
-	sta a0B
+	sta text_ptr+1
 	lda #<p1E36
-	sta a0A
+	sta text_ptr
 	ldy #$00
 j1E76:
 	lda #$04
@@ -3471,7 +3417,7 @@ j1E76:
 b1E7A:
 	tya
 	pha
-	lda (p0A),y
+	lda (text_ptr),y
 	jsr print_char
 	pla
 	tay
@@ -3537,16 +3483,16 @@ b1EA1:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #>string_elevator
-	sta a0B
+	sta text_ptr+1
 	lda #<string_elevator
-	sta a0A
+	sta text_ptr
 	ldy #$00
 	lda #$08
 	sta count+1
 b1F04:
 	tya
 	pha
-	lda (p0A),y
+	lda (text_ptr),y
 	jsr print_char
 	pla
 	tay
@@ -3594,11 +3540,11 @@ j1F25:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	pla
 	sta zp_col
 	inc zp_col
@@ -3620,13 +3566,13 @@ j1F25:
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	pla
 	sta zp_row
 	pla
@@ -3665,13 +3611,13 @@ j1F25:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	pla
 	sta zp_col
 p1FFF:
@@ -3694,11 +3640,11 @@ p1FFF:
 	inc zp_col
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
 	lda #$20
-	jsr s1192
+	jsr char_out
 	pla
 	sta zp_row
 	pla
@@ -3725,22 +3671,22 @@ j206A:
 	dey
 	bne b20E7
 	lda #<p2052
-	sta a0A
+	sta text_ptr
 	lda #>p2052
-	sta a0B
+	sta text_ptr+1
 	lda #$02
 	sta count
 	lda src
 	beq b207F
 	ldy #$0c
 b207F:
-	lda (p0A),y
+	lda (text_ptr),y
 	sta zp_col
 	iny
-	lda (p0A),y
+	lda (text_ptr),y
 	sta zp_row
 	iny
-	lda (p0A),y
+	lda (text_ptr),y
 	iny
 	sta count+1
 	tya
@@ -3758,13 +3704,13 @@ b207F:
 	lda #$02
 	sta count
 b20A5:
-	lda (p0A),y
+	lda (text_ptr),y
 	sta screen_ptr+1
 	iny
-	lda (p0A),y
+	lda (text_ptr),y
 	sta screen_ptr
 	iny
-	lda (p0A),y
+	lda (text_ptr),y
 	sta count+1
 	iny
 	tya
@@ -3788,9 +3734,9 @@ b20E7:
 	dey
 	bne b2107
 	lda #<p20C3
-	sta a0A
+	sta text_ptr
 	lda #>p20C3
-	sta a0B
+	sta text_ptr+1
 	lda #$02
 	sta count
 	ldy src
@@ -3818,7 +3764,7 @@ b210D:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$0c
-	jsr s1192
+	jsr char_out
 b2122:
 	lda a619B
 	and #$04
@@ -3829,22 +3775,22 @@ b2122:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$0d
-	jsr s1192
+	jsr char_out
 	lda #$10
-	jsr s1192
+	jsr char_out
 	lda #$0e
-	jsr s1192
+	jsr char_out
 	lda #$0a
 	sta zp_col
 	lda #$0d
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$12
-	jsr s1192
+	jsr char_out
 	lda #$13
-	jsr s1192
+	jsr char_out
 	lda #$0f
-	jsr s1192
+	jsr char_out
 b215D:
 	lda a619B
 	and #$02
@@ -3855,38 +3801,38 @@ b215D:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$0d
-	jsr s1192
+	jsr char_out
 	lda #$10
-	jsr s1192
+	jsr char_out
 	lda #$10
-	jsr s1192
+	jsr char_out
 	lda #$10
-	jsr s1192
+	jsr char_out
 	lda #$0e
-	jsr s1192
+	jsr char_out
 	lda #$09
 	sta zp_col
 	lda #$0f
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$03
-	jsr s1192
+	jsr char_out
 	inc zp_col
 	inc zp_col
 	inc zp_col
 	jsr get_rowcol_addr
 	lda #$11
-	jsr s1192
+	jsr char_out
 	dec zp_col
 	inc zp_row
 	jsr get_rowcol_addr
 	lda #$0f
-	jsr s1192
+	jsr char_out
 	lda #$09
 	sta zp_col
 	jsr get_rowcol_addr
 	lda #$03
-	jsr s1192
+	jsr char_out
 	lda #>p40D8
 	sta screen_ptr+1
 	lda #<p40D8
@@ -3903,14 +3849,14 @@ b21CB:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$02
-	jsr s1192
+	jsr char_out
 	lda #$07
 	sta zp_col
 	jsr get_rowcol_addr
 	ldy #$07
 	jsr s1777
 	lda #$02
-	jsr s1192
+	jsr char_out
 	lda #$06
 	sta zp_col
 	lda #$12
@@ -3929,7 +3875,7 @@ b21CB:
 	inc zp_col
 	jsr get_rowcol_addr
 	lda #$02
-	jsr s1192
+	jsr char_out
 	lda #>p4156
 	sta screen_ptr+1
 	lda #<p4156
@@ -3999,9 +3945,9 @@ j228F:
 
 b22AB:
 	lda #<string_square
-	sta a0A
+	sta text_ptr
 	lda #>string_square
-	sta a0B
+	sta text_ptr+1
 	lda #$0a
 	sta zp_col
 	lda #$04
@@ -4027,11 +3973,11 @@ b22AB:
 	sta count+1
 s22E6:
 	ldy #$00
-	lda (p0A),y
-	jsr s1192
-	inc a0A
+	lda (text_ptr),y
+	jsr char_out
+	inc text_ptr
 	bne b22F3
-	inc a0B
+	inc text_ptr+1
 b22F3:
 	dec count+1
 	bne s22E6
@@ -4039,9 +3985,9 @@ b22F3:
 
 b22F8:
 	lda #<p2254
-	sta a0A
+	sta text_ptr
 	lda #>p2254
-	sta a0B
+	sta text_ptr+1
 	lda #$13
 p2303=*+$01
 	sta zp_col
@@ -4051,18 +3997,18 @@ p2303=*+$01
 b230A:
 	jsr get_rowcol_addr
 	ldy #$00
-	lda (p0A),y
-	jsr s1192
-	inc a0A
+	lda (text_ptr),y
+	jsr char_out
+	inc text_ptr
 	bne b231A
-	inc a0B
+	inc text_ptr+1
 b231A:
 	ldy #$00
-	lda (p0A),y
-	jsr s1192
-	inc a0A
+	lda (text_ptr),y
+	jsr char_out
+	inc text_ptr
 	bne b2327
-	inc a0B
+	inc text_ptr+1
 b2327:
 	inc zp_row
 	dec zp_col
@@ -4073,9 +4019,9 @@ b2327:
 
 j2332:
 	lda #<p2246
-	sta a0A
+	sta text_ptr
 	lda #>p2246
-	sta a0B
+	sta text_ptr+1
 	lda #$02
 	sta zp_col
 	lda #$07
@@ -4103,7 +4049,7 @@ b2356:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$14
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
@@ -4112,11 +4058,11 @@ b2356:
 	jsr s17A7
 	jsr get_rowcol_addr
 	lda #$17
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
 	lda #$15
-	jsr s1192
+	jsr char_out
 	lda #$10
 	sta zp_col
 	lda #$09
@@ -4261,41 +4207,41 @@ s2484:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$7c
-	jsr s1192
+	jsr char_out
 	lda #$7d
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$7e
-	jsr s1192
+	jsr char_out
 	lda #$7f
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$1f
-	jsr s1192
+	jsr char_out
 	lda #$7b
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	rts
 
 s24E2:
@@ -4305,9 +4251,9 @@ s24E2:
 	lda #$1e
 	jsr print_char
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	lda #$1d
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
@@ -4316,7 +4262,7 @@ s24E2:
 	lda #$5f
 	jsr print_char
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	lda #$60
 s2510=*+$01
 	jsr print_char
@@ -4326,11 +4272,11 @@ s2510=*+$01
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$1c
-	jsr s1192
+	jsr char_out
 	lda #$0b
-	jsr s1192
+	jsr char_out
 	lda #$1b
-	jsr s1192
+	jsr char_out
 	rts
 
 s252D:
@@ -4338,9 +4284,9 @@ s252D:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$19
-	jsr s1192
+	jsr char_out
 	lda #$1a
-	jsr s1192
+	jsr char_out
 	rts
 
 s253F:
@@ -4348,7 +4294,7 @@ s253F:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$18
-	jsr s1192
+	jsr char_out
 	rts
 
 j254C:
@@ -4426,37 +4372,36 @@ b25D3=*+$01
 	bne b2585
 	rts
 
-s25E3:
+print_noun:
 	sta row_ptr
 	lda #<noun_table
 	sta string_ptr
 	lda #>noun_table
 	sta string_ptr+1
 	ldy #$00
-b25EF:
+@find_string:
 	lda (string_ptr),y
-	bmi b25FB
-b25F3:
+	bmi @found_start
+@next_char:
 	inc string_ptr
-	bne b25EF
+	bne @find_string
 	inc string_ptr+1
-	bne b25EF
-b25FB:
+	bne @find_string
+@found_start:
 	dec row_ptr
-	bne b25F3
+	bne @next_char
 	lda (string_ptr),y
 	and #$7f
-b2603:
-	jsr s1192
+@print_char:
+	jsr char_out
 	inc string_ptr
-	bne b260C
+	bne :+
 	inc string_ptr+1
-b260C:
-	ldy #$00
+:	ldy #$00
 	lda (string_ptr),y
-	bpl b2603
-	lda #$20
-	jmp s1192
+	bpl @print_char
+	lda #' '
+	jmp char_out
 
 s2617:
 	ldx #$28
@@ -4478,24 +4423,22 @@ b261B:
 	.byte $a9,$00,$9d,$00,$01,$9d,$01,$01
 	.byte $85,$df,$85,$e0,$20,$6e
 s2640:
-	lda a619D
+	lda gd_direct_object
 	sta src
 	lda a619C
 	sta src+1
 	cmp #$0e
-	bmi b2651
+	bmi :+
 	jmp j2B1B
 
-b2651:
-	lda src
+:	lda src
 	cmp #$15
-	bmi b265A
-	jmp j105A
+	bmi :+
+	jmp nonsense
 
-b265A:
-	jsr s0B97
+:	jsr s0B97
 	sta dst+1
-	lda a619D
+	lda gd_direct_object
 	sta src
 	lda a619C
 	sta src+1
@@ -4508,13 +4451,13 @@ b265A:
 	cmp src
 	beq b267E
 b2679:
-	lda #$1f
-b267B:
-	jmp s08A4
+	lda #$1f     ;Having fun?
+@print_line2:
+	jmp print_to_line2
 
 b267E:
 	lda #$73
-	bne b267B
+	bne @print_line2
 b2682:
 	lda a6194
 	cmp #$05
@@ -4522,18 +4465,19 @@ b2682:
 	lda #$07
 	cmp count+1
 	beq b2679
-	lda #<p030B
+	lda #$0b
 	sta src
-	lda #>p030B
+	lda #$03
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$01
 	sta a619E
 	jsr s1015
-	lda #$71
-	jsr s0892
-	lda #$72
-	bne b267B
+	lda #$71     ;The ring is activated and
+	jsr print_to_line1
+	lda #$72     ;shines light everywhere!
+	bne @print_line2
+
 b26AB:
 	dec src+1
 	bne b26E1
@@ -4552,12 +4496,12 @@ b26AB:
 	sta src
 	lda #>p0308
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 b26D2:
-	lda #$7f
-	jsr s0892
-	lda #$80
-	jsr s08A4
+	lda #$7f     ;A deafening roar envelopes
+	jsr print_to_line1
+	lda #$80     ;you. Your ears are ringing!
+	jsr print_to_line2
 	rts
 
 b26DD:
@@ -4590,24 +4534,24 @@ b2703:
 	lda dst+1
 	sta src
 b270D:
-	jsr s1A34
+	jsr item_exec
 	jsr s1015
-	lda #$4e
-	jsr s0892
-	lda a619D
-	jsr s25E3
-	lda #$4f
-	jmp s08A4
+	lda #$4e     ;You break the
+	jsr print_to_line1
+	lda gd_direct_object
+	jsr print_noun
+	lda #$4f     ;and it disappears!
+	jmp print_to_line2
 
 s2723:
-	lda a6198
+	lda gs_torches_unlit
 	bne b2743
-	dec a6197
+	dec gs_torches_lit
 	lda a6194
 	cmp #$05
 	beq b2742
 	lda #$00
-	sta a61A1
+	sta gs_torch_time+1
 	sta a619E
 	jsr s2788
 	lda #$0a
@@ -4616,39 +4560,38 @@ b2742:
 	rts
 
 b2743:
-	dec a6198
+	dec gs_torches_unlit
 	lda #$0e
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	sta src
 	lda #$00
 	sta src+1
-	jmp s1A34
+	jmp item_exec
 
 b2756:
 	dec src+1
 	bne b2799
-	lda a6197
+	lda gs_torches_lit
 	beq b2784
 	lda src
 	cmp #$0b
-	bne b2768
+	bne :+
 	jsr s281D
-b2768:
-	cmp #$12
+:	cmp #$12
 	bmi b2774
 	cmp #$13
 	beq b2795
 	lda dst+1
 	sta src
 b2774:
-	jsr s1A34
-	jsr s105F
-	lda #$52
-	jsr s0892
-	lda #$53
+	jsr item_exec
+	jsr clear_status_lines
+	lda #$52     ;It vanishes in a
+	jsr print_to_line1
+	lda #$53     ;burst of flames!
 b2781:
-	jmp s08A4
+	jmp print_to_line2
 
 b2784:
 	lda #$88
@@ -4683,20 +4626,20 @@ j27B3:
 	lda dst+1
 	sta src
 b27B7:
-	jsr s1A34
+	jsr item_exec
 	jsr s1015
-	lda #$7d
-	jsr s0892
-	lda #$20
-	jsr s1192
-	lda a619D
-	jsr s25E3
-	lda #$7e
+	lda #$7d     ;You eat the
+	jsr print_to_line1
+	lda #' '
+	jsr char_out
+	lda gd_direct_object
+	jsr print_noun
+	lda #$7e     ;and you get heartburn!
 b27CF:
-	jsr s08A4
+	jsr print_to_line2
 	lda #$07
 	sta src+1
-	jmp s1A34
+	jmp item_exec
 
 b27D9:
 	lda dst
@@ -4713,10 +4656,10 @@ b27D9:
 b27EB:
 	lda dst+1
 	sta src
-	jsr s1A34
-	lda a619F
+	jsr item_exec
+	lda gs_fed
 	sta src+1
-	lda a61A0
+	lda gs_fed+1
 	sta src
 	lda #<pAA
 	sta count
@@ -4729,9 +4672,9 @@ b27EB:
 	lda count+1
 	adc src+1
 	sta src+1
-	sta a619F
+	sta gs_fed
 	lda src
-	sta a61A0
+	sta gs_fed+1
 	lda #$58
 	bne b27CF
 s281D:
@@ -4744,7 +4687,7 @@ s281D:
 	beq b2836
 	lda #$0a
 	sta a61A5
-	jsr s127E
+	jsr clear_maze_window
 b2836:
 	lda #$0b
 	rts
@@ -4779,20 +4722,20 @@ b2865:
 	lda dst+1
 	sta src
 b2869:
-	jsr s1A34
+	jsr item_exec
 	jsr s28D9
 	jsr s332F
 	nop
 	nop
 	bne b287B
-	lda #$97
-	jmp s0892
+	lda #$97     ;and it vanishes!
+	jmp print_to_line1
 
 b287B:
-	lda #$5c
-	jsr s0892
-	lda #$5d
-	jmp s08A4
+	lda #$5c     ;and is eaten by
+	jsr print_to_line1
+	lda #$5d     ;the monster!
+	jmp print_to_line2
 
 b2885:
 	lda a6194
@@ -4808,60 +4751,58 @@ b2885:
 	sta src
 	lda #$00
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	jsr s28D9
-	lda #$5e
-	jsr s0892
-	lda #$5f
-	jsr s08A4
+	lda #$5e     ;and the monster grabs it,
+	jsr print_to_line1
+	lda #$5f     ;gets tangled, and topples over!
+	jsr print_to_line2
 	lda #$00
 	sta a61B2
 	rts
 
 b28B9:
 	jsr s28D9
-	lda #$6b
-	jsr s0892
-	lda #$6c
-	jmp s08A4
+	lda #$6b     ;returns and hits you
+	jsr print_to_line1
+	lda #$6c     ;in the eye!
+	jmp print_to_line2
 
 b28C6:
 	lda dst+1
 	sta src
-	jsr s1A34
+	jsr item_exec
 	lda #$07
 	sta src+1
-	jsr s1A34
-	lda #$81
-	jmp s08A4
+	jsr item_exec
+	lda #$81     ;Food fight!
+	jmp print_to_line2
 
 s28D9:
 	lda #$07
 	sta src+1
-	jsr s1A34
-	lda #$59
-	jsr s0892
-	lda a619D
-	jsr s25E3
+	jsr item_exec
+	lda #$59     ;The
+	jsr print_to_line1
+	lda gd_direct_object
+	jsr print_noun
 	jsr s32BD
 	lda #$20
 	ldy #$00
 	cmp (src),y
-	beq b28FC
+	beq :+
 	inc src
-	bne b28FC
+	bne :+
 	inc src+1
-b28FC:
-	inc src
-	bne b2902
+:	inc src
+	bne :+
 	inc src+1
-b2902:
-	lda #$5a
+:	lda #$5a     ;magically sails
 	jsr print_display_string
-	lda #$5b
-	jsr s08A4
-	jsr s1045
-	jmp s105F
+	lda #$5b     ;around a nearby corner
+	jsr print_to_line2
+	jsr wait5
+	jmp clear_status_lines
 
 j2912:
 	lda a61AD
@@ -4874,20 +4815,20 @@ b291C:
 	sta src
 	lda #>zp_col
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	jsr s28D9
-	jsr s105F
-	lda #$3f
-	jsr s0892
-	lda #$40
-	jsr s08A4
-	jsr s1045
-	jmp j10B9
+	jsr clear_status_lines
+	lda #$3f     ;The monster grabs the frisbee, throws
+	jsr print_to_line1
+	lda #$40     ;it back, and it saws your head off!
+	jsr print_to_line2
+	jsr wait5
+	jmp game_over
 
 j293D:
 	dec src+1
 	bne b2944
-	jmp j105A
+	jmp nonsense
 
 b2944:
 	dec src+1
@@ -4895,18 +4836,18 @@ b2944:
 	jsr s3274
 	lda #$0b
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	cmp #$00
 	beq b296D
 	sta src
 	lda #$06
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$06
 	bcs b296D
-	lda #$82
-	jsr s08A4
+	lda #$82     ;The hallway is too crowded.
+	jsr print_to_line2
 	jmp s3274
 
 b296D:
@@ -4920,10 +4861,10 @@ b296D:
 b297D:
 	lda #$05
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jmp s1A34
+	jmp item_exec
 
 b298B:
 	cmp #$13
@@ -4935,24 +4876,24 @@ b298B:
 b2996:
 	lda #$0e
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	beq b29A5
-	dec a6198
+	dec gs_torches_unlit
 	jmp b297D
 
 b29A5:
 	lda #$0d
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	sta src
-	dec a6197
+	dec gs_torches_lit
 	jsr s2788
 	lda #$00
 	sta a619E
-	sta a6197
+	sta gs_torches_lit
 	lda #$0a
 	sta a61A5
-	jsr s127E
+	jsr clear_maze_window
 	jmp b297D
 
 b29C7:
@@ -4961,11 +4902,11 @@ b29C7:
 	lda src
 	cmp #$09
 	beq b29D4
-	jmp j105A
+	jmp nonsense
 
 b29D4:
-	lda #$89
-	jmp s08A4
+	lda #$89     ;With what? Air?
+	jmp print_to_line2
 
 b29D9:
 	dec src+1
@@ -4974,7 +4915,7 @@ b29D9:
 	lda src
 	cmp #$13
 	beq b29E8
-	jmp j105A
+	jmp nonsense
 
 b29E8:
 	lda count+1
@@ -4985,41 +4926,41 @@ b29E8:
 b29F1:
 	lda a619E
 	bne b2A02
-	lda #$88
-	jsr s08A4
+	lda #$88     ;You have no fire.
+	jsr print_to_line2
 	lda #$07
 	sta src+1
-	jmp s1A34
+	jmp item_exec
 
 b2A02:
 	lda #$0d
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	cmp #$00
 	beq b2A16
 	sta src
 	lda #$01
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 b2A16:
 	lda #$0e
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	sta src
 	lda #$03
 	sta src+1
-	jsr s1A34
-	jsr s105F
-	lda #$65
-	jsr s0892
-	lda #$66
-	jsr s08A4
-	dec a6198
+	jsr item_exec
+	jsr clear_status_lines
+	lda #$65     ;The torch is lit and the
+	jsr print_to_line1
+	lda #$66     ;old torch dies and vanishes!
+	jsr print_to_line2
+	dec gs_torches_unlit
 	lda #$07
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$96
-	sta a61A1
+	sta gs_torch_time+1
 	rts
 
 b2A43:
@@ -5035,7 +4976,7 @@ b2A4A:
 	beq b2A63
 	cmp #$08
 	beq b2A5B
-	jmp j105A
+	jmp nonsense
 
 b2A5B:
 	lda #$02
@@ -5043,33 +4984,33 @@ b2A5B:
 	jmp s2640
 
 b2A63:
-	lda #$87
+	lda #$87     ;With who? The monster?
 j2A65:
-	jmp s08A4
+	jmp print_to_line2
 
 b2A68:
-	lda #<p0611
+	lda #$11
 	sta src
-	lda #>p0611
+	lda #$06
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp a6194
 	bne b2A89
-	lda a6195
+	lda gs_player_xyH
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc a6196
+	adc gs_player_xyL
 	cmp count
 	beq b2A96
 b2A89:
-	jsr s105F
-	lda #$83
-	jsr s0892
-	lda #$84
+	jsr clear_status_lines
+	lda #$83     ;A high shrill note comes
+	jsr print_to_line1
+	lda #$84     ;from the flute!
 	jmp j2A65
 
 b2A96:
@@ -5097,11 +5038,11 @@ b2AB4:
 	dec zp_col
 	dec zp_row
 	bpl b2A9E
-	lda #>p0311
+	lda #$03
 	sta src+1
-	lda #<p0311
+	lda #$11
 	sta src
-	jsr s1A34
+	jsr item_exec
 	jsr s2788
 	lda #$0f
 	sta a61A5
@@ -5115,14 +5056,14 @@ j2ADF:
 	lda src
 	cmp #$0d
 	beq b2AEC
-	jmp j105A
+	jmp nonsense
 
 b2AEC:
-	jsr s105F
-	lda #$21
-	jsr s0892
-	lda #$22
-	jmp s08A4
+	jsr clear_status_lines
+	lda #$21     ;Thunderbolts shoot out above you!
+	jsr print_to_line1
+	lda #$22     ;The staff thunders with uselss energy!
+	jmp print_to_line2
 
 b2AF9:
 	dec src+1
@@ -5134,16 +5075,16 @@ b2AFE:
 	cmp #$07
 	beq b2B11
 j2B04:
-	jsr s105F
-	lda #$91
-	jsr s0892
-	lda #$23
-	jmp s08A4
+	jsr clear_status_lines
+	lda #$91     ;OK...if you really want to,
+	jsr print_to_line1
+	lda #$23     ;you are wearing it.
+	jmp print_to_line2
 
 b2B11:
 	lda #$03
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	jmp j2B04
 
 j2B1B:
@@ -5162,15 +5103,15 @@ b2B2D:
 	bmi b2B4A
 	cmp #$1a
 	bmi b2B38
-	jmp j105A
+	jmp nonsense
 
 b2B38:
 	cmp #$17
 	beq b2B41
 b2B3C:
-	lda #$90
+	lda #$90     ;I don't see that here.
 b2B3E:
-	jmp s08A4
+	jmp print_to_line2
 
 b2B41:
 	jsr s2C8E
@@ -5180,10 +5121,10 @@ b2B41:
 b2B4A:
 	jsr s0B97
 b2B4D:
-	jsr s105F
-	lda #$67
-	jsr s0892
-	lda a619D
+	jsr clear_status_lines
+	lda #$67     ;A close inspection reveals
+	jsr print_to_line1
+	lda gd_direct_object
 	cmp #$03
 	beq b2B60
 	lda #$68
@@ -5195,7 +5136,7 @@ b2B64:
 	dec src+1
 	bne b2B7A
 	jsr s0B97
-	lda a619D
+	lda gd_direct_object
 	cmp #$03
 	beq b2B76
 	lda #$7a
@@ -5217,12 +5158,12 @@ b2B81:
 b2B8A:
 	cmp #$14
 	beq b2B91
-	jmp j105A
+	jmp nonsense
 
 b2B91:
 	lda #$0b
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	sta dst+1
 	beq b2B3C
 	lda dst
@@ -5232,7 +5173,7 @@ b2B91:
 	sta src
 	lda #$06
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$06
 	bcs b2BB4
@@ -5243,7 +5184,7 @@ b2BB4:
 	sta src
 	lda #$04
 	sta src+1
-	jsr s1A34
+	jsr item_exec
 j2BBF:
 	lda dst+1
 	cmp #$11
@@ -5256,13 +5197,13 @@ j2BBF:
 b2BCF:
 	lda #$12
 b2BD1:
-	jsr s105F
+	jsr clear_status_lines
 	sta dst
 	clc
 	adc #$04
-	jsr s08A4
-	lda #$18
-	jsr s0892
+	jsr print_to_line2
+	lda #$18     ;Inside the box there is a
+	jsr print_to_line1
 	lda dst
 	cmp #$03
 	bne b2BEA
@@ -5271,7 +5212,7 @@ b2BEA:
 	sta row_ptr
 	cmp #$11
 	bne b2BF3
-	jsr s1045
+	jsr wait5
 b2BF3:
 	pla
 	sta dst+1
@@ -5285,15 +5226,15 @@ b2BF3:
 j2C04=*+$01
 	lda dst+1
 	sta src
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	bne b2C13
-	inc a6198
+	inc gs_torches_unlit
 b2C13:
 	lda #$07
 	sta src+1
-	jmp s1A34
+	jmp item_exec
 
 b2C1A:
 	jsr s2788
@@ -5318,7 +5259,7 @@ b2C37:
 	stx src
 	ldx #>p060A
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$07
 	bmi b2C69
@@ -5328,26 +5269,26 @@ b2C37:
 	cmp #$1b
 	beq b2C71
 	jsr s3267
-	jsr s105F
-	lda #$19
-	jsr s0892
+	jsr clear_status_lines
+	lda #$19     ;You unlock the door...
+	jsr print_to_line1
 	jsr s3267
-	jsr s08A4
-	jmp j10B9
+	jsr print_to_line2
+	jmp game_over
 
 b2C69:
 	jsr s3267
-	lda #$92
-	jmp s08A4
+	lda #$92     ;But you have no key.
+	jmp print_to_line2
 
 b2C71:
 	ldx #$0c
 	stx a61A5
-	jsr s105F
-	lda #$19
-	jsr s0892
-	lda #$1b
-	jmp s08A4
+	jsr clear_status_lines
+	lda #$19     ;You unlock the door...
+	jsr print_to_line1
+	lda #$1b     ;and the key begins to tick!
+	jmp print_to_line2
 
 j2C83:
 	jsr s2788
@@ -5362,7 +5303,7 @@ s2C8E:
 	stx src+1
 	ldx a6194
 	stx count
-	lda a6195
+	lda gs_player_xyH
 	ldx #$04
 	stx count+1
 b2CA2:
@@ -5371,11 +5312,11 @@ b2CA2:
 	dec count+1
 	bne b2CA2
 	clc
-	adc a6196
+	adc gs_player_xyL
 	sta dst+1
 	lda count
 	clc
-	adc p6193
+	adc game_state
 	sta count
 	ldx #$09
 	stx count+1
@@ -5423,14 +5364,14 @@ b2D01:
 	lda src
 	cmp #$1a
 	bpl b2D0A
-	jmp j105A
+	jmp nonsense
 
 b2D0A:
 	ldx #>p0603
 	stx src+1
 	ldx #<p0603
 	stx src
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$08
 	beq b2D1E
@@ -5443,17 +5384,17 @@ b2D1E:
 	lda a61A5
 	beq b2D3D
 b2D2A:
-	lda #$85
-	jsr s08A4
-	lda #$20
-	jsr s1192
-	lda a619D
+	lda #$85     ;The calculator displays
+	jsr print_to_line2
+	lda #' '
+	jsr char_out
+	lda gd_direct_object
 	clc
 	adc #$16
-	jmp s1192
+	jmp char_out
 
 b2D3D:
-	lda a619D
+	lda gd_direct_object
 	sec
 	sbc #$19
 	ldx #<p2E02
@@ -5478,7 +5419,7 @@ j2D4B:
 b2D62:
 	ldy #$00
 	lda (src),y
-	sta p6193
+	sta game_state
 	inc src
 	bne b2D6F
 	inc src+1
@@ -5490,17 +5431,17 @@ b2D6F:
 	inc src+1
 b2D7A:
 	lda (src),y
-	sta a6195
+	sta gs_player_xyH
 	inc src
 	bne b2D85
 	inc src+1
 b2D85:
 	lda (src),y
-	sta a6196
+	sta gs_player_xyL
 	ldx #$00
 	stx a61A3
 	stx a61A4
-	lda a619D
+	lda gd_direct_object
 	cmp #$1c
 	bne b2DC3
 	lda a619E
@@ -5512,15 +5453,15 @@ b2DA5:
 	dec a619E
 	ldx #$00
 	stx a61A2
-	inc a6198
-	dec a6197
+	inc gs_torches_unlit
+	dec gs_torches_lit
 	ldx #$0d
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	ldx #$04
 	stx src+1
 	sta src
-	jsr s1A34
+	jsr item_exec
 b2DC3:
 	ldx #<p0103
 	stx src
@@ -5528,24 +5469,24 @@ b2DC3:
 	stx src+1
 	ldx #$0a
 	stx a61A5
-	jsr s1A34
-	jsr s127E
+	jsr item_exec
+	jsr clear_maze_window
 	ldx #$07
 	stx src+1
-	jsr s1A34
-	lda #$86
-	jsr s0892
-	lda #$74
-	jsr s08A4
-	lda a619D
+	jsr item_exec
+	lda #$86     ;You have been teleported!
+	jsr print_to_line1
+	lda #$74     ;The calculator vanishes.
+	jsr print_to_line2
+	lda gd_direct_object
 	cmp #$1c
 	bne b2E01
 	lda a61A2
 	bne b2E01
-	jsr s1045
-	jsr s105F
-	lda #$70
-	jsr s08A4
+	jsr wait5
+	jsr clear_status_lines
+	lda #$70     ;A draft blows your torch out.
+	jsr print_to_line2
 	jmp s0FDC
 
 b2E01:
@@ -5565,7 +5506,7 @@ j2E2A:
 b2E31:
 	ldx #$0b
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	tax
 	bne b2E3E
 	jmp j2F30
@@ -5575,8 +5516,8 @@ b2E3E:
 	sta src
 	ldx #$06
 	stx src+1
-	jsr s1A34
-	lda a619D
+	jsr item_exec
+	lda gd_direct_object
 	cmp #$14
 	bne b2E53
 	jmp j2EDE
@@ -5600,14 +5541,14 @@ b2E6A:
 	ldx #$06
 	stx src+1
 j2E72=*+$02
-	jsr s1A34
+	jsr item_exec
 	lda #$06
 	cmp count+1
 	beq b2E7C
 	jmp j2F30
 
 b2E7C:
-	ldx a619D
+	ldx gd_direct_object
 	stx src
 	jmp j2E9D
 
@@ -5615,7 +5556,7 @@ s2E84:
 	jsr s3274
 	ldx #$08
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count
 	cmp #$08
 	bcc b2E97
@@ -5629,12 +5570,12 @@ b2E9A:
 j2E9D:
 	ldx #$04
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 j2EA4:
 	ldx #$07
 	stx src+1
-	jsr s1A34
-	lda a619D
+	jsr item_exec
+	lda gd_direct_object
 	cmp #$03
 	bne b2EB5
 	jsr s2EC2
@@ -5654,11 +5595,11 @@ s2EC2:
 	lda a619C
 	cmp #$12
 	beq b2ED3
-	jsr s1045
+	jsr wait5
 b2ED3:
-	jsr s105F
-	lda #$27
-	jsr s08A4
+	jsr clear_status_lines
+	lda #$27     ;The calculator displays 317.
+	jsr print_to_line2
 b2EDB:
 	lda #$03
 	rts
@@ -5672,7 +5613,7 @@ j2EDE:
 	stx src
 	ldx #$02
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	jmp j2EA4
 
 j2EF5:
@@ -5690,7 +5631,7 @@ j2EFB:
 	cmp #$06
 	beq j2E9D
 	jsr s2E84
-	inc a6198
+	inc gs_torches_unlit
 	jmp j2E9D
 
 b2F16:
@@ -5710,9 +5651,9 @@ b2F2D:
 	jmp b2E9A
 
 j2F30:
-	lda #$9a
+	lda #$9a     ;It is currently impossible.
 b2F32:
-	jmp s08A4
+	jmp print_to_line2
 
 j2F35:
 	pla
@@ -5751,7 +5692,7 @@ b2F62:
 	pha
 	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$06
 	cmp count+1
 	beq b2F82
@@ -5768,13 +5709,13 @@ b2F82:
 	sta src
 	pla
 	sta src+1
-	lda a619D
+	lda gd_direct_object
 	cmp #$13
 	beq b2F92
 	jmp j2E9D
 
 b2F92:
-	inc a6198
+	inc gs_torches_unlit
 	jmp j2E9D
 
 j2F98:
@@ -5785,22 +5726,22 @@ j2F98:
 	beq b2FB7
 	cmp #$15
 	bpl b2FA9
-	jmp j105A
+	jmp nonsense
 
 b2FA9:
 	cmp #$1a
 	bmi b2FB0
-	jmp j105A
+	jmp nonsense
 
 b2FB0:
 	cmp #$17
 	bne b2FB7
-	jmp j105A
+	jmp nonsense
 
 b2FB7:
-	lda #$90
+	lda #$90     ;I don't see that here.
 b2FB9:
-	jsr s08A4
+	jsr print_to_line2
 	rts
 
 b2FBD:
@@ -5810,7 +5751,7 @@ b2FBD:
 	stx src
 	ldx #>p0602
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$08
 	beq b2FD5
@@ -5822,16 +5763,16 @@ b2FD5:
 b2FD9:
 	dec src+1
 	bne b2FE0
-	jmp j105A
+	jmp nonsense
 
 b2FE0:
 	dec src+1
 	bne b301D
-	lda #$76
-	jsr s08A4
-	lda #<p0C7A
+	lda #$76     ;OK...
+	jsr print_to_line2
+	lda #<text_buffer1
 	sta src
-	lda #>p0C7A
+	lda #>text_buffer1
 	sta src+1
 	ldy #$00
 	lda #$20
@@ -5847,12 +5788,12 @@ b3001:
 	lda (src),y
 	cmp #$20
 	beq b301C
-	sta (p0A),y
+	sta (text_ptr),y
 	jsr print_char
 b300E:
-	inc a0A
+	inc text_ptr
 	bne b3014
-	inc a0B
+	inc text_ptr+1
 b3014:
 	inc src
 	bne b3001
@@ -5868,34 +5809,34 @@ b301D:
 
 b3024:
 	lda #$02
-	cmp p6193
+	cmp game_state
 	bne b3072
 	tax
 	dex
 	txa
 	cmp a6194
 	bne b3072
-	cmp a6195
+	cmp gs_player_xyH
 	bne b3072
 	lda #$0b
-	cmp a6196
+	cmp gs_player_xyL
 	bne b3072
 	ldx #<p0607
 	stx src
 	ldx #>p0607
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$07
 	cmp count+1
 	bne b30A5
 	jsr s1015
 	jsr s0FDC
 	jsr s30C5
-	jsr s107C
+	jsr pit
 	inc a6194
 	ldx #$03
-	stx a6196
-	stx a6195
+	stx gs_player_xyL
+	stx gs_player_xyH
 	ldx #$00
 	stx a61A3
 	stx a61A4
@@ -5911,7 +5852,7 @@ b3072:
 	jmp b3024
 
 s3085:
-	lda p6193
+	lda game_state
 	tax
 	dex
 	txa
@@ -5922,31 +5863,31 @@ s3085:
 	dex
 	txa
 	beq b30A1
-	dec a6196
+	dec gs_player_xyL
 	rts
 
 b3099:
-	dec a6195
+	dec gs_player_xyH
 	rts
 
 b309D:
-	inc a6196
+	inc gs_player_xyL
 	rts
 
 b30A1:
-	inc a6195
+	inc gs_player_xyH
 	rts
 
 b30A5:
 	jsr s1015
 	jsr s0FDC
 	jsr s30C5
-	jsr s105F
-	lda #$2a
-	jsr s0892
-	lda #$2b
-	jsr s08A4
-	jmp j10B9
+	jsr clear_status_lines
+	lda #$2a     ;You have rammed your head into a steel
+	jsr print_to_line1
+	lda #$2b     ;wall and bashed your brains out!
+	jsr print_to_line2
+	jmp game_over
 
 j30BE:
 	dec src+1
@@ -5969,7 +5910,7 @@ b30D1:
 	lda src+1
 	cmp #$08
 	bne b30CF
-	bit aC054
+	bit hw_PAGE1
 	bit hw_FULLSCREEN
 	bit aC056
 	bit hw_GRAPHICS
@@ -5983,8 +5924,8 @@ b30D1:
 b30FB:
 	lda a61A5
 	beq b3105
-	lda #$98
-	jmp s0892
+	lda #$98     ;You will do no such thing!
+	jmp print_to_line1
 
 b3105:
 	jsr s30C5
@@ -6001,10 +5942,10 @@ j3111:
 	lda a6194
 	cmp #$01
 	bne b3130
-	lda a6195
+	lda gs_player_xyH
 	cmp #$06
 	bne b3130
-	lda a6196
+	lda gs_player_xyL
 	cmp #$0a
 	beq b3136
 b3130:
@@ -6014,13 +5955,13 @@ b3130:
 b3136:
 	jsr s1015
 	jsr s0FDC
-	jmp b0A4A
+	jmp @beheaded
 
 b313F:
 	jsr s1015
-	ldx a619F
+	ldx gs_fed
 	stx src+1
-	ldx a61A0
+	ldx gs_fed+1
 	stx src
 	lda src+1
 	bne b315D
@@ -6033,9 +5974,9 @@ b3159:
 	cmp #$0f
 	bcc b3190
 b315D:
-	lda #>p0A
+	lda #>text_ptr
 	sta count+1
-	lda #<p0A
+	lda #<text_ptr
 	sta count
 	lda src
 	sec
@@ -6044,13 +5985,13 @@ b315D:
 	lda src+1
 	sbc count+1
 	sta src+1
-	sta a619F
+	sta gs_fed
 	lda src
-	sta a61A0
+	sta gs_fed+1
 b317A:
 	jsr s0FDC
-	jsr s127E
-	lda #$2d
+	jsr clear_maze_window
+	lda #$2d     ;WHAM!
 	ldx #$08
 	stx zp_col
 	ldx #$0a
@@ -6060,60 +6001,59 @@ b317A:
 
 b3190:
 	ldx #$05
-	stx a61A0
+	stx gs_fed+1
 	bne b317A
 j3197:
 	dec src+1
 	bne b31DF
 	lda a61A5
 	beq b31A5
-	lda #$9a
-	jmp s08A4
+	lda #$9a     ;It is currently impossible.
+	jmp print_to_line2
 
 b31A5:
-	jsr s105F
-	lda #$93
-	jsr s0892
+	jsr clear_status_lines
+	lda #$93     ;Save the game?
+	jsr print_to_line1
 	jsr input_Y_or_N
 	and #$7f
-	cmp #$59
-	beq b31B9
-	jmp s105F
+	cmp #'Y'
+	beq :+
+	jmp clear_status_lines
 
-b31B9:
-	jmp j7C66
+:	jmp save_disk_or_tape
 
-j31BC:
-	lda #$95
-	jsr s0892
-	lda #$96
-	jsr s08A4
+save_to_tape:
+	lda #$95     ;Prepare cassette
+	jsr print_to_line1
+	lda #$96     ;Press any key
+	jsr print_to_line2
 	jsr input_char
-	ldx #<p6193
-	stx a3C
-	ldx #>p6193
-	stx a3D
-	ldx #<p6292
-	stx a3E
-	ldx #>p6292
-	stx a3F
-	jsr eFECD
-	jmp s105F
+	ldx #<game_state
+	stx tape_addr_start
+	ldx #>game_state
+	stx tape_addr_start+1
+	ldx #<game_state_end
+	stx tape_addr_end
+	ldx #>game_state_end
+	stx tape_addr_end+1
+	jsr rom_WRITE_TAPE
+	jmp clear_status_lines
 
 b31DF:
 	dec src+1
 	bne b31FB
-	jsr s105F
-	lda #$9c
-	jsr s0892
+	jsr clear_status_lines
+	lda #$9c     ;Are you sure you want to quit?
+	jsr print_to_line1
 	jsr input_Y_or_N
 	cmp #$59
 	beq b31F5
-	jmp s105F
+	jmp clear_status_lines
 
 b31F5:
 	jsr b31A5
-	jmp j10C4
+	jmp play_again
 
 b31FB:
 	dec src+1
@@ -6135,7 +6075,7 @@ b3219:
 	ldy #$00
 	lda (src),y
 	and #$7f
-	jsr s1192
+	jsr char_out
 	ldy #$00
 	lda (src),y
 	bpl b3213
@@ -6144,7 +6084,7 @@ b3219:
 	jsr s1015
 	lda #$07
 	sta src+1
-	jmp s1A34
+	jmp item_exec
 
 b3238:
 	lda a61A5
@@ -6152,21 +6092,21 @@ b3238:
 	beq b3258
 	lda a61B1
 	beq b324F
-	lda #$9d
-	jsr s08A4
+	lda #$9d     ;Try examining things.
+	jsr print_to_line2
 	ldx #$00
 	stx a61B1
 	rts
 
 b324F:
-	lda #$9e
-	jsr s08A4
+	lda #$9e     ;Type instructions.
+	jsr print_to_line2
 	inc a61B1
 	rts
 
 b3258:
-	lda #$9f
-	jmp s08A4
+	lda #$9f     ;Invert and telephone.
+	jmp print_to_line2
 
 j325D:
 	jsr s1015
@@ -6249,7 +6189,7 @@ j3319:
 	stx string_ptr+1
 	ldx #<p32CA
 	stx string_ptr
-	jsr s105F
+	jsr clear_status_lines
 	lda #$00
 	sta zp_col
 	lda #$16
@@ -6257,7 +6197,7 @@ j3319:
 	jmp print_string
 
 s332F:
-	lda a619D
+	lda gd_direct_object
 	cmp #$01
 	beq b333C
 	lda a61AD
@@ -6267,7 +6207,7 @@ s332F:
 b333C:
 	jsr s30C5
 	jsr clear_hgr2
-	jmp j10B9
+	jmp game_over
 
 	.byte $07,$ea
 s3347:
@@ -6295,7 +6235,7 @@ j3361:
 	jsr s2640
 j336E:
 	jsr s0B19
-	jsr s0B77
+	jsr print_timers
 	jsr s3435
 	jmp j3361
 
@@ -6320,7 +6260,7 @@ b3390:
 	cmp a61B5
 	bne j33D4
 	ldx #$04
-	stx p6193
+	stx game_state
 	jsr s1015
 	jsr s3422
 	jmp j34D5
@@ -6347,12 +6287,12 @@ j33D4:
 	jmp j336E
 
 b33DD:
-	jsr s127E
+	jsr clear_maze_window
 	ldx #$09
 	stx zp_col
 	ldx #$0a
 	stx zp_row
-	lda #$7c
+	lda #$7c     ;Splat!
 	jsr print_display_string
 	jsr s3427
 	jmp j3361
@@ -6363,23 +6303,23 @@ s33F3:
 	beq b3401
 	cmp #$5a
 	bpl b3401
-	jsr s1045
+	jsr wait5
 s3402=*+$01
 b3401:
-	lda #$24
-	jsr s0892
+	lda #$24     ;To everything
+	jsr print_to_line1
 	lda count+1
 	cmp #$01
 	beq b3411
-	lda #$26
+	lda #$26     ;Turn turn turn
 	jsr print_display_string
 b3411:
-	lda #$25
-	jsr s08A4
+	lda #$25     ;There is a season
+	jsr print_to_line2
 	lda count+1
 	cmp #$01
 	beq b3421
-	lda #$26
+	lda #$26     ;Turn turn turn
 	jsr print_display_string
 b3421:
 	rts
@@ -6425,12 +6365,12 @@ j3457:
 
 b345E:
 	jsr s1015
-	lda #$31
-	jsr s08A4
-	jsr s1045
+	lda #$31     ;A vampire bat attacks you!
+	jsr print_to_line2
+	jsr wait5
 j3469:
 	jsr s0CCA
-	ldx a619D
+	ldx gd_direct_object
 	stx count+1
 	lda a619C
 	cmp #$0e
@@ -6440,45 +6380,45 @@ j3469:
 	cmp #$03
 	beq b3499
 b3480:
-	jsr s105F
-	lda #$9b
-	jsr s0892
-	jmp j10B9
+	jsr clear_status_lines
+	lda #$9b     ;The bat drains you!
+	jsr print_to_line1
+	jmp game_over
 
 b348B:
 	lda count+1
 	cmp #$15
 	bne b3480
-	lda #$8c
+	lda #$8c     ;It looks very dangerous!
 j3493:
-	jsr s08A4
+	jsr print_to_line2
 	jmp j3469
 
 b3499:
-	jsr s105F
+	jsr clear_status_lines
 	ldx #$09
 	stx src
 	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$07
 	bne b3480
-	lda a619D
+	lda gd_direct_object
 	cmp #$09
 	bne b3480
-	lda #$50
-	jsr s0892
-	lda #$51
-	jsr s08A4
+	lda #$50     ;What a mess! The vampire bat
+	jsr print_to_line1
+	lda #$51     ;drinks the blood and dies!
+	jsr print_to_line2
 	ldx #$00
 	stx src+1
 	ldx #$09
 	stx src
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	ldx #$00
 	stx a61AB
 j34D5:
@@ -6518,11 +6458,11 @@ b3505:
 
 s3510:
 	jsr s1015
-	lda #$2e
-	jsr s08A4
-	jsr s1045
+	lda #$2e     ;A vicious dog attacks you!
+	jsr print_to_line2
+	jsr wait5
 	jsr s0CCA
-	lda a619D
+	lda gd_direct_object
 	sta count+1
 	lda a619C
 	cmp #$59
@@ -6534,17 +6474,17 @@ s3510:
 	cmp #$0e
 	beq b3541
 b3536:
-	jsr s105F
-	lda #$2f
-	jsr s08A4
-	jmp j10B9
+	jsr clear_status_lines
+	lda #$2f     ;He rips your throat out!
+	jsr print_to_line2
+	jmp game_over
 
 b3541:
 	lda count+1
 	cmp #$16
 	bne b3536
-	lda #$28
-	jsr s08A4
+	lda #$28     ;It displays 317.2!
+	jsr print_to_line2
 	jmp s3510
 
 b354F:
@@ -6555,24 +6495,24 @@ b354F:
 	stx src
 	ldx #>p0604
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	beq b3585
-	ldx #<p060E
+	ldx #$0e
 	stx src
-	ldx #>p060E
+	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	bne b3536
-	jsr s105F
-	lda #$97
-	jsr s08A4
+	jsr clear_status_lines
+	lda #$97     ;and it vanishes!
+	jsr print_to_line2
 j357F:
-	lda #$63
-	jsr s0892
+	lda #$63     ;You have killed it.
+	jsr print_to_line1
 	rts
 
 b3585:
@@ -6580,23 +6520,23 @@ b3585:
 	stx src+1
 	ldx #<p04
 	stx src
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jsr s1A34
-	lda #$64
-	jsr s08A4
+	jsr item_exec
+	lda #$64     ;The dagger disappears!
+	jsr print_to_line2
 	jmp j357F
 
 b359F:
 	lda count+1
 	cmp #$0c
 	bne b3536
-	ldx #<p060C
+	ldx #$0c
 	stx src
-	ldx #>p060C
+	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	bne b3536
@@ -6604,22 +6544,22 @@ b359F:
 	stx src
 	ldx #>string_ptr
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	jsr s28D9
-	lda #$5c
-	jsr s0892
-	lda #$5d
-	jsr s08A4
-	jsr s1045
-	jsr s105F
-	lda #$30
-	jsr s0892
-	jsr s1045
-	jsr s105F
-	lda #$5c
-	jsr s0892
-	lda #$5d
-	jsr s08A4
+	lda #$5c     ;and is eaten by
+	jsr print_to_line1
+	lda #$5d     ;the monster!
+	jsr print_to_line2
+	jsr wait5
+	jsr clear_status_lines
+	lda #$30     ;The dog chases the sneaker!
+	jsr print_to_line1
+	jsr wait5
+	jsr clear_status_lines
+	lda #$5c     ;and is eaten by
+	jsr print_to_line1
+	lda #$5d     ;the monster!
+	jsr print_to_line2
 	rts
 
 j35EA:
@@ -6636,11 +6576,11 @@ b35FA:
 	lda a61B2
 	bne b3612
 	jsr s366C
-	lda #$43
-	jsr s0892
+	lda #$43     ;The ground beneath your feet
+	jsr print_to_line1
 j3608=*+$01
-	lda #$44
-	jsr s08A4
+	lda #$44     ;begins to shake!
+	jsr print_to_line2
 	inc a61B2
 	jmp j364E
 
@@ -6648,32 +6588,32 @@ b3612:
 	lda a61B2
 	cmp #$01
 	bne b3629
-	lda #$45
-	jsr s0892
-	lda #$46
-	jsr s08A4
+	lda #$45     ;A disgusting odor permeates
+	jsr print_to_line1
+	lda #$46     ;the hallway!
+	jsr print_to_line2
 	inc a61B2
 s3626:
 	jmp j364E
 
 b3629:
 	jsr clear_hgr2
-	lda #$36
-	jsr s0892
-	lda #$37
-	jsr s08A4
+	lda #$36     ;The monster attacks you and
+	jsr print_to_line1
+	lda #$37     ;you are his next meal!
+	jsr print_to_line2
 	lda a61B8
 	bne b363E
-	jmp j10B9
+	jmp game_over
 
 b363E:
-	lda #$75
-	ldx #<p1500
+	lda #$75     ;Never raid a monster's lair
+	ldx #$00
 	stx zp_col
-	ldx #>p1500
+	ldx #$15
 	stx zp_row
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
 j364E:
 	jsr s0CCA
@@ -6691,20 +6631,20 @@ b365E:
 	jmp s3347
 
 s366C:
-	lda p0C7A
+	lda text_buffer1
 	cmp #$80
 	beq b3677
 	cmp #$20
 	bne b367F
 b3677:
-	lda p0CA2
+	lda text_buffer2
 	cmp #$80
 	bne b367F
 	rts
 
 b367F:
-	jsr s1045
-	jsr s105F
+	jsr wait5
+	jsr clear_status_lines
 	rts
 
 j3686:
@@ -6721,10 +6661,10 @@ b3696:
 	lda a61B3
 	bne b36AE
 	jsr s366C
-	lda #$43
-	jsr s0892
-	lda #$44
-	jsr s08A4
+	lda #$43     ;The ground beneath your feet
+	jsr print_to_line1
+	lda #$44     ;begins to shake!
+	jsr print_to_line2
 	inc a61B3
 	jmp j364E
 
@@ -6732,42 +6672,42 @@ b36AE:
 	tax
 	dex
 	bne b36D3
-	ldx #>p0608
+	ldx #$06
 	stx src+1
-	ldx #<p0608
+	ldx #$08
 	stx src
-	jsr s1A34
+	jsr item_exec
 	lda #$07
 	cmp count+1
 	beq b36D3
-	lda #$45
-	jsr s0892
-	lda #$46
-	jsr s08A4
+	lda #$45     ;A disgusting odor permeates
+	jsr print_to_line1
+	lda #$46     ;the hallway as it darkens!
+	jsr print_to_line2
 	inc a61B3
 	jmp j364E
 
 b36D3:
-	lda #$48
-	jsr s0892
-	ldx #<p0608
+	lda #$48     ;It is the monster's mother!
+	jsr print_to_line1
+	ldx #$08
 	stx src
-	ldx #>p0608
+	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$07
 	cmp count+1
 	bne b36EE
-	lda #$49
-	jsr s08A4
+	lda #$49     ;She has been seduced!
+	jsr print_to_line2
 b36EE:
 	lda count+1
 	pha
 	lda count
 	pha
 	jsr s0CCA
-	jsr s105F
-	lda a619D
+	jsr clear_status_lines
+	lda gd_direct_object
 	cmp #$18
 	beq b371E
 	cmp #$19
@@ -6780,19 +6720,19 @@ b3705:
 	lda #$07
 	cmp count+1
 	bne b3716
-	lda #$4a
-	jsr s0892
+	lda #$4a     ;She tiptoes up to you!
+	jsr print_to_line1
 b3716:
-	lda #$4b
-	jsr s08A4
-	jmp j10B9
+	lda #$4b     ;She slashes you to bits!
+	jsr print_to_line2
+	jmp game_over
 
 b371E:
 	lda a619C
 	cmp #$0e
 	bne b3735
-	lda #$8c
-	jsr s08A4
+	lda #$8c     ;It looks very dangerous!
+	jsr print_to_line2
 	tax
 	pla
 	sta count
@@ -6808,7 +6748,7 @@ b3735:
 	stx src
 	ldx #>p060E
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	bne b3705
@@ -6819,13 +6759,13 @@ b3735:
 	lda #$07
 	cmp count+1
 	bne b3716
-	lda #$4a
-	jsr s0892
-	lda #$4c
-	jsr s08A4
-	jsr s1045
-	lda #$78
-	jsr s08A4
+	lda #$4a     ;She tiptoes up to you!
+	jsr print_to_line1
+	lda #$4c     ;You slash her to bits!
+	jsr print_to_line2
+	jsr wait5
+	lda #$78     ;The body has vanished!
+	jsr print_to_line2
 	ldx #$00
 	stx a61B3
 	stx a61AC
@@ -6869,10 +6809,10 @@ b37AF:
 	beq b37AC
 b37B4:
 	jsr s366C
-	lda #$43
-	jsr s0892
-	lda #$44
-	jsr s08A4
+	lda #$43     ;The ground beneath your feet
+	jsr print_to_line1
+	lda #$44     ;begins to shake!
+	jsr print_to_line2
 	inc a61B3
 	jmp j364E
 
@@ -6881,10 +6821,10 @@ b37C7:
 	bne b37DE
 	jsr s366C
 	inc a61B3
-	lda #$45
-	jsr s0892
-	lda #$47
-	jsr s08A4
+	lda #$45     ;A disgusting odor permeates
+	jsr print_to_line1
+	lda #$47     ;the hallway!
+	jsr print_to_line2
 	jmp j364E
 
 b37DE:
@@ -6892,28 +6832,28 @@ b37DE:
 	lda a6194
 	cmp #$05
 	beq b37F5
-	lda #$36
-	jsr s0892
-	lda #$37
-	jsr s08A4
-	jmp j10B9
+	lda #$36     ;The monster attacks you and
+	jsr print_to_line1
+	lda #$37     ;you are his next meal!
+	jsr print_to_line2
+	jmp game_over
 
 b37F5:
-	lda #$48
-	jsr s0892
-	lda #$4b
+	lda #$48     ;It is the monster's mother!
+	jsr print_to_line1
+	lda #$4b     ;She slashes you to bits!
 b37FC:
-	jsr s08A4
-	jmp j10B9
+	jsr print_to_line2
+	jmp game_over
 
 j3802:
 	dex
 	bne b3874
-	lda a619D
+	lda gd_direct_object
 	cmp #$11
 	beq b3813
 b380C:
-	jsr s105F
+	jsr clear_status_lines
 	lda #$20
 	bne b37FC
 b3813:
@@ -6926,7 +6866,7 @@ b3813:
 	stx src
 	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$07
 	bpl b3842
@@ -6934,7 +6874,7 @@ b3813:
 	stx src
 	ldx #$06
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$07
 	bmi b380C
@@ -6944,25 +6884,25 @@ b3842:
 	stx src
 	ldx #$00
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	ldx #$00
 	stx src+1
 	ldx #$11
 	stx src
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jsr s1A34
-	lda #$64
-	jsr s08A4
+	jsr item_exec
+	lda #$64     ;The dagger disappears!
+	jsr print_to_line2
 b3864:
-	lda #$63
-	jsr s0892
+	lda #$63     ;You have killed it.
+	jsr print_to_line1
 	jmp j34D5
 
 b386C:
-	lda #$8c
-	jsr s08A4
+	lda #$8c     ;It looks very dangerous!
+	jsr print_to_line2
 	jmp j364E
 
 b3874:
@@ -6984,12 +6924,12 @@ b3884:
 	jmp j392C
 
 s3894:
-	lda p6193
+	lda game_state
 	sta count+1
-	lda a6195
+	lda gs_player_xyH
 	cmp #$0a
 	bne b38DD
-	lda a6196
+	lda gs_player_xyL
 	sec
 	sbc #$09
 	beq b38CC
@@ -7025,7 +6965,7 @@ b38CC:
 b38DA:
 	jsr s1E5A
 b38DD:
-	lda #$41
+	lda #$41     ;Tick tick
 	ldx #<p0206
 	stx zp_col
 	ldx #>p0206
@@ -7038,16 +6978,16 @@ b38EA:
 	lda a619C
 	cmp #$10
 	bne b3916
-	lda a619D
+	lda gd_direct_object
 	cmp #$17
 	bne b3916
-	lda p6193
+	lda game_state
 	cmp #$01
 	bne b3916
-	lda a6195
+	lda gs_player_xyH
 	cmp #$0a
 	bne b3916
-	lda a6196
+	lda gs_player_xyL
 	cmp #$0b
 	bne b3916
 	jmp j3C86
@@ -7059,9 +6999,9 @@ b3916:
 	stx zp_col
 	ldx #>p1500
 	stx zp_row
-	lda #$42
+	lda #$42     ;The key blows up the whole maze!
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
 j392C:
 	jsr s0CCA
@@ -7075,16 +7015,16 @@ b393C:
 	lda a619C
 	cmp #$10
 	bne b3962
-	lda a619D
+	lda gd_direct_object
 	cmp #$17
 	bne b3962
-	lda p6193
+	lda game_state
 	cmp #$01
 	bne b3962
-	lda a6195
+	lda gs_player_xyH
 	cmp #$0a
 	bne b3962
-	lda a6196
+	lda gs_player_xyL
 	cmp #$0b
 	bne b3962
 	jmp j3C86
@@ -7092,7 +7032,7 @@ b393C:
 b3962:
 	jsr s0B19
 	jsr s2640
-	jsr s0B77
+	jsr print_timers
 	jmp s3347
 
 j396E:
@@ -7122,17 +7062,17 @@ b399C:
 	jmp s2640
 
 j399F:
-	lda #$a3
-	jsr s0892
-	jsr s1045
-	lda #$a4
-	jsr s08A4
-	jsr s1045
+	lda #$a3     ;The elevator is moving!
+	jsr print_to_line1
+	jsr wait5
+	lda #$a4     ;You are deposited at the next level.
+	jsr print_to_line2
+	jsr wait5
 	jsr s1015
 	jmp j34D5
 
 b39B5:
-	jsr s127E
+	jsr clear_maze_window
 	ldx a6194
 	dex
 	dex
@@ -7141,14 +7081,14 @@ b39B5:
 	beq b3A03
 	dex
 	beq b3A0D
-	lda #$6d
-	jsr s0892
-	lda #$6e
-	jsr s08A4
-	jmp j10B9
+	lda #$6d     ;You are trapped in a fake
+	jsr print_to_line1
+	lda #$6e     ;elevator. There is no escape!
+	jsr print_to_line2
+	jmp game_over
 
 b39D2:
-	jsr s127E
+	jsr clear_maze_window
 	ldx #$03
 	stx src+1
 	stx a6199
@@ -7160,24 +7100,24 @@ b39D2:
 	stx src+1
 	jsr s1E5A
 	jsr s0FDC
-	jsr s127E
-	lda #$79
-	ldx #<p0A08
+	jsr clear_maze_window
+	lda #$79     ;Glitch!
+	ldx #$08
 	stx zp_col
-	ldx #>p0A08
+	ldx #$0a
 	stx zp_row
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
 b3A03:
 	inc a6194
 	ldx #$01
-	stx a6195
+	stx gs_player_xyH
 	bne b3A15
 b3A0D:
 	dec a6194
 	ldx #$04
-	stx a6195
+	stx gs_player_xyH
 b3A15:
 	ldx #$00
 	stx a61A3
@@ -7198,7 +7138,7 @@ b3A30:
 	ldx #$00
 	stx a61B2
 j3A35:
-	lda a619D
+	lda gd_direct_object
 	cmp #$18
 	beq b3A3F
 b3A3C:
@@ -7219,26 +7159,26 @@ b3A49:
 	stx src
 	ldx #>p0604
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	bne b3A3C
-	jsr s105F
+	jsr clear_status_lines
 	ldx #<p0104
 	stx src
 	ldx #>p0104
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jsr s1A34
-	lda #$64
-	jsr s0892
-	jsr s1045
-	lda #$61
-	jsr s0892
-	lda #$62
-	jsr s08A4
+	jsr item_exec
+	lda #$64     ;The dagger disappears!
+	jsr print_to_line1
+	jsr wait5
+	lda #$61     ;The monster is dead and
+	jsr print_to_line1
+	lda #$62     ;much blood is spilt!
+	jsr print_to_line2
 	ldx #$00
 	stx a61AD
 	lda a61A6
@@ -7252,14 +7192,14 @@ b3A9F:
 	lda a619C
 	cmp #$09
 	bne b3ADF
-	lda a619D
+	lda gd_direct_object
 	cmp #$09
 	bne b3ADF
 	ldx #>p0609
 	stx src+1
 	ldx #<p0609
 	stx src
-	jsr s1A34
+	jsr item_exec
 	lda #$08
 	cmp count+1
 	bne b3ADF
@@ -7267,21 +7207,21 @@ b3A9F:
 	stx src
 	ldx #>p0309
 	stx src+1
-	jsr s1A34
-	lda #$60
-	jsr s08A4
+	jsr item_exec
+	lda #$60     ;It is now full of blood.
+	jsr print_to_line2
 	jmp j34D5
 
 j3AD4:
-	lda #$8c
-	jsr s0892
+	lda #$8c     ;It looks very dangerous!
+	jsr print_to_line1
 	jsr s0CCA
 	jmp j3A35
 
 b3ADF:
-	jsr s105F
-	lda #$78
-	jsr s0892
+	jsr clear_status_lines
+	lda #$78     ;The body has vanished!
+	jsr print_to_line1
 	jmp j397E
 
 j3AEA:
@@ -7300,12 +7240,12 @@ b3AFA:
 b3AFD:
 	cmp #$07
 	bne b3AFA
-	lda a619D
+	lda gd_direct_object
 	cmp #$11
 	bne b3AFA
-	lda a6195
+	lda gs_player_xyH
 	sta count+1
-	lda a6196
+	lda gs_player_xyL
 	sta count
 	lda a6194
 	cmp #$03
@@ -7329,29 +7269,29 @@ b3B2C:
 	beq b3B56
 b3B38:
 	jsr s30C5
-	lda #$2d
-	jsr s0892
-	lda #$a5
-	jsr s08A4
-	jsr s1045
-	jsr s105F
-	lda #$a6
-	jsr s0892
-	jsr s1045
+	lda #$2d     ;Wham!
+	jsr print_to_line1
+	lda #$a5     ;Your head smashes into the ceiling!
+	jsr print_to_line2
+	jsr wait5
+	jsr clear_status_lines
+	lda #$a6     ;You fall on the snake!
+	jsr print_to_line1
+	jsr wait5
 	jmp b380C
 
 b3B56:
 	ldx #$01
 	stx count
 	inx
-	stx p6193
+	stx game_state
 	jmp j3B6A
 
 j3B61:
 	ldx #$00
 	stx count
 	ldx #$03
-	stx p6193
+	stx game_state
 j3B6A:
 	dec a6194
 	lda count+1
@@ -7363,10 +7303,10 @@ j3B6A:
 	lda a619C
 	cmp #$5b
 	beq b3B8E
-	jsr s105F
-	lda #$54
-	jsr s0892
-	jsr s1045
+	jsr clear_status_lines
+	lda #$54     ;You can't be serious!
+	jsr print_to_line1
+	jsr wait5
 	jmp b380C
 
 b3B8E:
@@ -7379,27 +7319,27 @@ b3B8E:
 	pha
 	cmp #$01
 	beq b3BA2
-	inc a6195
+	inc gs_player_xyH
 	jmp j3BA5
 
 b3BA2:
-	inc a6196
+	inc gs_player_xyL
 j3BA5:
 	jsr s1015
-	lda #$59
-	jsr s0892
-	lda #$11
-	jsr s25E3
-	lda #$77
+	lda #$59     ;The
+	jsr print_to_line1
+	lda #$11     ;snake
+	jsr print_noun
+	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #$11
 	stx src
 	ldx #$00
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	pla
 	sta count
 	pla
@@ -7412,28 +7352,28 @@ j3BA5:
 b3BD8:
 	lda a61AD
 	beq b3C03
-	lda #$59
-	jsr s08A4
-	lda #$0f
-	jsr s25E3
-	lda #$77
+	lda #$59     ;The
+	jsr print_to_line2
+	lda #$0f     ;wool
+	jsr print_noun
+	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #$00
 	stx src+1
 	ldx #$0f
 	stx src
-	jsr s1A34
+	jsr item_exec
 	ldx #$01
 	stx a61B8
 	ldx #$07
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 b3C03:
 	ldx #$01
 	stx a61B9
 	ldx #$07
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 j3C0F:
 	jsr s0CCA
 	lda a619C
@@ -7441,8 +7381,8 @@ j3C0F:
 	bcs b3C2B
 	cmp #$11
 	bne b3C25
-	lda #$98
-	jsr s08A4
+	lda #$98     ;You will do no such thing!
+	jsr print_to_line2
 	jmp j3C0F
 
 b3C25:
@@ -7452,11 +7392,11 @@ b3C25:
 b3C2B:
 	cmp #$5b
 	beq b3C58
-	ldx p6193
+	ldx game_state
 	stx count+1
 	jsr s0956
 j3C37:
-	lda p6193
+	lda game_state
 	ldx #<p0400
 	stx src
 	ldx #>p0400
@@ -7473,29 +7413,29 @@ b3C55:
 	jmp j3C0F
 
 b3C58:
-	lda p6193
+	lda game_state
 	cmp #$01
 	beq b3C72
-	jsr s127E
-	ldx #<p0A09
+	jsr clear_maze_window
+	ldx #$09
 	stx zp_col
-	ldx #>p0A09
+	ldx #$0a
 	stx zp_row
-	lda #$7c
+	lda #$7c     ;Splat!
 	jsr print_display_string
 	jmp j3C0F
 
 b3C72:
 	inc a6194
 	ldx #$03
-	stx p6193
-	dec a6195
-	jsr s107C
+	stx game_state
+	dec gs_player_xyH
+	jsr pit
 	jsr s1015
 	jmp j34D5
 
 j3C86:
-	jsr s127E
+	jsr clear_maze_window
 	lda #<p4707
 	sta a6199
 	ldx #>p4707
@@ -7509,8 +7449,8 @@ j3C86:
 	ldx #$01
 	stx a61A8
 j3CA6:
-	lda #$a0
-	jsr s0892
+	lda #$a0     ;Don't make unnecessary turns.
+	jsr print_to_line1
 	jsr s0CCA
 	lda a61A8
 	sta count+1
@@ -7527,7 +7467,7 @@ b3CC1:
 	jmp j3EAA
 
 b3CC8:
-	jsr s127E
+	jsr clear_maze_window
 	ldx #<p2303
 	stx a6199
 	ldx #>p2303
@@ -7554,7 +7494,7 @@ b3CF4:
 	jmp j3EAA
 
 b3CFB:
-	jsr s127E
+	jsr clear_maze_window
 	ldx #<p01
 	stx a6199
 	ldx #>p01
@@ -7576,7 +7516,7 @@ b3D1C:
 	jmp j3EAA
 
 b3D23:
-	jsr s127E
+	jsr clear_maze_window
 	ldx #<p01
 	stx a6199
 	ldx #>p01
@@ -7601,7 +7541,7 @@ b3D4B:
 	jmp j3ECA
 
 b3D52:
-	lda a619D
+	lda gd_direct_object
 	cmp #$17
 	beq b3D5C
 	jmp j3ECA
@@ -7618,18 +7558,18 @@ b3D69:
 	bne b3DDD
 	cmp #$5b
 	bne b3D8E
-	jsr s127E
-	ldx #<p1400
+	jsr clear_maze_window
+	ldx #$00
 	stx zp_col
-	ldx #>p1400
+	ldx #$14
 	stx zp_row
-	lda #$3a
+	lda #$3a     ;You fall through the floor
 	jsr print_display_string
-	lda #$0a
-	jsr s1192
-	lda #$3b
+	lda #char_newline
+	jsr char_out
+	lda #$3b     ;onto a bed of spikes!
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
 b3D8E:
 	cmp #$5a
@@ -7643,18 +7583,18 @@ b3D99:
 	jmp j3ECA
 
 b3D9C:
-	lda a619D
+	lda gd_direct_object
 	cmp #$01
 	bne b3D99
 	ldx #>p0601
 	stx src+1
 	ldx #<p0601
 	stx src
-	jsr s1A34
+	jsr item_exec
 	lda count+1
 	cmp #$08
 	bne b3D99
-	jsr s127E
+	jsr clear_maze_window
 	jsr s30C5
 	ldx #<p4607
 	stx a6199
@@ -7664,10 +7604,10 @@ b3D9C:
 	ldx #$01
 	stx src+1
 	stx src
-	jsr s1A34
+	jsr item_exec
 	ldx #$07
 	stx src+1
-	jsr s1A34
+	jsr item_exec
 	inc a61A8
 	jmp j3CA6
 
@@ -7686,7 +7626,7 @@ b3DEC:
 	jmp j3EAA
 
 b3DEF:
-	jsr s127E
+	jsr clear_maze_window
 	ldx #<p2303
 	stx a6199
 	ldx #>p2303
@@ -7700,16 +7640,16 @@ b3E05:
 	bmi b3DE5
 	cmp #$5b
 	bne b3DEC
-	jsr s127E
+	jsr clear_maze_window
 	ldx #$01
 	stx a6199
 	stx a619A
 	jsr s12A6
 j3E1B:
-	lda #$3c
-	jsr s0892
-	lda #$3d
-	jsr s08A4
+	lda #$3c     ;Before I let you go free
+	jsr print_to_line1
+	lda #$3d     ;what was the name of the monster?
+	jsr print_to_line2
 	jsr s0CCA
 	lda a619C
 	cmp #$5a
@@ -7723,60 +7663,56 @@ p3E36:
 	.byte $44,$49,$53,$41,$47,$52,$45,$45
 	.byte $53,$21,$80
 j3E49:
-	jsr s105F
-	ldx #<p1600
+	jsr clear_status_lines
+	ldx #$00
 	stx zp_col
-	ldx #>p1600
+	ldx #$16
 	stx zp_row
 	ldx #<p3E36
 	stx string_ptr
 	ldx #>p3E36
 	stx string_ptr+1
 	jsr print_string
-	jsr s1045
+	jsr wait5
 	jmp j3E1B
 
-p3E65:
-	.byte $52,$45,$54,$55,$52,$4e,$20,$54
-	.byte $4f,$20,$53,$41,$4e,$49,$54,$59
-	.byte $20,$42,$59,$20,$50,$52,$45,$53
-	.byte $53,$49,$4e,$47,$20,$52,$45,$53
-	.byte $45,$54,$21,$80
+text_congrats:
+	.byte "RETURN TO SANITY BY PRESSING RESET!", $80
 b3E89:
 	jsr clear_hgr2
 	ldx #$00
 	stx zp_col
 	stx zp_row
-	lda #$4d
+	lda #$4d     ;Correct! You have survived!
 	jsr print_display_string
-	lda #$0a
-	jsr s1192
-	ldx #<p3E65
+	lda #char_newline
+	jsr char_out
+	ldx #<text_congrats
 	stx string_ptr
-	ldx #>p3E65
+	ldx #>text_congrats
 	stx string_ptr+1
 	jsr print_string
-j3EA7:
-	jmp j3EA7
+@infinite_loop:
+	jmp @infinite_loop
 
 j3EAA:
-	jsr s127E
-	jsr s105F
-	ldx #<p1400
+	jsr clear_maze_window
+	jsr clear_status_lines
+	ldx #$00
 	stx zp_col
-	ldx #>p1400
+	ldx #$14
 	stx zp_row
-	lda #$a1
+	lda #$a1     ;You have turned into a pillar of salt!
 	jsr print_display_string
-	lda #$0a
-	jsr s1192
-	lda #$a2
+	lda #char_newline
+	jsr char_out
+	lda #$a2     ;Don't say I didn't warn you!
 	jsr print_display_string
-	jmp j10B9
+	jmp game_over
 
 j3ECA:
-	lda #$9a
-	jsr s08A4
+	lda #$9a     ;It is currently impossible.
+	jsr print_to_line2
 	jmp j3CA6
 
 	.byte $86
@@ -7870,13 +7806,13 @@ b3F68:
 
 s3F77:
 	lda a0124
-	sta a3C
+	sta tape_addr_start
 	lda a0125
-	sta a3D
+	sta tape_addr_start+1
 	lda a0126
-	sta a3E
+	sta tape_addr_end
 	lda a0127
-	sta a3F
+	sta tape_addr_end+1
 	rts
 
 	brk
@@ -7901,7 +7837,7 @@ s3FA0:
 
 b3FA3:
 	jsr s3F77
-	jsr eFEFD
+	jsr rom_READ_TAPE
 	ldx #$00
 	rts
 
@@ -7943,7 +7879,7 @@ s3FD0:
 
 b3FD3:
 	jsr s3F77
-	jsr eFECD
+	jsr rom_WRITE_TAPE
 	rts
 
 	jsr eFD35
@@ -8027,7 +7963,7 @@ p60A5:
 	.byte $15,$aa,$09,$0e,$25,$4a,$01,$00
 	.byte $25,$5a,$01,$00,$25,$6a,$01,$00
 	.byte $25,$7a,$01,$00,$25,$8a,$01,$00
-p613D:
+data_new_game:
 	.byte $02,$01,$0a,$06,$01,$00,$07,$bf
 	.byte $00,$00,$00,$01,$00,$a0,$c8,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
@@ -8039,17 +7975,17 @@ p613D:
 	.byte $02,$86,$03,$2a,$03,$6a,$04,$57
 	.byte $02,$39,$02,$26,$03,$56,$04,$72
 	.byte $02,$82,$03,$26,$04,$96
-p6193:
+game_state:
 	.byte $02
 a6194:
 	.byte $05
-a6195:
+gs_player_xyH:
 	.byte $04
-a6196:
+gs_player_xyL:
 	.byte $0a
-a6197:
+gs_torches_lit:
 	.byte $00
-a6198:
+gs_torches_unlit:
 	.byte $01
 a6199:
 	.byte $00
@@ -8059,16 +7995,12 @@ a619B:
 	.byte $00
 a619C:
 	.byte $10
-a619D:
+gd_direct_object:
 	.byte $17
 a619E:
 	.byte $01
-a619F:
-	.byte $00
-a61A0:
-	.byte $80
-a61A1:
-	.byte $80
+gs_fed:
+	.byte $00,$80,$80
 a61A2:
 	.byte $00
 a61A3:
@@ -8111,20 +8043,17 @@ a61B8:
 	.byte $00
 a61B9:
 	.byte $01,$00
-p61BB:
+gs_item_loc_inv:
 	.byte $08
-p61BC:
+gs_item_loc_map:
 	.byte $00,$03,$a5,$00,$00,$04,$a9,$08
 	.byte $00,$01,$64,$02,$33,$08,$00,$00
 	.byte $00,$05,$72,$07,$00,$00,$00,$02
-	.byte $86,$08,$00,$04,$a8,$04,$57
-p61DB:
-	.byte $00,$00
-p61DD:
+	.byte $86,$08,$00,$04,$a8,$04,$57,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
-	.byte $00,$00,$08,$00,$00,$00,$00,$00
+	.byte $00,$00,$00,$08,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
-	.byte $00,$00
+	.byte $00,$00,$00
 a61F7:
 	.byte $44
 a61F8:
@@ -8166,7 +8095,7 @@ a6204:
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00
-p6292:
+game_state_end:
 	.byte $00,$00
 font:
 	.byte $10,$08,$3e,$7f,$ff,$ff,$be,$1c
@@ -8326,71 +8255,69 @@ junk_intro:
 	.byte $05, "e JSR TIME", $B1, $10, "e JSR WHIT", $C5, $15, "e JSR CLRWN", $C4, " e "
 	.byte "LDA #4", $B2, "%e JSR POIN", $D4, "0e LDA #4", $B3, "5e JSR POIN"
 	.byte "T", $B5, "@e JMP "
-text_savegame:
+text_save_device:
 	.byte "Save to DISK or TAPE (T or D)?"
 	.byte $80
-text_loadgame:
+text_load_device:
 	msbstring "Get from DISK or TAPE (T or D)?"
 	.byte $80
 	.assert * = $7c3f, error, "Unexpected alignment"
-s7C3F:
+load_disk_or_tape:
 	jsr clear_hgr2
 	ldx #$00
 	stx zp_col
 	stx zp_row
-	ldx #<text_loadgame
+	ldx #<text_load_device
 	stx string_ptr
-	ldx #>text_loadgame
+	ldx #>text_load_device
 	stx string_ptr+1
 	jsr print_string
-	jsr s7C94
-	cmp #$44
-	bne b7C5D
-	jmp j7D0C
+	jsr input_T_or_D
+	cmp #'D'
+	bne prompt_tape
+	jmp load_from_disk
 
-b7C5D:
+prompt_tape:
 	jsr clear_hgr2
-	lda #$95
-	jsr s0892
+	lda #$95     ;Prepare your cassette
+	jsr print_to_line1
 	rts
 
-j7C66:
+save_disk_or_tape:
 	jsr clear_hgr2
 	ldx #$00
 	stx zp_col
 	stx zp_row
-	ldx #<text_savegame
+	ldx #<text_save_device
 	stx string_ptr
-	ldx #>text_savegame
+	ldx #>text_save_device
 	stx string_ptr+1
 	jsr print_string
-	jsr s7C94
-	cmp #$54
-	beq b7C84
-	jmp j7CEF
+	jsr input_T_or_D
+	cmp #'T'
+	beq prepare_tape_save
+	jmp save_to_disk
 
-b7C84:
+prepare_tape_save:
 	jsr clear_hgr2
 	jsr s1015
 	ldx #$07
 	stx src+1
-	jsr s1A34
-	jmp j31BC
+	jsr item_exec
+	jmp save_to_tape
 
-s7C94:
+input_T_or_D:
 	bit hw_STROBE
-b7C97:
-	jsr blink_cursor
+:	jsr blink_cursor
 	bit hw_KEYBOARD
-	bpl b7C97
+	bpl :-
 	lda hw_KEYBOARD
 	and #$7f
-	cmp #$54
-	beq b7CAC
-	cmp #$44
-	bne s7C94
-b7CAC:
-	pha
+	cmp #'T'
+	beq :+
+	cmp #'D'
+	bne input_T_or_D
+:	pha
 	jsr clear_cursor
 	pla
 	rts
@@ -8401,30 +8328,31 @@ a7CC2:
 	.byte $01
 a7CC3:
 	.byte $00,$00,$60,$01
-p7CC7:
-	.byte $D0, "lace data diskette in DRIVE 1, SLOT 6.", $80
-j7CEF:
+text_insert_disk:
+	msbstring "Place data diskette in DRIVE 1, SLOT 6."
+	.byte $80
+save_to_disk:
 	ldx #$02
 	stx a7CC2
-	jsr s7D4F
-	bcc b7CFF
+	jsr prompt_insert_disk
+	bcc prepare_disk_save
 	jsr s7D74
-	jmp j7E23
+	jmp disk_error_retry
 
-b7CFF:
+prepare_disk_save:
 	jsr clear_hgr2
 	jsr s1015
 	ldx #$07
 	stx src+1
-	jmp s1A34
+	jmp item_exec
 
-j7D0C:
+load_from_disk:
 	ldx #$01
 	stx a7CC2
-	jsr s7D4F
+	jsr prompt_insert_disk
 	bcc s7D1C
 	jsr s7D74
-	jmp j7E1D
+	jmp disk_error_fatal
 
 s7D1C:
 	ldy #$00
@@ -8453,24 +8381,24 @@ s7D1C:
 
 b7D4A:
 	lda #$05
-	jmp j7E1D
+	jmp disk_error_fatal
 
-s7D4F:
-	lda #$0a
-	jsr s1192
-	ldx #<p7CC7
+prompt_insert_disk:
+	lda #char_newline
+	jsr char_out
+	ldx #<text_insert_disk
 	stx string_ptr
-	ldx #>p7CC7
+	ldx #>text_insert_disk
 	stx string_ptr+1
 	jsr print_string
-	lda #$0a
-	jsr s1192
-	lda #$96
+	lda #$0a     ;char_newline
+	jsr char_out
+	lda #$96     ;Press any key
 	jsr print_display_string
 	jsr input_char
 	lda #$7c
 	ldy #$b6
-	jsr e03D9
+	jsr DOS_call_rwts
 	rts
 
 s7D74:
@@ -8496,47 +8424,46 @@ b7D8C:
 	lda #$04
 	rts
 
-p7D8F:
-	.byte "DISKETTE WRITE PROTECTED!", $80, "VOLUME MISMATC"
-	.byte "H!", $80, "DRIVE ERROR! CAUSE UNKNOWN!", $80, "READ ERRO"
-	.byte "R! CHECK YOUR DISKETTE!", $80, "NOT A DEATHMAZE "
-	.byte "FILE! INPUT REJECTED!", $80
-j7E1D:
+; 1-based indexing via 'A'
+string_disk_error:
+	.byte "DISKETTE WRITE PROTECTED!", $80
+	.byte "VOLUME MISMATCH!", $80
+	.byte "DRIVE ERROR! CAUSE UNKNOWN!", $80
+	.byte "READ ERROR! CHECK YOUR DISKETTE!", $80
+	.byte "NOT A DEATHMAZE FILE! INPUT REJECTED!", $80
+
+disk_error_fatal:
 	ldx #$00
 	stx dst
-	beq b7E27
-j7E23:
+	beq disk_error
+disk_error_retry:
 	ldx #$ff
 	stx dst
-b7E27:
+disk_error:
 	tay
 	dey
-	bne b7E2D
-	beq b7E44
-b7E2D:
-	dey
-	bne b7E34
+	bne :+
+	beq @print_message
+:	dey
+	bne :+
 	ldy #$1a
-	bne b7E44
-b7E34:
-	dey
-	bne b7E3B
+	bne @print_message
+:	dey
+	bne :+
 	ldy #$2b
-	bne b7E44
-b7E3B:
-	dey
-	bne b7E42
+	bne @print_message
+:	dey
+	bne :+
 	ldy #$47
-	bne b7E44
-b7E42:
-	ldy #<p68
-b7E44:
+	bne @print_message
+:	ldy #$68
+@print_message:
 	sty count
-	ldx #>p68
+	ldx #$00
 	stx count+1
-	ldx #<p7D8F
+	ldx #<string_disk_error
 	stx string_ptr
-	ldx #>p7D8F
+	ldx #>string_disk_error
 	stx string_ptr+1
 	clc
 	lda count
@@ -8545,18 +8472,17 @@ b7E44:
 	lda count+1
 	adc string_ptr+1
 	sta string_ptr+1
-	lda #$0a
-	jsr s1192
+	lda #char_newline
+	jsr char_out
 	jsr print_string
 	jsr input_char
 	lda dst
-	beq b7E71
-	jmp b7CFF
+	beq :+
+	jmp prepare_disk_save
 
-b7E71:
+:	pla
 	pla
-	pla
-	jmp j0805
+	jmp main
 
 	lda a61A5
 	bne b7E81
@@ -8701,7 +8627,7 @@ b7F79:
 b7F82:
 	jsr get_rowcol_addr
 	lda #$02
-	jsr s1192
+	jsr char_out
 	dec zp_col
 	dec zp_col
 	inc zp_row
@@ -8714,7 +8640,7 @@ b7F82:
 b7F98:
 	jsr get_rowcol_addr
 	lda #$01
-	jsr s1192
+	jsr char_out
 	inc zp_row
 	dec count+1
 	bne b7F98
@@ -8739,9 +8665,9 @@ b7FAC:
 
 	ldy #$00
 	lda #<p6000
-	sta a0A
+	sta text_ptr
 	lda #>p6000
-	sta a0B
+	sta text_ptr+1
 	ldx a6194
 	lda #$00
 	clc
@@ -8751,27 +8677,27 @@ b7FAC:
 	jmp j17CF
 
 b7FD7:
-	adc a0A
-	sta a0A
-	ldx a6195
+	adc text_ptr
+	sta text_ptr
+	ldx gs_player_xyH
 	dex
 	beq b7FEA
-	inc a0A
-	inc a0A
-	inc a0A
+	inc text_ptr
+	inc text_ptr
+	inc text_ptr
 	jmp j17DE
 
 b7FEA:
-	lda a6196
+	lda gs_player_xyL
 	cmp #$05
 	bmi b7FFF
 	cmp #$09
 	bmi b7FFA
-	inc a0A
+	inc text_ptr
 	sec
 	sbc #$04
 b7FFA:
-	inc a0A
+	inc text_ptr
 	sec
 	sbc #$04
 	.assert * = $7fff, error, "Unexpected alignment"

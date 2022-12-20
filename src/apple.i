@@ -1,6 +1,8 @@
 ; --- ADDRESSES
 
 zp_CSWL = $0036
+zp_A1 = $003c
+zp_A2 = $003e
 
 irq_IIgs = $03fe
 
@@ -18,6 +20,7 @@ hw_CLOCKCTL   = $c034  ;IIgs only. Low 4 bits = border color
 CLOCKCTL_border_color_mask = $f0
 
 hw_GRAPHICS   = $c050
+hw_TEXT       = $c051
 hw_FULLSCREEN = $c052
 hw_PAGE1      = $c054
 hw_PAGE2      = $c055
@@ -36,6 +39,9 @@ rom_ZIDBYTE     = $fbc0
 rom_HOME        = $fc58
 rom_COUT        = $fded
 rom_IIgs_ID     = $fe1f
+rom_WRITE_TAPE  = $fecd
+rom_READ_TAPE   = $fefd
+rom_MONITOR     = $ff69
 
 vector_NMI   = $fffa
 vector_RESET = $fffc
