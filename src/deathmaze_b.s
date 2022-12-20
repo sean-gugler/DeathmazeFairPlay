@@ -454,10 +454,10 @@ b0A3D:
 b0A43:
 	lda count
 	cmp #$0a
-	beq @beheaded
+	beq beheaded
 	rts
 
-@beheaded:
+beheaded:
 	jsr clear_hgr2
 	lda #$00
 	sta zp_col
@@ -1332,10 +1332,9 @@ s1015:
 	jsr s1DDF
 	lda src+1
 	ora src
-	beq b102F
+	beq :+
 	jsr s1E5A
-b102F:
-	ldx #$0a
+:	ldx #$0a
 	stx src+1
 	jsr item_exec
 	lda a619B
@@ -1473,15 +1472,15 @@ b111D:
 	cmp #$11
 	beq @not_here
 	cmp #$15
-	bpl b1134
+	bpl @b1134
 	jmp nonsense
 
-b1134:
+@b1134:
 	cmp #$1a
-	bmi b113B
+	bmi @b113B
 	jmp nonsense
 
-b113B:
+@b113B:
 	cmp #$17
 	bne @not_here
 	jmp nonsense
@@ -2758,10 +2757,10 @@ item_exec:
 	lda #$00
 	sta src+1
 	clc
-	lda #<gs_item_inventory-2
+	lda #<gs_item_loc_inv-2
 	adc src
 	sta src
-	lda #>gs_item_inventory
+	lda #>gs_item_loc_inv-2
 	adc src+1
 	sta src+1
 	pla
@@ -2850,7 +2849,7 @@ draw_inventory:
 	lda #$04
 	sta zp_row
 	jsr get_rowcol_addr
-@check_item_known:
+check_item_known:
 	ldy #$00
 	lda (src),y
 	cmp #$08
@@ -2869,7 +2868,7 @@ next_known_item:
 	bne :+
 	inc src+1
 :	dec count+1
-	bne @check_item_known
+	bne check_item_known
 
 	lda #<gs_item_loc_inv
 	sta src
@@ -2877,7 +2876,7 @@ next_known_item:
 	sta src+1
 	lda #$17
 	sta count+1
-@check_item_closed:
+check_item_closed:
 	ldy #$00
 	lda (src),y
 	cmp #$06
@@ -2892,7 +2891,7 @@ next_closed_item:
 	bne :+
 	inc src+1
 :	dec count+1
-	bne @check_item_closed
+	bne check_item_closed
 
 	lda #$1a
 	sta zp_col
@@ -3043,14 +3042,14 @@ code0B_inside_box:
 	sta count+1
 	ldy #$00
 	lda dst+1
-@next_location:
+box_next_loc:
 	cmp (src),y
 	beq item_at_feet
 not_at_feet:
 	iny
 	iny
 	dec count+1
-	bne @next_location
+	bne box_next_loc
 
 	lda #>gs_item_loc_inv
 	sta src+1
@@ -3060,18 +3059,18 @@ not_at_feet:
 	sta count+1
 	lda #$06
 	ldy #$00
-@next_carried:
+box_next_carry:
 	cmp (src),y
 	beq return_item_num
 	iny
 	iny
 	dec count+1
-	bne @next_carried
+	bne box_next_carry
 
 ; Skip over snake
-	lda #>gs_item_inventory+22
+	lda #>gs_item_loc_inv+22
 	sta src+1
-	lda #<gs_item_inventory+22
+	lda #<gs_item_loc_inv+22
 	sta src
 	lda #$06
 	sta count+1
@@ -3085,9 +3084,9 @@ not_at_feet:
 	bne @next_other
 
 ; Go back and check snake
-	ldx #>gs_item_inventory+20
+	ldx #>gs_item_loc_inv+20
 	stx src+1
-	ldx #<gs_item_inventory+20
+	ldx #<gs_item_loc_inv+20
 	stx src
 	ldy #$00
 	cmp (src),y
@@ -3120,7 +3119,7 @@ return_item_num:
 	sta src+1
 	sec
 	lda src
-	sbc #<gs_item_inventory
+	sbc #<gs_item_loc_inv
 	clc
 	ror
 	clc
@@ -4444,28 +4443,28 @@ s2640:
 	lda a619C
 	sta src+1
 	dec src+1
-	bne b26AB
+	bne @b26AB
 	lda #$0b
 	cmp src
-	beq b2682
+	beq @b2682
 	lda #$0d
 	cmp src
-	beq b267E
-b2679:
+	beq @b267E
+@b2679:
 	lda #$1f     ;Having fun?
 @print_line2:
 	jmp print_to_line2
 
-b267E:
+@b267E:
 	lda #$73
 	bne @print_line2
-b2682:
+@b2682:
 	lda a6194
 	cmp #$05
-	bne b2679
+	bne @b2679
 	lda #$07
 	cmp count+1
-	beq b2679
+	beq @b2679
 	lda #$0b
 	sta src
 	lda #$03
@@ -4479,14 +4478,14 @@ b2682:
 	lda #$72     ;shines light everywhere!
 	bne @print_line2
 
-b26AB:
+@b26AB:
 	dec src+1
 	bne b26E1
 	lda src
 	cmp #$05
 	beq b26DD
 	cmp #$08
-	bne b2679
+	bne @b2679
 	lda a6194
 	cmp #$05
 	bne b26D2
@@ -5956,7 +5955,7 @@ b3130:
 b3136:
 	jsr s1015
 	jsr s0FDC
-	jmp @beheaded
+	jmp beheaded
 
 b313F:
 	jsr s1015

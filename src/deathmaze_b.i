@@ -14,12 +14,12 @@
 
 ;$zp_string_number = dst+1
 
-;<gs_item_inventory-2 = $b9
-;<gs_item_inventory = $bb
+;<gs_item_loc_inv-2 = $b9
+;<gs_item_loc_inv = $bb
 
 ;<row8_table = $62
 
-;>gs_item_inventory = $61
+;>gs_item_loc_inv-2 = $61
 
 ;>row8_table = $11
 

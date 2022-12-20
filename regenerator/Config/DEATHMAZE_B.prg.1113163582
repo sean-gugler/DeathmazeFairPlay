@@ -108,8 +108,8 @@
 1231 #' '
 1260 #char_cursor
 127A #' '
-1A42 #<gs_item_inventory-2
-1A48 #>gs_item_inventory
+1A42 #<gs_item_loc_inv-2
+1A48 #>gs_item_loc_inv-2
 1AAA char_ClearLine
 1ACC Inventory:
 1B30 Torches:
@@ -122,7 +122,7 @@
 1BA2 Box
 1BEC #gs_size-1
 1C98 clamp min 0
-1CA7 #<gs_item_inventory
+1CA7 #<gs_item_loc_inv
 2612 #' '
 2679 Having fun?
 26A2 The ring is activated and
@@ -347,7 +347,7 @@
 0921 clear_text_buf
 0925 -
 0938 warm_start
-0A4A @beheaded
+0A4A beheaded
 0B18 done_timer
 0B4F @dec_food
 0B5C +
@@ -376,6 +376,8 @@
 10B9 game_over
 10C4 play_again
 10D3 +
+1134 @b1134
+113B @b113B
 1142 @not_here
 1162 row8_table
 1192 char_out
@@ -407,12 +409,12 @@
 1A93 code07_draw_inv
 1A9B draw_inventory
 1AA7 -
-1ADC @check_item_known
+1ADC check_item_known
 1AE7 +
 1AEE next_known_item
 1AF4 +
 1AFA +
-1B0A @check_item_closed
+1B0A check_item_closed
 1B15 next_closed_item
 1B1B +
 1B21 +
@@ -429,9 +431,9 @@
 1C06 code0A
 1C0D code0B_inside_box
 1C14 +
-1C31 @next_location
+1C31 box_next_loc
 1C35 not_at_feet
-1C4B @next_carried
+1C4B box_next_carry
 1C63 @next_other
 1C7E item_at_feet
 1C94 return_item_num
@@ -451,7 +453,11 @@
 260C +
 2651 +
 265A +
+2679 @b2679
 267B @print_line2
+267E @b267E
+2682 @b2682
+26AB @b26AB
 2768 +
 28FC +
 2902 +
@@ -477,8 +483,8 @@
 61A1 gs_torch_time
 61BB gs_item_loc_inv
 61BC gs_item_loc_map
-61DB gs_item_inventory+20
-61DD gs_item_inventory+22
+61DB gs_item_loc_inv+20
+61DD gs_item_loc_inv+22
 6292 game_state_end
 6294 font
 6695 verb_table
