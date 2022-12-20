@@ -2799,10 +2799,10 @@ item_exec:
 	lda #$00
 	sta src+1
 	clc
-	lda #<gs_item_loc_inv-2
+	lda #<(gs_item_loc_inv-2)
 	adc src
 	sta src
-	lda #>gs_item_loc_inv-2
+	lda #>(gs_item_loc_inv-2)
 	adc src+1
 	sta src+1
 	pla
@@ -3110,9 +3110,9 @@ box_next_carry:
 	bne box_next_carry
 
 ; Skip over snake
-	lda #>gs_item_loc_inv+22
+	lda #>(gs_item_loc_inv+$22)
 	sta src+1
-	lda #<gs_item_loc_inv+22
+	lda #<(gs_item_loc_inv+$22)
 	sta src
 	lda #$06
 	sta count+1
@@ -3126,9 +3126,9 @@ box_next_carry:
 	bne @next_other
 
 ; Go back and check snake
-	ldx #>gs_item_loc_inv+20
+	ldx #>(gs_item_loc_inv+$20)
 	stx src+1
-	ldx #<gs_item_loc_inv+20
+	ldx #<(gs_item_loc_inv+$20)
 	stx src
 	ldy #$00
 	cmp (src),y

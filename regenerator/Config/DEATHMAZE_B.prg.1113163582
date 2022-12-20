@@ -108,8 +108,8 @@
 1231 #' '
 1260 #char_cursor
 127A #' '
-1A42 #<gs_item_loc_inv-2
-1A48 #>gs_item_loc_inv-2
+1A42 #<(gs_item_loc_inv-2)
+1A48 #>(gs_item_loc_inv-2)
 1AAA char_ClearLine
 1ACC Inventory:
 1B30 Torches:
@@ -366,6 +366,7 @@
 0FF7 input_Y_or_N
 0FFA -
 100F +
+102F +
 1044 @done
 1045 wait5
 1049 @dec16
@@ -483,8 +484,8 @@
 61A1 gs_torch_time
 61BB gs_item_loc_inv
 61BC gs_item_loc_map
-61DB gs_item_loc_inv+20
-61DD gs_item_loc_inv+22
+61DB (gs_item_loc_inv+32)
+61DD (gs_item_loc_inv+34)
 6292 game_state_end
 6294 font
 6695 verb_table
