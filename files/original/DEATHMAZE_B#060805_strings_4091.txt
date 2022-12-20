@@ -1,0 +1,5 @@
+  1 $01            %`GREN DEC *
+  1 $01 H0` BNE GOON6
+  2 $02 85` JMP UNCOM
+  3 $03 P@`GOON68 DEC *
+  4 $04  

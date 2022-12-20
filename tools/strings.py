@@ -38,19 +38,40 @@ def sections(it, is_start):
     return groupby(it, inc_if)
 
 def write(fname, seq):
-    with open(fname, 'wt') as out:
-        out.write('\t.feature  string_escapes\n')
-        for i,s in sections(seq, lambda c: c & 0x80):
-            ba = bytearray(s)
-            ba[0] &= 0x7F
-            text = ba.decode('ascii').replace('"', '\\"')
-            out.write(f'; STRING ${i:02x} ({i})\n')
-            if len(text) <= 40:
-                out.write(f'\tmsbstring "{text}"\n')
-            else:
-                j = text.find('Copyright')
-                for k in range(j%40, len(text), 40):
-                    out.write(f'\t.byte "{text[k:k+40]}"\n')
+    define = []
+    declare = []
+    reference = []
+
+    ident_illegal = str.maketrans(
+        r' :.,*!?"()\<>' + "'" ,
+        r"______________" )
+
+    i = 1
+    define.append('\t.feature  string_escapes\n')
+    for _,s in sections(seq, lambda c: c & 0x80):
+        ba = bytearray(s)
+        ba[0] &= 0x7F
+        text = ba.decode('ascii').replace('"', '\\"')
+        # hdr.append(f'; STRING ${i:02x} ({i})\n')
+        if len(text) <= 40:
+            # word = (text + ' EMPTY').split()[0]
+            word = text.translate(ident_illegal)
+            define.append(f'\tmsbstring "{text}"\n')
+            declare.append(f'\tword_{word} = ${i:02x}\n')
+            reference.append(f'{i:3} ${i:02x} {text}\n')
+        else:
+            j = text.find('Copyright')
+            for k in range(j%40, len(text), 40):
+                define.append(f'\t.byte "{text[k:k+40]}"\n')
+        if not text.endswith('*'):
+            i += 1
+
+    with open(fname + '.def.i', 'wt') as out:
+        out.write(''.join(define))
+    with open(fname + '.decl.i', 'wt') as out:
+        out.write(''.join(declare))
+    with open(fname + '.txt', 'wt') as out:
+        out.write(''.join(reference))
 
 def main(argv):
     args = usage(argv)
@@ -63,7 +84,7 @@ def main(argv):
     pairs = zip(iter(R), R)
     for c,(i,j) in enumerate(pairs):
         if j-i > 100:
-            write(f'{args.input}_strings_{c}.i', src[i:j])
+            write(f'{args.input}_strings_{c}', src[i:j])
 
     return 0
 
