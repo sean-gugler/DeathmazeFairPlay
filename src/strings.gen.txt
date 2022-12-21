@@ -1,0 +1,284 @@
+[Verbs]
+rais
+blow
+brea
+burn
+chew*
+eat 
+roll*
+chuc*
+heav*
+thro
+clim
+drop*
+leav*
+put 
+fill
+ligh
+play
+stri
+wear
+exam*
+look
+wipe*
+clea*
+poli*
+rub 
+open*
+unlo
+pres
+get *
+grab*
+hold*
+take
+stab*
+kill*
+slas*
+atta*
+hack
+pain
+gren
+say *
+yell*
+scre
+char
+fart
+save
+quit
+inst*
+dire
+help*
+hint
+
+[Nouns]
+Ball
+Brush
+Calculator
+Dagger
+Flute
+Frisbee
+Hat 
+Horn
+Jar 
+Key 
+Ring
+Sneaker
+Staff
+Sword
+Wool
+Yoyo
+Snake
+Food
+Torch
+Box 
+Bat 
+Dog 
+Door*
+Elev
+Monster
+Mother
+Zero
+One 
+Two 
+Three
+Four
+Five
+Six 
+Seven
+Eight
+Nine
+
+[Messages]
+Inventory:
+Torches:
+Lit:
+Unlit:
+crystal ball.
+paintbrush used by Van Gogh.
+calculator with 10 buttons.
+jeweled handled dagger.
+flute.
+precision crafted frisbee.
+hat with two ram's horns.
+carefully polished horn.
+glass jar complete with lid.
+golden key.
+diamond ring.
+rotted mutilated sneaker.
+magic staff.
+90 pound two-handed sword.
+ball of blue wool.
+yoyo.
+snake !!!
+basket of food.
+torch.
+Inside the box there is a
+You unlock the door...
+and the wall falls on you!
+and the key begins to tick!
+and a 20,000 volt shock kills you!
+A 600 pound gorilla rips your face off!
+Two men in white coats take you away!
+Having fun?
+The snake bites you and you die!
+Thunderbolts shoot out above you!
+The staff thunders with useless energy!
+you are wearing it.
+To everything
+There is a season
+, TURN,TURN,TURN
+The calculator displays 317.
+It displays 317.2 !
+The invisible guillotine beheads you!
+You have rammed your head into a steel
+wall and bashed your brains out!
+AAAAAAAAAAAHHHHH!
+WHAM!!!
+A vicious dog attacks you!
+He rips your throat out!
+The dog chases the sneaker!
+A vampire bat attacks you!
+Your stomach is growling!
+Your torch is dying!
+You are another victim of the maze!
+You have died of starvation!
+The monster attacks you and
+you are his next meal!
+the magic word works! you have escaped!
+Do you want to play again (Y or N)?
+You fall through the floor
+onto a bed of spikes!
+Before I let you go free
+what was the name of the monster?
+it says "the magic word is camelot".
+The monster grabs the frisbee, throws 
+it back, and it saws your head off!
+TICK! TICK!
+The key blows up the whole maze!
+The ground beneath your feet
+begins to shake!
+A disgusting odor permeates
+the hallway as it darkens!
+the hallway!
+It is the monster's mother!
+She has been seduced!
+She tiptoes up to you!
+She slashes you to bits!
+You slash her to bits!
+Correct! You have survived!
+You break the
+and it disappears!
+What a mess! The vampire bat
+drinks the blood and dies!
+It vanishes in a
+burst of flames!
+You can't be serious!
+You are making little sense.
+ what?                   
+all form into darts!
+The food is being digested.
+The 
+magically sails
+around a nearby corner
+and is eaten by
+the monster !!!!
+and the monster grabs it,
+gets tangled, and topples over!
+It is now full of blood.
+The monster is dead and
+much blood is spilt!
+You have killed it.
+The dagger disappears!
+The torch is lit and the
+old torch dies and vanishes!
+A close inspection reveals
+absolutely nothing of value!
+a smudged display!
+A can of spinach?
+returns and hits you
+in the eye!
+You are trapped in a fake
+elevator. There is no escape!
+With what? Toenail polish?
+A draft blows your torch out!
+The ring is activated and
+shines light everywhere!
+The staff begins to quake!
+The calculator vanishes.
+NEVER, EVER raid a monster's lair.
+OK...
+has vanished.
+The body has vanished!
+GLITCH!
+OK...it is clean.
+Check your inventory, DOLT!
+SPLAT!
+You eat the
+and you get heartburn!
+A deafening roar envelopes
+you. Your ears are ringing!
+FOOD FIGHT!! FOOD FIGHT!!
+The hallway is too crowded.
+A high shrill note comes
+from the flute!
+The calculator displays
+You have been teleported!
+With who? The monster?
+You have no fire.
+With what? Air?
+It's awfully dark.
+Look at your monitor.
+It looks very dangerous!
+I'm sorry, but I can't 
+You are confusing me.
+What in tarnation is a 
+I don't see that here.
+OK...if you really want to,
+But you have no key.
+Do you wish to save the game (Y or N)?
+Do you wish to continue a game (Y or N)?
+Please prepare your cassette.
+When ready, press any key.
+and it vanishes!
+You will do no such thing!
+You are carrying the limit.
+It is currently impossible.
+The bat drains you of your vital fluids!
+Are you sure you want to quit (Y or N)?
+Try examining things.
+Type instructions.
+Invert and telephone.
+Don't make unnecessary turns.
+You have turned into a pillar of salt!
+Don't say I didn't warn you!
+The elevator is moving!
+You are deposited at the next level.
+Your head smashes into the ceiling!
+You fall on the snake!
+Oh no! A pit!
+
+[Intro]
+"           Deathmaze 5000               "
+" Location is constantly displayed via   "
+"3-D graphics. To move forward one step, "
+"press Z. To turn to the left or right,  "
+"press the left or right arrow. To turn  "
+"around, press X. Only Z actually changes"
+"your position. Additionally, words such "
+"as CHARGE may be helpful in movement.   "
+" At any time, one and two word commands "
+"may be entered. Some useful commands are"
+"OPEN BOX, GET BOX, DROP and HELP. Many  "
+"more exist. To manipulate an object, you"
+"must be on top of it, or be carrying it."
+" To save a game in progress, enter SAVE."
+"This is encouraged. Deathmaze is huge.  "
+"It will take some time to escape.       "
+" The five levels of Deathmaze are con-  "
+"nected by elevators, pits, and science. "
+"Connections are not always obvious.     "
+"             Good Luck!                 "
+"                                        "
+"Copyright 1980 by Med Systems Software  "
+"All rights reserved.                  "
+
