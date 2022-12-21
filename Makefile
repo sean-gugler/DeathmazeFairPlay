@@ -106,6 +106,14 @@ clean_dependencies:
 
 # Final game files.
 
+STRING_TABLES = verb noun display intro
+STRING_STEMS = $(patsubst %,src/string_%,$(STRING_TABLES))
+STRING_DECL = $(patsubst %,%_decl.i,$(STRING_STEMS))
+STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
+STRINGS = $(STRING_DECL) $(STRING_DEF)
+
+$(STRINGS): tools/build_strings.py src/strings.txt
+	$^ $(STRING_STEMS)
 
 
 # Targets that are not explicit files
@@ -122,4 +130,4 @@ clean: $(CLEAN)
 
 distclean: $(DISTCLEAN)
 
-all: $(DISKS) $(MB_FILES) $(output_dir)/slideshow_start.do $(output_dir)/slideshow_end.do | $(output_dir)
+all: $(STRINGS) | $(output_dir)
