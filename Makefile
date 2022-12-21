@@ -34,6 +34,7 @@ LD65FLAGS=
 
 
 output_dir = output
+extras_dir = extras
 
 # Tools.
 
@@ -51,7 +52,8 @@ clean_tempfiles:
 # Generated directories
 
 FOLDERS = \
-	$(output_dir)
+	$(output_dir) \
+	$(extras_dir)
 
 $(FOLDERS):
 	mkdir -p $@
@@ -67,8 +69,25 @@ $(FOLDERS):
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
 
-strings: tools/strings.py
-	$^ files/original/DEATHMAZE_B\#060805
+# Extras.
+
+GENERATED += $(extras_dir)
+
+strings: tools/extract_strings.py | $(extras_dir)
+	$^ files/original/DEATHMAZE_B\#060805 src/strings.txt $(extras_dir)
+
+
+FONT = $(output_dir)/FONT.prg
+
+# In-memory address = $4294
+# in-file offset = $4294 - $0805 = $3A8F
+$(FONT): tools/font.py files/original/DEATHMAZE_B\#060805 | $(output_dir)
+	$^ $@ 3A8F
+
+font: $(FONT)
+
+GENERATED += $(FONT)
+
 
 
 # Dependencies
@@ -87,16 +106,6 @@ clean_dependencies:
 
 # Final game files.
 
-FONT = $(output_dir)/FONT.prg
-
-# In-memory address = $4294
-# in-file offset = $4294 - $0805 = $3A8F
-$(FONT): tools/font.py files/original/DEATHMAZE_B\#060805 | $(output_dir)
-	$^ $@ 3A8F
-
-font: $(FONT)
-
-GENERATED += $(FONT)
 
 
 # Targets that are not explicit files

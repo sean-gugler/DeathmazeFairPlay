@@ -55,24 +55,28 @@ def sections(it, is_start):
 """
 
 def hibit_split(seq):
-    n = 1
     for s in sections(seq, lambda c: c & 0x80):
         ba = bytearray(s)
         ba[0] &= 0x7F
-        text = ba.decode('ascii')
+        yield ba.decode('ascii')
 
-        yield n, text
-
-        # Word ending in * indicates the next word is a synonym.
-        # Both use the same number for internal game logic.
-        if not text.endswith('*'):
-            n += 1
+def synonyms(seq):
+    # In the game's vocabulary table, any word
+    # ending in * indicates the next word is a synonym.
+    # Both use the same number for internal game logic.
+    syn = ''
+    for text in seq:
+        if text.endswith('*'):
+            syn += text[:-1] + ' '
+        else:
+            yield syn + text
+            syn = ''
 
 def write_section(out, label, seq, folder):
     out.write(f'[{label}]\n')
     path = Path(folder) / f'string_nums_{label.lower()}.txt'
     with path.open('wt') as ref:
-        for n,text in seq:
+        for n,text in enumerate(seq, 1):
             out.write(f'{text}\n')
             ref.write(f'{n:3} ${n:02x} {text}\n')
     out.write('\n')
@@ -112,16 +116,23 @@ def main(argv):
     with open(args.output, 'wt') as f:
         # First chunk of text is a concatenation of the verb list and the noun list.
         # Verbs are not capitalized and nouns are, so that's how we know where to divide the list.
-        def upper_cased(elt):
-            n,text = elt
+        def upper_cased(text):
             return text[0].isupper()
 
         W = hibit_split(next(S))
+        # G = groupby(W, upper_cased)
+        # Convert generators to lists
+        # Verbs, Nouns = [[w for w in g] for _,g in G]
+        
+        # write_section(f, 'Verbs', Verbs[1])
+        # write_section(f, 'Nouns', Nouns[1])
+        # number_vocab(vn)
+
 
         L = ('Verbs','Nouns')
         G = groupby(W, upper_cased)
         for label, (_,g) in zip(L, G):
-            write_section(f, label, g, args.extras)
+            write_section(f, label, synonyms(g), args.extras)
 
         # Verbs, Nouns = groupby(W, upper_cased)
         # write_section(f, 'Verbs', Verbs[1])
