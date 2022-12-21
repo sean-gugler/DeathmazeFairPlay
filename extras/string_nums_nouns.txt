@@ -20,7 +20,7 @@
  20 $14 Box 
  21 $15 Bat 
  22 $16 Dog 
- 23 $17 Door Elev
+ 23 $17 Door Elevator
  24 $18 Monster
  25 $19 Mother
  26 $1a Zero

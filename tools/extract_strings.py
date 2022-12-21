@@ -37,7 +37,6 @@ def char(b):
 def printable(b):
     return char(b) in string.printable
 
-# Note: string tables have 1-based indexing
 def sections(it, is_start):
     def inc_if (elt, c=[0]):
         c[0] += bool(is_start(elt))
@@ -76,6 +75,7 @@ def write_section(out, label, seq, folder):
     out.write(f'[{label}]\n')
     path = Path(folder) / f'string_nums_{label.lower()}.txt'
     with path.open('wt') as ref:
+        # Note: in-game string tables have 1-based indexing
         for n,text in enumerate(seq, 1):
             out.write(f'{text}\n')
             ref.write(f'{n:3} ${n:02x} {text}\n')
@@ -118,25 +118,12 @@ def main(argv):
         # Verbs are not capitalized and nouns are, so that's how we know where to divide the list.
         def upper_cased(text):
             return text[0].isupper()
-
         W = hibit_split(next(S))
-        # G = groupby(W, upper_cased)
-        # Convert generators to lists
-        # Verbs, Nouns = [[w for w in g] for _,g in G]
-        
-        # write_section(f, 'Verbs', Verbs[1])
-        # write_section(f, 'Nouns', Nouns[1])
-        # number_vocab(vn)
-
+        G = groupby(W, upper_cased)
 
         L = ('Verbs','Nouns')
-        G = groupby(W, upper_cased)
         for label, (_,g) in zip(L, G):
             write_section(f, label, synonyms(g), args.extras)
-
-        # Verbs, Nouns = groupby(W, upper_cased)
-        # write_section(f, 'Verbs', Verbs[1])
-        # write_section(f, 'Nouns', Nouns[1])
 
         write_section(f, 'Messages', hibit_split(next(S)), args.extras)
 

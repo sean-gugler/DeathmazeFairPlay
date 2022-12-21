@@ -1,4 +1,4 @@
-[Verbs]
+[Verbs Transitive]
 raise
 blow
 break
@@ -19,6 +19,8 @@ press
 get grab hold take
 stab kill slas attack hack
 paint
+
+[Verbs Intransitive]
 grendel
 say yell scream
 charge
@@ -258,3 +260,4 @@ Oh no! A pit!
 "                                        "
 "Copyright 1980 by Med Systems Software  "
 "All rights reserved.                  "
+

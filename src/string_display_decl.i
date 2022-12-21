@@ -59,7 +59,7 @@
 	text_onto_a_bed_of_spikes_ = $3b
 	text_Before_I_let_you_go_free = $3c
 	text_what_was_the_name_of_the_monster_ = $3d
-	text_it_says___the_magic_word_is_camelot___ = $3e
+	text_it_says__the_magic_word_is_camelot__ = $3e
 	text_The_monster_grabs_the_frisbee__throws_ = $3f
 	text_it_back__and_it_saws_your_head_off_ = $40
 	text_TICK__TICK_ = $41

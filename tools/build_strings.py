@@ -41,7 +41,10 @@ def sections(it):
 
 
 def fit4(word):
-    return (word + '   ')[:4] + '*'
+    return (word + '   ')[:4]
+
+def min4(word):
+    return word + ' ' * max(0, 4 - len(word))
 
 def define_vocab(fit, T):
     for text in T:
@@ -103,7 +106,7 @@ def main(argv):
         for i,line in declare_vocab('noun', N):
             out.write(line)
     with open(args.nouns + DEF, 'wt') as out:
-        for line in define_vocab(str, N):
+        for line in define_vocab(min4, N):
             out.write(line)
 
     M = S['Messages']
