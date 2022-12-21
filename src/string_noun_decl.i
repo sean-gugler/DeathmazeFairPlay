@@ -20,7 +20,7 @@
 	noun_box = $14
 	noun_bat = $15
 	noun_dog = $16
-	noun_elevator = $17
+	noun_elev = $17
 	noun_monster = $18
 	noun_mother = $19
 	noun_zero = $1a
@@ -33,4 +33,5 @@
 	noun_seven = $21
 	noun_eight = $22
 	noun_nine = $23
-	noun_end = $24
+
+	nouns_end = $24

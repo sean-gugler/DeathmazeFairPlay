@@ -29,4 +29,5 @@
 	verb_quit = $1a
 	verb_directions = $1b
 	verb_hint = $1c
-	verb_end = $1d
+
+	verbs_end = $1d

@@ -59,10 +59,12 @@ def define_vocab(fit, T):
             yield f'\tmsbstring "{word}"\n'
 
 def declare_vocab(prefix, T):
-    for i,text in enumerate(T + ['end'], 1):
+    for i,text in enumerate(T, 1):
         T = text.split()
         last = T[-1].lower()
         yield i, f'\t{prefix}_{last} = ${i:02x}\n'
+    i += 1
+    yield i, f'\n\t{prefix}s_end = ${i:02x}\n'
 
 def define_message(T):
     yield '\t.feature  string_escapes\n'

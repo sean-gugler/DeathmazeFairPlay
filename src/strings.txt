@@ -53,7 +53,7 @@ Torch
 Box 
 Bat 
 Dog 
-Door Elevator
+Door Elev
 Monster
 Mother
 Zero
