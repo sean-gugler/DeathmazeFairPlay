@@ -3,13 +3,14 @@
 :CODE END
 8000
 :DATA BYTES
+0C2A-0CCA
 1162-1192
 1A1D-1A34
 1E36-1E5A
 2052-206A
 20C3-20E7
 2246-2262
-2632-2640
+2624-2640
 2CE8-2CFA
 2E02-2E2A
 32CA-3319
@@ -38,19 +39,27 @@
 7CC7-7CEF
 7D8F-7E1D
 :BLANK LINES
+0E4D
+0FDC
 127E
+1A34
 1AFE
 1B25
 1C3B
+2640
 26AB
 :REMOVED BYTES
 :FULL COMMENTS
-0CCA (end cruft)
+0D8A BUG? was this supposed to repeat last command?
+0E37 BUG: meant to prevent double-space, but only prevents WORD_L_
+1148 junk
 1A1D junk
 1A9F clear screen region
 1AB5 print inventory
 1C55 Skip over snake
 1C6D Go back and check snake
+2624 junk
+2632 junk
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 7D8F 1-based indexing via 'A'
 :SIDE COMMENTS
@@ -62,8 +71,19 @@
 0900 $zp_string_number
 091C $zp_string_number
 0923 #' '
+0931 #verb_movement_begin
+094E #verb_forward
+0956 #verb_left
+095A #verb_uturn
 09D9 Splat!
+0A3D #special_calc_puzzle
 0A55 Invisible guillotine
+0A7B #special_dog1
+0AB6 #special_dog2
+0ADE #special_mother
+0AFA #special_bat
+0B13 #special_monster
+0B4A #special_dark
 0B67 Died of starvation!
 0B7F #food_low
 0B83 Stomach is growling
@@ -78,15 +98,74 @@
 0C97 you are his next meal!
 0C9F It is the monster's mother!
 0CA4 She slashes you to bits!
+0CDB #char_mask_upper
+0D29 $zp_input_char_count
+0D2B $zp_input_word_count
+0D4D #char_mask_upper
+0D50 $zp_input_char_count
+0D55 #'Z'
+0D5C #'X'
+0D63 #char_left
+0D6A #char_right
+0D71 #' '
+0D75 #char_enter
+0D7C #char_left
+0D83 #char_enter
+0D8A #char_esc
 0DB8 #' '
+0DC8 #' '
+0DD1 #verb_forward
+0DD5 #verb_right
+0DD9 #verb_left
+0DDD #verb_uturn
 0DF0 #' '
+0DFA $zp_input_char_count
+0DFE #' '
+0E02 $zp_input_word_count
+0E08 $zp_input_char_count
+0E0D $zp_raw_input
+0E0F #'A'
+0E13 $zp_input_char_count
+0E17 Check previous character
+0E19 #' '
+0E1D $zp_raw_input
+0E1F Make lower-case
+0E23 $zp_raw_input
+0E2A $zp_input_char_count
+0E2C $zp_input_char_count
+0E30 #max_input
+0E37 $zp_input_char_count
+0E39 BUG: remove to fix.
+0E3C #' '
+0E43 $zp_input_word_count
+0E47 $zp_input_word_count
+0E49 #' '
+0E50 #' '
+0E52 $zp_input_char_count
+0E54 $zp_input_char_count
+0E70 #' '
+0E80 #' '
+0E96 #verbs_end
 0E9A I'm sorry, but I can't
+0EAD #' '
+0EBA #'.'
+0EC2 #verb_intransitive
+0ECB #vocab_end
+0ECF #verbs_end
+0ED4 #verbs_end-1
 0EDA What in tarnation is a
 0F0D #'?'
+0F19 #verb_intransitive
+0F1D #verb_look
 0F34 #char_ClearLine
+0F3F #char_mask_upper
 0F52 what?
 0F5F Look at your monitor.
 0F63 It's awfully dark.
+0F90 #'*'
+0FA2 #char_mask_upper
+0FA8 #char_mask_upper
+0FC7 #vocab_end-1
 1007 #'Y'
 100B #'N'
 105A Little sense.
@@ -123,22 +202,44 @@
 1BEC #gs_size-1
 1C98 clamp min 0
 1CA7 #<gs_item_loc_inv
+24E9 #glyph_R_notched
+24EE #glyph_solid
+24F3 #glyph_L_notched
+2503 #glyph_UR_triangle
+2508 #glyph_solid
+250D #glyph_UL_triangle
+251D #glyph_R_solid
+2522 #glyph_solid
+2527 #glyph_L_solid
+2534 #glyph_keyhole_R
+2539 #glyph_keyhole_L
+2546 #glyph_keyhole_C
 2612 #' '
+266D #noun_ring
+2673 #noun_staff
 2679 Having fun?
+267E Staff begins to quake
 26A2 The ring is activated and
 26A7 shines light everywhere!
+26B1 #noun_flute
+26B5 #noun_horn
+26C3 #special_mother
 26D2 A deafening roar envelopes
 26D7 you. Your ears are ringing!
+26DD #noun_play - noun_blow
 2713 You break the
 271E and it disappears!
+273D #special_dark
 277A It vanishes in a
 277F burst of flames!
 27BD You eat the
 27C2 #' '
 27CD and you get heartburn!
+282E #special_dark
 2876 and it vanishes!
 287B and is eaten by
 2880 the monster!
+2896 #special_tripped
 28A9 and the monster grabs it,
 28AE gets tangled, and topples over!
 28BC returns and hits you
@@ -150,14 +251,25 @@
 292D The monster grabs the frisbee, throws
 2932 it back, and it saws your head off!
 2965 The hallway is too crowded.
+29BC #special_dark
+29CD #noun_jar
 29D4 With what? Air?
 29F6 You have no fire.
 2A29 The torch is lit and the
 2A2E old torch dies and vanishes!
 2A3D #torch_lifespan
+2A4C #item_flute
+2A50 #item_ball
+2A54 item_horn
+2A5B #cmd_blow
 2A63 With who? The monster?
 2A8C A high shrill note comes
 2A91 from the flute!
+2A93 GUG: saves no bytes, adds time.
+2AA1 #glyph_R_solid
+2AA6 #glyph_X
+2AAB #glyph_L_solid
+2AD4 #special_climb
 2AEF Thunderbolts shoot out above you!
 2AF4 The staff thunders with uselss energy!
 2B07 OK...if you really want to,
@@ -165,15 +277,24 @@
 2B3C I don't see that here.
 2B50 A close inspection reveals
 2BDC Inside the box there is a
+2C1D #special_snake
 2C5B You unlock the door...
 2C6C But you have no key.
+2C71 #special_bomb
 2C79 You unlock the door...
 2C7E and the key begins to tick!
+2C86 #special_elevator
 2D2A The calculator displays
 2D2F #' '
+2D41 #noun_zero-1
+2D95 #noun_two
+2DCB #special_dark
 2DDD You have been teleported!
 2DE2 The calculator vanishes.
+2DEA #noun_two
 2DF9 A draft blows your torch out.
+2EBC #special_snake
+2EC5 #special_calc_puzzle
 2ED6 The calculator displays 317.
 2F30 It is currently impossible.
 2FB7 I don't see that here.
@@ -188,25 +309,58 @@
 31BC Prepare cassette
 31C1 Press any key
 31E6 Are you sure you want to quit?
+323B #special_calc_puzzle
 3244 Try examining things.
 324F Type instructions.
 3258 Invert and telephone.
+335C $zp_hint_mode
+337A #verb_forward
+337E $zp_action
+3385 Set initial turn direction
+3390 $zp_action
+33B1 $zp_action
+33CF $zp_action
 33E8 Splat!
+33F6 #verb_drop
+33FA #verb_movement_begin
 3401 To everything
+3406 $zp_hint_mode
 340C Turn turn turn
 3411 There is a season
+3416 $zp_hint_mode
 341C Turn turn turn
+3427 #puzzle_step1
+344B $zp_hint_mode
+3452 $zp_hint_mode
 3461 A vampire bat attacks you!
+346F #zp_object
+3474 #verb_look
+3478 #verb_throw
+347C #verb_break
 3483 The bat drains you!
+348B #zp_object
+348D #noun_bat
 3491 It looks very dangerous!
+34B0 #noun_jar
 34B4 What a mess! The vampire bat
 34B9 drinks the blood and dies!
 3513 A vicious dog attacks you!
+3518 GUG: can this be wait_short?
+3521 $zp_object
+352A #verb_throw
+352E #verb_attack
+3532 #verb_look
 3539 He rips your throat out!
-3547 It displays 317.2!
+3541 $zp_object
+3543 #noun_dog
+3547 It displays 317.2!  ;BUG: should be $8c
+354C BUG: should JMP to get_player_input
+354F $zp_object
+3551 #noun_dog
 357A and it vanishes!
 357F You have killed it.
 3597 The dagger disappears!
+35A1 #noun_sneaker
 35C4 and is eaten by
 35C9 the monster!
 35D4 The dog chases the sneaker!
@@ -225,9 +379,13 @@
 36C8 the hallway as it darkens!
 36D3 It is the monster's mother!
 36E9 She has been seduced!
+36FD #noun_monster
+3701 #noun_mother
 3711 She tiptoes up to you!
 3716 She slashes you to bits!
+3721 #verb_look
 3725 It looks very dangerous!
+3735 #verb_attack
 3756 She tiptoes up to you!
 375B You slash her to bits!
 3763 The body has vanished!
@@ -239,22 +397,35 @@
 37ED you are his next meal!
 37F5 It is the monster's mother!
 37FA She slashes you to bits!
+3808 #noun_snake
+380F Snake bites you!
+3816 #verb_look
+381A #verb_attack
 385F The dagger disappears!
 3864 You have killed it.
 386C It looks very dangerous!
 38DD Tick tick
 3924 The key blows up the whole maze!
+393F #verb_open
+3946 #noun_door
 399F The elevator is moving!
 39A7 You are deposited at the next level.
 39C5 You are trapped in a fake
 39CA elevator. There is no escape!
 39F3 Glitch!
+3A38 #noun_monster
+3A42 #verb_look
+3A49 #verb_attack
 3A78 The dagger disappears!
 3A80 The monster is dead and
 3A85 much blood is spilt!
+3AA5 #verb_fill
+3AAC #noun_jar
 3ACC It is now full of blood.
 3AD4 It looks very dangerous!
 3AE2 The body has vanished!
+3AFD #verb_climb
+3B04 #noun_snake
 3B3B Wham!
 3B40 Your head smashes into the ceiling!
 3B4B You fall on the snake!
@@ -265,9 +436,11 @@
 3BDD The
 3BE2 wool
 3BE7 has vanished
+3C19 #verb_press
 3C1D You will do no such thing!
 3C6A Splat!
 3CA6 Don't make unnecessary turns.
+3D55 #noun_door
 3D7C You fall through the floor
 3D81 #char_newline
 3D86 onto a bed of spikes!
@@ -301,20 +474,16 @@
 0009 screen_ptr+1
 000A text_ptr
 000B text_ptr+1
-000C string_ptr
-000D string_ptr+1
-000E src
-000F src+1
-0010 dst
-0011 dst+1
-0013 row_ptr
+000C zp_0C_string
+000D zp_0D
+000E zp_0E_src
+0010 zp_10_dst
 0014 row_ptr+1
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
-0019 count
-001A count+1
+0019 zp_19_n
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -346,7 +515,12 @@
 091C @found_string
 0921 clear_text_buf
 0925 -
+092B main_game_loop
 0938 warm_start
+0943 cmd_verbal
+0949 cmd_movement
+0956 move_turn
+099D move_forward
 0A4A beheaded
 0B18 done_timer
 0B4F @dec_food
@@ -359,16 +533,86 @@
 0C0E +
 0C14 +
 0C23 @check_done
+0C29 textbuf_prev_input
 0C7A text_buffer1
 0CA2 text_buffer2
+0CCA get_player_input
+0CCD -
+0CDD +
+0D22 -
+0D39 input_blink_cursor
+0D3C -
+0D5C +
+0D63 +
+0D6A +
+0D71 +
+0D7B @check_backspace
+0D83 @check_enter
+0D8A @check_esc
+0DA3 @next_char
+0DB2 @repeat_display
+0DBA +
+0DC8 @check_space
+0DD1 @forward
+0DD5 @right
+0DD9 @left
+0DDD @around
+0DDF @return_move
+0DE5 input_enter
+0DE8 input_backspace
+0E04 +
+0E0D input_letter
+0E23 @no_modification
+0E25 +
+0E37 input_space
+0E43 +
+0E4D parse_input
+0E5E @parse_verb
+0E68 @skip_word
+0E6E +
+0E7A +
+0E84 @verb_only
+0E8B @parse_object
+0E93 @check_verb
+0EA9 @echo_next_char
+0EB9 @echo_period
+0EC2 @known_verb
+0ED9 @done_verb
+0EDA @unknown_object
+0EE9 @find_word_end
+0EF7 @found_word_end
+0EFD @obj_next_letter
+0F0D @obj_word_end
+0F16 @verb_no_object
+0F43 @next_verb_letter
+0F49 @echo
+0F52 @verb_word_end
+0F5A @cmd_look
+0F63 @dark
+0F65 +
+0F6B get_vocab
+0F7D @next_word
+0F7F @find_string
+0F8D @found_start
+0F96 +
+0F9C +
+0FA0 @compare_char
+0FB4 +
+0FBA +
+0FBE @done
+0FC5 @mismatch
+0FD8 @fail
+0FDC wait_short
+0FE0 -
 0FE9 input_char
 0FEC -
 0FF7 input_Y_or_N
 0FFA -
 100F +
+1015 draw_view
 102F +
 1044 @done
-1045 wait5
+1045 wait_long
 1049 @dec16
 104D -
 105A nonsense
@@ -446,25 +690,158 @@
 1D0E code0A_impl
 1F13 string_elevator
 2262 string_square
+24E2 draw_keyhole_0
+252D draw_keyhole_1
+253F draw_keyhole_2
 25E3 print_noun
 25EF @find_string
 25F3 @next_char
 25FB @found_start
 2603 @print_char
 260C +
+2640 exec_cmd
 2651 +
 265A +
-2679 @b2679
+2669 cmd_raise
+2679 @having_fun
 267B @print_line2
-267E @b267E
-2682 @b2682
-26AB @b26AB
+267E @staff
+2682 @ring
+26AB @cmd_blow
+26D2 +
+26DD @play
+26E1 cmd_break
+2756 cmd_burn
 2768 +
+28B9 throw_yoyo
+28C6 throw_food
+28D9 @thrown
 28FC +
 2902 +
+291C throw_frisbee
+293D cmd_drop
+2944 +
+29C7 cmd_fill
+29D4 +
 29F1 cmd_light
+2A43 cmd_play
+2A4A +
+2A5B play_horn
+2A63 play_ball
+2A65 print_and_rts
+2A68 play_flute
+2A89 @music
+2A96 @charm
+2A9E @draw_snake
+2AB4 -
+2ADF cmd_strike
+2D2A @display
+2D3D @teleport
+2D4B @find_location
+2D62 @found
+2D6F +
+2D7A +
+2D85 +
+2DA5 @snuff
+2DC3 @teleported
+2E01 @done
+2E02 teleport_table
 31B9 +
 31BC save_to_tape
+324F +
+3258 @calc_hint
+3347 check_special_mode
+334D +
+3354 special_calc_puzzle
+3361 @puzzle_loop
+336E @continue_loop
+337A @move
+3390 @check_repeat_turn
+33B1 @new_direction
+33C9 +
+33D4 @update_display
+33DD @bump_into_wall
+33F3 @print_hint
+3401 +
+3411 +
+3421 @done
+3422 @init_puzzle
+3427 @reset_target
+3435 @print_timed_hint
+3449 @print_hint_basic
+3450 @print_hint_extra
+3457 special_bat
+345E +
+3469 @bat_loop
+3480 @dead
+348B @look
+3499 @try_action
+34F0 special_dog
+34FF @dog2
+3505 +
+3510 @confront_dog
+3536 @dead
+3541 @look
+354F @attack
+359F @throw
+35EA special_monster
+35F0 +
+35FA +
+3612 @monster_smell
+3629 monster_kills_you
+363E +
+364E input_near_danger
+365E +
+366C wait_if_moved
+3677 +
+367F @wait
+3686 special_mother
+368C +
+3696 +
+36AE @mother_smell
+36D3 @mother_arrives
+36EE @input_near_mother
+3705 @dead_pop
+3716 @dead
+371E @look
+3735 @attack
+3777 special_dark
+377D +
+3787 +
+37C7 @monster_smell
+37DE @monster_attacks
+37F5 @mother
+37FC dead_bit
+3802 special_snake
+380C dead_by_snake
+3813 snake_check_verb
+381E @attack
+3864 @killed
+386C @look
+3874 special_bomb
+387A +
+3884 +
+393C +
+396E special_elevator
+3974 +
+3A20 special_tripped
+3A26 +
+3A30 +
+3A35 @check_input
+3A3C @dead
+3A3F +
+3A49 +
+3A4D @attack
+3A9F +
+3AD4 @look
+3ADF @done
+3AEA special_climb
+3AF0 +
+3AFA @dead
+3AFD +
+3B8E +
+3BA2 +
+3C86 special_exit
 3E65 text_congrats
 3EA7 @infinite_loop
 3F00 relocate_data
@@ -472,22 +849,41 @@
 3F4E vector_reset
 4000 screen_HGR2
 613D data_new_game
-6193 game_state
-6195 gs_player_xyH
-6196 gs_player_xyL
+6193 gs_facing
+6194 gs_level
+6195 gs_player_x
+6196 gs_player_y
 6197 gs_torches_lit
 6198 gs_torches_unlit
-619D gd_direct_object
+619C gd_parsed_verb
+619D gd_parsed_object
 619E gs_room_lit
 619F gs_food_time_hi
 61A0 gs_food_time_lo
 61A1 gs_torch_time
+61A2 gs_teleported_lit
+61A5 gs_special_mode
+61A8 gs_exit_turns
+61AB gs_bat_alive
+61AD gs_monster_lurks
+61AE gs_dog1_alive
+61AF gs_dog2_alive
+61B1 gs_next_hint
+61B2 gs_monster_proximity
+61B3 gs_mother_proximity
+61B4 gs_rotate_target
+61B5 gs_rotate_count
+61B6 gs_rotate_direction
+61B7 gs_rotate_total
+61B8 gs_lair_raided
+61B9 gs_snake_used
 61BB gs_item_loc_inv
 61BC gs_item_loc_map
 61DB (gs_item_loc_inv+32)
 61DD (gs_item_loc_inv+34)
 6292 game_state_end
 6294 font
+6694 vocab_table
 6695 verb_table
 6773 noun_table
 6820 junk_string
@@ -534,7 +930,9 @@ FF69 rom_MONITOR
 08A4
 0A4D
 0B69
+0CEE
 0D8E
+0DAA
 0F29
 1045
 1060
@@ -604,31 +1002,54 @@ FF69 rom_MONITOR
 254C
 2559
 268F
+26C7
 289B
+291C
 2A68
 2A96
 2AC6
+2C8E
+2DC3
 3182
 3324
 33E0
+3427
 349C
 34BE
+3555
 3566
 356A
+3585
 35A5
+35B6
 3640
 36B2
 36D8
+3739
 381E
 382F
 3842
 384D
 38C1
+38DF
+391C
 39F5
+3A52
+3A66
+3AB0
+3AC1
 3BB7
 3BEC
+3C3A
 3C62
+3C89
+3C96
+3CCB
+3CD8
 3D74
+3DA3
+3DBA
+3DF2
 3E4C
 3EB0
 3F21

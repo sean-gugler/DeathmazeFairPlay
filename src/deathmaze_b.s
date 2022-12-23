@@ -15,20 +15,20 @@ screen_ptr = $08
 ;screen_ptr+1 = $09
 text_ptr = $0a
 ;text_ptr+1 = $0b
-string_ptr = $0c
-;string_ptr+1 = $0d
-src = $0e
-;src+1 = $0f
-dst = $10
-;dst+1 = $11
-row_ptr = $13
+zp_0C_string = $0c
+zp_0D = $0d
+zp_0E_src = $0e
+a0F = $0f
+zp_10_dst = $10
+a11 = $11
+a13 = $13
 ;row_ptr+1 = $14
 line_count = $15
 zp_counter = $16
 clock = $17
 ;clock+1 = $18
-count = $19
-;count+1 = $1a
+zp_19_n = $19
+a1A = $1a
 tape_addr_start = $3c
 ;tape_addr_start+1 = $3d
 tape_addr_end = $3e
@@ -45,11 +45,11 @@ aEF = $ef
 ;
 ;screen_ptr = $08
 ;text_ptr = $0a
-;string_ptr = $0c
-;src = $0e
-;dst = $10
-;row_ptr = $13
-;count = $19
+;zp_0C_string = $0c
+;zp_0E_src = $0e
+;zp_10_dst = $10
+p13 = $13
+;zp_19_n = $19
 p28 = $28
 pC2 = $c2
 ;
@@ -59,7 +59,6 @@ f0135 = $0135
 ;
 ; **** ABSOLUTE ADRESSES ****
 ;
-a0108 = $0108
 a0124 = $0124
 a0125 = $0125
 a0126 = $0126
@@ -70,34 +69,20 @@ aC056 = $c056
 ; **** POINTERS ****
 ;
 p01 = $0001
-p04 = $0004
-p05 = $0005
-p50 = $0050
 pAA = $00aa
 p00F4 = $00f4
 p00F6 = $00f6
-p0103 = $0103
-p0104 = $0104
-p0150 = $0150
-p0206 = $0206
 p0307 = $0307
 p0308 = $0308
-p0309 = $0309
 p0400 = $0400
 p0402 = $0402
 p0508 = $0508
-p0601 = $0601
 p0602 = $0602
 p0603 = $0603
-p0604 = $0604
 p0607 = $0607
-p0609 = $0609
 p060A = $060a
-p060E = $060e
 p0612 = $0612
 p0615 = $0615
-p0801 = $0801
-p0802 = $0802
 ;
 ; **** EXTERNAL JUMPS ****
 ;
@@ -157,27 +142,27 @@ new_session:
 
 new_game:
 	ldx #item_exec_reset_game
-	stx src+1
+	stx a0F
 	jsr item_exec
 j084A:
 	ldx #$1b
-	stx a619C
-	jsr s2640
-	jmp j092B
+	stx gd_parsed_verb
+	jsr exec_cmd
+	jmp main_game_loop
 
 clear_hgr2:
 	ldx #<screen_HGR2
-	stx src
+	stx zp_0E_src
 	ldx #>screen_HGR2
-	stx src+1
+	stx a0F
 	ldy #$00
 @next_page:
 	tya
-:	sta (src),y
-	inc src
+:	sta (zp_0E_src),y
+	inc zp_0E_src
 	bne :-
-	inc src+1
-	lda src+1
+	inc a0F
+	lda a0F
 	cmp #$60
 	bne @next_page
 	rts
@@ -186,9 +171,9 @@ clear_hgr2:
 	nop
 	nop
 load_from_tape:
-	ldx #<game_state
+	ldx #<gs_facing
 	stx tape_addr_start
-	ldx #>game_state
+	ldx #>gs_facing
 	stx tape_addr_start+1
 	ldx #>game_state_end
 	stx tape_addr_end+1
@@ -196,7 +181,7 @@ load_from_tape:
 	stx tape_addr_end
 	jsr rom_READ_TAPE
 	jsr clear_hgr2
-	jsr s1015
+	jsr draw_view
 	jsr s7D1C
 	nop
 	jmp item_exec
@@ -225,19 +210,19 @@ print_to_line:
 	jsr get_rowcol_addr
 	jsr clear_text_buf
 	ldy #$00
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	and #$7f
 @next_char:
 	sta (text_ptr),y
 	jsr print_char
-	inc string_ptr
+	inc zp_0C_string
 	bne :+
-	inc string_ptr+1
+	inc zp_0D
 :	inc text_ptr
 	bne :+
 	inc text_ptr+1
 :	ldy #$00
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	bpl @next_char
 	lda #char_ClearLine
 	jsr char_out
@@ -248,32 +233,32 @@ print_display_string:
 print_string:
 	jsr get_rowcol_addr
 	ldy #$00
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	and #$7f
 @next_char:
 	jsr print_char
-	inc string_ptr
+	inc zp_0C_string
 	bne :+
-	inc string_ptr+1
+	inc zp_0D
 :	ldy #$00
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	bpl @next_char
 	rts
 
 get_display_string:
 	sta zp_string_number
 	ldx #<display_string_table
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>display_string_table
-	stx string_ptr+1
+	stx zp_0D
 	ldy #$00
 @scan:
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	bmi @found_string
 @next_char:
-	inc string_ptr
+	inc zp_0C_string
 	bne @scan
-	inc string_ptr+1
+	inc zp_0D
 	bne @scan
 @found_string:
 	dec zp_string_number
@@ -288,89 +273,89 @@ clear_text_buf:
 	bpl :-
 	rts
 
-j092B:
-	jsr s0CCA
-	lda a619C
-	cmp #$5a
-	bmi b0943
-	jsr s0949
+main_game_loop:
+	jsr get_player_input
+	lda gd_parsed_verb
+	cmp #verb_movement_begin
+	bmi cmd_verbal
+	jsr cmd_movement
 warm_start:
-	lda a61A5
-	beq j092B
-	jsr s3347
-	jmp j092B
+	lda gs_special_mode
+	beq main_game_loop
+	jsr check_special_mode
+	jmp main_game_loop
 
-b0943:
-	jsr s2640
+cmd_verbal:
+	jsr exec_cmd
 	jmp warm_start
 
-s0949:
-	ldx game_state
-	stx count+1
-	cmp #$5b
-	beq b099D
-	jsr s0956
+cmd_movement:
+	ldx gs_facing
+	stx a1A
+	cmp #verb_forward
+	beq move_forward
+	jsr move_turn
 	rts
 
-s0956:
-	cmp #$5c
+move_turn:
+	cmp #verb_left
 	beq b0975
-	cmp #$5e
+	cmp #verb_uturn
 	beq b0987
-	lda count+1
+	lda a1A
 	cmp #$04
 	beq b0969
-	inc game_state
+	inc gs_facing
 	bne b096E
 b0969:
 	ldx #$01
-	stx game_state
+	stx gs_facing
 b096E:
-	jsr s1015
+	jsr draw_view
 	jsr print_timers
 	rts
 
 b0975:
-	lda count+1
+	lda a1A
 	cmp #$01
 	beq b0980
-	dec game_state
+	dec gs_facing
 	bpl b096E
 b0980:
 	ldx #$04
-	stx game_state
+	stx gs_facing
 	bne b096E
 b0987:
-	lda count+1
+	lda a1A
 	cmp #$03
 	bmi b0995
-	dec game_state
-	dec game_state
+	dec gs_facing
+	dec gs_facing
 	bpl b096E
 b0995:
-	inc game_state
-	inc game_state
+	inc gs_facing
+	inc gs_facing
 	bpl b096E
-b099D:
-	lda a6194
+move_forward:
+	lda gs_level
 	cmp #$03
 	bne b09C9
-	lda gs_player_xyH
+	lda gs_player_x
 	cmp #$07
 	bne b09C9
-	lda gs_player_xyL
-	ldx game_state
-	stx count+1
+	lda gs_player_y
+	ldx gs_facing
+	stx a1A
 	cmp #$08
 	beq b09C3
 	cmp #$09
 	bne b09C9
-	lda count+1
+	lda a1A
 	cmp #$04
 	bne b09C9
 	beq b09DF
 b09C3:
-	lda count+1
+	lda a1A
 	cmp #$02
 	beq b09DF
 b09C9:
@@ -386,41 +371,41 @@ b09C9:
 	rts
 
 b09DF:
-	ldx game_state
+	ldx gs_facing
 	dex
 	beq b09FA
 	dex
 	beq b09F5
 	dex
 	beq b09F0
-	dec gs_player_xyL
+	dec gs_player_y
 	bpl b09FD
 b09F0:
-	inc gs_player_xyH
+	inc gs_player_x
 	bpl b09FD
 b09F5:
-	inc gs_player_xyL
+	inc gs_player_y
 	bpl b09FD
 b09FA:
-	dec gs_player_xyH
+	dec gs_player_x
 b09FD:
 	jsr s0A10
-	lda a61A5
+	lda gs_special_mode
 	beq b0A06
 	rts
 
 b0A06:
 	jsr s0B19
-	jsr s1015
+	jsr draw_view
 	jsr print_timers
 	rts
 
 s0A10:
-	lda gs_player_xyL
-	sta count
-	lda gs_player_xyH
-	sta count+1
-	lda a6194
+	lda gs_player_y
+	sta zp_19_n
+	lda gs_player_x
+	sta a1A
+	lda gs_level
 	cmp #$03
 	bne b0A22
 	rts
@@ -432,7 +417,7 @@ b0A22:
 b0A27:
 	cmp #$02
 	beq b0A5D
-	lda count+1
+	lda a1A
 	cmp #$03
 	beq b0A36
 	cmp #$06
@@ -440,19 +425,19 @@ b0A27:
 	rts
 
 b0A36:
-	lda count
+	lda zp_19_n
 	cmp #$03
 	beq b0A3D
 b0A3C:
 	rts
 
 b0A3D:
-	ldx #$02
-	stx a61A5
+	ldx #special_calc_puzzle
+	stx gs_special_mode
 	rts
 
 b0A43:
-	lda count
+	lda zp_19_n
 	cmp #$0a
 	beq beheaded
 	rts
@@ -468,7 +453,7 @@ beheaded:
 	jmp game_over
 
 b0A5D:
-	lda count
+	lda zp_19_n
 	cmp #$05
 	beq b0A87
 b0A63:
@@ -478,13 +463,13 @@ b0A63:
 	lda a61A3
 	beq b0A3C
 b0A6F:
-	lda a61AE
+	lda gs_dog1_alive
 	and #$01
 	beq b0A3C
-	lda a61A5
+	lda gs_special_mode
 	bne b0A81
-	ldx #$06
-	stx a61A5
+	ldx #special_dog1
+	stx gs_special_mode
 	rts
 
 b0A81:
@@ -493,18 +478,18 @@ b0A81:
 	rts
 
 b0A87:
-	lda count+1
+	lda a1A
 	cmp #$05
 	beq b0AAF
 	cmp #$08
 	bne b0A63
 	ldx #$03
-	stx game_state
-	stx a6194
+	stx gs_facing
+	stx gs_level
 	ldx #<p0508
-	stx gs_player_xyH
+	stx gs_player_x
 	ldx #>p0508
-	stx gs_player_xyL
+	stx gs_player_y
 	ldx #$00
 	stx a61A3
 	stx a61A4
@@ -512,18 +497,18 @@ b0A87:
 	rts
 
 b0AAF:
-	lda a61AF
+	lda gs_dog2_alive
 	and #$01
 	beq b0ABB
-	ldx #$07
-	stx a61A5
+	ldx #special_dog2
+	stx gs_special_mode
 b0ABB:
 	rts
 
 j0ABC:
 	cmp #$04
 	beq b0B00
-	lda count+1
+	lda a1A
 	cmp #$04
 	beq b0AEA
 b0AC6:
@@ -536,10 +521,10 @@ b0AD2:
 	lda a61AC
 	and #$04
 	beq b0ABB
-	lda a61A5
+	lda gs_special_mode
 	bne b0AE4
-	ldx #$09
-	stx a61A5
+	ldx #special_mother
+	stx gs_special_mode
 	rts
 
 b0AE4:
@@ -548,15 +533,15 @@ b0AE4:
 	rts
 
 b0AEA:
-	lda count
+	lda zp_19_n
 	cmp #$04
 	bne b0AC6
-	lda a61AB
+	lda gs_bat_alive
 	and #$02
 	beq b0AC6
 	jsr s10DC
-	ldx #$04
-	stx a61A5
+	ldx #special_bat
+	stx gs_special_mode
 	rts
 
 b0B00:
@@ -566,11 +551,11 @@ b0B00:
 	lda a61A3
 	beq b0ABB
 b0B0C:
-	lda a61AD
+	lda gs_monster_lurks
 	and #$02
 	beq done_timer
-	ldx #$08
-	stx a61A5
+	ldx #special_monster
+	stx gs_special_mode
 done_timer:
 	rts
 
@@ -586,7 +571,7 @@ b0B26:
 	stx a61A4
 	inc a61A3
 j0B2E:
-	lda a6194
+	lda gs_level
 	cmp #$05
 	beq @dec_food
 	lda gs_torch_time
@@ -597,8 +582,8 @@ j0B2E:
 	ldx #$00
 	stx gs_room_lit
 	jsr s10DC
-	ldx #$0a
-	stx a61A5
+	ldx #special_dark
+	stx gs_special_mode
 @dec_food:
 	dec gs_food_time_lo
 	lda gs_food_time_lo
@@ -635,13 +620,13 @@ print_timers:
 	rts
 
 s0B97:
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$12
 	bpl b0BB3
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$07
 	bpl rts_bb2
 b0BAB:
@@ -660,7 +645,7 @@ b0BB3:
 	cmp #$13
 	beq b0BD3
 	ldx #$0b
-	stx src+1
+	stx a0F
 	jsr item_exec
 	cmp #$00
 	beq b0BAB
@@ -668,7 +653,7 @@ b0BB3:
 
 b0BC7:
 	ldx #$0c
-	stx src+1
+	stx a0F
 	jsr item_exec
 	cmp #$00
 	beq b0BAB
@@ -676,17 +661,17 @@ b0BC7:
 
 b0BD3:
 	ldx #$0e
-	stx src+1
+	stx a0F
 	jsr item_exec
 	cmp #$00
 	bne rts_bb2
-	lda a6194
+	lda gs_level
 	cmp #$05
 	beq b0BAB
 	lda gs_room_lit
 	beq b0BAB
 	ldx #$0d
-	stx src+1
+	stx a0F
 	jsr item_exec
 	cmp #$00
 	bne rts_bb2
@@ -700,141 +685,76 @@ b0BD3:
 memcpy:
 	ldy #$00
 @next_byte:
-	lda (src),y
-	sta (dst),y
-	inc src
+	lda (zp_0E_src),y
+	sta (zp_10_dst),y
+	inc zp_0E_src
 	bne :+
-	inc src+1
-:	inc dst
+	inc a0F
+:	inc zp_10_dst
 	bne :+
-	inc dst+1
-:	dec count
+	inc a11
+:	dec zp_19_n
 	beq @check_done
-	lda count
+	lda zp_19_n
 	cmp #$ff
 	bne @next_byte
-	dec count+1
+	dec a1A
 	jmp @next_byte
 
 @check_done:
-	lda count+1
-	ora count
+	lda a1A
+	ora zp_19_n
 	bne @next_byte
-p0C29:
+textbuf_prev_input:
 	rts
 
 p0C2A:
-	cmp #$50
-	bcc b0C31
-	jsr s1015
-b0C31:
-	lda gs_room_lit
-	beq b0C3E
-	ldx #$00
-	stx a61B3
-	jmp j3493
-
-b0C3E:
-	ldx #$00
-	stx a61A4
-	lda a61B3
-	bne b0C71
-	lda a6194
-	cmp #$05
-	beq b0C59
-	lda a61AD
-	and #$02
-	bne b0C5E
-b0C56:
-	jmp j3493
-
-b0C59:
-	lda a61AC
-	beq b0C56
-b0C5E:
-	jsr s3626
-	lda #$43     ;The ground beneath your feet
-	jsr print_to_line1
-	lda #$44     ;begins to shake!
-	jsr print_to_line2
-	inc a61B3
-	jmp j3608
-
-b0C71:
-	cmp #$01
-	bne b0C88
-	jsr s3626
-p0C79=*+$01
-text_buffer1=*+$02
-	inc a61B3
-	lda #$45     ;A disgusting odor permeates
-	jsr print_to_line1
-	lda #$47     ;the hallway!
-	jsr print_to_line2
-	jmp j3608
-
-b0C88:
-	jsr s3626
-	lda a6194
-	cmp #$05
-	beq b0C9F
-	lda #$36     ;The monster attacks you and
-	jsr print_to_line1
-	lda #$37     ;you are his next meal!
-	jsr print_to_line2
-	jmp game_over
-
-b0C9F:
-	lda #$48     ;It is the monster's mother!
-text_buffer2=*+$01
-	jsr print_to_line1
-	lda #$4b     ;She slashes you to bits!
-b0CA6:
-	jsr print_to_line2
-	jmp game_over
-
-	dex
-	bne b0D1E
-	lda gd_direct_object
-	cmp #$11
-	beq b0CBD
-b0CB6:
-	jsr clear_status_lines
-	lda #$20
-	bne b0CA6
-b0CBD:
-	lda a619C
-	cmp #$0e
-	beq b0D16
-	cmp #$13
-	bne b0CB6
-	ldx #$04
-
-; (end cruft)
-s0CCA:
+	.byte $c9,$50,$90,$03,$20,$15,$10,$ad
+	.byte $9e,$61,$f0,$08,$a2,$00,$8e,$b3
+	.byte $61,$4c,$93,$34,$a2,$00,$8e,$a4
+	.byte $61,$ad,$b3,$61,$d0,$29,$ad,$94
+	.byte $61,$c9,$05,$f0,$0a,$ad,$ad,$61
+	.byte $29,$02,$d0,$08,$4c,$93,$34,$ad
+	.byte $ac,$61,$f0,$f8,$20,$26,$36,$a9
+	.byte $43,$20,$92,$08,$a9,$44,$20,$a4
+	.byte $08,$ee,$b3,$61,$4c,$08,$36,$c9
+	.byte $01,$d0,$13,$20,$26,$36,$ee
+p0C79:
+	.byte $b3
+text_buffer1:
+	.byte $61,$a9,$45,$20,$92,$08,$a9,$47
+	.byte $20,$a4,$08,$4c,$08,$36,$20,$26
+	.byte $36,$ad,$94,$61,$c9,$05,$f0,$0d
+	.byte $a9,$36,$20,$92,$08,$a9,$37,$20 ;The monster attacks you and
+	.byte $a4,$08,$4c,$b9,$10,$a9,$48,$20
+text_buffer2:
+	.byte $92,$08,$a9,$4b,$20,$a4,$08,$4c
+	.byte $b9,$10,$ca,$d0,$6f,$ad,$9d,$61
+	.byte $c9,$11,$f0,$07,$20,$5f,$10,$a9
+	.byte $20,$d0,$e9,$ad,$9c,$61,$c9,$0e
+	.byte $f0,$52,$c9,$13,$d0,$ee,$a2,$04
+get_player_input:
 	bit hw_STROBE
-b0CCD:
-	bit hw_KEYBOARD
-	bpl b0CCD
+:	bit hw_KEYBOARD
+	bpl :-
 	lda hw_KEYBOARD
 	and #$7f
 	cmp #$40
-	bmi b0CDD
-	and #$5f
-b0CDD:
-	pha
+	bmi :+
+	and #char_mask_upper
+:	pha
 	lda #>text_buffer1
-	sta src+1
+	sta a0F
 	lda #<text_buffer1
-	sta src
+	sta zp_0E_src
 	lda #>p0C2A
-	sta dst+1
+	sta a11
 	lda #<p0C2A
-	sta dst
-	lda #>p50
-	sta count+1
-	lda #<p50
-	sta count
+	sta zp_10_dst
+	lda #$00
+	sta a1A
+	lda #$50
+	sta zp_19_n
 	jsr memcpy
 	jsr clear_status_lines
 	nop
@@ -859,139 +779,131 @@ b0CDD:
 	dec zp_row
 	jsr get_rowcol_addr
 	lda #>p0C79
-b0D16:
-	sta string_ptr+1
+	sta zp_0D
 	lda #<p0C79
-	sta string_ptr
-b0D1E:
+	sta zp_0C_string
 	lda #$80
 	ldy #$50
-b0D22:
-	sta (string_ptr),y
+:	sta (zp_0C_string),y
 	dey
-	bne b0D22
+	bne :-
 	lda #$00
-	sta dst+1
-	sta dst
+	sta zp_input_char_count
+	sta zp_input_word_count
 	lda #>p0C79
-	sta count+1
+	sta a1A
 	lda #<p0C79
-	sta count
+	sta zp_19_n
 	pla
 	jmp j0D4F
 
-b0D39:
+input_blink_cursor:
 	bit hw_STROBE
-b0D3C:
-	jsr blink_cursor
+:	jsr blink_cursor
 	bit hw_KEYBOARD
-	bpl b0D3C
+	bpl :-
 	lda hw_KEYBOARD
 	and #$7f
 	cmp #$40
 	bmi j0D4F
-	and #$5f
+	and #char_mask_upper
 j0D4F:
 	pha
-	lda dst+1
-	bne b0D7B
+	lda zp_input_char_count
+	bne @check_backspace
 	pla
-	cmp #$5a
-	bne b0D5C
-	jmp j0DD1
+	cmp #'Z'
+	bne :+
+	jmp @forward
 
-b0D5C:
-	cmp #$58
-	bne b0D63
-	jmp j0DDD
+:	cmp #'X'
+	bne :+
+	jmp @around
 
-b0D63:
-	cmp #$08
-	bne b0D6A
-	jmp j0DD9
+:	cmp #char_left
+	bne :+
+	jmp @left
 
-b0D6A:
-	cmp #$15
-	bne b0D71
-	jmp j0DD5
+:	cmp #char_right
+	bne :+
+	jmp @right
 
-b0D71:
-	cmp #$20
-	beq b0D39
-	cmp #$0d
-	beq b0D39
-	bne b0D83
-b0D7B:
+:	cmp #' '
+	beq input_blink_cursor
+	cmp #char_enter
+	beq input_blink_cursor
+	bne @check_enter
+@check_backspace:
 	pla
-	cmp #$08
-	bne b0D83
-	jmp j0DE8
+	cmp #char_left
+	bne @check_enter
+	jmp input_backspace
 
-b0D83:
-	cmp #$0d
-	bne b0D8A
-	jmp j0DE5
+@check_enter:
+	cmp #char_enter
+	bne @check_esc
+	jmp input_enter
 
-b0D8A:
-	cmp #$1b
-	bne b0DC8
+; BUG? was this supposed to repeat last command?
+@check_esc:
+	cmp #char_esc
+	bne @check_space
 	lda #$00
 	sta zp_col
 	lda #$16
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #>p0C29
-	sta src+1
-	lda #<p0C29
-	sta src
+	lda #>textbuf_prev_input
+	sta a0F
+	lda #<textbuf_prev_input
+	sta zp_0E_src
 	ldy #$50
-b0DA3:
-	lda (src),y
-	sta (count),y
+@next_char:
+	lda (zp_0E_src),y
+	sta (zp_19_n),y
 	dey
-	bne b0DA3
-	ldy #<p0150
-	sty src
-	ldy #>p0150
-	sty src+1
-b0DB2:
-	lda (count),y
+	bne @next_char
+	ldy #$50
+	sty zp_0E_src
+	ldy #$01
+	sty a0F
+@repeat_display:
+	lda (zp_19_n),y
 	cmp #$80
-	bmi b0DBA
+	bmi :+
 	lda #' '
-b0DBA:
-	jsr char_out
-	inc src+1
-	ldy src+1
-	dec src
-	bne b0DB2
-	jmp s0CCA
+:	jsr char_out
+	inc a0F
+	ldy a0F
+	dec zp_0E_src
+	bne @repeat_display
+	jmp get_player_input
 
-b0DC8:
-	cmp #$20
-	beq b0E37
-	bcs b0E0D
-	jmp b0D39
+@check_space:
+	cmp #' '
+	beq input_space
+	bcs input_letter
+	jmp input_blink_cursor
 
-j0DD1:
-	lda #$5b
-	bne b0DDF
-j0DD5:
-	lda #$5d
-	bne b0DDF
-j0DD9:
-	lda #$5c
-	bne b0DDF
-j0DDD:
-	lda #$5e
-b0DDF:
-	sta a619C
+@forward:
+	lda #verb_forward
+	bne @return_move
+@right:
+	lda #verb_right
+	bne @return_move
+@left:
+	lda #verb_left
+	bne @return_move
+@around:
+	lda #verb_uturn
+@return_move:
+	sta gd_parsed_verb
 	jmp clear_cursor
 
-j0DE5:
-	jmp j0E4D
+input_enter:
+	jmp parse_input
 
-j0DE8:
+input_backspace:
 	jsr clear_cursor
 	dec zp_col
 	jsr get_rowcol_addr
@@ -999,185 +911,182 @@ j0DE8:
 	jsr char_out
 	dec zp_col
 	jsr get_rowcol_addr
-	ldy dst+1
-	lda (count),y
-	cmp #$20
-	bne b0E04
-	dec dst
-b0E04:
-	lda #$80
-	sta (count),y
-	dec dst+1
-	jmp b0D39
+	ldy zp_input_char_count
+	lda (zp_19_n),y
+	cmp #' '
+	bne :+
+	dec zp_input_word_count
+:	lda #$80
+	sta (zp_19_n),y
+	dec zp_input_char_count
+	jmp input_blink_cursor
 
-b0E0D:
-	sta row_ptr
-	cmp #$41
-	bcc b0E23
-	ldy dst+1
-	beq b0E23
-	lda (count),y
-	cmp #$20
-	beq b0E23
-	lda row_ptr
-	ora #$20
-	bne b0E25
-b0E23:
-	lda row_ptr
-b0E25:
-	pha
+input_letter:
+	sta zp_raw_input
+	cmp #'A'
+	bcc @no_modification
+	ldy zp_input_char_count
+	beq @no_modification
+	lda (zp_19_n),y ;Check previous character
+	cmp #' '
+	beq @no_modification
+	lda zp_raw_input
+	ora #$20     ;Make lower-case
+	bne :+
+@no_modification:
+	lda zp_raw_input
+:	pha
 	jsr char_out
 	pla
-	inc dst+1
-	ldy dst+1
-	sta (count),y
-	cpy #$1e
-	beq j0E4D
-	jmp b0D39
+	inc zp_input_char_count
+	ldy zp_input_char_count
+	sta (zp_19_n),y
+	cpy #max_input
+	beq parse_input
+	jmp input_blink_cursor
 
-b0E37:
-	ldy dst+1
-	dey
-	lda (count),y
-	cmp #$20
-	bne b0E43
-	jmp b0D39
+; BUG: meant to prevent double-space, but only prevents WORD_L_
+input_space:
+	ldy zp_input_char_count
+	dey          ;BUG: remove to fix.
+	lda (zp_19_n),y
+	cmp #' '
+	bne :+
+	jmp input_blink_cursor
 
-b0E43:
-	lda dst
-	bne j0E4D
-	inc dst
-	lda #$20
-	bne b0E0D
-j0E4D:
+:	lda zp_input_word_count
+	bne parse_input
+	inc zp_input_word_count
+	lda #' '
+	bne input_letter
+
+parse_input:
 	jsr clear_cursor
-	lda #$20
-	inc dst+1
-	ldy dst+1
-	sta (count),y
-	inc count
-	bne b0E5E
-	inc count+1
-b0E5E:
-	jsr s0F6B
-	lda dst
-	sta a619C
+	lda #' '
+	inc zp_input_char_count
+	ldy zp_input_char_count
+	sta (zp_19_n),y
+	inc zp_19_n
+	bne @parse_verb
+	inc a1A
+@parse_verb:
+	jsr get_vocab
+	lda zp_10_dst
+	sta gd_parsed_verb
 	ldy #$00
-b0E68:
-	inc count
-	bne b0E6E
-	inc count+1
-b0E6E:
-	lda (count),y
-	cmp #$20
-	bne b0E68
-	inc count
-	bne b0E7A
-	inc count+1
-b0E7A:
-	lda (count),y
+@skip_word:
+	inc zp_19_n
+	bne :+
+	inc a1A
+:	lda (zp_19_n),y
+	cmp #' '
+	bne @skip_word
+	inc zp_19_n
+	bne :+
+	inc a1A
+:	lda (zp_19_n),y
 	cmp #$80
-	beq b0E84
-	cmp #$20
-	bne b0E8B
-b0E84:
+	beq @verb_only
+	cmp #' '
+	bne @parse_object
+@verb_only:
 	lda #$00
-	sta gd_direct_object
-	beq b0E93
-b0E8B:
-	jsr s0F6B
-	lda dst
-	sta gd_direct_object
-b0E93:
-	lda a619C
-	cmp #$1d
-	bcc b0EC2
+	sta gd_parsed_object
+	beq @check_verb
+@parse_object:
+	jsr get_vocab
+	lda zp_10_dst
+	sta gd_parsed_object
+@check_verb:
+	lda gd_parsed_verb
+	cmp #verbs_end
+	bcc @known_verb
 	lda #$8d     ;I'm sorry, but I can't
 	jsr print_to_line2
 	lda #<text_buffer1
-	sta count
+	sta zp_19_n
 	lda #>text_buffer1
-	sta count+1
+	sta a1A
 	ldy #$00
-b0EA9:
+@echo_next_char:
 	tya
 	pha
-	lda (count),y
-	cmp #$20
-	beq b0EB9
+	lda (zp_19_n),y
+	cmp #' '
+	beq @echo_period
 	jsr char_out
 	pla
 	tay
 	iny
-	bne b0EA9
-b0EB9:
+	bne @echo_next_char
+@echo_period:
 	pla
-	lda #$2e
+	lda #'.'
 	jsr print_char
-	jmp s0CCA
+	jmp get_player_input
 
-b0EC2:
-	cmp #$14
-	bcs b0F16
-	lda gd_direct_object
-	beq b0F16
-	cmp #$40
-	beq b0EDA
-	cmp #$1d
-	bcc b0EDA
+@known_verb:
+	cmp #verb_intransitive
+	bcs @verb_no_object
+	lda gd_parsed_object
+	beq @verb_no_object
+	cmp #vocab_end
+	beq @unknown_object
+	cmp #verbs_end
+	bcc @unknown_object
 	sec
-	sbc #$1c
-	sta gd_direct_object
-b0ED9:
+	sbc #verbs_end-1
+	sta gd_parsed_object
+@done_verb:
 	rts
 
-b0EDA:
+@unknown_object:
 	lda #$8f     ;What in tarnation is a
 	jsr print_to_line2
 	lda #<text_buffer1
-	sta count
+	sta zp_19_n
 	lda #>text_buffer1
-	sta count+1
+	sta a1A
 	ldy #$00
-b0EE9:
-	lda (count),y
+@find_word_end:
+	lda (zp_19_n),y
 	cmp #$20
-	beq b0EF7
-	inc count
-	bne b0EE9
-	inc count+1
-	bne b0EE9
-b0EF7:
-	inc count
-	bne b0EFD
-	inc count+1
-b0EFD:
+	beq @found_word_end
+	inc zp_19_n
+	bne @find_word_end
+	inc a1A
+	bne @find_word_end
+@found_word_end:
+	inc zp_19_n
+	bne @obj_next_letter
+	inc a1A
+@obj_next_letter:
 	tya
 	pha
-	lda (count),y
+	lda (zp_19_n),y
 	cmp #$20
-	beq b0F0D
+	beq @obj_word_end
 	jsr char_out
 	pla
 	tay
 	iny
-	bne b0EFD
-b0F0D:
+	bne @obj_next_letter
+@obj_word_end:
 	lda #'?'
 	jsr char_out
 	pla
-	jmp s0CCA
+	jmp get_player_input
 
-b0F16:
-	lda a619C
-	cmp #$14
-	bcs b0ED9
-	cmp #$0e
-	beq b0F5A
+@verb_no_object:
+	lda gd_parsed_verb
+	cmp #verb_intransitive
+	bcs @done_verb
+	cmp #verb_look
+	beq @cmd_look
 	lda #>text_buffer1
-	sta count+1
+	sta a1A
 	lda #<text_buffer1
-	sta count
+	sta zp_19_n
 	lda #$00
 	sta zp_col
 	lda #$17
@@ -1186,118 +1095,113 @@ b0F16:
 	lda #char_ClearLine
 	jsr char_out
 	ldy #$00
-	sty dst+1
-	lda (count),y
-	and #$5f
-	bne b0F49
-b0F43:
-	lda (count),y
+	sty a11
+	lda (zp_19_n),y
+	and #char_mask_upper
+	bne @echo
+@next_verb_letter:
+	lda (zp_19_n),y
 	cmp #$20
-	beq b0F52
-b0F49:
+	beq @verb_word_end
+@echo:
 	jsr char_out
-	inc dst+1
-	ldy dst+1
-	bne b0F43
-b0F52:
+	inc a11
+	ldy a11
+	bne @next_verb_letter
+@verb_word_end:
 	lda #$56     ;what?
 	jsr print_display_string
-	jmp s0CCA
+	jmp get_player_input
 
-b0F5A:
+@cmd_look:
 	lda gs_room_lit
-	beq b0F63
+	beq @dark
 	lda #$8b     ;Look at your monitor.
-	bne b0F65
-b0F63:
+	bne :+
+@dark:
 	lda #$8a     ;It's awfully dark.
-b0F65:
-	jsr print_to_line2
-	jmp s0CCA
+:	jsr print_to_line2
+	jmp get_player_input
 
-s0F6B:
-	lda count+1
+get_vocab:
+	lda a1A
 	pha
-	lda count
+	lda zp_19_n
 	pha
-	lda #>p6694
-	sta src+1
-	lda #<p6694
-	sta src
+	lda #>vocab_table
+	sta a0F
+	lda #<vocab_table
+	sta zp_0E_src
 	lda #$00
-	sta dst
-j0F7D:
+	sta zp_10_dst
+@next_word:
 	ldy #$01
-b0F7F:
-	lda (src),y
+@find_string:
+	lda (zp_0E_src),y
 	and #$80
-	bne b0F8D
-	inc src
-	bne b0F7F
-	inc src+1
-	bne b0F7F
-b0F8D:
+	bne @found_start
+	inc zp_0E_src
+	bne @find_string
+	inc a0F
+	bne @find_string
+@found_start:
 	dey
-	lda (src),y
-	cmp #$2a
-	beq b0F96
-	inc dst
-b0F96:
-	inc src
-	bne b0F9C
-	inc src+1
-b0F9C:
-	lda #$04
-	sta dst+1
-b0FA0:
-	lda (src),y
-	and #$5f
-	sta row_ptr
-	lda (count),y
-	and #$5f
-	cmp row_ptr
-	bne b0FC5
-	inc count
-	bne b0FB4
-	inc count+1
-b0FB4:
-	inc src
-	bne b0FBA
-	inc src+1
-b0FBA:
-	dec dst+1
-	bne b0FA0
-b0FBE:
+	lda (zp_0E_src),y
+	cmp #'*'
+	beq :+
+	inc zp_10_dst
+:	inc zp_0E_src
+	bne :+
+	inc a0F
+:	lda #$04
+	sta a11
+@compare_char:
+	lda (zp_0E_src),y
+	and #char_mask_upper
+	sta a13
+	lda (zp_19_n),y
+	and #char_mask_upper
+	cmp a13
+	bne @mismatch
+	inc zp_19_n
+	bne :+
+	inc a1A
+:	inc zp_0E_src
+	bne :+
+	inc a0F
+:	dec a11
+	bne @compare_char
+@done:
 	pla
-	sta count
+	sta zp_19_n
 	pla
-	sta count+1
+	sta a1A
 	rts
 
-b0FC5:
-	lda dst
-	cmp #$3f
-	beq b0FD8
+@mismatch:
+	lda zp_10_dst
+	cmp #vocab_end-1
+	beq @fail
 	pla
-	sta count
+	sta zp_19_n
 	pla
-	sta count+1
+	sta a1A
 	pha
-	lda count
+	lda zp_19_n
 	pha
-	jmp j0F7D
+	jmp @next_word
 
-b0FD8:
-	inc dst
-	bne b0FBE
-s0FDC:
+@fail:
+	inc zp_10_dst
+	bne @done
+
+wait_short:
 	ldx #$90
-	stx src+1
-b0FE0:
-	dec src
-	bne b0FE0
-	dec src+1
-	bne b0FE0
+	stx a0F
+:	dec zp_0E_src
+	bne :-
+	dec a0F
+	bne :-
 	rts
 
 input_char:
@@ -1323,40 +1227,40 @@ input_Y_or_N:
 	pla
 	rts
 
-s1015:
+draw_view:
 	jsr clear_maze_window
 	jsr s17BF
 	lda gs_room_lit
 	beq @done
 	jsr s12A6
 	jsr s1DDF
-	lda src+1
-	ora src
+	lda a0F
+	ora zp_0E_src
 	beq :+
 	jsr s1E5A
 :	ldx #$0a
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda a619B
 	beq @done
-	sta src
+	sta zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr s1E5A
 @done:
 	rts
 
-wait5:
+wait_long:
 	ldx #$05
-	stx dst
+	stx zp_10_dst
 @dec16:
 	ldx #$00
-	stx src+1
-:	dec src
+	stx a0F
+:	dec zp_0E_src
 	bne :-
-	dec src+1
+	dec a0F
 	bne :-
-	dec dst
+	dec zp_10_dst
 	bne @dec16
 	rts
 
@@ -1389,14 +1293,14 @@ pit:
 	jsr get_rowcol_addr
 	lda #$a7     ;Oh no! A pit!
 	jsr print_display_string
-	jsr s0FDC
+	jsr wait_short
 	ldx #$05
 	stx zp_col
 	inc zp_row
 	jsr get_rowcol_addr
 	lda #$2c     ;AAAAAAHH!
 	jsr print_display_string
-	jsr wait5
+	jsr wait_long
 	jsr clear_maze_window
 	ldx #$09
 	stx zp_col
@@ -1405,10 +1309,10 @@ pit:
 	jsr get_rowcol_addr
 	lda #$2d     ;WHAM!
 	jsr print_display_string
-	jmp wait5
+	jmp wait_long
 
 game_over:
-	jsr wait5
+	jsr wait_long
 	jsr clear_status_lines
 	lda #$34     ;Victim of the maze!
 	jsr print_to_line1
@@ -1428,36 +1332,36 @@ s10DC:
 	lda a61A6
 b10E1=*+$02
 	sta a61A7
-	lda a61A5
+	lda gs_special_mode
 	sta a61A6
 	rts
 
 	sta f61,x
 	jsr pit
-	jsr s1015
+	jsr draw_view
 	jmp j3493
 
 	rts
 
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$06
-	cmp count+1
+	cmp a1A
 	beq b110D
-	dec dst+1
+	dec a11
 	bne b10E1
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
+	sta a0F
 	jmp j2EFB
 
 b110D:
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
-	lda gd_direct_object
+	sta a0F
+	lda gd_parsed_object
 	cmp #$13
 	beq b111D
 	jmp j2E72
@@ -1466,9 +1370,9 @@ b111D:
 	inc gs_torches_unlit
 	jmp j2E72
 
-	dec src+1
+	dec a0F
 	bne b1148
-	lda src
+	lda zp_0E_src
 	cmp #$11
 	beq @not_here
 	cmp #$15
@@ -1490,15 +1394,16 @@ b111D:
 	jsr print_to_line2
 	rts
 
+; junk
 b1148:
-	dec src+1
+	dec a0F
 	bne b1164
 	ldx #<p0602
-	stx src
+	stx zp_0E_src
 	ldx #>p0602
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$08
 	beq b1160
 	jmp j0BAD
@@ -1526,19 +1431,19 @@ char_out:
 	jmp clear_up_to_3F
 
 print_char:
-	sta row_ptr
+	sta a13
 	lda #$00
 	sta row_ptr+1
-	asl row_ptr
+	asl a13
 	rol row_ptr+1
-	asl row_ptr
+	asl a13
 	rol row_ptr+1
-	asl row_ptr
+	asl a13
 	rol row_ptr+1
 	clc
 	lda #<font
-	adc row_ptr
-	sta row_ptr
+	adc a13
+	sta a13
 	lda #>font
 	adc row_ptr+1
 	sta row_ptr+1
@@ -1548,7 +1453,7 @@ print_char:
 	sta line_count
 	clc
 @next_line:
-	lda (row_ptr),y
+	lda (p13),y
 	sta (screen_ptr,x)
 	lda #$04
 	adc screen_ptr+1
@@ -1571,17 +1476,17 @@ get_rowcol_addr:
 	asl
 	clc
 	adc #<row8_table
-	sta row_ptr
+	sta a13
 	lda #$00
 	adc #>row8_table
 	sta row_ptr+1
 	ldy #$01
 	clc
-	lda (row_ptr),y
+	lda (p13),y
 	adc zp_col
 	sta screen_ptr
 	dey
-	lda (row_ptr),y
+	lda (p13),y
 	sta screen_ptr+1
 	rts
 
@@ -1669,7 +1574,7 @@ clear_maze_window:
 	jsr get_rowcol_addr
 	clc
 	lda #$08
-	sta count
+	sta zp_19_n
 @clear_raster:
 	lda #$00
 	ldy #$16
@@ -1679,7 +1584,7 @@ clear_maze_window:
 	lda #$04
 	adc screen_ptr+1
 	sta screen_ptr+1
-	dec count
+	dec zp_19_n
 	bne @clear_raster
 	dec zp_row
 	bpl @clear_row
@@ -2003,7 +1908,6 @@ b14E9:
 	jsr s17A7
 b14FE:
 	lda #$0e
-p1500:
 	sta zp_col
 	lda #$07
 	sta zp_row
@@ -2341,7 +2245,7 @@ b1779:
 
 s177F:
 	tya
-	sta count+1
+	sta a1A
 b1782:
 	jsr get_rowcol_addr
 	lda #$02
@@ -2349,26 +2253,26 @@ b1782:
 	dec zp_col
 	dec zp_col
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne b1782
 	rts
 
 s1795:
 	tya
-	sta count+1
+	sta a1A
 b1798:
 	jsr get_rowcol_addr
 	lda #$01
 	jsr char_out
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne b1798
 	rts
 
 s17A7:
 	pha
 	tya
-	sta count+1
+	sta a1A
 	pla
 b17AC:
 	pha
@@ -2379,7 +2283,7 @@ b17AC:
 	pla
 	dec zp_col
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne b17AC
 	rts
 
@@ -2389,7 +2293,7 @@ s17BF:
 	sta text_ptr
 	lda #>p6000
 	sta text_ptr+1
-	ldx a6194
+	ldx gs_level
 	lda #$00
 	clc
 j17CF:
@@ -2401,7 +2305,7 @@ j17CF:
 b17D7:
 	adc text_ptr
 	sta text_ptr
-	ldx gs_player_xyH
+	ldx gs_player_x
 j17DE:
 	dex
 	beq b17EA
@@ -2411,7 +2315,7 @@ j17DE:
 	jmp j17DE
 
 b17EA:
-	lda gs_player_xyL
+	lda gs_player_y
 	cmp #$05
 	bmi b17FF
 	cmp #$09
@@ -2434,12 +2338,12 @@ j1802:
 	jmp j1802
 
 b180A:
-	sta count+1
-	stx count
-	stx dst+1
+	sta a1A
+	stx zp_19_n
+	stx a11
 	stx a6199
 	stx a619A
-	ldx game_state
+	ldx gs_facing
 	dex
 	bne b181F
 	jmp j1910
@@ -2454,62 +2358,62 @@ b1825:
 	beq b18A7
 j1828:
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	bne b184C
-	inc count
-	lda count
+	inc zp_19_n
+	lda zp_19_n
 	cmp #$05
 	beq b184C
-	lda count+1
+	lda a1A
 	cmp #$80
 	bne b1845
 	dec text_ptr
 	lda #$02
-	sta count+1
+	sta a1A
 	jmp j1828
 
 b1845:
-	asl count+1
-	asl count+1
+	asl a1A
+	asl a1A
 	jmp j1828
 
 b184C:
-	lda count
+	lda zp_19_n
 	jsr s1A10
-	lsr count+1
+	lsr a1A
 j1853:
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	beq b185C
 	inc a619A
 b185C:
 	ldy #$03
 	lda (text_ptr),y
 	ldy #$00
-	and count+1
+	and a1A
 	beq b1869
 	inc a6199
 b1869:
 	jsr s1A10
-	cmp dst+1
+	cmp a11
 	beq b189A
 	jsr s1A10
 	lda #$04
-	cmp dst+1
+	cmp a11
 	beq b1897
 	asl a6199
 	asl a619A
-	inc dst+1
-	lda count+1
+	inc a11
+	lda a1A
 	cmp #$01
 	beq b188E
-	lsr count+1
-	lsr count+1
+	lsr a1A
+	lsr a1A
 	jmp j1853
 
 b188E:
 	lda #$40
-	sta count+1
+	sta a1A
 	inc text_ptr
 	jmp j1853
 
@@ -2527,39 +2431,39 @@ b189A:
 	rts
 
 b18A7:
-	lsr count+1
+	lsr a1A
 b18A9:
 	clc
 	lda text_ptr
 	adc #$03
 	sta text_ptr
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	bne b18BE
-	inc count
-	lda count
+	inc zp_19_n
+	lda zp_19_n
 	cmp #$05
 	bne b18A9
 b18BE:
-	lda count
+	lda zp_19_n
 	jsr s1A10
-	lda count+1
-	sta count
-	asl count+1
+	lda a1A
+	sta zp_19_n
+	asl a1A
 	clc
-	ror count
+	ror zp_19_n
 	bcc b18D0
-	ror count
+	ror zp_19_n
 b18D0:
 	dec text_ptr
 	dec text_ptr
 	dec text_ptr
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	beq b18DF
 	inc a619A
 b18DF:
-	lda count
+	lda zp_19_n
 	cmp #$80
 	beq b18EA
 	lda (text_ptr),y
@@ -2570,32 +2474,32 @@ b18EA:
 	lda (text_ptr),y
 	dey
 j18EE:
-	and count
+	and zp_19_n
 	beq b18F5
 	inc a6199
 b18F5:
-	lda dst+1
+	lda a11
 	cmp #$04
 b18F9:
 	beq b1897
 	jsr s1A10
-	cmp dst+1
+	cmp a11
 b1900:
 	beq b189A
 	jsr s1A10
-	inc dst+1
+	inc a11
 	asl a6199
 	asl a619A
 	jmp b18D0
 
 j1910:
-	lsr count+1
+	lsr a1A
 j1912:
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	bne b1929
-	inc count
-	lda count
+	inc zp_19_n
+	lda zp_19_n
 	cmp #$05
 	beq b1929
 	dec text_ptr
@@ -2604,32 +2508,32 @@ j1912:
 	jmp j1912
 
 b1929:
-	lda count
+	lda zp_19_n
 	jsr s1A10
-	lda count+1
-	sta count
-	asl count+1
+	lda a1A
+	sta zp_19_n
+	asl a1A
 	clc
-	ror count
+	ror zp_19_n
 	bcc b193B
-	ror count
+	ror zp_19_n
 b193B:
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	beq b1944
 	inc a6199
 b1944:
-	lda count
+	lda zp_19_n
 	cmp #$80
 	bne b194C
 	inc text_ptr
 b194C:
 	lda (text_ptr),y
-	and count
+	and zp_19_n
 	beq b1955
 	inc a619A
 b1955:
-	lda count
+	lda zp_19_n
 	cmp #$80
 	beq b195D
 	inc text_ptr
@@ -2637,109 +2541,109 @@ b195D:
 	inc text_ptr
 	inc text_ptr
 	jsr s1A10
-	cmp dst+1
+	cmp a11
 	beq b1900
 	jsr s1A10
 	lda #$04
-	cmp dst+1
+	cmp a11
 b196F:
 	beq b18F9
-	inc dst+1
+	inc a11
 	asl a6199
 	asl a619A
 	jmp b193B
 
 j197C:
-	lda count+1
+	lda a1A
 	cmp #$02
 	bne b198B
 	lda #$80
-	sta count+1
+	sta a1A
 	inc text_ptr
 	jmp j198F
 
 b198B:
-	lsr count+1
-	lsr count+1
+	lsr a1A
+	lsr a1A
 j198F:
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	bne b19B3
-	inc count
-	lda count
+	inc zp_19_n
+	lda zp_19_n
 	cmp #$05
 	beq b19B3
-	lda count+1
+	lda a1A
 	cmp #$02
 	bne b19AC
 	inc text_ptr
 	lda #$80
-	sta count+1
+	sta a1A
 	jmp j198F
 
 b19AC:
-	lsr count+1
-	lsr count+1
+	lsr a1A
+	lsr a1A
 	jmp j198F
 
 b19B3:
-	lda count+1
+	lda a1A
 	cmp #$80
 	beq b19BE
-	asl count+1
+	asl a1A
 	jmp j19C4
 
 b19BE:
 	dec text_ptr
 	lda #$01
-	sta count+1
+	sta a1A
 j19C4:
-	lda count
+	lda zp_19_n
 	jsr s1A10
 j19C9:
 	lda (text_ptr),y
-	and count+1
+	and a1A
 	beq b19D2
 	inc a6199
 b19D2:
 	ldy #$03
 	lda (text_ptr),y
 	ldy #$00
-	and count+1
+	and a1A
 	beq b19DF
 	inc a619A
 b19DF:
 	lda #$04
-	cmp dst+1
+	cmp a11
 	beq b196F
 	jsr s1A10
-	cmp dst+1
+	cmp a11
 	bne b19EF
 	jmp b189A
 
 b19EF:
 	jsr s1A10
 	asl a6199
-	inc dst+1
+	inc a11
 	asl a619A
-	lda count+1
+	lda a1A
 	cmp #$40
 	beq b1A07
-	asl count+1
-	asl count+1
+	asl a1A
+	asl a1A
 	jmp j19C9
 
 b1A07:
 	lda #$01
-	sta count+1
+	sta a1A
 	dec text_ptr
 	jmp j19C9
 
 s1A10:
-	sta row_ptr
+	sta a13
 	lda a61F7
 	pha
-	lda row_ptr
+	lda a13
 	sta a61F7
 	pla
 	rts
@@ -2748,21 +2652,22 @@ s1A10:
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00
+
 item_exec:
-	lda src+1
+	lda a0F
 	cmp #$07
 	bpl code07_draw_inv
-	asl src
+	asl zp_0E_src
 	pha
 	lda #$00
-	sta src+1
+	sta a0F
 	clc
 	lda #<(gs_item_loc_inv-2)
-	adc src
-	sta src
+	adc zp_0E_src
+	sta zp_0E_src
 	lda #>(gs_item_loc_inv-2)
-	adc src+1
-	sta src+1
+	adc a0F
+	sta a0F
 	pla
 	cmp #$05
 	bpl code06_get_item_stat
@@ -2775,37 +2680,37 @@ item_exec:
 	adc #$05
 set_item_code:
 	ldy #$00
-	sta (src),y
-	inc src
+	sta (zp_0E_src),y
+	inc zp_0E_src
 	bne :+
-	inc src+1
+	inc a0F
 :	lda #$00
-	sta (src),y
+	sta (zp_0E_src),y
 	rts
 
 code06_get_item_stat:
 	cmp #$05
 	beq code05_drop_item
 	ldy #$00
-	lda (src),y
-	sta count+1
+	lda (zp_0E_src),y
+	sta a1A
 	iny
-	lda (src),y
-	sta count
+	lda (zp_0E_src),y
+	sta zp_19_n
 	rts
 
 code05_drop_item:
-	lda a6194
+	lda gs_level
 	ldy #$00
-	sta (src),y
-	lda gs_player_xyH
+	sta (zp_0E_src),y
+	lda gs_player_x
 	asl
 	asl
 	asl
 	asl
-	ora gs_player_xyL
+	ora gs_player_y
 	iny
-	sta (src),y
+	sta (zp_0E_src),y
 	rts
 
 code07_draw_inv:
@@ -2816,7 +2721,7 @@ code07_draw_inv:
 
 draw_inventory:
 	lda #$0f
-	sta count+1
+	sta a1A
 
 ; clear screen region
 	lda #$19
@@ -2827,16 +2732,16 @@ draw_inventory:
 	lda #$1e     ;char_ClearLine
 	jsr char_out
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne :-
 
 ; print inventory
 	lda #$14
-	sta count+1
+	sta a1A
 	lda #<gs_item_loc_inv
-	sta src
+	sta zp_0E_src
 	lda #>gs_item_loc_inv
-	sta src+1
+	sta a0F
 	lda #$1a
 	sta zp_col
 	lda #$03
@@ -2851,7 +2756,7 @@ draw_inventory:
 	jsr get_rowcol_addr
 check_item_known:
 	ldy #$00
-	lda (src),y
+	lda (zp_0E_src),y
 	cmp #$08
 	bne :+
 	jmp print_known_item
@@ -2861,36 +2766,36 @@ check_item_known:
 	jmp print_known_item
 
 next_known_item:
-	inc src
+	inc zp_0E_src
 	bne :+
-	inc src+1
-:	inc src
+	inc a0F
+:	inc zp_0E_src
 	bne :+
-	inc src+1
-:	dec count+1
+	inc a0F
+:	dec a1A
 	bne check_item_known
 
 	lda #<gs_item_loc_inv
-	sta src
+	sta zp_0E_src
 	lda #>gs_item_loc_inv
-	sta src+1
+	sta a0F
 	lda #$17
-	sta count+1
+	sta a1A
 check_item_closed:
 	ldy #$00
-	lda (src),y
+	lda (zp_0E_src),y
 	cmp #$06
 	bne next_closed_item
 	jmp print_closed_item
 
 next_closed_item:
-	inc src
+	inc zp_0E_src
 	bne :+
-	inc src+1
-:	inc src
+	inc a0F
+:	inc zp_0E_src
 	bne :+
-	inc src+1
-:	dec count+1
+	inc a0F
+:	dec a1A
 	bne check_item_closed
 
 	lda #$1a
@@ -2933,16 +2838,16 @@ next_closed_item:
 print_known_item:
 	lda #$15
 	sec
-	sbc count+1
+	sbc a1A
 	cmp #$12
 	bmi :+
 	lda #$12     ;clamp max inventory row
-:	sta row_ptr
+:	sta a13
 	lda zp_col
 	pha
 	lda zp_row
 	pha
-	lda row_ptr
+	lda a13
 	jsr print_noun
 	pla
 	sta zp_row
@@ -2968,143 +2873,143 @@ print_closed_item:
 	jmp next_closed_item
 
 code08_count_inv:
-	sta count+1
-	dec count+1
+	sta a1A
+	dec a1A
 	bne code09_new_game
 	lda #>gs_item_loc_inv
-	sta src+1
+	sta a0F
 	lda #<gs_item_loc_inv
-	sta src
+	sta zp_0E_src
 	lda #$14
-	sta count+1
+	sta a1A
 	lda #$00
-	sta count
+	sta zp_19_n
 	ldy #$00
 @check_carried:
-	lda (src),y
+	lda (zp_0E_src),y
 	cmp #$06
 	bmi :+
-	inc count
+	inc zp_19_n
 :	iny
 	iny
-	dec count+1
+	dec a1A
 	bne @check_carried
 	lda gs_torch_time
 	bne @add_one
 	lda gs_torches_unlit
 	beq @done
 @add_one:
-	inc count
+	inc zp_19_n
 @done:
 	rts
 
 code09_new_game:
-	dec count+1
+	dec a1A
 	bne code0A
 	ldy #gs_size-1
 	lda #>data_new_game
-	sta src+1
+	sta a0F
 	lda #<data_new_game
-	sta src
-	lda #<game_state
-	sta dst
-	lda #>game_state
-	sta dst+1
-:	lda (src),y
-	sta (dst),y
+	sta zp_0E_src
+	lda #<gs_facing
+	sta zp_10_dst
+	lda #>gs_facing
+	sta a11
+:	lda (zp_0E_src),y
+	sta (zp_10_dst),y
 	dey
 	bpl :-
 	rts
 
 code0A:
-	dec count+1
+	dec a1A
 	bne code0B_inside_box
 	jmp code0A_impl
 
 code0B_inside_box:
-	dec count+1
+	dec a1A
 	beq :+
 	jmp code0C
 
-:	lda gs_player_xyH
+:	lda gs_player_x
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc gs_player_xyL
-	sta dst+1
+	adc gs_player_y
+	sta a11
 	lda #>gs_item_loc_map
-	sta src+1
+	sta a0F
 	lda #<gs_item_loc_map
-	sta src
+	sta zp_0E_src
 	lda #$17
-	sta count+1
+	sta a1A
 	ldy #$00
-	lda dst+1
+	lda a11
 box_next_loc:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq item_at_feet
 not_at_feet:
 	iny
 	iny
-	dec count+1
+	dec a1A
 	bne box_next_loc
 
 	lda #>gs_item_loc_inv
-	sta src+1
+	sta a0F
 	lda #<gs_item_loc_inv
-	sta src
+	sta zp_0E_src
 	lda #$10
-	sta count+1
+	sta a1A
 	lda #$06
 	ldy #$00
 box_next_carry:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq return_item_num
 	iny
 	iny
-	dec count+1
+	dec a1A
 	bne box_next_carry
 
 ; Skip over snake
 	lda #>(gs_item_loc_inv+34)
-	sta src+1
+	sta a0F
 	lda #<(gs_item_loc_inv+34)
-	sta src
+	sta zp_0E_src
 	lda #$06
-	sta count+1
+	sta a1A
 	ldy #$00
 @next_other:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq return_item_num
 	iny
 	iny
-	dec count+1
+	dec a1A
 	bne @next_other
 
 ; Go back and check snake
 	ldx #>(gs_item_loc_inv+32)
-	stx src+1
+	stx a0F
 	ldx #<(gs_item_loc_inv+32)
-	stx src
+	stx zp_0E_src
 	ldy #$00
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq return_item_num
 	lda #$00
 	rts
 
 item_at_feet:
-	dec src
-	lda (src),y
-	sta row_ptr
-	inc src
+	dec zp_0E_src
+	lda (zp_0E_src),y
+	sta a13
+	inc zp_0E_src
 	dey
-	lda row_ptr
-	cmp a6194
+	lda a13
+	cmp gs_level
 	beq return_item_num
 	iny
-	lda dst+1
+	lda a11
 	jmp not_at_feet
 
 return_item_num:
@@ -3112,13 +3017,13 @@ return_item_num:
 	tya
 	bpl :+
 	lda #$00     ;clamp min 0
-:	adc src
-	sta src
+:	adc zp_0E_src
+	sta zp_0E_src
 	lda #$00
-	adc src+1
-	sta src+1
+	adc a0F
+	sta a0F
 	sec
-	lda src
+	lda zp_0E_src
 	sbc #<gs_item_loc_inv
 	clc
 	ror
@@ -3127,62 +3032,62 @@ return_item_num:
 	rts
 
 code0C:
-	dec count+1
+	dec a1A
 	bne code0D
 	lda #>p0308
-	sta dst+1
+	sta a11
 	lda #<p0308
-	sta dst
+	sta zp_10_dst
 	lda #>p0612
-	sta src+1
+	sta a0F
 	lda #<p0612
-	sta src
+	sta zp_0E_src
 b1CC3:
-	lda src+1
+	lda a0F
 	pha
-	lda src
+	lda zp_0E_src
 	pha
 	jsr item_exec
-	lda dst
-	cmp count+1
+	lda zp_10_dst
+	cmp a1A
 	beq b1CE1
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
-	inc src
-	dec dst+1
+	sta a0F
+	inc zp_0E_src
+	dec a11
 	bne b1CC3
 	lda #$00
 	rts
 
 b1CE1:
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	lda src
+	lda zp_0E_src
 	rts
 
 code0D:
-	dec count+1
+	dec a1A
 	bne code0E
 	lda #>p0307
-	sta dst+1
+	sta a11
 	lda #<p0307
-	sta dst
+	sta zp_10_dst
 	bne b1D02
 code0E:
-	dec count+1
+	dec a1A
 	bne code_default
 	lda #>p0308
-	sta dst+1
+	sta a11
 	lda #<p0308
-	sta dst
+	sta zp_10_dst
 b1D02:
 	lda #>p0615
-	sta src+1
+	sta a0F
 	lda #<p0615
-	sta src
+	sta zp_0E_src
 	jsr b1CC3
 code_default:
 	rts
@@ -3201,13 +3106,13 @@ code0A_impl:
 	sec
 	sbc #$01
 b1D21:
-	sta count+1
-	lda gs_player_xyH
-	sta dst+1
-	lda gs_player_xyL
-	sta dst
-	lda a6194
-	sta count
+	sta a1A
+	lda gs_player_x
+	sta a11
+	lda gs_player_y
+	sta zp_10_dst
+	lda gs_level
+	sta zp_19_n
 	jmp j1D3B
 
 b1D35:
@@ -3216,99 +3121,99 @@ b1D35:
 	rts
 
 j1D3B:
-	lda count+1
-	sta src+1
+	lda a1A
+	sta a0F
 	lda #$00
-	sta src
+	sta zp_0E_src
 j1D43:
-	lda game_state
+	lda gs_facing
 	jsr s1DC7
 	jsr s1D69
-	dec count+1
+	dec a1A
 	beq b1D55
-	lsr src
+	lsr zp_0E_src
 	jmp j1D43
 
 b1D55:
 	lda #$04
 	sec
-	sbc src+1
+	sbc a0F
 	beq b1D63
 b1D5C:
-	lsr src
+	lsr zp_0E_src
 	sec
 	sbc #$01
 	bne b1D5C
 b1D63:
-	lda src
+	lda zp_0E_src
 	sta a619B
 	rts
 
 s1D69:
 	pha
-	lda dst+1
+	lda a11
 	pha
-	lda dst
+	lda zp_10_dst
 	pha
-	lda src+1
+	lda a0F
 	pha
-	lda src
+	lda zp_0E_src
 	pha
-	lda dst+1
+	lda a11
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc dst
+	adc zp_10_dst
 	pha
 	lda #>gs_item_loc_map
-	sta src+1
+	sta a0F
 	lda #<gs_item_loc_map
-	sta src
+	sta zp_0E_src
 	lda #$17
-	sta dst+1
+	sta a11
 	pla
 	ldy #$00
 b1D8F:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq b1DA7
 j1D93:
 	iny
 	iny
-	dec dst+1
+	dec a11
 	bne b1D8F
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
+	sta a0F
 b1D9F:
 	pla
-	sta dst
+	sta zp_10_dst
 	pla
-	sta dst+1
+	sta a11
 	pla
 	rts
 
 b1DA7:
-	sta dst
-	dec src
-	lda (src),y
-	inc src
-	cmp count
+	sta zp_10_dst
+	dec zp_0E_src
+	lda (zp_0E_src),y
+	inc zp_0E_src
+	cmp zp_19_n
 	beq b1DB8
-	lda dst
+	lda zp_10_dst
 	jmp j1D93
 
 b1DB8:
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
-	lda src
+	sta a0F
+	lda zp_0E_src
 	clc
 	adc #$08
-	sta src
+	sta zp_0E_src
 	bne b1D9F
 s1DC7:
 	cmp #$01
@@ -3317,77 +3222,77 @@ s1DC7:
 	beq b1DD9
 	cmp #$03
 	beq b1DDC
-	dec dst
+	dec zp_10_dst
 	rts
 
 b1DD6:
-	dec dst+1
+	dec a11
 	rts
 
 b1DD9:
-	inc dst
+	inc zp_10_dst
 	rts
 
 b1DDC:
-	inc dst+1
+	inc a11
 	rts
 
 s1DDF:
-	lda game_state
+	lda gs_facing
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc a6194
-	sta dst+1
-	lda gs_player_xyH
+	adc gs_level
+	sta a11
+	lda gs_player_x
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc gs_player_xyL
-	sta dst
+	adc gs_player_y
+	sta zp_10_dst
 	lda #>p60A5
-	sta src+1
+	sta a0F
 	lda #<p60A5
-	sta src
+	sta zp_0E_src
 	lda #$26
-	sta count
+	sta zp_19_n
 	ldy #$00
-	lda dst+1
+	lda a11
 b1E09:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq b1E1C
 	iny
 b1E0E:
 	iny
 	iny
 	iny
-	dec count
+	dec zp_19_n
 	bne b1E09
 	lda #$00
-	sta src+1
-	sta src
+	sta a0F
+	sta zp_0E_src
 	rts
 
 b1E1C:
-	lda dst
+	lda zp_10_dst
 	iny
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq b1E27
-	lda dst+1
+	lda a11
 	bne b1E0E
 b1E27:
 	iny
-	lda (src),y
-	sta dst+1
+	lda (zp_0E_src),y
+	sta a11
 	iny
-	lda (src),y
-	sta src
-	lda dst+1
-	sta src+1
+	lda (zp_0E_src),y
+	sta zp_0E_src
+	lda a11
+	sta a0F
 	rts
 
 p1E36:
@@ -3397,11 +3302,11 @@ p1E36:
 	.byte $20,$0b,$0b,$20,$0b,$0b,$0b,$0b
 	.byte $0b,$0b,$0b,$0b
 s1E5A:
-	ldy src+1
+	ldy a0F
 	dey
 	bne b1EA1
 	lda #$09
-	sta count+1
+	sta a1A
 	sta zp_col
 	lda #$06
 	sta zp_row
@@ -3413,7 +3318,7 @@ s1E5A:
 	ldy #$00
 j1E76:
 	lda #$04
-	sta count
+	sta zp_19_n
 b1E7A:
 	tya
 	pha
@@ -3422,9 +3327,9 @@ b1E7A:
 	pla
 	tay
 	iny
-	dec count
+	dec zp_19_n
 	bne b1E7A
-	dec count+1
+	dec a1A
 	beq b1EA0
 	tya
 	pha
@@ -3488,7 +3393,7 @@ b1EA1:
 	sta text_ptr
 	ldy #$00
 	lda #$08
-	sta count+1
+	sta a1A
 b1F04:
 	tya
 	pha
@@ -3497,7 +3402,7 @@ b1F04:
 	pla
 	tay
 	iny
-	dec count+1
+	dec a1A
 	bne b1F04
 	rts
 
@@ -3510,13 +3415,13 @@ b1F1B:
 
 b1F21:
 	lda #$06
-	sta string_ptr
+	sta zp_0C_string
 j1F25:
 	lda #$00
 	sta zp_row
 	lda #$06
 	sec
-	sbc string_ptr
+	sbc zp_0C_string
 	sta zp_col
 	pha
 	lda #$20
@@ -3587,7 +3492,7 @@ j1F25:
 	sta zp_row
 	lda #$10
 	clc
-	adc string_ptr
+	adc zp_0C_string
 	sta zp_col
 	pha
 	lda #$20
@@ -3655,7 +3560,7 @@ p1FFF:
 	jsr s17A7
 	ldy #$04
 	jsr s1795
-	dec string_ptr
+	dec zp_0C_string
 	beq b2051
 	jsr s2617
 	jmp j1F25
@@ -3675,8 +3580,8 @@ j206A:
 	lda #>p2052
 	sta text_ptr+1
 	lda #$02
-	sta count
-	lda src
+	sta zp_19_n
+	lda zp_0E_src
 	beq b207F
 	ldy #$0c
 b207F:
@@ -3688,21 +3593,21 @@ b207F:
 	iny
 	lda (text_ptr),y
 	iny
-	sta count+1
+	sta a1A
 	tya
 	pha
-	lda count+1
+	lda a1A
 	tay
 	lda #$02
 	clc
-	adc count
+	adc zp_19_n
 	jsr s17A7
 	pla
 	tay
-	dec count
+	dec zp_19_n
 	bne b207F
 	lda #$02
-	sta count
+	sta zp_19_n
 b20A5:
 	lda (text_ptr),y
 	sta screen_ptr+1
@@ -3711,16 +3616,16 @@ b20A5:
 	sta screen_ptr
 	iny
 	lda (text_ptr),y
-	sta count+1
+	sta a1A
 	iny
 	tya
 	pha
-	lda count+1
+	lda a1A
 	tay
 	jsr s1777
 	pla
 	tay
-	dec count
+	dec zp_19_n
 	bne b20A5
 	rts
 
@@ -3738,8 +3643,8 @@ b20E7:
 	lda #>p20C3
 	sta text_ptr+1
 	lda #$02
-	sta count
-	ldy src
+	sta zp_19_n
+	ldy zp_0E_src
 	beq b2102
 	dey
 	beq b207F
@@ -3912,7 +3817,7 @@ j2272:
 	jmp j2347
 
 b2278:
-	lda src
+	lda zp_0E_src
 	cmp #$01
 	beq b22F8
 	cmp #$04
@@ -3954,7 +3859,7 @@ b22AB:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$03
-	sta count+1
+	sta a1A
 	jsr s22E6
 	lda #$08
 	sta zp_col
@@ -3962,7 +3867,7 @@ b22AB:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$07
-	sta count+1
+	sta a1A
 	jsr s22E6
 	lda #$09
 	sta zp_col
@@ -3970,7 +3875,7 @@ b22AB:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$06
-	sta count+1
+	sta a1A
 s22E6:
 	ldy #$00
 	lda (text_ptr),y
@@ -3979,7 +3884,7 @@ s22E6:
 	bne b22F3
 	inc text_ptr+1
 b22F3:
-	dec count+1
+	dec a1A
 	bne s22E6
 	rts
 
@@ -3989,11 +3894,10 @@ b22F8:
 	lda #>p2254
 	sta text_ptr+1
 	lda #$13
-p2303=*+$01
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta count+1
+	sta a1A
 b230A:
 	jsr get_rowcol_addr
 	ldy #$00
@@ -4013,7 +3917,7 @@ b2327:
 	inc zp_row
 	dec zp_col
 	dec zp_col
-	dec count+1
+	dec a1A
 	bne b230A
 	rts
 
@@ -4026,7 +3930,7 @@ j2332:
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta count+1
+	sta a1A
 	jmp b230A
 
 j2347:
@@ -4035,7 +3939,7 @@ j2347:
 	jmp j2410
 
 b234D:
-	lda src
+	lda zp_0E_src
 	cmp #$04
 	bne b2356
 	jmp j23DD
@@ -4138,30 +4042,30 @@ j2410:
 	jmp j254C
 
 b2416:
-	lda src
+	lda zp_0E_src
 	and #$0f
 	beq b244F
 	and #$08
 	beq b2427
 	lda #$0c
 	sta zp_col
-	jsr s253F
+	jsr draw_keyhole_2
 b2427:
-	lda src
+	lda zp_0E_src
 	and #$04
 	beq b2434
 	lda #$0d
 	sta zp_col
-	jsr s252D
+	jsr draw_keyhole_1
 b2434:
-	lda src
+	lda zp_0E_src
 	and #$02
 	beq b2441
 	lda #$0f
 	sta zp_col
-	jsr s24E2
+	jsr draw_keyhole_0
 b2441:
-	lda src
+	lda zp_0E_src
 	and #$01
 	beq b244E
 	lda #$13
@@ -4172,33 +4076,33 @@ b244E:
 	rts
 
 b244F:
-	lda src
+	lda zp_0E_src
 	and #$10
 	beq b245C
 	lda #$02
 	sta zp_col
 	jsr s2484
 b245C:
-	lda src
+	lda zp_0E_src
 	and #$20
 	beq b2469
 	lda #$05
 	sta zp_col
-	jsr s24E2
+	jsr draw_keyhole_0
 b2469:
-	lda src
+	lda zp_0E_src
 	and #$40
 	beq b2476
 	lda #$08
 	sta zp_col
-	jsr s252D
+	jsr draw_keyhole_1
 b2476:
-	lda src
+	lda zp_0E_src
 	and #$80
 	beq b2483
 	lda #$0a
 	sta zp_col
-	jsr s253F
+	jsr draw_keyhole_2
 b2483:
 	rts
 
@@ -4244,26 +4148,26 @@ s2484:
 	jsr char_out
 	rts
 
-s24E2:
+draw_keyhole_0:
 	lda #$09
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$1e
+	lda #glyph_R_notched
 	jsr print_char
-	lda #$0b
+	lda #glyph_solid
 	jsr char_out
-	lda #$1d
+	lda #glyph_L_notched
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$5f
+	lda #glyph_UR_triangle
 	jsr print_char
-	lda #$0b
+	lda #glyph_solid
 	jsr char_out
-	lda #$60
+	lda #glyph_UL_triangle
 s2510=*+$01
 	jsr print_char
 	inc zp_row
@@ -4271,29 +4175,29 @@ s2510=*+$01
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$1c
+	lda #glyph_R_solid
 	jsr char_out
-	lda #$0b
+	lda #glyph_solid
 	jsr char_out
-	lda #$1b
-	jsr char_out
-	rts
-
-s252D:
-	lda #$0a
-	sta zp_row
-	jsr get_rowcol_addr
-	lda #$19
-	jsr char_out
-	lda #$1a
+	lda #glyph_L_solid
 	jsr char_out
 	rts
 
-s253F:
+draw_keyhole_1:
 	lda #$0a
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$18
+	lda #glyph_keyhole_R
+	jsr char_out
+	lda #glyph_keyhole_L
+	jsr char_out
+	rts
+
+draw_keyhole_2:
+	lda #$0a
+	sta zp_row
+	jsr get_rowcol_addr
+	lda #glyph_keyhole_C
 	jsr char_out
 	rts
 
@@ -4318,38 +4222,38 @@ j254C:
 	ldy #$02
 	jsr s1777
 	lda #$0a
-	sta string_ptr
+	sta zp_0C_string
 	lda #$0b
-	sta count
+	sta zp_19_n
 	lda #>p0402
-	sta dst+1
+	sta a11
 	lda #<p0402
-	sta dst
+	sta zp_10_dst
 b2585:
 	jsr s2617
-	lda string_ptr
+	lda zp_0C_string
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #$20
 	ldy #$12
 	jsr s17A7
-	lda count
+	lda zp_19_n
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #$20
 	ldy #$12
 	jsr s17A7
-	dec string_ptr
-	inc count
-	lda string_ptr
+	dec zp_0C_string
+	inc zp_19_n
+	lda zp_0C_string
 	sta zp_col
 	lda #$03
 	sta zp_row
 	ldy #$12
 	jsr s17A7
-	lda count
+	lda zp_19_n
 	sta zp_col
 	lda #$03
 	sta zp_row
@@ -4358,187 +4262,183 @@ b2585:
 	jsr s17A7
 	lda #$11
 	sta zp_row
-	dec string_ptr
-	lda string_ptr
-	inc string_ptr
+	dec zp_0C_string
+	lda zp_0C_string
+	inc zp_0C_string
 	sta zp_col
-b25D3=*+$01
 	jsr get_rowcol_addr
-	inc dst
-	inc dst
-	ldy dst
+	inc zp_10_dst
+	inc zp_10_dst
+	ldy zp_10_dst
 	jsr s1777
-	dec dst+1
+	dec a11
 	bne b2585
 	rts
 
 print_noun:
-	sta row_ptr
+	sta a13
 	lda #<noun_table
-	sta string_ptr
+	sta zp_0C_string
 	lda #>noun_table
-	sta string_ptr+1
+	sta zp_0D
 	ldy #$00
 @find_string:
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	bmi @found_start
 @next_char:
-	inc string_ptr
+	inc zp_0C_string
 	bne @find_string
-	inc string_ptr+1
+	inc zp_0D
 	bne @find_string
 @found_start:
-	dec row_ptr
+	dec a13
 	bne @next_char
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	and #$7f
 @print_char:
 	jsr char_out
-	inc string_ptr
+	inc zp_0C_string
 	bne :+
-	inc string_ptr+1
+	inc zp_0D
 :	ldy #$00
-	lda (string_ptr),y
+	lda (zp_0C_string),y
 	bpl @print_char
 	lda #' '
 	jmp char_out
 
 s2617:
 	ldx #$28
-	stx src+1
+	stx a0F
 b261B:
-	dec src
+	dec zp_0E_src
 	bne b261B
-	dec src+1
+	dec a0F
 	bne b261B
 	rts
 
-	bpl b25D3
-	ora #$01
-	jsr s3402
-	lda a0108
-	jsr s3402
-	rts
+; junk
+	.byte $10,$ad,$09,$01,$20,$02,$34,$ad
+	.byte $08,$01,$20,$02,$34,$60,$a9,$00
+	.byte $9d,$00,$01,$9d,$01,$01,$85,$df
+	.byte $85,$e0,$20,$6e
 
-	.byte $a9,$00,$9d,$00,$01,$9d,$01,$01
-	.byte $85,$df,$85,$e0,$20,$6e
-s2640:
-	lda gd_direct_object
-	sta src
-	lda a619C
-	sta src+1
+exec_cmd:
+	lda gd_parsed_object
+	sta zp_0E_src
+	lda gd_parsed_verb
+	sta a0F
 	cmp #$0e
 	bmi :+
 	jmp j2B1B
 
-:	lda src
+:	lda zp_0E_src
 	cmp #$15
 	bmi :+
 	jmp nonsense
 
 :	jsr s0B97
-	sta dst+1
-	lda gd_direct_object
-	sta src
-	lda a619C
-	sta src+1
-	dec src+1
-	bne @b26AB
-	lda #$0b
-	cmp src
-	beq @b2682
-	lda #$0d
-	cmp src
-	beq @b267E
-@b2679:
+	sta a11
+	lda gd_parsed_object
+	sta zp_0E_src
+	lda gd_parsed_verb
+	sta a0F
+cmd_raise:
+	dec a0F
+	bne @cmd_blow
+	lda #noun_ring
+	cmp zp_0E_src
+	beq @ring
+	lda #noun_staff
+	cmp zp_0E_src
+	beq @staff
+@having_fun:
 	lda #$1f     ;Having fun?
 @print_line2:
 	jmp print_to_line2
 
-@b267E:
-	lda #$73
+@staff:
+	lda #$73     ;Staff begins to quake
 	bne @print_line2
-@b2682:
-	lda a6194
+@ring:
+	lda gs_level
 	cmp #$05
-	bne @b2679
+	bne @having_fun
 	lda #$07
-	cmp count+1
-	beq @b2679
+	cmp a1A
+	beq @having_fun
 	lda #$0b
-	sta src
+	sta zp_0E_src
 	lda #$03
-	sta src+1
+	sta a0F
 	jsr item_exec
 	lda #$01
 	sta gs_room_lit
-	jsr s1015
+	jsr draw_view
 	lda #$71     ;The ring is activated and
 	jsr print_to_line1
 	lda #$72     ;shines light everywhere!
 	bne @print_line2
 
-@b26AB:
-	dec src+1
-	bne b26E1
-	lda src
+@cmd_blow:
+	dec a0F
+	bne cmd_break
+	lda zp_0E_src
+	cmp #noun_flute
+	beq @play
+	cmp #noun_horn
+	bne @having_fun
+	lda gs_level
 	cmp #$05
-	beq b26DD
-	cmp #$08
-	bne @b2679
-	lda a6194
-	cmp #$05
-	bne b26D2
-	lda a61A5
-	cmp #$09
-	bne b26D2
-	lda #<p0308
-	sta src
-	lda #>p0308
-	sta src+1
+	bne :+
+	lda gs_special_mode
+	cmp #special_mother
+	bne :+
+	lda #$08
+	sta zp_0E_src
+	lda #$03
+	sta a0F
 	jsr item_exec
-b26D2:
-	lda #$7f     ;A deafening roar envelopes
+:	lda #$7f     ;A deafening roar envelopes
 	jsr print_to_line1
 	lda #$80     ;you. Your ears are ringing!
 	jsr print_to_line2
 	rts
 
-b26DD:
-	lda #$09
-	sta src+1
-b26E1:
-	dec src+1
-	bne b2756
-	lda src
+@play:
+	lda #noun_play - noun_blow
+	sta a0F
+cmd_break:
+	dec a0F
+	bne cmd_burn
+	lda zp_0E_src
 	cmp #$0b
 	bne b26EE
 	jsr s281D
 b26EE:
 	cmp #$12
 	bmi b270D
-	sta row_ptr
-	lda dst
+	sta a13
+	lda zp_10_dst
 	pha
-	lda dst+1
+	lda a11
 	pha
-	lda row_ptr
+	lda a13
 	cmp #$13
 	bne b2703
 	jsr s2723
 b2703:
 	pla
-	sta dst+1
+	sta a11
 	pla
-	sta dst
-	lda dst+1
-	sta src
+	sta zp_10_dst
+	lda a11
+	sta zp_0E_src
 b270D:
 	jsr item_exec
-	jsr s1015
+	jsr draw_view
 	lda #$4e     ;You break the
 	jsr print_to_line1
-	lda gd_direct_object
+	lda gd_parsed_object
 	jsr print_noun
 	lda #$4f     ;and it disappears!
 	jmp print_to_line2
@@ -4547,34 +4447,34 @@ s2723:
 	lda gs_torches_unlit
 	bne b2743
 	dec gs_torches_lit
-	lda a6194
+	lda gs_level
 	cmp #$05
 	beq b2742
 	lda #$00
 	sta gs_torch_time
 	sta gs_room_lit
 	jsr s2788
-	lda #$0a
-	sta a61A5
+	lda #special_dark
+	sta gs_special_mode
 b2742:
 	rts
 
 b2743:
 	dec gs_torches_unlit
 	lda #$0e
-	sta src+1
+	sta a0F
 	jsr item_exec
-	sta src
+	sta zp_0E_src
 	lda #$00
-	sta src+1
+	sta a0F
 	jmp item_exec
 
-b2756:
-	dec src+1
+cmd_burn:
+	dec a0F
 	bne b2799
 	lda gs_torches_lit
 	beq b2784
-	lda src
+	lda zp_0E_src
 	cmp #$0b
 	bne :+
 	jsr s281D
@@ -4582,8 +4482,8 @@ b2756:
 	bmi b2774
 	cmp #$13
 	beq b2795
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 b2774:
 	jsr item_exec
 	jsr clear_status_lines
@@ -4599,20 +4499,20 @@ b2784:
 s2788:
 	lda a61A6
 	sta a61A7
-	lda a61A5
+	lda gs_special_mode
 	sta a61A6
 	rts
 
 b2795:
 	lda #$06
-	sta src+1
+	sta a0F
 b2799:
-	dec src+1
+	dec a0F
 	beq b27A0
 	jmp j2839
 
 b27A0:
-	lda src
+	lda zp_0E_src
 	cmp #$0b
 	bne b27A9
 	jsr s281D
@@ -4623,82 +4523,82 @@ b27A9:
 	cmp #$13
 	beq b27D9
 j27B3:
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 b27B7:
 	jsr item_exec
-	jsr s1015
+	jsr draw_view
 	lda #$7d     ;You eat the
 	jsr print_to_line1
 	lda #' '
 	jsr char_out
-	lda gd_direct_object
+	lda gd_parsed_object
 	jsr print_noun
 	lda #$7e     ;and you get heartburn!
 b27CF:
 	jsr print_to_line2
 	lda #$07
-	sta src+1
+	sta a0F
 	jmp item_exec
 
 b27D9:
-	lda dst
+	lda zp_10_dst
 	pha
-	lda dst+1
+	lda a11
 	pha
 	jsr s2723
 	pla
-	sta dst+1
+	sta a11
 	pla
-	sta dst
+	sta zp_10_dst
 	jmp j27B3
 
 b27EB:
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 	jsr item_exec
 	lda gs_food_time_hi
-	sta src+1
+	sta a0F
 	lda gs_food_time_lo
-	sta src
+	sta zp_0E_src
 	lda #<pAA
-	sta count
+	sta zp_19_n
 	lda #>pAA
-	sta count+1
+	sta a1A
 	clc
-	lda count
-	adc src
-	sta src
-	lda count+1
-	adc src+1
-	sta src+1
+	lda zp_19_n
+	adc zp_0E_src
+	sta zp_0E_src
+	lda a1A
+	adc a0F
+	sta a0F
 	sta gs_food_time_hi
-	lda src
+	lda zp_0E_src
 	sta gs_food_time_lo
 	lda #$58
 	bne b27CF
 s281D:
-	lda a6194
+	lda gs_level
 	cmp #$05
 	bne b2836
 	lda #$00
 	sta gs_room_lit
 	lda a61AC
 	beq b2836
-	lda #$0a
-	sta a61A5
+	lda #special_dark
+	sta gs_special_mode
 	jsr clear_maze_window
 b2836:
 	lda #$0b
 	rts
 
 j2839:
-	dec src+1
+	dec a0F
 	beq b2840
-	jmp j293D
+	jmp cmd_drop
 
 b2840:
-	lda src
+	lda zp_0E_src
 	cmp #$0b
 	bne b2849
 	jsr s281D
@@ -4711,19 +4611,19 @@ b2850:
 	cmp #$0f
 	beq b2885
 	cmp #$10
-	beq b28B9
+	beq throw_yoyo
 	cmp #$12
 	bmi b2869
-	beq b28C6
+	beq throw_food
 	cmp #$13
 	bne b2865
 	jsr s2723
 b2865:
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 b2869:
 	jsr item_exec
-	jsr s28D9
+	jsr @thrown
 	jsr s332F
 	nop
 	nop
@@ -4738,112 +4638,111 @@ b287B:
 	jmp print_to_line2
 
 b2885:
-	lda a6194
+	lda gs_level
 	cmp #$04
 	bne b2869
 	lda a61A4
 	cmp #$29
 	bcc b2869
 	jsr s2788
-	lda #$0e
-	sta a61A5
+	lda #special_tripped
+	sta gs_special_mode
 	lda #$0f
-	sta src
+	sta zp_0E_src
 	lda #$00
-	sta src+1
+	sta a0F
 	jsr item_exec
-	jsr s28D9
+	jsr @thrown
 	lda #$5e     ;and the monster grabs it,
 	jsr print_to_line1
 	lda #$5f     ;gets tangled, and topples over!
 	jsr print_to_line2
 	lda #$00
-	sta a61B2
+	sta gs_monster_proximity
 	rts
 
-b28B9:
-	jsr s28D9
+throw_yoyo:
+	jsr @thrown
 	lda #$6b     ;returns and hits you
 	jsr print_to_line1
 	lda #$6c     ;in the eye!
 	jmp print_to_line2
 
-b28C6:
-	lda dst+1
-	sta src
+throw_food:
+	lda a11
+	sta zp_0E_src
 	jsr item_exec
 	lda #$07
-	sta src+1
+	sta a0F
 	jsr item_exec
 	lda #$81     ;Food fight!
 	jmp print_to_line2
 
-s28D9:
+@thrown:
 	lda #$07
-	sta src+1
+	sta a0F
 	jsr item_exec
 	lda #$59     ;The
 	jsr print_to_line1
-	lda gd_direct_object
+	lda gd_parsed_object
 	jsr print_noun
 	jsr s32BD
 	lda #$20
 	ldy #$00
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq :+
-	inc src
+	inc zp_0E_src
 	bne :+
-	inc src+1
-:	inc src
+	inc a0F
+:	inc zp_0E_src
 	bne :+
-	inc src+1
+	inc a0F
 :	lda #$5a     ;magically sails
 	jsr print_display_string
 	lda #$5b     ;around a nearby corner
 	jsr print_to_line2
-	jsr wait5
+	jsr wait_long
 	jmp clear_status_lines
 
 j2912:
-	lda a61AD
+	lda gs_monster_lurks
 	and #$02
-	bne b291C
+	bne throw_frisbee
 	jmp b2869
 
-b291C:
-	lda #<zp_col
-	sta src
-	lda #>zp_col
-	sta src+1
+throw_frisbee:
+	lda #$06
+	sta zp_0E_src
+	lda #$00
+	sta a0F
 	jsr item_exec
-	jsr s28D9
+	jsr @thrown
 	jsr clear_status_lines
 	lda #$3f     ;The monster grabs the frisbee, throws
 	jsr print_to_line1
 	lda #$40     ;it back, and it saws your head off!
 	jsr print_to_line2
-	jsr wait5
+	jsr wait_long
 	jmp game_over
 
-j293D:
-	dec src+1
-	bne b2944
+cmd_drop:
+	dec a0F
+	bne :+
 	jmp nonsense
 
-b2944:
-	dec src+1
-	bne b29C7
+:	dec a0F
+	bne cmd_fill
 	jsr s3274
 	lda #$0b
-	sta src+1
+	sta a0F
 	jsr item_exec
 	cmp #$00
 	beq b296D
-	sta src
+	sta zp_0E_src
 	lda #$06
-	sta src+1
+	sta a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$06
 	bcs b296D
 	lda #$82     ;The hallway is too crowded.
@@ -4852,7 +4751,7 @@ b2944:
 
 b296D:
 	jsr s3274
-	lda src
+	lda zp_0E_src
 	cmp #$12
 	bpl b298B
 	cmp #$0b
@@ -4860,22 +4759,22 @@ b296D:
 	jsr s281D
 b297D:
 	lda #$05
-	sta src+1
+	sta a0F
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jmp item_exec
 
 b298B:
 	cmp #$13
 	beq b2996
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 	jmp b297D
 
 b2996:
 	lda #$0e
-	sta src+1
+	sta a0F
 	jsr item_exec
 	beq b29A5
 	dec gs_torches_unlit
@@ -4883,42 +4782,41 @@ b2996:
 
 b29A5:
 	lda #$0d
-	sta src+1
+	sta a0F
 	jsr item_exec
-	sta src
+	sta zp_0E_src
 	dec gs_torches_lit
 	jsr s2788
 	lda #$00
 	sta gs_room_lit
 	sta gs_torches_lit
-	lda #$0a
-	sta a61A5
+	lda #special_dark
+	sta gs_special_mode
 	jsr clear_maze_window
 	jmp b297D
 
-b29C7:
-	dec src+1
+cmd_fill:
+	dec a0F
 	bne b29D9
-	lda src
-	cmp #$09
-	beq b29D4
+	lda zp_0E_src
+	cmp #noun_jar
+	beq :+
 	jmp nonsense
 
-b29D4:
-	lda #$89     ;With what? Air?
+:	lda #$89     ;With what? Air?
 	jmp print_to_line2
 
 b29D9:
-	dec src+1
-	bne b2A43
-	sta dst+1
-	lda src
+	dec a0F
+	bne cmd_play
+	sta a11
+	lda zp_0E_src
 	cmp #$13
 	beq b29E8
 	jmp nonsense
 
 b29E8:
-	lda count+1
+	lda a1A
 	cmp #$07
 	bne cmd_light
 	jmp j0BAD
@@ -4929,26 +4827,26 @@ cmd_light:
 	lda #$88     ;You have no fire.
 	jsr print_to_line2
 	lda #$07
-	sta src+1
+	sta a0F
 	jmp item_exec
 
 b2A02:
 	lda #$0d
-	sta src+1
+	sta a0F
 	jsr item_exec
 	cmp #$00
 	beq b2A16
-	sta src
+	sta zp_0E_src
 	lda #$01
-	sta src+1
+	sta a0F
 	jsr item_exec
 b2A16:
 	lda #$0e
-	sta src+1
+	sta a0F
 	jsr item_exec
-	sta src
+	sta zp_0E_src
 	lda #$03
-	sta src+1
+	sta a0F
 	jsr item_exec
 	jsr clear_status_lines
 	lda #$65     ;The torch is lit and the
@@ -4957,103 +4855,101 @@ b2A16:
 	jsr print_to_line2
 	dec gs_torches_unlit
 	lda #$07
-	sta src+1
+	sta a0F
 	jsr item_exec
 	lda #torch_lifespan
 	sta gs_torch_time
 	rts
 
-b2A43:
-	dec src+1
-	beq b2A4A
-	jmp j2ADF
+cmd_play:
+	dec a0F
+	beq :+
+	jmp cmd_strike
 
-b2A4A:
-	lda src
-	cmp #$05
-	beq b2A68
-	cmp #$01
-	beq b2A63
-	cmp #$08
-	beq b2A5B
+:	lda zp_0E_src
+	cmp #item_flute
+	beq play_flute
+	cmp #item_ball
+	beq play_ball
+	cmp #$08     ;item_horn
+	beq play_horn
 	jmp nonsense
 
-b2A5B:
-	lda #$02
-	sta a619C
-	jmp s2640
+play_horn:
+	lda #cmd_blow
+	sta gd_parsed_verb
+	jmp exec_cmd
 
-b2A63:
+play_ball:
 	lda #$87     ;With who? The monster?
-j2A65:
+print_and_rts:
 	jmp print_to_line2
 
-b2A68:
+play_flute:
 	lda #$11
-	sta src
+	sta zp_0E_src
 	lda #$06
-	sta src+1
+	sta a0F
 	jsr item_exec
-	lda count+1
-	cmp a6194
-	bne b2A89
-	lda gs_player_xyH
+	lda a1A
+	cmp gs_level
+	bne @music
+	lda gs_player_x
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc gs_player_xyL
-	cmp count
-	beq b2A96
-b2A89:
+	adc gs_player_y
+	cmp zp_19_n
+	beq @charm
+@music:
 	jsr clear_status_lines
 	lda #$83     ;A high shrill note comes
 	jsr print_to_line1
 	lda #$84     ;from the flute!
-	jmp j2A65
+	jmp print_and_rts ;GUG: saves no bytes, adds time.
 
-b2A96:
+@charm:
 	lda #$0a
 	sta zp_col
 	lda #$14
 	sta zp_row
-b2A9E:
+@draw_snake:
 	jsr get_rowcol_addr
-	lda #$1c
+	lda #glyph_R_solid
 	jsr print_char
-	lda #$05
+	lda #glyph_X
 	jsr print_char
-	lda #$1b
+	lda #glyph_L_solid
 	jsr print_char
 	lda #$30
-	sta dst+1
-b2AB4:
-	dec dst
-	bne b2AB4
-	dec dst+1
-	bne b2AB4
+	sta a11
+:	dec zp_10_dst
+	bne :-
+	dec a11
+	bne :-
 	dec zp_col
 	dec zp_col
 	dec zp_col
 	dec zp_row
-	bpl b2A9E
+	bpl @draw_snake
 	lda #$03
-	sta src+1
+	sta a0F
 	lda #$11
-	sta src
+	sta zp_0E_src
 	jsr item_exec
 	jsr s2788
-	lda #$0f
-	sta a61A5
+	lda #special_climb
+	sta gs_special_mode
 	lda #$00
-	sta a61B9
+	sta gs_snake_used
 	rts
 
-j2ADF:
-	dec src+1
+cmd_strike:
+	dec a0F
 	bne b2AF9
-	lda src
+	lda zp_0E_src
 	cmp #$0d
 	beq b2AEC
 	jmp nonsense
@@ -5066,12 +4962,12 @@ b2AEC:
 	jmp print_to_line2
 
 b2AF9:
-	dec src+1
+	dec a0F
 	beq b2AFE
 	rts
 
 b2AFE:
-	lda src
+	lda zp_0E_src
 	cmp #$07
 	beq b2B11
 j2B04:
@@ -5083,17 +4979,17 @@ j2B04:
 
 b2B11:
 	lda #$03
-	sta src+1
+	sta a0F
 	jsr item_exec
 	jmp j2B04
 
 j2B1B:
-	lda src+1
+	lda a0F
 	sec
 	sbc #$0e
-	sta src+1
+	sta a0F
 	bne b2B64
-	lda src
+	lda zp_0E_src
 	cmp #$07
 	bne b2B2D
 	jmp j3319
@@ -5124,7 +5020,7 @@ b2B4D:
 	jsr clear_status_lines
 	lda #$67     ;A close inspection reveals
 	jsr print_to_line1
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$03
 	beq b2B60
 	lda #$68
@@ -5133,10 +5029,10 @@ b2B60:
 	lda #$69
 	bne b2B3E
 b2B64:
-	dec src+1
+	dec a0F
 	bne b2B7A
 	jsr s0B97
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$03
 	beq b2B76
 	lda #$7a
@@ -5145,12 +5041,12 @@ b2B76:
 	lda #$28
 	bne b2B3E
 b2B7A:
-	dec src+1
+	dec a0F
 	beq b2B81
 	jmp j2CFA
 
 b2B81:
-	lda src
+	lda zp_0E_src
 	cmp #$17
 	bne b2B8A
 	jmp j2C26
@@ -5162,31 +5058,31 @@ b2B8A:
 
 b2B91:
 	lda #$0b
-	sta src+1
+	sta a0F
 	jsr item_exec
-	sta dst+1
+	sta a11
 	beq b2B3C
-	lda dst
+	lda zp_10_dst
 	pha
-	lda dst+1
+	lda a11
 	pha
-	sta src
+	sta zp_0E_src
 	lda #$06
-	sta src+1
+	sta a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$06
 	bcs b2BB4
 	jmp j2BBF
 
 b2BB4:
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 	lda #$04
-	sta src+1
+	sta a0F
 	jsr item_exec
 j2BBF:
-	lda dst+1
+	lda a11
 	cmp #$11
 	beq b2C1A
 	bmi b2BD1
@@ -5198,48 +5094,48 @@ b2BCF:
 	lda #$12
 b2BD1:
 	jsr clear_status_lines
-	sta dst
+	sta zp_10_dst
 	clc
 	adc #$04
 	jsr print_to_line2
 	lda #$18     ;Inside the box there is a
 	jsr print_to_line1
-	lda dst
+	lda zp_10_dst
 	cmp #$03
 	bne b2BEA
 	jsr s2EC2
 b2BEA:
-	sta row_ptr
+	sta a13
 	cmp #$11
 	bne b2BF3
-	jsr wait5
+	jsr wait_long
 b2BF3:
 	pla
-	sta dst+1
+	sta a11
 	pla
-	sta dst
-	lda row_ptr
+	sta zp_10_dst
+	lda a13
 	cmp #$13
 	bne b2C13
 	lda #$06
-	sta src+1
+	sta a0F
 j2C04=*+$01
-	lda dst+1
-	sta src
+	lda a11
+	sta zp_0E_src
 	jsr item_exec
 	lda #$08
-	cmp count+1
+	cmp a1A
 	bne b2C13
 	inc gs_torches_unlit
 b2C13:
 	lda #$07
-	sta src+1
+	sta a0F
 	jmp item_exec
 
 b2C1A:
 	jsr s2788
-	ldx #$0b
-	stx a61A5
+	ldx #special_snake
+	stx gs_special_mode
 	lda #$11
 	bne b2BD1
 j2C26:
@@ -5256,11 +5152,11 @@ b2C30:
 b2C37:
 	jsr s3267
 	ldx #<p060A
-	stx src
+	stx zp_0E_src
 	ldx #>p060A
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$07
 	bmi b2C69
 	jsr s3267
@@ -5282,8 +5178,8 @@ b2C69:
 	jmp print_to_line2
 
 b2C71:
-	ldx #$0c
-	stx a61A5
+	ldx #special_bomb
+	stx gs_special_mode
 	jsr clear_status_lines
 	lda #$19     ;You unlock the door...
 	jsr print_to_line1
@@ -5292,232 +5188,228 @@ b2C71:
 
 j2C83:
 	jsr s2788
-	ldx #$0d
-	stx a61A5
+	ldx #special_elevator
+	stx gs_special_mode
 	jmp j325D
 
 s2C8E:
-	ldx #<p2CE8
-	stx src
-	ldx #>p2CE8
-	stx src+1
-	ldx a6194
-	stx count
-	lda gs_player_xyH
+	ldx #$e8
+	stx zp_0E_src
+	ldx #$2c
+	stx a0F
+	ldx gs_level
+	stx zp_19_n
+	lda gs_player_x
 	ldx #$04
-	stx count+1
+	stx a1A
 b2CA2:
 	asl
-	asl count
-	dec count+1
+	asl zp_19_n
+	dec a1A
 	bne b2CA2
 	clc
-	adc gs_player_xyL
-	sta dst+1
-	lda count
+	adc gs_player_y
+	sta a11
+	lda zp_19_n
 	clc
-	adc game_state
-	sta count
+	adc gs_facing
+	sta zp_19_n
 	ldx #$09
-	stx count+1
+	stx a1A
 b2CBB:
 	ldy #$00
-	cmp (src),y
+	cmp (zp_0E_src),y
 	bne b2CD3
-	lda dst+1
-	inc src
+	lda a11
+	inc zp_0E_src
 	bne b2CC9
-	inc src+1
+	inc a0F
 b2CC9:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	bne b2CD9
 	lda #$0a
 	sec
-	sbc count+1
+	sbc a1A
 	rts
 
 b2CD3:
-	inc src
+	inc zp_0E_src
 	bne b2CD9
-	inc src+1
+	inc a0F
 b2CD9:
-	inc src
+	inc zp_0E_src
 	bne b2CDF
-	inc src+1
+	inc a0F
 b2CDF:
-	lda count
-	dec count+1
+	lda zp_19_n
+	dec a1A
 	bne b2CBB
 	lda #$00
 	rts
 
-p2CE8:
 	.byte $23,$77,$31,$44,$42,$14,$52,$35
 	.byte $52,$4a,$52,$5a,$52,$6a,$52,$7a
 	.byte $52,$8a
 j2CFA:
-	dec src+1
+	dec a0F
 	beq b2D01
 	jmp j2E2A
 
 b2D01:
-	lda src
+	lda zp_0E_src
 	cmp #$1a
 	bpl b2D0A
 	jmp nonsense
 
 b2D0A:
 	ldx #>p0603
-	stx src+1
+	stx a0F
 	ldx #<p0603
-	stx src
+	stx zp_0E_src
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$08
 	beq b2D1E
 	jmp j0BAD
 
 b2D1E:
-	lda a61AD
+	lda gs_monster_lurks
 	and #$02
-	bne b2D2A
-	lda a61A5
-	beq b2D3D
-b2D2A:
+	bne @display
+	lda gs_special_mode
+	beq @teleport
+@display:
 	lda #$85     ;The calculator displays
 	jsr print_to_line2
 	lda #' '
 	jsr char_out
-	lda gd_direct_object
+	lda gd_parsed_object
 	clc
 	adc #$16
 	jmp char_out
 
-b2D3D:
-	lda gd_direct_object
+@teleport:
+	lda gd_parsed_object
 	sec
-	sbc #$19
-	ldx #<p2E02
-	stx src
-	ldx #>p2E02
-	stx src+1
-j2D4B:
+	sbc #noun_zero-1
+	ldx #<teleport_table
+	stx zp_0E_src
+	ldx #>teleport_table
+	stx a0F
+@find_location:
 	sec
 	sbc #$01
-	beq b2D62
+	beq @found
 	clc
 	pha
 	lda #$04
-	adc src
-	sta src
-	lda src+1
+	adc zp_0E_src
+	sta zp_0E_src
+	lda a0F
 	adc #$00
-	sta src+1
+	sta a0F
 	pla
-	jmp j2D4B
+	jmp @find_location
 
-b2D62:
+@found:
 	ldy #$00
-	lda (src),y
-	sta game_state
-	inc src
-	bne b2D6F
-	inc src+1
-b2D6F:
-	lda (src),y
-	sta a6194
-	inc src
-	bne b2D7A
-	inc src+1
-b2D7A:
-	lda (src),y
-	sta gs_player_xyH
-	inc src
-	bne b2D85
-	inc src+1
-b2D85:
-	lda (src),y
-	sta gs_player_xyL
+	lda (zp_0E_src),y
+	sta gs_facing
+	inc zp_0E_src
+	bne :+
+	inc a0F
+:	lda (zp_0E_src),y
+	sta gs_level
+	inc zp_0E_src
+	bne :+
+	inc a0F
+:	lda (zp_0E_src),y
+	sta gs_player_x
+	inc zp_0E_src
+	bne :+
+	inc a0F
+:	lda (zp_0E_src),y
+	sta gs_player_y
 	ldx #$00
 	stx a61A3
 	stx a61A4
-	lda gd_direct_object
-	cmp #$1c
-	bne b2DC3
+	lda gd_parsed_object
+	cmp #noun_two
+	bne @teleported
 	lda gs_room_lit
-	bne b2DA5
+	bne @snuff
 	ldx #$01
-	stx a61A2
-	bne b2DC3
-b2DA5:
+	stx gs_teleported_lit
+	bne @teleported
+@snuff:
 	dec gs_room_lit
 	ldx #$00
-	stx a61A2
+	stx gs_teleported_lit
 	inc gs_torches_unlit
 	dec gs_torches_lit
 	ldx #$0d
-	stx src+1
+	stx a0F
 	jsr item_exec
 	ldx #$04
-	stx src+1
-	sta src
+	stx a0F
+	sta zp_0E_src
 	jsr item_exec
-b2DC3:
-	ldx #<p0103
-	stx src
-	ldx #>p0103
-	stx src+1
-	ldx #$0a
-	stx a61A5
+@teleported:
+	ldx #$03
+	stx zp_0E_src
+	ldx #$01
+	stx a0F
+	ldx #special_dark
+	stx gs_special_mode
 	jsr item_exec
 	jsr clear_maze_window
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$86     ;You have been teleported!
 	jsr print_to_line1
 	lda #$74     ;The calculator vanishes.
 	jsr print_to_line2
-	lda gd_direct_object
-	cmp #$1c
-	bne b2E01
-	lda a61A2
-	bne b2E01
-	jsr wait5
+	lda gd_parsed_object
+	cmp #noun_two
+	bne @done
+	lda gs_teleported_lit
+	bne @done
+	jsr wait_long
 	jsr clear_status_lines
 	lda #$70     ;A draft blows your torch out.
 	jsr print_to_line2
-	jmp s0FDC
+	jmp wait_short
 
-b2E01:
+@done:
 	rts
 
-p2E02:
+teleport_table:
 	.byte $02,$02,$05,$04,$02,$02,$07,$09
 	.byte $01,$05,$03,$03,$02,$03,$04,$06
 	.byte $02,$01,$08,$05,$03,$02,$01,$03
 	.byte $02,$01,$05,$05,$01,$01,$07,$0a
 	.byte $03,$04,$09,$0a,$03,$03,$07,$0a
 j2E2A:
-	dec src+1
+	dec a0F
 	beq b2E31
 	jmp j2F98
 
 b2E31:
 	ldx #$0b
-	stx src+1
+	stx a0F
 	jsr item_exec
 	tax
 	bne b2E3E
 	jmp j2F30
 
 b2E3E:
-	sta dst+1
-	sta src
+	sta a11
+	sta zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$14
 	bne b2E53
 	jmp j2EDE
@@ -5528,36 +5420,36 @@ b2E53:
 	jmp j2EF5
 
 b2E5A:
-	cmp dst+1
+	cmp a11
 	bne b2E6A
-	ldx dst+1
-	stx src
-	lda count+1
+	ldx a11
+	stx zp_0E_src
+	lda a1A
 	cmp #$06
 	bne b2E9A
-	lda dst+1
+	lda a11
 b2E6A:
-	sta src
+	sta zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 j2E72=*+$02
 	jsr item_exec
 	lda #$06
-	cmp count+1
+	cmp a1A
 	beq b2E7C
 	jmp j2F30
 
 b2E7C:
-	ldx gd_direct_object
-	stx src
+	ldx gd_parsed_object
+	stx zp_0E_src
 	jmp j2E9D
 
 s2E84:
 	jsr s3274
 	ldx #$08
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count
+	lda zp_19_n
 	cmp #$08
 	bcc b2E97
 	jmp j2F35
@@ -5569,13 +5461,13 @@ b2E9A:
 	jsr s2E84
 j2E9D:
 	ldx #$04
-	stx src+1
+	stx a0F
 	jsr item_exec
 j2EA4:
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$03
 	bne b2EB5
 	jsr s2EC2
@@ -5583,19 +5475,19 @@ b2EB5:
 	cmp #$11
 	bne b2EC1
 	jsr s2788
-	ldx #$0b
-	stx a61A5
+	ldx #special_snake
+	stx gs_special_mode
 b2EC1:
 	rts
 
 s2EC2:
-	lda a61A5
-	cmp #$02
+	lda gs_special_mode
+	cmp #special_calc_puzzle
 	bne b2EDB
-	lda a619C
+	lda gd_parsed_verb
 	cmp #$12
 	beq b2ED3
-	jsr wait5
+	jsr wait_long
 b2ED3:
 	jsr clear_status_lines
 	lda #$27     ;The calculator displays 317.
@@ -5605,29 +5497,29 @@ b2EDB:
 	rts
 
 j2EDE:
-	lda count+1
+	lda a1A
 	cmp #$06
 	bpl j2F30
 	jsr s2E84
-	ldx dst+1
-	stx src
+	ldx a11
+	stx zp_0E_src
 	ldx #$02
-	stx src+1
+	stx a0F
 	jsr item_exec
 	jmp j2EA4
 
 j2EF5:
 	cmp #$12
 	beq b2F16
-	lda dst+1
+	lda a11
 j2EFB:
 	cmp #$18
 	bpl b2F42
 	cmp #$15
 	bmi b2F42
-	ldx dst+1
-	stx src
-	lda count+1
+	ldx a11
+	stx zp_0E_src
+	lda a1A
 	cmp #$06
 	beq j2E9D
 	jsr s2E84
@@ -5635,14 +5527,14 @@ j2EFB:
 	jmp j2E9D
 
 b2F16:
-	lda dst+1
+	lda a11
 	cmp #$15
 	bpl b2F48
 	cmp #$12
 	bmi b2F48
-	ldx dst+1
-	stx src
-	lda count+1
+	ldx a11
+	stx zp_0E_src
+	lda a1A
 	cmp #$06
 	bne b2F2D
 	jmp j2E9D
@@ -5657,59 +5549,59 @@ b2F32:
 
 j2F35:
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
+	sta a0F
 	jsr s3274
 	lda #$99
 	bne b2F32
 b2F42:
 	ldx #$14
-	stx src
+	stx zp_0E_src
 	bne b2F4C
 b2F48:
 	ldx #$11
-	stx src
+	stx zp_0E_src
 b2F4C:
-	lda src+1
+	lda a0F
 	pha
-	lda src
+	lda zp_0E_src
 	pha
 	ldx #$03
-	stx dst+1
+	stx a11
 b2F56:
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
-	inc src
+	sta a0F
+	inc zp_0E_src
 	bne b2F62
-	inc src+1
+	inc a0F
 b2F62:
-	lda src+1
+	lda a0F
 	pha
-	lda src
+	lda zp_0E_src
 	pha
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$06
-	cmp count+1
+	cmp a1A
 	beq b2F82
-	dec dst+1
+	dec a11
 	bne b2F56
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
+	sta a0F
 	jmp j2F30
 
 b2F82:
 	pla
-	sta src
+	sta zp_0E_src
 	pla
-	sta src+1
-	lda gd_direct_object
+	sta a0F
+	lda gd_parsed_object
 	cmp #$13
 	beq b2F92
 	jmp j2E9D
@@ -5719,9 +5611,9 @@ b2F92:
 	jmp j2E9D
 
 j2F98:
-	dec src+1
+	dec a0F
 	bne b2FBD
-	lda src
+	lda zp_0E_src
 	cmp #$11
 	beq b2FB7
 	cmp #$15
@@ -5745,14 +5637,14 @@ b2FB9:
 	rts
 
 b2FBD:
-	dec src+1
+	dec a0F
 	bne b2FD9
 	ldx #<p0602
-	stx src
+	stx zp_0E_src
 	ldx #>p0602
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$08
 	beq b2FD5
 	jmp j0BAD
@@ -5761,31 +5653,31 @@ b2FD5:
 	lda #$6f
 	bne b2FB9
 b2FD9:
-	dec src+1
+	dec a0F
 	bne b2FE0
 	jmp nonsense
 
 b2FE0:
-	dec src+1
+	dec a0F
 	bne b301D
 	lda #$76     ;OK...
 	jsr print_to_line2
 	lda #<text_buffer1
-	sta src
+	sta zp_0E_src
 	lda #>text_buffer1
-	sta src+1
+	sta a0F
 	ldy #$00
 	lda #$20
 b2FF5:
-	cmp (src),y
+	cmp (zp_0E_src),y
 	beq b300E
-	inc src
+	inc zp_0E_src
 	bne b2FF5
-	inc src+1
+	inc a0F
 	bne b2FF5
 b3001:
 	ldy #$00
-	lda (src),y
+	lda (zp_0E_src),y
 	cmp #$20
 	beq b301C
 	sta (text_ptr),y
@@ -5795,64 +5687,64 @@ b300E:
 	bne b3014
 	inc text_ptr+1
 b3014:
-	inc src
+	inc zp_0E_src
 	bne b3001
-	inc src+1
+	inc a0F
 	bne b3001
 b301C:
 	rts
 
 b301D:
-	dec src+1
+	dec a0F
 	beq b3024
 	jmp j30BE
 
 b3024:
 	lda #$02
-	cmp game_state
+	cmp gs_facing
 	bne b3072
 	tax
 	dex
 	txa
-	cmp a6194
+	cmp gs_level
 	bne b3072
-	cmp gs_player_xyH
+	cmp gs_player_x
 	bne b3072
 	lda #$0b
-	cmp gs_player_xyL
+	cmp gs_player_y
 	bne b3072
 	ldx #<p0607
-	stx src
+	stx zp_0E_src
 	ldx #>p0607
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$07
-	cmp count+1
+	cmp a1A
 	bne b30A5
-	jsr s1015
-	jsr s0FDC
+	jsr draw_view
+	jsr wait_short
 	jsr s30C5
 	jsr pit
-	inc a6194
+	inc gs_level
 	ldx #$03
-	stx gs_player_xyL
-	stx gs_player_xyH
+	stx gs_player_y
+	stx gs_player_x
 	ldx #$00
 	stx a61A3
 	stx a61A4
-	jmp s1015
+	jmp draw_view
 
 b3072:
 	lda a619A
 	and #$e0
 	beq b30A5
 	jsr s3085
-	jsr s0FDC
-	jsr s1015
+	jsr wait_short
+	jsr draw_view
 	jmp b3024
 
 s3085:
-	lda game_state
+	lda gs_facing
 	tax
 	dex
 	txa
@@ -5863,24 +5755,24 @@ s3085:
 	dex
 	txa
 	beq b30A1
-	dec gs_player_xyL
+	dec gs_player_y
 	rts
 
 b3099:
-	dec gs_player_xyH
+	dec gs_player_x
 	rts
 
 b309D:
-	inc gs_player_xyL
+	inc gs_player_y
 	rts
 
 b30A1:
-	inc gs_player_xyH
+	inc gs_player_x
 	rts
 
 b30A5:
-	jsr s1015
-	jsr s0FDC
+	jsr draw_view
+	jsr wait_short
 	jsr s30C5
 	jsr clear_status_lines
 	lda #$2a     ;You have rammed your head into a steel
@@ -5890,31 +5782,31 @@ b30A5:
 	jmp game_over
 
 j30BE:
-	dec src+1
+	dec a0F
 	beq b30FB
 	jmp j3197
 
 s30C5:
 	ldx #<p0400
-	stx src
+	stx zp_0E_src
 	ldx #>p0400
-	stx src+1
+	stx a0F
 	ldy #$00
 b30CF:
 	lda #$dd
 b30D1:
-	sta (src),y
-	inc src
+	sta (zp_0E_src),y
+	inc zp_0E_src
 	bne b30D1
-	inc src+1
-	lda src+1
+	inc a0F
+	lda a0F
 	cmp #$08
 	bne b30CF
 	bit hw_PAGE1
 	bit hw_FULLSCREEN
 	bit aC056
 	bit hw_GRAPHICS
-	jsr s0FDC
+	jsr wait_short
 	bit hw_PAGE2
 	bit hw_FULLSCREEN
 	bit hw_HIRES
@@ -5922,7 +5814,7 @@ b30D1:
 	rts
 
 b30FB:
-	lda a61A5
+	lda gs_special_mode
 	beq b3105
 	lda #$98     ;You will do no such thing!
 	jmp print_to_line1
@@ -5932,20 +5824,20 @@ b3105:
 	jmp j3111
 
 j310B:
-	jsr s0FDC
-	jsr s1015
+	jsr wait_short
+	jsr draw_view
 j3111:
 	lda a619A
 	and #$e0
 	beq b313F
 	jsr s3085
-	lda a6194
+	lda gs_level
 	cmp #$01
 	bne b3130
-	lda gs_player_xyH
+	lda gs_player_x
 	cmp #$06
 	bne b3130
-	lda gs_player_xyL
+	lda gs_player_y
 	cmp #$0a
 	beq b3136
 b3130:
@@ -5953,19 +5845,19 @@ b3130:
 	jmp j310B
 
 b3136:
-	jsr s1015
-	jsr s0FDC
+	jsr draw_view
+	jsr wait_short
 	jmp beheaded
 
 b313F:
-	jsr s1015
+	jsr draw_view
 	ldx gs_food_time_hi
-	stx src+1
+	stx a0F
 	ldx gs_food_time_lo
-	stx src
-	lda src+1
+	stx zp_0E_src
+	lda a0F
 	bne b315D
-	lda src
+	lda zp_0E_src
 	cmp #$05
 	bcs b3159
 	jmp j0B64
@@ -5975,21 +5867,21 @@ b3159:
 	bcc b3190
 b315D:
 	lda #>text_ptr
-	sta count+1
+	sta a1A
 	lda #<text_ptr
-	sta count
-	lda src
+	sta zp_19_n
+	lda zp_0E_src
 	sec
-	sbc count
-	sta src
-	lda src+1
-	sbc count+1
-	sta src+1
+	sbc zp_19_n
+	sta zp_0E_src
+	lda a0F
+	sbc a1A
+	sta a0F
 	sta gs_food_time_hi
-	lda src
+	lda zp_0E_src
 	sta gs_food_time_lo
 b317A:
-	jsr s0FDC
+	jsr wait_short
 	jsr clear_maze_window
 	lda #$2d     ;WHAM!
 	ldx #$08
@@ -6004,9 +5896,9 @@ b3190:
 	stx gs_food_time_lo
 	bne b317A
 j3197:
-	dec src+1
+	dec a0F
 	bne b31DF
-	lda a61A5
+	lda gs_special_mode
 	beq b31A5
 	lda #$9a     ;It is currently impossible.
 	jmp print_to_line2
@@ -6029,9 +5921,9 @@ save_to_tape:
 	lda #$96     ;Press any key
 	jsr print_to_line2
 	jsr input_char
-	ldx #<game_state
+	ldx #<gs_facing
 	stx tape_addr_start
-	ldx #>game_state
+	ldx #>gs_facing
 	stx tape_addr_start+1
 	ldx #<game_state_end
 	stx tape_addr_end
@@ -6041,7 +5933,7 @@ save_to_tape:
 	jmp clear_status_lines
 
 b31DF:
-	dec src+1
+	dec a0F
 	bne b31FB
 	jsr clear_status_lines
 	lda #$9c     ;Are you sure you want to quit?
@@ -6056,7 +5948,7 @@ b31F5:
 	jmp play_again
 
 b31FB:
-	dec src+1
+	dec a0F
 	bne b3238
 	jsr clear_hgr2
 	lda #$00
@@ -6064,111 +5956,110 @@ b31FB:
 	sta zp_row
 	jsr get_rowcol_addr
 	ldx #<p77BF
-	stx src
+	stx zp_0E_src
 	ldx #>p77BF
-	stx src+1
+	stx a0F
 b3213:
-	inc src
+	inc zp_0E_src
 	bne b3219
-	inc src+1
+	inc a0F
 b3219:
 	ldy #$00
-	lda (src),y
+	lda (zp_0E_src),y
 	and #$7f
 	jsr char_out
 	ldy #$00
-	lda (src),y
+	lda (zp_0E_src),y
 	bpl b3213
 	jsr input_char
 	jsr clear_hgr2
-	jsr s1015
+	jsr draw_view
 	lda #$07
-	sta src+1
+	sta a0F
 	jmp item_exec
 
 b3238:
-	lda a61A5
-	cmp #$02
-	beq b3258
-	lda a61B1
-	beq b324F
+	lda gs_special_mode
+	cmp #special_calc_puzzle
+	beq @calc_hint
+	lda gs_next_hint
+	beq :+
 	lda #$9d     ;Try examining things.
 	jsr print_to_line2
 	ldx #$00
-	stx a61B1
+	stx gs_next_hint
 	rts
 
-b324F:
-	lda #$9e     ;Type instructions.
+:	lda #$9e     ;Type instructions.
 	jsr print_to_line2
-	inc a61B1
+	inc gs_next_hint
 	rts
 
-b3258:
+@calc_hint:
 	lda #$9f     ;Invert and telephone.
 	jmp print_to_line2
 
 j325D:
-	jsr s1015
+	jsr draw_view
 	lda #$0a
-	sta src+1
+	sta a0F
 	jmp s1E5A
 
 s3267:
-	sta row_ptr
+	sta a13
 	lda a61F7
 	pha
-	lda row_ptr
+	lda a13
 	sta a61F7
 	pla
 	rts
 
 s3274:
-	lda src
+	lda zp_0E_src
 	tax
 	lda a61F8
-	sta src
+	sta zp_0E_src
 	txa
 	sta a61F8
-	lda src+1
+	lda a0F
 	tax
 	lda a61F9
-	sta src+1
+	sta a0F
 	txa
 	sta a61F9
-	lda dst
+	lda zp_10_dst
 	tax
 	lda a61FA
-	sta dst
+	sta zp_10_dst
 	txa
 	sta a61FA
-	lda dst+1
+	lda a11
 	tax
 	lda a61FB
-	sta dst+1
+	sta a11
 	txa
 	sta a61FB
-	lda count
+	lda zp_19_n
 	tax
 	lda a61FC
-	sta count
+	sta zp_19_n
 	txa
 	sta a61FC
 	lda a61FD
 	tax
-	lda count+1
+	lda a1A
 	sta a61FD
 	txa
-	sta count+1
+	sta a1A
 	rts
 
 s32BD:
 	pha
-	dec src
-	lda src
+	dec zp_0E_src
+	lda zp_0E_src
 	cmp #$ff
 	bne b32C8
-	dec src+1
+	dec a0F
 b32C8:
 	pla
 	rts
@@ -6186,9 +6077,9 @@ p32CA:
 	.byte $4e,$44,$20,$49,$54,$21,$a0
 j3319:
 	ldx #>p32CA
-	stx string_ptr+1
+	stx zp_0D
 	ldx #<p32CA
-	stx string_ptr
+	stx zp_0C_string
 	jsr clear_status_lines
 	lda #$00
 	sta zp_col
@@ -6197,10 +6088,10 @@ j3319:
 	jmp print_string
 
 s332F:
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$01
 	beq b333C
-	lda a61AD
+	lda gs_monster_lurks
 	and #$02
 	rts
 
@@ -6210,83 +6101,81 @@ b333C:
 	jmp game_over
 
 	.byte $07,$ea
-s3347:
-	ldx a61A5
-	bne b334D
+check_special_mode:
+	ldx gs_special_mode
+	bne :+
 	rts
 
-b334D:
+:	dex
 	dex
-	dex
-	beq b3354
-	jmp j3457
+	beq special_calc_puzzle
+	jmp special_bat
 
-b3354:
-	jsr s1015
-	jsr s3422
+special_calc_puzzle:
+	jsr draw_view
+	jsr @init_puzzle
 	ldx #$01
-	stx count+1
-	jsr s33F3
-j3361:
-	jsr s0CCA
-	lda a619C
+	stx zp_hint_mode
+	jsr @print_hint
+@puzzle_loop:
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$46
-	bpl b337A
-	jsr s2640
-j336E:
+	bpl @move
+	jsr exec_cmd
+@continue_loop:
 	jsr s0B19
 	jsr print_timers
-	jsr s3435
-	jmp j3361
+	jsr @print_timed_hint
+	jmp @puzzle_loop
 
-b337A:
-	cmp #$5b
-	beq b33DD
-	sta count+1
-	lda a61B6
-	bne b3390
-	ldx count+1
-	stx a61B6
-	inc a61B5
-	jmp j33D4
+@move:
+	cmp #verb_forward
+	beq @bump_into_wall
+	sta zp_action
+	lda gs_rotate_direction
+	bne @check_repeat_turn
+	ldx a1A      ;Set initial turn direction
+	stx gs_rotate_direction
+	inc gs_rotate_count
+	jmp @update_display
 
-b3390:
-	cmp count+1
-	bne b33B1
-	inc a61B5
-	lda a61B4
+@check_repeat_turn:
+	cmp zp_action
+	bne @new_direction
+	inc gs_rotate_count
+	lda gs_rotate_target
 	cmp #$03
-	bne j33D4
-	cmp a61B5
-	bne j33D4
+	bne @update_display
+	cmp gs_rotate_count
+	bne @update_display
 	ldx #$04
-	stx game_state
-	jsr s1015
-	jsr s3422
+	stx gs_facing
+	jsr draw_view
+	jsr @init_puzzle
 	jmp j34D5
 
-b33B1:
-	ldx count+1
-	stx a61B6
-	lda a61B4
-	cmp a61B5
-	bne b33C9
+@new_direction:
+	ldx zp_action
+	stx gs_rotate_direction
+	lda gs_rotate_target
+	cmp gs_rotate_count
+	bne :+
 	ldx #$01
-	stx a61B5
-	dec a61B4
-	jmp j33D4
+	stx gs_rotate_count
+	dec gs_rotate_target
+	jmp @update_display
 
-b33C9:
-	jsr s3427
-	inc a61B5
-	ldx count+1
-	stx a61B6
-j33D4:
-	jsr s1015
-	inc a61B7
-	jmp j336E
+:	jsr @reset_target
+	inc gs_rotate_count
+	ldx zp_action
+	stx gs_rotate_direction
+@update_display:
+	jsr draw_view
+	inc gs_rotate_total
+	jmp @continue_loop
 
-b33DD:
+@bump_into_wall:
 	jsr clear_maze_window
 	ldx #$09
 	stx zp_col
@@ -6294,219 +6183,214 @@ b33DD:
 	stx zp_row
 	lda #$7c     ;Splat!
 	jsr print_display_string
-	jsr s3427
-	jmp j3361
+	jsr @reset_target
+	jmp @puzzle_loop
 
-s33F3:
-	lda a619C
-	cmp #$08
-	beq b3401
-	cmp #$5a
-	bpl b3401
-	jsr wait5
-s3402=*+$01
-b3401:
-	lda #$24     ;To everything
+@print_hint:
+	lda gd_parsed_verb
+	cmp #verb_drop
+	beq :+
+	cmp #verb_movement_begin
+	bpl :+
+	jsr wait_long
+:	lda #$24     ;To everything
 	jsr print_to_line1
-	lda count+1
+	lda zp_hint_mode
 	cmp #$01
-	beq b3411
+	beq :+
 	lda #$26     ;Turn turn turn
 	jsr print_display_string
-b3411:
-	lda #$25     ;There is a season
+:	lda #$25     ;There is a season
 	jsr print_to_line2
-	lda count+1
+	lda zp_hint_mode
 	cmp #$01
-	beq b3421
+	beq @done
 	lda #$26     ;Turn turn turn
 	jsr print_display_string
-b3421:
+@done:
 	rts
 
-s3422:
+@init_puzzle:
 	ldx #$00
-	stx a61B7
-s3427:
-	ldx #<p05
-	stx a61B4
-	ldx #>p05
-	stx a61B5
-	stx a61B6
+	stx gs_rotate_total
+@reset_target:
+	ldx #puzzle_step1
+	stx gs_rotate_target
+	ldx #$00
+	stx gs_rotate_count
+	stx gs_rotate_direction
 	rts
 
-s3435:
-	lda a61B7
+@print_timed_hint:
+	lda gs_rotate_total
 	cmp #$06
-	bcc b3449
+	bcc @print_hint_basic
 	cmp #$0f
-	bcc b3421
+	bcc @done
 	cmp #$15
-	bcc b3449
+	bcc @print_hint_basic
 	cmp #$1a
-	bcc b3450
+	bcc @print_hint_extra
 	rts
 
-b3449:
+@print_hint_basic:
 	ldx #$01
-	stx count+1
-	jmp s33F3
+	stx zp_hint_mode
+	jmp @print_hint
 
-b3450:
+@print_hint_extra:
 	ldx #$00
-	stx count+1
-	jmp s33F3
+	stx zp_hint_mode
+	jmp @print_hint
 
-j3457:
+special_bat:
 	dex
 	dex
-	beq b345E
-	jmp j34F0
+	beq :+
+	jmp special_dog
 
-b345E:
-	jsr s1015
+:	jsr draw_view
 	lda #$31     ;A vampire bat attacks you!
 	jsr print_to_line2
-	jsr wait5
-j3469:
-	jsr s0CCA
-	ldx gd_direct_object
-	stx count+1
-	lda a619C
-	cmp #$0e
-	beq b348B
-	cmp #$06
-	beq b3499
-	cmp #$03
-	beq b3499
-b3480:
+	jsr wait_long
+@bat_loop:
+	jsr get_player_input
+	ldx gd_parsed_object
+	stx #zp_object
+	lda gd_parsed_verb
+	cmp #verb_look
+	beq @look
+	cmp #verb_throw
+	beq @try_action
+	cmp #verb_break
+	beq @try_action
+@dead:
 	jsr clear_status_lines
 	lda #$9b     ;The bat drains you!
 	jsr print_to_line1
 	jmp game_over
 
-b348B:
-	lda count+1
-	cmp #$15
-	bne b3480
+@look:
+	lda #zp_object
+	cmp #noun_bat
+	bne @dead
 	lda #$8c     ;It looks very dangerous!
 j3493:
 	jsr print_to_line2
-	jmp j3469
+	jmp @bat_loop
 
-b3499:
+@try_action:
 	jsr clear_status_lines
 	ldx #$09
-	stx src
+	stx zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$07
-	bne b3480
-	lda gd_direct_object
-	cmp #$09
-	bne b3480
+	bne @dead
+	lda gd_parsed_object
+	cmp #noun_jar
+	bne @dead
 	lda #$50     ;What a mess! The vampire bat
 	jsr print_to_line1
 	lda #$51     ;drinks the blood and dies!
 	jsr print_to_line2
 	ldx #$00
-	stx src+1
+	stx a0F
 	ldx #$09
-	stx src
+	stx zp_0E_src
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	ldx #$00
-	stx a61AB
+	stx gs_bat_alive
 j34D5:
 	lda a61A6
-	sta count+1
-	sta a61A5
+	sta a1A
+	sta gs_special_mode
 	ldx a61A7
 	stx a61A6
 	ldx #$00
 	stx a61A7
-	lda count+1
+	lda a1A
 	beq b34EF
-	jmp s3347
+	jmp check_special_mode
 
 b34EF:
 	rts
 
-j34F0:
+special_dog:
 	dex
 	dex
-	bne b34FF
-	jsr s3510
+	bne @dog2
+	jsr @confront_dog
 	ldx #$00
-	stx a61AE
+	stx gs_dog1_alive
 	jmp j34D5
 
-b34FF:
+@dog2:
 	dex
-	beq b3505
-	jmp j35EA
+	beq :+
+	jmp special_monster
 
-b3505:
-	jsr s3510
+:	jsr @confront_dog
 	ldx #$00
-	stx a61AF
+	stx gs_dog2_alive
 	jmp j34D5
 
-s3510:
-	jsr s1015
+@confront_dog:
+	jsr draw_view
 	lda #$2e     ;A vicious dog attacks you!
 	jsr print_to_line2
-	jsr wait5
-	jsr s0CCA
-	lda gd_direct_object
-	sta count+1
-	lda a619C
+	jsr wait_long ;GUG: can this be wait_short?
+	jsr get_player_input
+	lda gd_parsed_object
+	sta zp_object
+	lda gd_parsed_verb
 	cmp #$59
-	bcs b3536
-	cmp #$06
-	beq b359F
-	cmp #$13
-	beq b354F
-	cmp #$0e
-	beq b3541
-b3536:
+	bcs @dead
+	cmp #verb_throw
+	beq @throw
+	cmp #verb_attack
+	beq @attack
+	cmp #verb_look
+	beq @look
+@dead:
 	jsr clear_status_lines
 	lda #$2f     ;He rips your throat out!
 	jsr print_to_line2
 	jmp game_over
 
-b3541:
-	lda count+1
-	cmp #$16
-	bne b3536
-	lda #$28     ;It displays 317.2!
+@look:
+	lda zp_object
+	cmp #noun_dog
+	bne @dead
+	lda #$28     ;It displays 317.2!  ;BUG: should be $8c
 	jsr print_to_line2
-	jmp s3510
+	jmp @confront_dog ;BUG: should JMP to get_player_input
 
-b354F:
-	lda count+1
-	cmp #$16
-	bne b3536
-	ldx #<p0604
-	stx src
-	ldx #>p0604
-	stx src+1
+@attack:
+	lda zp_object
+	cmp #noun_dog
+	bne @dead
+	ldx #$04
+	stx zp_0E_src
+	ldx #$06
+	stx a0F
 	jsr item_exec
 	lda #$08
-	cmp count+1
+	cmp a1A
 	beq b3585
 	ldx #$0e
-	stx src
+	stx zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$08
-	cmp count+1
-	bne b3536
+	cmp a1A
+	bne @dead
 	jsr clear_status_lines
 	lda #$97     ;and it vanishes!
 	jsr print_to_line2
@@ -6516,45 +6400,45 @@ j357F:
 	rts
 
 b3585:
-	ldx #>p04
-	stx src+1
-	ldx #<p04
-	stx src
+	ldx #$00
+	stx a0F
+	ldx #$04
+	stx zp_0E_src
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
 	jmp j357F
 
-b359F:
-	lda count+1
-	cmp #$0c
-	bne b3536
+@throw:
+	lda a1A
+	cmp #noun_sneaker
+	bne @dead
 	ldx #$0c
-	stx src
+	stx zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$08
-	cmp count+1
-	bne b3536
-	ldx #<string_ptr
-	stx src
-	ldx #>string_ptr
-	stx src+1
+	cmp a1A
+	bne @dead
+	ldx #$0c
+	stx zp_0E_src
+	ldx #$00
+	stx a0F
 	jsr item_exec
-	jsr s28D9
+	jsr @thrown
 	lda #$5c     ;and is eaten by
 	jsr print_to_line1
 	lda #$5d     ;the monster!
 	jsr print_to_line2
-	jsr wait5
+	jsr wait_long
 	jsr clear_status_lines
 	lda #$30     ;The dog chases the sneaker!
 	jsr print_to_line1
-	jsr wait5
+	jsr wait_long
 	jsr clear_status_lines
 	lda #$5c     ;and is eaten by
 	jsr print_to_line1
@@ -6562,52 +6446,47 @@ b359F:
 	jsr print_to_line2
 	rts
 
-j35EA:
+special_monster:
 	dex
-	beq b35F0
-	jmp j3686
+	beq :+
+	jmp special_mother
 
-b35F0:
-	lda a619C
+:	lda gd_parsed_verb
 	cmp #$50
-	bcc b35FA
-	jsr s1015
-b35FA:
-	lda a61B2
-	bne b3612
-	jsr s366C
+	bcc :+
+	jsr draw_view
+:	lda gs_monster_proximity
+	bne @monster_smell
+	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
-j3608=*+$01
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc a61B2
-	jmp j364E
+	inc gs_monster_proximity
+	jmp input_near_danger
 
-b3612:
-	lda a61B2
+@monster_smell:
+	lda gs_monster_proximity
 	cmp #$01
-	bne b3629
+	bne monster_kills_you
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$46     ;the hallway!
 	jsr print_to_line2
-	inc a61B2
-s3626:
-	jmp j364E
+	inc gs_monster_proximity
+	jmp input_near_danger
 
-b3629:
+monster_kills_you:
 	jsr clear_hgr2
 	lda #$36     ;The monster attacks you and
 	jsr print_to_line1
 	lda #$37     ;you are his next meal!
 	jsr print_to_line2
-	lda a61B8
-	bne b363E
+	lda gs_lair_raided
+	bne :+
 	jmp game_over
 
-b363E:
-	lda #$75     ;Never raid a monster's lair
+:	lda #$75     ;Never raid a monster's lair
 	ldx #$00
 	stx zp_col
 	ldx #$15
@@ -6615,190 +6494,184 @@ b363E:
 	jsr print_display_string
 	jmp game_over
 
-j364E:
-	jsr s0CCA
-	lda a619C
+input_near_danger:
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$50
-	bcc b365E
-	jsr s0949
-	jmp s3347
+	bcc :+
+	jsr cmd_movement
+	jmp check_special_mode
 
-b365E:
-	jsr s2640
+:	jsr exec_cmd
 	ldx #$0c
-	stx a61B2
-	jsr s366C
-	jmp s3347
+	stx gs_monster_proximity
+	jsr wait_if_moved
+	jmp check_special_mode
 
-s366C:
+wait_if_moved:
 	lda text_buffer1
 	cmp #$80
-	beq b3677
+	beq :+
 	cmp #$20
-	bne b367F
-b3677:
-	lda text_buffer2
+	bne @wait
+:	lda text_buffer2
 	cmp #$80
-	bne b367F
+	bne @wait
 	rts
 
-b367F:
-	jsr wait5
+@wait:
+	jsr wait_long
 	jsr clear_status_lines
 	rts
 
-j3686:
+special_mother:
 	dex
-	beq b368C
-	jmp j3777
+	beq :+
+	jmp special_dark
 
-b368C:
-	lda a619C
+:	lda gd_parsed_verb
 	cmp #$50
-	bcc b3696
-	jsr s1015
-b3696:
-	lda a61B3
-	bne b36AE
-	jsr s366C
+	bcc :+
+	jsr draw_view
+:	lda gs_mother_proximity
+	bne @mother_smell
+	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc a61B3
-	jmp j364E
+	inc gs_mother_proximity
+	jmp input_near_danger
 
-b36AE:
+@mother_smell:
 	tax
 	dex
-	bne b36D3
+	bne @mother_arrives
 	ldx #$06
-	stx src+1
+	stx a0F
 	ldx #$08
-	stx src
+	stx zp_0E_src
 	jsr item_exec
 	lda #$07
-	cmp count+1
-	beq b36D3
+	cmp a1A
+	beq @mother_arrives
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$46     ;the hallway as it darkens!
 	jsr print_to_line2
-	inc a61B3
-	jmp j364E
+	inc gs_mother_proximity
+	jmp input_near_danger
 
-b36D3:
+@mother_arrives:
 	lda #$48     ;It is the monster's mother!
 	jsr print_to_line1
 	ldx #$08
-	stx src
+	stx zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$07
-	cmp count+1
-	bne b36EE
+	cmp a1A
+	bne @input_near_mother
 	lda #$49     ;She has been seduced!
 	jsr print_to_line2
-b36EE:
-	lda count+1
+@input_near_mother:
+	lda a1A
 	pha
-	lda count
+	lda zp_19_n
 	pha
-	jsr s0CCA
+	jsr get_player_input
 	jsr clear_status_lines
-	lda gd_direct_object
-	cmp #$18
-	beq b371E
-	cmp #$19
-	beq b371E
-b3705:
+	lda gd_parsed_object
+	cmp #noun_monster
+	beq @look
+	cmp #noun_mother
+	beq @look
+@dead_pop:
 	pla
-	sta count
+	sta zp_19_n
 	pla
-	sta count+1
+	sta a1A
 	lda #$07
-	cmp count+1
-	bne b3716
+	cmp a1A
+	bne @dead
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
-b3716:
+@dead:
 	lda #$4b     ;She slashes you to bits!
 	jsr print_to_line2
 	jmp game_over
 
-b371E:
-	lda a619C
-	cmp #$0e
-	bne b3735
+@look:
+	lda gd_parsed_verb
+	cmp #verb_look
+	bne @attack
 	lda #$8c     ;It looks very dangerous!
 	jsr print_to_line2
 	tax
 	pla
-	sta count
+	sta zp_19_n
 	pla
-	sta count+1
+	sta a1A
 	txa
-	jmp b36EE
+	jmp @input_near_mother
 
-b3735:
-	cmp #$13
-	bne b3705
-	ldx #<p060E
-	stx src
-	ldx #>p060E
-	stx src+1
+@attack:
+	cmp #verb_attack
+	bne @dead_pop
+	ldx #$0e
+	stx zp_0E_src
+	ldx #$06
+	stx a0F
 	jsr item_exec
 	lda #$08
-	cmp count+1
-	bne b3705
+	cmp a1A
+	bne @dead_pop
 	pla
-	sta count
+	sta zp_19_n
 	pla
-	sta count+1
+	sta a1A
 	lda #$07
-	cmp count+1
-	bne b3716
+	cmp a1A
+	bne @dead
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
 	lda #$4c     ;You slash her to bits!
 	jsr print_to_line2
-	jsr wait5
+	jsr wait_long
 	lda #$78     ;The body has vanished!
 	jsr print_to_line2
 	ldx #$00
-	stx a61B3
+	stx gs_mother_proximity
 	stx a61AC
-	stx a61A5
+	stx gs_special_mode
 	stx a61A6
 	rts
 
-j3777:
+special_dark:
 	dex
-	beq b377D
-	jmp j3802
+	beq :+
+	jmp special_snake
 
-b377D:
-	lda a619C
+:	lda gd_parsed_verb
 	cmp #$50
-	bcc b3787
-	jsr s1015
-b3787:
-	lda gs_room_lit
+	bcc :+
+	jsr draw_view
+:	lda gs_room_lit
 	beq b3794
 	ldx #$00
-	stx a61B3
+	stx gs_mother_proximity
 	jmp j34D5
 
 b3794:
 	ldx #$00
 	stx a61A4
-	lda a61B3
-	bne b37C7
-	lda a6194
+	lda gs_mother_proximity
+	bne @monster_smell
+	lda gs_level
 	cmp #$05
 	beq b37AF
-	lda a61AD
+	lda gs_monster_lurks
 	and #$02
 	bne b37B4
 b37AC:
@@ -6808,128 +6681,127 @@ b37AF:
 	lda a61AC
 	beq b37AC
 b37B4:
-	jsr s366C
+	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc a61B3
-	jmp j364E
+	inc gs_mother_proximity
+	jmp input_near_danger
 
-b37C7:
+@monster_smell:
 	cmp #$01
-	bne b37DE
-	jsr s366C
-	inc a61B3
+	bne @monster_attacks
+	jsr wait_if_moved
+	inc gs_mother_proximity
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$47     ;the hallway!
 	jsr print_to_line2
-	jmp j364E
+	jmp input_near_danger
 
-b37DE:
-	jsr s366C
-	lda a6194
+@monster_attacks:
+	jsr wait_if_moved
+	lda gs_level
 	cmp #$05
-	beq b37F5
+	beq @mother
 	lda #$36     ;The monster attacks you and
 	jsr print_to_line1
 	lda #$37     ;you are his next meal!
 	jsr print_to_line2
 	jmp game_over
 
-b37F5:
+@mother:
 	lda #$48     ;It is the monster's mother!
 	jsr print_to_line1
 	lda #$4b     ;She slashes you to bits!
-b37FC:
+dead_bit:
 	jsr print_to_line2
 	jmp game_over
 
-j3802:
+special_snake:
 	dex
-	bne b3874
-	lda gd_direct_object
-	cmp #$11
-	beq b3813
-b380C:
+	bne special_bomb
+	lda gd_parsed_object
+	cmp #noun_snake
+	beq snake_check_verb
+dead_by_snake:
 	jsr clear_status_lines
-	lda #$20
-	bne b37FC
-b3813:
-	lda a619C
-	cmp #$0e
-	beq b386C
-	cmp #$13
-	bne b380C
+	lda #$20     ;Snake bites you!
+	bne dead_bit
+snake_check_verb:
+	lda gd_parsed_verb
+	cmp #verb_look
+	beq @look
+	cmp #verb_attack
+	bne dead_by_snake
+@attack:
 	ldx #$04
-	stx src
+	stx zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$07
 	bpl b3842
 	ldx #$0e
-	stx src
+	stx zp_0E_src
 	ldx #$06
-	stx src+1
+	stx a0F
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$07
-	bmi b380C
-	bpl b3864
+	bmi dead_by_snake
+	bpl @killed
 b3842:
 	ldx #$04
-	stx src
+	stx zp_0E_src
 	ldx #$00
-	stx src+1
+	stx a0F
 	jsr item_exec
 	ldx #$00
-	stx src+1
+	stx a0F
 	ldx #$11
-	stx src
+	stx zp_0E_src
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
-b3864:
+@killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
 	jmp j34D5
 
-b386C:
+@look:
 	lda #$8c     ;It looks very dangerous!
 	jsr print_to_line2
-	jmp j364E
+	jmp input_near_danger
 
-b3874:
+special_bomb:
 	dex
-	beq b387A
-	jmp j396E
+	beq :+
+	jmp special_elevator
 
-b387A:
-	lda a619C
+:	lda gd_parsed_verb
 	cmp #$50
-	bcc b3884
-	jsr s1015
-b3884:
-	lda a61B6
+	bcc :+
+	jsr draw_view
+:	lda gs_rotate_direction
 	cmp #$09
 	beq b38EA
-	inc a61B6
+	inc gs_rotate_direction
 	jsr s3894
 	jmp j392C
 
 s3894:
-	lda game_state
-	sta count+1
-	lda gs_player_xyH
+	lda gs_facing
+	sta a1A
+	lda gs_player_x
 	cmp #$0a
 	bne b38DD
-	lda gs_player_xyL
+	lda gs_player_y
 	sec
 	sbc #$09
 	beq b38CC
@@ -6939,141 +6811,139 @@ s3894:
 	dex
 	bne b38DD
 	lda #$01
-	cmp count+1
+	cmp a1A
 	bne b38DD
 	ldx #$01
-	stx src+1
+	stx a0F
 	bne b38DA
 b38BB:
 	lda #$02
-	cmp count+1
+	cmp a1A
 	bne b38DD
 	ldx #$10
-	stx src
+	stx zp_0E_src
 	ldx #$09
-	stx src+1
+	stx a0F
 	jmp b38DA
 
 b38CC:
 	lda #$02
-	cmp count+1
+	cmp a1A
 	bne b38DD
 	ldx #$20
-	stx src
+	stx zp_0E_src
 	lda #$09
-	stx src+1
+	stx a0F
 b38DA:
 	jsr s1E5A
 b38DD:
 	lda #$41     ;Tick tick
-	ldx #<p0206
+	ldx #$06
 	stx zp_col
-	ldx #>p0206
+	ldx #$02
 	stx zp_row
 	jmp print_display_string
 
 b38EA:
 	jsr s3894
-	jsr s0CCA
-	lda a619C
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$10
 	bne b3916
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$17
 	bne b3916
-	lda game_state
+	lda gs_facing
 	cmp #$01
 	bne b3916
-	lda gs_player_xyH
+	lda gs_player_x
 	cmp #$0a
 	bne b3916
-	lda gs_player_xyL
+	lda gs_player_y
 	cmp #$0b
 	bne b3916
-	jmp j3C86
+	jmp special_exit
 
 b3916:
 	jsr s30C5
 	jsr clear_hgr2
-	ldx #<p1500
+	ldx #$00
 	stx zp_col
-	ldx #>p1500
+	ldx #$15
 	stx zp_row
 	lda #$42     ;The key blows up the whole maze!
 	jsr print_display_string
 	jmp game_over
 
 j392C:
-	jsr s0CCA
-	lda a619C
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$59
-	bcc b393C
-	jsr s0949
-	jmp s3347
+	bcc :+
+	jsr cmd_movement
+	jmp check_special_mode
 
-b393C:
-	lda a619C
-	cmp #$10
+:	lda gd_parsed_verb
+	cmp #verb_open
 	bne b3962
-	lda gd_direct_object
-	cmp #$17
+	lda gd_parsed_object
+	cmp #noun_door
 	bne b3962
-	lda game_state
+	lda gs_facing
 	cmp #$01
 	bne b3962
-	lda gs_player_xyH
+	lda gs_player_x
 	cmp #$0a
 	bne b3962
-	lda gs_player_xyL
+	lda gs_player_y
 	cmp #$0b
 	bne b3962
-	jmp j3C86
+	jmp special_exit
 
 b3962:
 	jsr s0B19
-	jsr s2640
+	jsr exec_cmd
 	jsr print_timers
-	jmp s3347
+	jmp check_special_mode
 
-j396E:
+special_elevator:
 	dex
-	beq b3974
-	jmp j3A20
+	beq :+
+	jmp special_tripped
 
-b3974:
-	jsr s0CCA
-	lda a619C
+:	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$5b
 	beq b39B5
 j397E:
 	lda a61A6
-	sta a61A5
+	sta gs_special_mode
 	lda a61A7
 	ldx #$00
 	stx a61A7
 	sta a61A6
-	jsr s1015
-	lda a619C
+	jsr draw_view
+	lda gd_parsed_verb
 	cmp #$5b
 	bcc b399C
-	jmp s0949
+	jmp cmd_movement
 
 b399C:
-	jmp s2640
+	jmp exec_cmd
 
 j399F:
 	lda #$a3     ;The elevator is moving!
 	jsr print_to_line1
-	jsr wait5
+	jsr wait_long
 	lda #$a4     ;You are deposited at the next level.
 	jsr print_to_line2
-	jsr wait5
-	jsr s1015
+	jsr wait_long
+	jsr draw_view
 	jmp j34D5
 
 b39B5:
 	jsr clear_maze_window
-	ldx a6194
+	ldx gs_level
 	dex
 	dex
 	beq b39D2
@@ -7090,16 +6960,16 @@ b39B5:
 b39D2:
 	jsr clear_maze_window
 	ldx #$03
-	stx src+1
+	stx a0F
 	stx a6199
 	ldx #$23
-	stx src
+	stx zp_0E_src
 	stx a619A
 	jsr s12A6
 	ldx #$03
-	stx src+1
+	stx a0F
 	jsr s1E5A
-	jsr s0FDC
+	jsr wait_short
 	jsr clear_maze_window
 	lda #$79     ;Glitch!
 	ldx #$08
@@ -7110,161 +6980,155 @@ b39D2:
 	jmp game_over
 
 b3A03:
-	inc a6194
+	inc gs_level
 	ldx #$01
-	stx gs_player_xyH
+	stx gs_player_x
 	bne b3A15
 b3A0D:
-	dec a6194
+	dec gs_level
 	ldx #$04
-	stx gs_player_xyH
+	stx gs_player_x
 b3A15:
 	ldx #$00
 	stx a61A3
 	stx a61A4
 	jmp j399F
 
-j3A20:
+special_tripped:
 	dex
-	beq b3A26
-	jmp j3AEA
+	beq :+
+	jmp special_climb
 
-b3A26:
-	lda a61B2
+:	lda gs_monster_proximity
 	cmp #$0c
-	bne b3A30
-	jsr s0CCA
-b3A30:
-	ldx #$00
-	stx a61B2
-j3A35:
-	lda gd_direct_object
-	cmp #$18
-	beq b3A3F
-b3A3C:
-	jmp b3629
+	bne :+
+	jsr get_player_input
+:	ldx #$00
+	stx gs_monster_proximity
+@check_input:
+	lda gd_parsed_object
+	cmp #noun_monster
+	beq :+
+@dead:
+	jmp monster_kills_you
 
-b3A3F:
-	lda a619C
-	cmp #$0e
-	bne b3A49
-	jmp j3AD4
+:	lda gd_parsed_verb
+	cmp #verb_look
+	bne :+
+	jmp @look
 
-b3A49:
-	cmp #$13
-	bne b3A3C
+:	cmp #verb_attack
+	bne @dead
+@attack:
 	lda gs_room_lit
-	beq b3A3C
-	ldx #<p0604
-	stx src
-	ldx #>p0604
-	stx src+1
+	beq @dead
+	ldx #$04
+	stx zp_0E_src
+	ldx #$06
+	stx a0F
 	jsr item_exec
 	lda #$08
-	cmp count+1
-	bne b3A3C
+	cmp a1A
+	bne @dead
 	jsr clear_status_lines
-	ldx #<p0104
-	stx src
-	ldx #>p0104
-	stx src+1
+	ldx #$04
+	stx zp_0E_src
+	ldx #$01
+	stx a0F
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line1
-	jsr wait5
+	jsr wait_long
 	lda #$61     ;The monster is dead and
 	jsr print_to_line1
 	lda #$62     ;much blood is spilt!
 	jsr print_to_line2
 	ldx #$00
-	stx a61AD
+	stx gs_monster_lurks
 	lda a61A6
 	cmp #$08
-	bne b3A9F
+	bne :+
 	lda a61A7
 	sta a61A6
 	stx a61A7
-b3A9F:
-	jsr s0CCA
-	lda a619C
-	cmp #$09
-	bne b3ADF
-	lda gd_direct_object
-	cmp #$09
-	bne b3ADF
-	ldx #>p0609
-	stx src+1
-	ldx #<p0609
-	stx src
+:	jsr get_player_input
+	lda gd_parsed_verb
+	cmp #verb_fill
+	bne @done
+	lda gd_parsed_object
+	cmp #noun_jar
+	bne @done
+	ldx #$06
+	stx a0F
+	ldx #$09
+	stx zp_0E_src
 	jsr item_exec
 	lda #$08
-	cmp count+1
-	bne b3ADF
-	ldx #<p0309
-	stx src
-	ldx #>p0309
-	stx src+1
+	cmp a1A
+	bne @done
+	ldx #$09
+	stx zp_0E_src
+	ldx #$03
+	stx a0F
 	jsr item_exec
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
 	jmp j34D5
 
-j3AD4:
+@look:
 	lda #$8c     ;It looks very dangerous!
 	jsr print_to_line1
-	jsr s0CCA
-	jmp j3A35
+	jsr get_player_input
+	jmp @check_input
 
-b3ADF:
+@done:
 	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
 	jsr print_to_line1
 	jmp j397E
 
-j3AEA:
+special_climb:
 	dex
-	beq b3AF0
-	jmp j3C86
+	beq :+
+	jmp special_exit
 
-b3AF0:
-	jsr s0CCA
-	lda a619C
+:	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$5a
-	bcc b3AFD
-b3AFA:
-	jmp b380C
+	bcc :+
+@dead:
+	jmp dead_by_snake
 
-b3AFD:
-	cmp #$07
-	bne b3AFA
-	lda gd_direct_object
-	cmp #$11
-	bne b3AFA
-	lda gs_player_xyH
-	sta count+1
-	lda gs_player_xyL
-	sta count
-	lda a6194
+:	cmp #verb_climb
+	bne @dead
+	lda gd_parsed_object
+	cmp #noun_snake
+	bne @dead
+	lda gs_player_x
+	sta a1A
+	lda gs_player_y
+	sta zp_19_n
+	lda gs_level
 	cmp #$03
 	beq b3B2C
 	cmp #$04
 	bne b3B38
-	lda count+1
+	lda a1A
 	cmp #$01
 	bne b3B38
-	lda count
+	lda zp_19_n
 	cmp #$0a
 	bne b3B38
 	jmp j3B61
 
 b3B2C:
-	lda count+1
+	lda a1A
 	cmp #$08
 	bne b3B38
-	lda count
+	lda zp_19_n
 	cmp #$05
 	beq b3B56
 b3B38:
@@ -7273,59 +7137,57 @@ b3B38:
 	jsr print_to_line1
 	lda #$a5     ;Your head smashes into the ceiling!
 	jsr print_to_line2
-	jsr wait5
+	jsr wait_long
 	jsr clear_status_lines
 	lda #$a6     ;You fall on the snake!
 	jsr print_to_line1
-	jsr wait5
-	jmp b380C
+	jsr wait_long
+	jmp dead_by_snake
 
 b3B56:
 	ldx #$01
-	stx count
+	stx zp_19_n
 	inx
-	stx game_state
+	stx gs_facing
 	jmp j3B6A
 
 j3B61:
 	ldx #$00
-	stx count
+	stx zp_19_n
 	ldx #$03
-	stx game_state
+	stx gs_facing
 j3B6A:
-	dec a6194
-	lda count+1
+	dec gs_level
+	lda a1A
 	pha
-	lda count
+	lda zp_19_n
 	pha
-	jsr s1015
-	jsr s0CCA
-	lda a619C
+	jsr draw_view
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$5b
-	beq b3B8E
+	beq :+
 	jsr clear_status_lines
 	lda #$54     ;You can't be serious!
 	jsr print_to_line1
-	jsr wait5
-	jmp b380C
+	jsr wait_long
+	jmp dead_by_snake
 
-b3B8E:
+:	pla
+	sta zp_19_n
 	pla
-	sta count
-	pla
-	sta count+1
+	sta a1A
 	pha
-	lda count
+	lda zp_19_n
 	pha
 	cmp #$01
-	beq b3BA2
-	inc gs_player_xyH
+	beq :+
+	inc gs_player_x
 	jmp j3BA5
 
-b3BA2:
-	inc gs_player_xyL
+:	inc gs_player_y
 j3BA5:
-	jsr s1015
+	jsr draw_view
 	lda #$59     ;The
 	jsr print_to_line1
 	lda #$11     ;snake
@@ -7333,24 +7195,24 @@ j3BA5:
 	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #$11
-	stx src
+	stx zp_0E_src
 	ldx #$00
-	stx src+1
+	stx a0F
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	pla
-	sta count
+	sta zp_19_n
 	pla
-	sta count+1
-	lda count
+	sta a1A
+	lda zp_19_n
 	cmp #$01
 	bne b3BD8
 	jmp j34D5
 
 b3BD8:
-	lda a61AD
+	lda gs_monster_lurks
 	beq b3C03
 	lda #$59     ;The
 	jsr print_to_line2
@@ -7359,48 +7221,48 @@ b3BD8:
 	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #$00
-	stx src+1
+	stx a0F
 	ldx #$0f
-	stx src
+	stx zp_0E_src
 	jsr item_exec
 	ldx #$01
-	stx a61B8
+	stx gs_lair_raided
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 b3C03:
 	ldx #$01
-	stx a61B9
+	stx gs_snake_used
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 j3C0F:
-	jsr s0CCA
-	lda a619C
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$5a
 	bcs b3C2B
-	cmp #$11
+	cmp #verb_press
 	bne b3C25
 	lda #$98     ;You will do no such thing!
 	jsr print_to_line2
 	jmp j3C0F
 
 b3C25:
-	jsr s2640
+	jsr exec_cmd
 	jmp j3C37
 
 b3C2B:
 	cmp #$5b
 	beq b3C58
-	ldx game_state
-	stx count+1
-	jsr s0956
+	ldx gs_facing
+	stx a1A
+	jsr move_turn
 j3C37:
-	lda game_state
-	ldx #<p0400
-	stx src
-	ldx #>p0400
-	stx src+1
+	lda gs_facing
+	ldx #$00
+	stx zp_0E_src
+	ldx #$04
+	stx a0F
 	cmp #$01
 	bne b3C55
 	lda gs_room_lit
@@ -7413,7 +7275,7 @@ b3C55:
 	jmp j3C0F
 
 b3C58:
-	lda game_state
+	lda gs_facing
 	cmp #$01
 	beq b3C72
 	jsr clear_maze_window
@@ -7426,36 +7288,36 @@ b3C58:
 	jmp j3C0F
 
 b3C72:
-	inc a6194
+	inc gs_level
 	ldx #$03
-	stx game_state
-	dec gs_player_xyH
+	stx gs_facing
+	dec gs_player_x
 	jsr pit
-	jsr s1015
+	jsr draw_view
 	jmp j34D5
 
-j3C86:
+special_exit:
 	jsr clear_maze_window
-	lda #<p4707
+	lda #$07
 	sta a6199
-	ldx #>p4707
+	ldx #$47
 	stx a619A
 	jsr s12A6
-	ldx #>p0801
-	stx src+1
-	ldx #<p0801
-	stx src
+	ldx #$08
+	stx a0F
+	ldx #$01
+	stx zp_0E_src
 	jsr s1E5A
 	ldx #$01
-	stx a61A8
+	stx gs_exit_turns
 j3CA6:
 	lda #$a0     ;Don't make unnecessary turns.
 	jsr print_to_line1
-	jsr s0CCA
-	lda a61A8
-	sta count+1
-	lda a619C
-	dec count+1
+	jsr get_player_input
+	lda gs_exit_turns
+	sta a1A
+	lda gd_parsed_verb
+	dec a1A
 	bne b3CE9
 	cmp #$5a
 	bpl b3CC1
@@ -7468,21 +7330,21 @@ b3CC1:
 
 b3CC8:
 	jsr clear_maze_window
-	ldx #<p2303
+	ldx #$03
 	stx a6199
-	ldx #>p2303
+	ldx #$23
 	stx a619A
 	jsr s12A6
-	ldx #>p0802
-	stx src+1
-	ldx #<p0802
-	stx src
+	ldx #$08
+	stx a0F
+	ldx #$02
+	stx zp_0E_src
 	jsr s1E5A
-	inc a61A8
+	inc gs_exit_turns
 	jmp j3CA6
 
 b3CE9:
-	dec count+1
+	dec a1A
 	bne b3D11
 	cmp #$5a
 	bpl b3CF4
@@ -7500,11 +7362,11 @@ b3CFB:
 	ldx #>p01
 	stx a619A
 	jsr s12A6
-	inc a61A8
+	inc gs_exit_turns
 	jmp j3CA6
 
 b3D11:
-	dec count+1
+	dec a1A
 	bne b3D40
 	cmp #$5a
 	bpl b3D1C
@@ -7523,13 +7385,13 @@ b3D23:
 	stx a619A
 	jsr s12A6
 	ldx #$02
-	stx src+1
+	stx a0F
 	jsr s1E5A
-	inc a61A8
+	inc gs_exit_turns
 	jmp j3CA6
 
 b3D40:
-	dec count+1
+	dec a1A
 	bne b3D69
 	cmp #$5a
 	bmi b3D4B
@@ -7541,20 +7403,20 @@ b3D4B:
 	jmp j3ECA
 
 b3D52:
-	lda gd_direct_object
-	cmp #$17
+	lda gd_parsed_object
+	cmp #noun_door
 	beq b3D5C
 	jmp j3ECA
 
 b3D5C:
 	ldx #$0a
-	stx src+1
+	stx a0F
 	jsr s1E5A
-	inc a61A8
+	inc gs_exit_turns
 	jmp j3CA6
 
 b3D69:
-	dec count+1
+	dec a1A
 	bne b3DDD
 	cmp #$5b
 	bne b3D8E
@@ -7583,36 +7445,36 @@ b3D99:
 	jmp j3ECA
 
 b3D9C:
-	lda gd_direct_object
+	lda gd_parsed_object
 	cmp #$01
 	bne b3D99
-	ldx #>p0601
-	stx src+1
-	ldx #<p0601
-	stx src
+	ldx #$06
+	stx a0F
+	ldx #$01
+	stx zp_0E_src
 	jsr item_exec
-	lda count+1
+	lda a1A
 	cmp #$08
 	bne b3D99
 	jsr clear_maze_window
 	jsr s30C5
-	ldx #<p4607
+	ldx #$07
 	stx a6199
-	ldx #>p4607
+	ldx #$46
 	stx a619A
 	jsr s12A6
 	ldx #$01
-	stx src+1
-	stx src
+	stx a0F
+	stx zp_0E_src
 	jsr item_exec
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
-	inc a61A8
+	inc gs_exit_turns
 	jmp j3CA6
 
 b3DDD:
-	dec count+1
+	dec a1A
 	bne b3E05
 	cmp #$5a
 	bpl b3DE8
@@ -7627,12 +7489,12 @@ b3DEC:
 
 b3DEF:
 	jsr clear_maze_window
-	ldx #<p2303
+	ldx #$03
 	stx a6199
-	ldx #>p2303
+	ldx #$23
 	stx a619A
 	jsr s12A6
-	inc a61A8
+	inc gs_exit_turns
 	jmp j3CA6
 
 b3E05:
@@ -7650,8 +7512,8 @@ j3E1B:
 	jsr print_to_line1
 	lda #$3d     ;what was the name of the monster?
 	jsr print_to_line2
-	jsr s0CCA
-	lda a619C
+	jsr get_player_input
+	lda gd_parsed_verb
 	cmp #$5a
 	bpl b3DEC
 	cmp #$15
@@ -7669,11 +7531,11 @@ j3E49:
 	ldx #$16
 	stx zp_row
 	ldx #<p3E36
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>p3E36
-	stx string_ptr+1
+	stx zp_0D
 	jsr print_string
-	jsr wait5
+	jsr wait_long
 	jmp j3E1B
 
 text_congrats:
@@ -7688,9 +7550,9 @@ b3E89:
 	lda #char_newline
 	jsr char_out
 	ldx #<text_congrats
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>text_congrats
-	stx string_ptr+1
+	stx zp_0D
 	jsr print_string
 @infinite_loop:
 	jmp @infinite_loop
@@ -7745,17 +7607,17 @@ relocate_data:
 
 ; Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 	ldx #$00
-	stx src
-	stx dst
+	stx zp_0E_src
+	stx zp_10_dst
 	stx p3FFF
 	ldx #$40
-	stx src+1
+	stx a0F
 	ldx #$60
-	stx dst+1
+	stx a11
 	ldx #<p1FFF
-	stx count
+	stx zp_19_n
 	ldx #>p1FFF
-	stx count+1
+	stx a1A
 	jsr memcpy
 	ldx #opcode_JMP
 	stx DOS_hook_monitor
@@ -8137,723 +7999,720 @@ p438E:
 	.byte $12,$0a,$06,$0a,$12,$00,$00,$0c
 	.byte $08,$08,$08,$08,$1c,$00,$00,$00
 	.byte $16,$2a,$2a,$2a,$2a,$00,$00,$00
-	.byte $1a
-p4607:
-	.byte $26,$22,$22,$22,$00,$00,$00,$1c
-	.byte $22,$22,$22,$1c,$00,$00,$00,$1e
-	.byte $22,$22,$1e,$02,$02,$00,$00,$3c
-	.byte $22,$22,$3c,$20,$20,$00,$00,$1a
-	.byte $26,$02,$02,$02,$00,$00,$00,$3c
-	.byte $02,$1c,$20,$1e,$00,$04,$04,$1e
-	.byte $04,$04,$24,$18,$00,$00,$00,$22
-	.byte $22,$22,$32,$2c,$00,$00,$00,$22
-	.byte $22,$14,$14,$08,$00,$00,$00,$2a
-	.byte $2a,$2a,$2a,$14,$00,$00,$00,$22
-	.byte $14,$08,$14,$22,$00,$00,$00,$22
-	.byte $22,$22,$3c,$20,$1c,$00,$00,$3e
-	.byte $10,$08,$04,$3e,$00,$0f,$0f,$0f
-	.byte $0f,$7f,$7f,$7f,$7f,$70,$78,$7c
-	.byte $7e,$7f,$7f,$7f,$7f,$07,$0f,$1f
-	.byte $3f,$7f,$7f,$7f,$7f,$7f,$7f,$7f
-	.byte $7f,$7e,$7c,$78,$70,$7f,$7f,$7f
-	.byte $7f,$3f,$1f,$0f,$07,$ff,$f2,$61
-	.byte $69,$73,$e2,$6c,$6f,$77,$e2,$72
-	.byte $65,$61,$e2,$75,$72,$6e,$e3,$68
-	.byte $65,$77,$2a,$e5,$61,$74,$20,$f2
-	.byte $6f,$6c,$6c,$2a,$e3,$68,$75,$63
-	.byte $2a,$e8,$65,$61,$76,$2a,$f4,$68
-	.byte $72,$6f,$e3,$6c,$69,$6d,$e4,$72
-	.byte $6f,$70,$2a,$ec,$65,$61,$76,$2a
-	.byte $f0,$75,$74,$20,$e6,$69,$6c,$6c
-	.byte $ec,$69,$67,$68,$f0,$6c,$61,$79
-	.byte $f3,$74,$72,$69,$f7,$65,$61,$72
-	.byte $e5,$78,$61,$6d,$2a,$ec,$6f,$6f
-	.byte $6b,$f7,$69,$70,$65,$2a,$e3,$6c
-	.byte $65,$61,$2a,$f0,$6f,$6c,$69,$2a
-	.byte $f2,$75,$62,$20,$ef,$70,$65,$6e
-p4707:
-	.byte $2a,$f5,$6e,$6c,$6f,$f0,$72,$65
-	.byte $73,$e7,$65,$74,$20,$2a,$e7,$72
-	.byte $61,$62,$2a,$e8,$6f,$6c,$64,$2a
-	.byte $f4,$61,$6b,$65,$f3,$74,$61,$62
-	.byte $2a,$eb,$69,$6c,$6c,$2a,$f3,$6c
-	.byte $61,$73,$2a,$e1,$74,$74,$61,$2a
-	.byte $e8,$61,$63,$6b,$f0,$61,$69,$6e
-	.byte $e7,$72,$65,$6e,$f3,$61,$79,$20
-	.byte $2a,$f9,$65,$6c,$6c,$2a,$f3,$63
-	.byte $72,$65,$e3,$68,$61,$72,$e6,$61
-	.byte $72,$74,$f3,$61,$76,$65,$f1,$75
-	.byte $69,$74,$e9,$6e,$73,$74,$2a,$e4
-	.byte $69,$72,$65,$e8,$65,$6c,$70,$2a
-	.byte $e8,$69,$6e,$74,$c2,$61,$6c,$6c
-	.byte $c2,$72,$75,$73,$68,$c3,$61,$6c
-	.byte $63,$75,$6c,$61,$74,$6f,$72,$c4
-	.byte $61,$67,$67,$65,$72,$c6,$6c,$75
-	.byte $74,$65,$c6,$72,$69,$73,$62,$65
-	.byte $65,$c8,$61,$74,$20,$c8,$6f,$72
-	.byte $6e,$ca,$61,$72,$20,$cb,$65,$79
-	.byte $20,$d2,$69,$6e,$67,$d3,$6e,$65
-	.byte $61,$6b,$65,$72,$d3,$74,$61,$66
-	.byte $66,$d3,$77,$6f,$72,$64,$d7,$6f
-	.byte $6f,$6c,$d9,$6f,$79,$6f,$d3,$6e
-	.byte $61,$6b,$65,$c6,$6f,$6f,$64,$d4
-	.byte $6f,$72,$63,$68,$c2,$6f,$78,$20
-	.byte $c2,$61,$74,$20,$c4,$6f,$67,$20
-	.byte $c4,$6f,$6f,$72,$2a,$c5,$6c,$65
-	.byte $76,$cd,$6f,$6e,$73,$74,$65,$72
-	.byte $cd,$6f,$74,$68,$65,$72,$da,$65
-	.byte $72,$6f,$cf,$6e,$65,$20,$d4,$77
-	.byte $6f,$20,$d4,$68,$72,$65,$65,$c6
-	.byte $6f,$75,$72,$c6,$69,$76,$65,$d3
-	.byte $69,$78,$20,$d3,$65,$76,$65,$6e
-	.byte $c5,$69,$67,$68,$74,$ce,$69,$6e
-	.byte $65,$ff,$ff,$00,$00,$ff,$ff,$00
-	.byte $00,$ff,$c9,$6e,$76,$65,$6e,$74
-	.byte $6f,$72,$79,$3a,$d4,$6f,$72,$63
-	.byte $68,$65,$73,$3a,$cc,$69,$74,$3a
-	.byte $d5,$6e,$6c,$69,$74,$3a,$e3,$72
-	.byte $79,$73,$74,$61,$6c,$20,$62,$61
-	.byte $6c,$6c,$2e,$f0,$61,$69,$6e,$74
-	.byte $62,$72,$75,$73,$68,$20,$75,$73
-	.byte $65,$64,$20,$62,$79,$20,$56,$61
-	.byte $6e,$20,$47,$6f,$67,$68,$2e,$e3
-	.byte $61,$6c,$63,$75,$6c,$61,$74,$6f
-	.byte $72,$20,$77,$69,$74,$68,$20,$31
-	.byte $30,$20,$62,$75,$74,$74,$6f,$6e
-	.byte $73,$2e,$ea,$65,$77,$65,$6c,$65
-	.byte $64,$20,$68,$61,$6e,$64,$6c,$65
-	.byte $64,$20,$64,$61,$67,$67,$65,$72
-	.byte $2e,$e6,$6c,$75,$74,$65,$2e,$f0
-	.byte $72,$65,$63,$69,$73,$69,$6f,$6e
-	.byte $20,$63,$72,$61,$66,$74,$65,$64
-	.byte $20,$66,$72,$69,$73,$62,$65,$65
-	.byte $2e,$e8,$61,$74,$20,$77,$69,$74
-	.byte $68,$20,$74,$77,$6f,$20,$72,$61
-	.byte $6d,$27,$73,$20,$68,$6f,$72,$6e
-	.byte $73,$2e,$e3,$61,$72,$65,$66,$75
-	.byte $6c,$6c,$79,$20,$70,$6f,$6c,$69
-	.byte $73,$68,$65,$64,$20,$68,$6f,$72
-	.byte $6e,$2e,$e7,$6c,$61,$73,$73,$20
-	.byte $6a,$61,$72,$20,$63,$6f,$6d,$70
-	.byte $6c,$65,$74,$65,$20,$77,$69,$74
-	.byte $68,$20,$6c,$69,$64,$2e,$e7,$6f
-	.byte $6c,$64,$65,$6e,$20,$6b,$65,$79
-	.byte $2e,$e4,$69,$61,$6d,$6f,$6e,$64
-	.byte $20,$72,$69,$6e,$67,$2e,$f2,$6f
-	.byte $74,$74,$65,$64,$20,$6d,$75,$74
-	.byte $69,$6c,$61,$74,$65,$64,$20,$73
-	.byte $6e,$65,$61,$6b,$65,$72,$2e,$ed
-	.byte $61,$67,$69,$63,$20,$73,$74,$61
-	.byte $66,$66,$2e,$b9,$30,$20,$70,$6f
-	.byte $75,$6e,$64,$20,$74,$77,$6f,$2d
-	.byte $68,$61,$6e,$64,$65,$64,$20,$73
-	.byte $77,$6f,$72,$64,$2e,$e2,$61,$6c
-	.byte $6c,$20,$6f,$66,$20,$62,$6c,$75
-	.byte $65,$20,$77,$6f,$6f,$6c,$2e,$f9
-	.byte $6f,$79,$6f,$2e,$f3,$6e,$61,$6b
-	.byte $65,$20,$21,$21,$21,$e2,$61,$73
-	.byte $6b,$65,$74,$20,$6f,$66,$20,$66
-	.byte $6f,$6f,$64,$2e,$f4,$6f,$72,$63
-	.byte $68,$2e,$c9,$6e,$73,$69,$64,$65
-	.byte $20,$74,$68,$65,$20,$62,$6f,$78
-	.byte $20,$74,$68,$65,$72,$65,$20,$69
-	.byte $73,$20,$61,$d9,$6f,$75,$20,$75
-	.byte $6e,$6c,$6f,$63,$6b,$20,$74,$68
-	.byte $65,$20,$64,$6f,$6f,$72,$2e,$2e
-	.byte $2e,$e1,$6e,$64,$20,$74,$68,$65
-	.byte $20,$77,$61,$6c,$6c,$20,$66,$61
-	.byte $6c,$6c,$73,$20,$6f,$6e,$20,$79
-	.byte $6f,$75,$21,$e1,$6e,$64,$20,$74
-	.byte $68,$65,$20,$6b,$65,$79,$20,$62
-	.byte $65,$67,$69,$6e,$73,$20,$74,$6f
-	.byte $20,$74,$69,$63,$6b,$21,$e1,$6e
-	.byte $64,$20,$61,$20,$32,$30,$2c,$30
-	.byte $30,$30,$20,$76,$6f,$6c,$74,$20
-	.byte $73,$68,$6f,$63,$6b,$20,$6b,$69
-	.byte $6c,$6c,$73,$20,$79,$6f,$75,$21
-	.byte $c1,$20,$36,$30,$30,$20,$70,$6f
-	.byte $75,$6e,$64,$20,$67,$6f,$72,$69
-	.byte $6c,$6c,$61,$20,$72,$69,$70,$73
-	.byte $20,$79,$6f,$75,$72,$20,$66,$61
-	.byte $63,$65,$20,$6f,$66,$66,$21,$d4
-	.byte $77,$6f,$20,$6d,$65,$6e,$20,$69
-	.byte $6e,$20,$77,$68,$69,$74,$65,$20
-	.byte $63,$6f,$61,$74,$73,$20,$74,$61
-	.byte $6b,$65,$20,$79,$6f,$75,$20,$61
-	.byte $77,$61,$79,$21,$c8,$61,$76,$69
-	.byte $6e,$67,$20,$66,$75,$6e,$3f,$d4
-	.byte $68,$65,$20,$73,$6e,$61,$6b,$65
-	.byte $20,$62,$69,$74,$65,$73,$20,$79
-	.byte $6f,$75,$20,$61,$6e,$64,$20,$79
-	.byte $6f,$75,$20,$64,$69,$65,$21,$d4
-	.byte $68,$75,$6e,$64,$65,$72,$62,$6f
-	.byte $6c,$74,$73,$20,$73,$68,$6f,$6f
-	.byte $74,$20,$6f,$75,$74,$20,$61,$62
-	.byte $6f,$76,$65,$20,$79,$6f,$75,$21
-	.byte $d4,$68,$65,$20,$73,$74,$61,$66
-	.byte $66,$20,$74,$68,$75,$6e,$64,$65
-	.byte $72,$73,$20,$77,$69,$74,$68,$20
-	.byte $75,$73,$65,$6c,$65,$73,$73,$20
-	.byte $65,$6e,$65,$72,$67,$79,$21,$f9
-	.byte $6f,$75,$20,$61,$72,$65,$20,$77
-	.byte $65,$61,$72,$69,$6e,$67,$20,$69
-	.byte $74,$2e,$d4,$6f,$20,$65,$76,$65
-	.byte $72,$79,$74,$68,$69,$6e,$67,$d4
-	.byte $68,$65,$72,$65,$20,$69,$73,$20
-	.byte $61,$20,$73,$65,$61,$73,$6f,$6e
-	.byte $ac,$20,$54,$55,$52,$4e,$2c,$54
-	.byte $55,$52,$4e,$2c,$54,$55,$52,$4e
-	.byte $d4,$68,$65,$20,$63,$61,$6c,$63
-	.byte $75,$6c,$61,$74,$6f,$72,$20,$64
-	.byte $69,$73,$70,$6c,$61,$79,$73,$20
-	.byte $33,$31,$37,$2e,$c9,$74,$20,$64
-	.byte $69,$73,$70,$6c,$61,$79,$73,$20
-	.byte $33,$31,$37,$2e,$32,$20,$21,$d4
-	.byte $68,$65,$20,$69,$6e,$76,$69,$73
-	.byte $69,$62,$6c,$65,$20,$67,$75,$69
-	.byte $6c,$6c,$6f,$74,$69,$6e,$65,$20
-	.byte $62,$65,$68,$65,$61,$64,$73,$20
-	.byte $79,$6f,$75,$21,$d9,$6f,$75,$20
-	.byte $68,$61,$76,$65,$20,$72,$61,$6d
-	.byte $6d,$65,$64,$20,$79,$6f,$75,$72
-	.byte $20,$68,$65,$61,$64,$20,$69,$6e
-	.byte $74,$6f,$20,$61,$20,$73,$74,$65
-	.byte $65,$6c,$f7,$61,$6c,$6c,$20,$61
-	.byte $6e,$64,$20,$62,$61,$73,$68,$65
-	.byte $64,$20,$79,$6f,$75,$72,$20,$62
-	.byte $72,$61,$69,$6e,$73,$20,$6f,$75
-	.byte $74,$21,$c1,$41,$41,$41,$41,$41
-	.byte $41,$41,$41,$41,$41,$48,$48,$48
-	.byte $48,$48,$21,$d7,$48,$41,$4d,$21
-	.byte $21,$21,$c1,$20,$76,$69,$63,$69
-	.byte $6f,$75,$73,$20,$64,$6f,$67,$20
-	.byte $61,$74,$74,$61,$63,$6b,$73,$20
-	.byte $79,$6f,$75,$21,$c8,$65,$20,$72
-	.byte $69,$70,$73,$20,$79,$6f,$75,$72
-	.byte $20,$74,$68,$72,$6f,$61,$74,$20
-	.byte $6f,$75,$74,$21,$d4,$68,$65,$20
-	.byte $64,$6f,$67,$20,$63,$68,$61,$73
-	.byte $65,$73,$20,$74,$68,$65,$20,$73
-	.byte $6e,$65,$61,$6b,$65,$72,$21,$c1
-	.byte $20,$76,$61,$6d,$70,$69,$72,$65
-	.byte $20,$62,$61,$74,$20,$61,$74,$74
-	.byte $61,$63,$6b,$73,$20,$79,$6f,$75
-	.byte $21,$d9,$6f,$75,$72,$20,$73,$74
-	.byte $6f,$6d,$61,$63,$68,$20,$69,$73
-	.byte $20,$67,$72,$6f,$77,$6c,$69,$6e
-	.byte $67,$21,$d9,$6f,$75,$72,$20,$74
-	.byte $6f,$72,$63,$68,$20,$69,$73,$20
-	.byte $64,$79,$69,$6e,$67,$21,$d9,$6f
-	.byte $75,$20,$61,$72,$65,$20,$61,$6e
-	.byte $6f,$74,$68,$65,$72,$20,$76,$69
-	.byte $63,$74,$69,$6d,$20,$6f,$66,$20
-	.byte $74,$68,$65,$20,$6d,$61,$7a,$65
-	.byte $21,$d9,$6f,$75,$20,$68,$61,$76
-	.byte $65,$20,$64,$69,$65,$64,$20,$6f
-	.byte $66,$20,$73,$74,$61,$72,$76,$61
-	.byte $74,$69,$6f,$6e,$21,$d4,$68,$65
-	.byte $20,$6d,$6f,$6e,$73,$74,$65,$72
-	.byte $20,$61,$74,$74,$61,$63,$6b,$73
-	.byte $20,$79,$6f,$75,$20,$61,$6e,$64
-	.byte $f9,$6f,$75,$20,$61,$72,$65,$20
-	.byte $68,$69,$73,$20,$6e,$65,$78,$74
-	.byte $20,$6d,$65,$61,$6c,$21,$f4,$68
-	.byte $65,$20,$6d,$61,$67,$69,$63,$20
-	.byte $77,$6f,$72,$64,$20,$77,$6f,$72
-	.byte $6b,$73,$21,$20,$79,$6f,$75,$20
-	.byte $68,$61,$76,$65,$20,$65,$73,$63
-	.byte $61,$70,$65,$64,$21,$c4,$6f,$20
-	.byte $79,$6f,$75,$20,$77,$61,$6e,$74
-	.byte $20,$74,$6f,$20,$70,$6c,$61,$79
-	.byte $20,$61,$67,$61,$69,$6e,$20,$28
-	.byte $59,$20,$6f,$72,$20,$4e,$29,$3f
-	.byte $d9,$6f,$75,$20,$66,$61,$6c,$6c
-	.byte $20,$74,$68,$72,$6f,$75,$67,$68
-	.byte $20,$74,$68,$65,$20,$66,$6c,$6f
-	.byte $6f,$72,$ef,$6e,$74,$6f,$20,$61
-	.byte $20,$62,$65,$64,$20,$6f,$66,$20
-	.byte $73,$70,$69,$6b,$65,$73,$21,$c2
-	.byte $65,$66,$6f,$72,$65,$20,$49,$20
-	.byte $6c,$65,$74,$20,$79,$6f,$75,$20
-	.byte $67,$6f,$20,$66,$72,$65,$65,$f7
-	.byte $68,$61,$74,$20,$77,$61,$73,$20
-	.byte $74,$68,$65,$20,$6e,$61,$6d,$65
-	.byte $20,$6f,$66,$20,$74,$68,$65,$20
-	.byte $6d,$6f,$6e,$73,$74,$65,$72,$3f
-	.byte $e9,$74,$20,$73,$61,$79,$73,$20
-	.byte $22,$74,$68,$65,$20,$6d,$61,$67
-	.byte $69,$63,$20,$77,$6f,$72,$64,$20
-	.byte $69,$73,$20,$63,$61,$6d,$65,$6c
-	.byte $6f,$74,$22,$2e,$d4,$68,$65,$20
-	.byte $6d,$6f,$6e,$73,$74,$65,$72,$20
-	.byte $67,$72,$61,$62,$73,$20,$74,$68
-	.byte $65,$20,$66,$72,$69,$73,$62,$65
-	.byte $65,$2c,$20,$74,$68,$72,$6f,$77
-	.byte $73,$20,$e9,$74,$20,$62,$61,$63
-	.byte $6b,$2c,$20,$61,$6e,$64,$20,$69
-	.byte $74,$20,$73,$61,$77,$73,$20,$79
-	.byte $6f,$75,$72,$20,$68,$65,$61,$64
-	.byte $20,$6f,$66,$66,$21,$d4,$49,$43
-	.byte $4b,$21,$20,$54,$49,$43,$4b,$21
-	.byte $d4,$68,$65,$20,$6b,$65,$79,$20
-	.byte $62,$6c,$6f,$77,$73,$20,$75,$70
-	.byte $20,$74,$68,$65,$20,$77,$68,$6f
-	.byte $6c,$65,$20,$6d,$61,$7a,$65,$21
-	.byte $d4,$68,$65,$20,$67,$72,$6f,$75
-	.byte $6e,$64,$20,$62,$65,$6e,$65,$61
-	.byte $74,$68,$20,$79,$6f,$75,$72,$20
-	.byte $66,$65,$65,$74,$e2,$65,$67,$69
-	.byte $6e,$73,$20,$74,$6f,$20,$73,$68
-	.byte $61,$6b,$65,$21,$c1,$20,$64,$69
-	.byte $73,$67,$75,$73,$74,$69,$6e,$67
-	.byte $20,$6f,$64,$6f,$72,$20,$70,$65
-	.byte $72,$6d,$65,$61,$74,$65,$73,$f4
-	.byte $68,$65,$20,$68,$61,$6c,$6c,$77
-	.byte $61,$79,$20,$61,$73,$20,$69,$74
-	.byte $20,$64,$61,$72,$6b,$65,$6e,$73
-	.byte $21,$f4,$68,$65,$20,$68,$61,$6c
-	.byte $6c,$77,$61,$79,$21,$c9,$74,$20
-	.byte $69,$73,$20,$74,$68,$65,$20,$6d
-	.byte $6f,$6e,$73,$74,$65,$72,$27,$73
-	.byte $20,$6d,$6f,$74,$68,$65,$72,$21
-	.byte $d3,$68,$65,$20,$68,$61,$73,$20
-	.byte $62,$65,$65,$6e,$20,$73,$65,$64
-	.byte $75,$63,$65,$64,$21,$d3,$68,$65
-	.byte $20,$74,$69,$70,$74,$6f,$65,$73
-	.byte $20,$75,$70,$20,$74,$6f,$20,$79
-	.byte $6f,$75,$21,$d3,$68,$65,$20,$73
-	.byte $6c,$61,$73,$68,$65,$73,$20,$79
-	.byte $6f,$75,$20,$74,$6f,$20,$62,$69
-	.byte $74,$73,$21,$d9,$6f,$75,$20,$73
-	.byte $6c,$61,$73,$68,$20,$68,$65,$72
-	.byte $20,$74,$6f,$20,$62,$69,$74,$73
-	.byte $21,$c3,$6f,$72,$72,$65,$63,$74
-	.byte $21,$20,$59,$6f,$75,$20,$68,$61
-	.byte $76,$65,$20,$73,$75,$72,$76,$69
-	.byte $76,$65,$64,$21,$d9,$6f,$75,$20
-	.byte $62,$72,$65,$61,$6b,$20,$74,$68
-	.byte $65,$e1,$6e,$64,$20,$69,$74,$20
-	.byte $64,$69,$73,$61,$70,$70,$65,$61
-	.byte $72,$73,$21,$d7,$68,$61,$74,$20
-	.byte $61,$20,$6d,$65,$73,$73,$21,$20
-	.byte $54,$68,$65,$20,$76,$61,$6d,$70
-	.byte $69,$72,$65,$20,$62,$61,$74,$e4
-	.byte $72,$69,$6e,$6b,$73,$20,$74,$68
-	.byte $65,$20,$62,$6c,$6f,$6f,$64,$20
-	.byte $61,$6e,$64,$20,$64,$69,$65,$73
-	.byte $21,$c9,$74,$20,$76,$61,$6e,$69
-	.byte $73,$68,$65,$73,$20,$69,$6e,$20
-	.byte $61,$e2,$75,$72,$73,$74,$20,$6f
-	.byte $66,$20,$66,$6c,$61,$6d,$65,$73
-	.byte $21,$d9,$6f,$75,$20,$63,$61,$6e
-	.byte $27,$74,$20,$62,$65,$20,$73,$65
-	.byte $72,$69,$6f,$75,$73,$21,$d9,$6f
-	.byte $75,$20,$61,$72,$65,$20,$6d,$61
-	.byte $6b,$69,$6e,$67,$20,$6c,$69,$74
-	.byte $74,$6c,$65,$20,$73,$65,$6e,$73
-	.byte $65,$2e,$a0,$77,$68,$61,$74,$3f
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$e1,$6c,$6c,$20,$66
-	.byte $6f,$72,$6d,$20,$69,$6e,$74,$6f
-	.byte $20,$64,$61,$72,$74,$73,$21,$d4
-	.byte $68,$65,$20,$66,$6f,$6f,$64,$20
-	.byte $69,$73,$20,$62,$65,$69,$6e,$67
-	.byte $20,$64,$69,$67,$65,$73,$74,$65
-	.byte $64,$2e,$d4,$68,$65,$20,$ed,$61
-	.byte $67,$69,$63,$61,$6c,$6c,$79,$20
-	.byte $73,$61,$69,$6c,$73,$e1,$72,$6f
-	.byte $75,$6e,$64,$20,$61,$20,$6e,$65
-	.byte $61,$72,$62,$79,$20,$63,$6f,$72
-	.byte $6e,$65,$72,$e1,$6e,$64,$20,$69
-	.byte $73,$20,$65,$61,$74,$65,$6e,$20
-	.byte $62,$79,$f4,$68,$65,$20,$6d,$6f
-	.byte $6e,$73,$74,$65,$72,$20,$21,$21
-	.byte $21,$21,$e1,$6e,$64,$20,$74,$68
-	.byte $65,$20,$6d,$6f,$6e,$73,$74,$65
-	.byte $72,$20,$67,$72,$61,$62,$73,$20
-	.byte $69,$74,$2c,$e7,$65,$74,$73,$20
-	.byte $74,$61,$6e,$67,$6c,$65,$64,$2c
-	.byte $20,$61,$6e,$64,$20,$74,$6f,$70
-	.byte $70,$6c,$65,$73,$20,$6f,$76,$65
-	.byte $72,$21,$c9,$74,$20,$69,$73,$20
-	.byte $6e,$6f,$77,$20,$66,$75,$6c,$6c
-	.byte $20,$6f,$66,$20,$62,$6c,$6f,$6f
-	.byte $64,$2e,$d4,$68,$65,$20,$6d,$6f
-	.byte $6e,$73,$74,$65,$72,$20,$69,$73
-	.byte $20,$64,$65,$61,$64,$20,$61,$6e
-	.byte $64,$ed,$75,$63,$68,$20,$62,$6c
-	.byte $6f,$6f,$64,$20,$69,$73,$20,$73
-	.byte $70,$69,$6c,$74,$21,$d9,$6f,$75
-	.byte $20,$68,$61,$76,$65,$20,$6b,$69
-	.byte $6c,$6c,$65,$64,$20,$69,$74,$2e
-	.byte $d4,$68,$65,$20,$64,$61,$67,$67
-	.byte $65,$72,$20,$64,$69,$73,$61,$70
-	.byte $70,$65,$61,$72,$73,$21,$d4,$68
-	.byte $65,$20,$74,$6f,$72,$63,$68,$20
-	.byte $69,$73,$20,$6c,$69,$74,$20,$61
-	.byte $6e,$64,$20,$74,$68,$65,$ef,$6c
-	.byte $64,$20,$74,$6f,$72,$63,$68,$20
-	.byte $64,$69,$65,$73,$20,$61,$6e,$64
-	.byte $20,$76,$61,$6e,$69,$73,$68,$65
-	.byte $73,$21,$c1,$20,$63,$6c,$6f,$73
-	.byte $65,$20,$69,$6e,$73,$70,$65,$63
-	.byte $74,$69,$6f,$6e,$20,$72,$65,$76
-	.byte $65,$61,$6c,$73,$e1,$62,$73,$6f
-	.byte $6c,$75,$74,$65,$6c,$79,$20,$6e
-	.byte $6f,$74,$68,$69,$6e,$67,$20,$6f
-	.byte $66,$20,$76,$61,$6c,$75,$65,$21
-	.byte $e1,$20,$73,$6d,$75,$64,$67,$65
-	.byte $64,$20,$64,$69,$73,$70,$6c,$61
-	.byte $79,$21,$c1,$20,$63,$61,$6e,$20
-	.byte $6f,$66,$20,$73,$70,$69,$6e,$61
-	.byte $63,$68,$3f,$f2,$65,$74,$75,$72
-	.byte $6e,$73,$20,$61,$6e,$64,$20,$68
-	.byte $69,$74,$73,$20,$79,$6f,$75,$e9
-	.byte $6e,$20,$74,$68,$65,$20,$65,$79
-	.byte $65,$21,$d9,$6f,$75,$20,$61,$72
-	.byte $65,$20,$74,$72,$61,$70,$70,$65
-	.byte $64,$20,$69,$6e,$20,$61,$20,$66
-	.byte $61,$6b,$65,$e5,$6c,$65,$76,$61
-	.byte $74,$6f,$72,$2e,$20,$54,$68,$65
-	.byte $72,$65,$20,$69,$73,$20,$6e,$6f
-	.byte $20,$65,$73,$63,$61,$70,$65,$21
-	.byte $d7,$69,$74,$68,$20,$77,$68,$61
-	.byte $74,$3f,$20,$54,$6f,$65,$6e,$61
-	.byte $69,$6c,$20,$70,$6f,$6c,$69,$73
-	.byte $68,$3f,$c1,$20,$64,$72,$61,$66
-	.byte $74,$20,$62,$6c,$6f,$77,$73,$20
-	.byte $79,$6f,$75,$72,$20,$74,$6f,$72
-	.byte $63,$68,$20,$6f,$75,$74,$21,$d4
-	.byte $68,$65,$20,$72,$69,$6e,$67,$20
-	.byte $69,$73,$20,$61,$63,$74,$69,$76
-	.byte $61,$74,$65,$64,$20,$61,$6e,$64
-	.byte $f3,$68,$69,$6e,$65,$73,$20,$6c
-	.byte $69,$67,$68,$74,$20,$65,$76,$65
-	.byte $72,$79,$77,$68,$65,$72,$65,$21
-	.byte $d4,$68,$65,$20,$73,$74,$61,$66
-	.byte $66,$20,$62,$65,$67,$69,$6e,$73
-	.byte $20,$74,$6f,$20,$71,$75,$61,$6b
-	.byte $65,$21,$d4,$68,$65,$20,$63,$61
+	.byte $1a,$26,$22,$22,$22,$00,$00,$00
+	.byte $1c,$22,$22,$22,$1c,$00,$00,$00
+	.byte $1e,$22,$22,$1e,$02,$02,$00,$00
+	.byte $3c,$22,$22,$3c,$20,$20,$00,$00
+	.byte $1a,$26,$02,$02,$02,$00,$00,$00
+	.byte $3c,$02,$1c,$20,$1e,$00,$04,$04
+	.byte $1e,$04,$04,$24,$18,$00,$00,$00
+	.byte $22,$22,$22,$32,$2c,$00,$00,$00
+	.byte $22,$22,$14,$14,$08,$00,$00,$00
+	.byte $2a,$2a,$2a,$2a,$14,$00,$00,$00
+	.byte $22,$14,$08,$14,$22,$00,$00,$00
+	.byte $22,$22,$22,$3c,$20,$1c,$00,$00
+	.byte $3e,$10,$08,$04,$3e,$00,$0f,$0f
+	.byte $0f,$0f,$7f,$7f,$7f,$7f,$70,$78
+	.byte $7c,$7e,$7f,$7f,$7f,$7f,$07,$0f
+	.byte $1f,$3f,$7f,$7f,$7f,$7f,$7f,$7f
+	.byte $7f,$7f,$7e,$7c,$78,$70,$7f,$7f
+	.byte $7f,$7f,$3f,$1f,$0f,$07,$ff,$f2
+	.byte $61,$69,$73,$e2,$6c,$6f,$77,$e2
+	.byte $72,$65,$61,$e2,$75,$72,$6e,$e3
+	.byte $68,$65,$77,$2a,$e5,$61,$74,$20
+	.byte $f2,$6f,$6c,$6c,$2a,$e3,$68,$75
+	.byte $63,$2a,$e8,$65,$61,$76,$2a,$f4
+	.byte $68,$72,$6f,$e3,$6c,$69,$6d,$e4
+	.byte $72,$6f,$70,$2a,$ec,$65,$61,$76
+	.byte $2a,$f0,$75,$74,$20,$e6,$69,$6c
+	.byte $6c,$ec,$69,$67,$68,$f0,$6c,$61
+	.byte $79,$f3,$74,$72,$69,$f7,$65,$61
+	.byte $72,$e5,$78,$61,$6d,$2a,$ec,$6f
+	.byte $6f,$6b,$f7,$69,$70,$65,$2a,$e3
+	.byte $6c,$65,$61,$2a,$f0,$6f,$6c,$69
+	.byte $2a,$f2,$75,$62,$20,$ef,$70,$65
+	.byte $6e,$2a,$f5,$6e,$6c,$6f,$f0,$72
+	.byte $65,$73,$e7,$65,$74,$20,$2a,$e7
+	.byte $72,$61,$62,$2a,$e8,$6f,$6c,$64
+	.byte $2a,$f4,$61,$6b,$65,$f3,$74,$61
+	.byte $62,$2a,$eb,$69,$6c,$6c,$2a,$f3
+	.byte $6c,$61,$73,$2a,$e1,$74,$74,$61
+	.byte $2a,$e8,$61,$63,$6b,$f0,$61,$69
+	.byte $6e,$e7,$72,$65,$6e,$f3,$61,$79
+	.byte $20,$2a,$f9,$65,$6c,$6c,$2a,$f3
+	.byte $63,$72,$65,$e3,$68,$61,$72,$e6
+	.byte $61,$72,$74,$f3,$61,$76,$65,$f1
+	.byte $75,$69,$74,$e9,$6e,$73,$74,$2a
+	.byte $e4,$69,$72,$65,$e8,$65,$6c,$70
+	.byte $2a,$e8,$69,$6e,$74,$c2,$61,$6c
+	.byte $6c,$c2,$72,$75,$73,$68,$c3,$61
 	.byte $6c,$63,$75,$6c,$61,$74,$6f,$72
-	.byte $20,$76,$61,$6e,$69,$73,$68,$65
-	.byte $73,$2e,$ce,$45,$56,$45,$52,$2c
-	.byte $20,$45,$56,$45,$52,$20,$72,$61
-	.byte $69,$64,$20,$61,$20,$6d,$6f,$6e
-	.byte $73,$74,$65,$72,$27,$73,$20,$6c
-	.byte $61,$69,$72,$2e,$cf,$4b,$2e,$2e
-	.byte $2e,$e8,$61,$73,$20,$76,$61,$6e
-	.byte $69,$73,$68,$65,$64,$2e,$d4,$68
-	.byte $65,$20,$62,$6f,$64,$79,$20,$68
-	.byte $61,$73,$20,$76,$61,$6e,$69,$73
-	.byte $68,$65,$64,$21,$c7,$4c,$49,$54
-	.byte $43,$48,$21,$cf,$4b,$2e,$2e,$2e
-	.byte $69,$74,$20,$69,$73,$20,$63,$6c
-	.byte $65,$61,$6e,$2e,$c3,$68,$65,$63
-	.byte $6b,$20,$79,$6f,$75,$72,$20,$69
-	.byte $6e,$76,$65,$6e,$74,$6f,$72,$79
-	.byte $2c,$20,$44,$4f,$4c,$54,$21,$d3
-	.byte $50,$4c,$41,$54,$21,$d9,$6f,$75
-	.byte $20,$65,$61,$74,$20,$74,$68,$65
-	.byte $e1,$6e,$64,$20,$79,$6f,$75,$20
-	.byte $67,$65,$74,$20,$68,$65,$61,$72
-	.byte $74,$62,$75,$72,$6e,$21,$c1,$20
-	.byte $64,$65,$61,$66,$65,$6e,$69,$6e
-	.byte $67,$20,$72,$6f,$61,$72,$20,$65
-	.byte $6e,$76,$65,$6c,$6f,$70,$65,$73
-	.byte $f9,$6f,$75,$2e,$20,$59,$6f,$75
-	.byte $72,$20,$65,$61,$72,$73,$20,$61
-	.byte $72,$65,$20,$72,$69,$6e,$67,$69
-	.byte $6e,$67,$21,$c6,$4f,$4f,$44,$20
-	.byte $46,$49,$47,$48,$54,$21,$21,$20
-	.byte $46,$4f,$4f,$44,$20,$46,$49,$47
-	.byte $48,$54,$21,$21,$d4,$68,$65,$20
-	.byte $68,$61,$6c,$6c,$77,$61,$79,$20
-	.byte $69,$73,$20,$74,$6f,$6f,$20,$63
-	.byte $72,$6f,$77,$64,$65,$64,$2e,$c1
-	.byte $20,$68,$69,$67,$68,$20,$73,$68
-	.byte $72,$69,$6c,$6c,$20,$6e,$6f,$74
-	.byte $65,$20,$63,$6f,$6d,$65,$73,$e6
-	.byte $72,$6f,$6d,$20,$74,$68,$65,$20
-	.byte $66,$6c,$75,$74,$65,$21,$d4,$68
-	.byte $65,$20,$63,$61,$6c,$63,$75,$6c
-	.byte $61,$74,$6f,$72,$20,$64,$69,$73
-	.byte $70,$6c,$61,$79,$73,$d9,$6f,$75
-	.byte $20,$68,$61,$76,$65,$20,$62,$65
-	.byte $65,$6e,$20,$74,$65,$6c,$65,$70
-	.byte $6f,$72,$74,$65,$64,$21,$d7,$69
-	.byte $74,$68,$20,$77,$68,$6f,$3f,$20
-	.byte $54,$68,$65,$20,$6d,$6f,$6e,$73
-	.byte $74,$65,$72,$3f,$d9,$6f,$75,$20
+	.byte $c4,$61,$67,$67,$65,$72,$c6,$6c
+	.byte $75,$74,$65,$c6,$72,$69,$73,$62
+	.byte $65,$65,$c8,$61,$74,$20,$c8,$6f
+	.byte $72,$6e,$ca,$61,$72,$20,$cb,$65
+	.byte $79,$20,$d2,$69,$6e,$67,$d3,$6e
+	.byte $65,$61,$6b,$65,$72,$d3,$74,$61
+	.byte $66,$66,$d3,$77,$6f,$72,$64,$d7
+	.byte $6f,$6f,$6c,$d9,$6f,$79,$6f,$d3
+	.byte $6e,$61,$6b,$65,$c6,$6f,$6f,$64
+	.byte $d4,$6f,$72,$63,$68,$c2,$6f,$78
+	.byte $20,$c2,$61,$74,$20,$c4,$6f,$67
+	.byte $20,$c4,$6f,$6f,$72,$2a,$c5,$6c
+	.byte $65,$76,$cd,$6f,$6e,$73,$74,$65
+	.byte $72,$cd,$6f,$74,$68,$65,$72,$da
+	.byte $65,$72,$6f,$cf,$6e,$65,$20,$d4
+	.byte $77,$6f,$20,$d4,$68,$72,$65,$65
+	.byte $c6,$6f,$75,$72,$c6,$69,$76,$65
+	.byte $d3,$69,$78,$20,$d3,$65,$76,$65
+	.byte $6e,$c5,$69,$67,$68,$74,$ce,$69
+	.byte $6e,$65,$ff,$ff,$00,$00,$ff,$ff
+	.byte $00,$00,$ff,$c9,$6e,$76,$65,$6e
+	.byte $74,$6f,$72,$79,$3a,$d4,$6f,$72
+	.byte $63,$68,$65,$73,$3a,$cc,$69,$74
+	.byte $3a,$d5,$6e,$6c,$69,$74,$3a,$e3
+	.byte $72,$79,$73,$74,$61,$6c,$20,$62
+	.byte $61,$6c,$6c,$2e,$f0,$61,$69,$6e
+	.byte $74,$62,$72,$75,$73,$68,$20,$75
+	.byte $73,$65,$64,$20,$62,$79,$20,$56
+	.byte $61,$6e,$20,$47,$6f,$67,$68,$2e
+	.byte $e3,$61,$6c,$63,$75,$6c,$61,$74
+	.byte $6f,$72,$20,$77,$69,$74,$68,$20
+	.byte $31,$30,$20,$62,$75,$74,$74,$6f
+	.byte $6e,$73,$2e,$ea,$65,$77,$65,$6c
+	.byte $65,$64,$20,$68,$61,$6e,$64,$6c
+	.byte $65,$64,$20,$64,$61,$67,$67,$65
+	.byte $72,$2e,$e6,$6c,$75,$74,$65,$2e
+	.byte $f0,$72,$65,$63,$69,$73,$69,$6f
+	.byte $6e,$20,$63,$72,$61,$66,$74,$65
+	.byte $64,$20,$66,$72,$69,$73,$62,$65
+	.byte $65,$2e,$e8,$61,$74,$20,$77,$69
+	.byte $74,$68,$20,$74,$77,$6f,$20,$72
+	.byte $61,$6d,$27,$73,$20,$68,$6f,$72
+	.byte $6e,$73,$2e,$e3,$61,$72,$65,$66
+	.byte $75,$6c,$6c,$79,$20,$70,$6f,$6c
+	.byte $69,$73,$68,$65,$64,$20,$68,$6f
+	.byte $72,$6e,$2e,$e7,$6c,$61,$73,$73
+	.byte $20,$6a,$61,$72,$20,$63,$6f,$6d
+	.byte $70,$6c,$65,$74,$65,$20,$77,$69
+	.byte $74,$68,$20,$6c,$69,$64,$2e,$e7
+	.byte $6f,$6c,$64,$65,$6e,$20,$6b,$65
+	.byte $79,$2e,$e4,$69,$61,$6d,$6f,$6e
+	.byte $64,$20,$72,$69,$6e,$67,$2e,$f2
+	.byte $6f,$74,$74,$65,$64,$20,$6d,$75
+	.byte $74,$69,$6c,$61,$74,$65,$64,$20
+	.byte $73,$6e,$65,$61,$6b,$65,$72,$2e
+	.byte $ed,$61,$67,$69,$63,$20,$73,$74
+	.byte $61,$66,$66,$2e,$b9,$30,$20,$70
+	.byte $6f,$75,$6e,$64,$20,$74,$77,$6f
+	.byte $2d,$68,$61,$6e,$64,$65,$64,$20
+	.byte $73,$77,$6f,$72,$64,$2e,$e2,$61
+	.byte $6c,$6c,$20,$6f,$66,$20,$62,$6c
+	.byte $75,$65,$20,$77,$6f,$6f,$6c,$2e
+	.byte $f9,$6f,$79,$6f,$2e,$f3,$6e,$61
+	.byte $6b,$65,$20,$21,$21,$21,$e2,$61
+	.byte $73,$6b,$65,$74,$20,$6f,$66,$20
+	.byte $66,$6f,$6f,$64,$2e,$f4,$6f,$72
+	.byte $63,$68,$2e,$c9,$6e,$73,$69,$64
+	.byte $65,$20,$74,$68,$65,$20,$62,$6f
+	.byte $78,$20,$74,$68,$65,$72,$65,$20
+	.byte $69,$73,$20,$61,$d9,$6f,$75,$20
+	.byte $75,$6e,$6c,$6f,$63,$6b,$20,$74
+	.byte $68,$65,$20,$64,$6f,$6f,$72,$2e
+	.byte $2e,$2e,$e1,$6e,$64,$20,$74,$68
+	.byte $65,$20,$77,$61,$6c,$6c,$20,$66
+	.byte $61,$6c,$6c,$73,$20,$6f,$6e,$20
+	.byte $79,$6f,$75,$21,$e1,$6e,$64,$20
+	.byte $74,$68,$65,$20,$6b,$65,$79,$20
+	.byte $62,$65,$67,$69,$6e,$73,$20,$74
+	.byte $6f,$20,$74,$69,$63,$6b,$21,$e1
+	.byte $6e,$64,$20,$61,$20,$32,$30,$2c
+	.byte $30,$30,$30,$20,$76,$6f,$6c,$74
+	.byte $20,$73,$68,$6f,$63,$6b,$20,$6b
+	.byte $69,$6c,$6c,$73,$20,$79,$6f,$75
+	.byte $21,$c1,$20,$36,$30,$30,$20,$70
+	.byte $6f,$75,$6e,$64,$20,$67,$6f,$72
+	.byte $69,$6c,$6c,$61,$20,$72,$69,$70
+	.byte $73,$20,$79,$6f,$75,$72,$20,$66
+	.byte $61,$63,$65,$20,$6f,$66,$66,$21
+	.byte $d4,$77,$6f,$20,$6d,$65,$6e,$20
+	.byte $69,$6e,$20,$77,$68,$69,$74,$65
+	.byte $20,$63,$6f,$61,$74,$73,$20,$74
+	.byte $61,$6b,$65,$20,$79,$6f,$75,$20
+	.byte $61,$77,$61,$79,$21,$c8,$61,$76
+	.byte $69,$6e,$67,$20,$66,$75,$6e,$3f
+	.byte $d4,$68,$65,$20,$73,$6e,$61,$6b
+	.byte $65,$20,$62,$69,$74,$65,$73,$20
+	.byte $79,$6f,$75,$20,$61,$6e,$64,$20
+	.byte $79,$6f,$75,$20,$64,$69,$65,$21
+	.byte $d4,$68,$75,$6e,$64,$65,$72,$62
+	.byte $6f,$6c,$74,$73,$20,$73,$68,$6f
+	.byte $6f,$74,$20,$6f,$75,$74,$20,$61
+	.byte $62,$6f,$76,$65,$20,$79,$6f,$75
+	.byte $21,$d4,$68,$65,$20,$73,$74,$61
+	.byte $66,$66,$20,$74,$68,$75,$6e,$64
+	.byte $65,$72,$73,$20,$77,$69,$74,$68
+	.byte $20,$75,$73,$65,$6c,$65,$73,$73
+	.byte $20,$65,$6e,$65,$72,$67,$79,$21
+	.byte $f9,$6f,$75,$20,$61,$72,$65,$20
+	.byte $77,$65,$61,$72,$69,$6e,$67,$20
+	.byte $69,$74,$2e,$d4,$6f,$20,$65,$76
+	.byte $65,$72,$79,$74,$68,$69,$6e,$67
+	.byte $d4,$68,$65,$72,$65,$20,$69,$73
+	.byte $20,$61,$20,$73,$65,$61,$73,$6f
+	.byte $6e,$ac,$20,$54,$55,$52,$4e,$2c
+	.byte $54,$55,$52,$4e,$2c,$54,$55,$52
+	.byte $4e,$d4,$68,$65,$20,$63,$61,$6c
+	.byte $63,$75,$6c,$61,$74,$6f,$72,$20
+	.byte $64,$69,$73,$70,$6c,$61,$79,$73
+	.byte $20,$33,$31,$37,$2e,$c9,$74,$20
+	.byte $64,$69,$73,$70,$6c,$61,$79,$73
+	.byte $20,$33,$31,$37,$2e,$32,$20,$21
+	.byte $d4,$68,$65,$20,$69,$6e,$76,$69
+	.byte $73,$69,$62,$6c,$65,$20,$67,$75
+	.byte $69,$6c,$6c,$6f,$74,$69,$6e,$65
+	.byte $20,$62,$65,$68,$65,$61,$64,$73
+	.byte $20,$79,$6f,$75,$21,$d9,$6f,$75
+	.byte $20,$68,$61,$76,$65,$20,$72,$61
+	.byte $6d,$6d,$65,$64,$20,$79,$6f,$75
+	.byte $72,$20,$68,$65,$61,$64,$20,$69
+	.byte $6e,$74,$6f,$20,$61,$20,$73,$74
+	.byte $65,$65,$6c,$f7,$61,$6c,$6c,$20
+	.byte $61,$6e,$64,$20,$62,$61,$73,$68
+	.byte $65,$64,$20,$79,$6f,$75,$72,$20
+	.byte $62,$72,$61,$69,$6e,$73,$20,$6f
+	.byte $75,$74,$21,$c1,$41,$41,$41,$41
+	.byte $41,$41,$41,$41,$41,$41,$48,$48
+	.byte $48,$48,$48,$21,$d7,$48,$41,$4d
+	.byte $21,$21,$21,$c1,$20,$76,$69,$63
+	.byte $69,$6f,$75,$73,$20,$64,$6f,$67
+	.byte $20,$61,$74,$74,$61,$63,$6b,$73
+	.byte $20,$79,$6f,$75,$21,$c8,$65,$20
+	.byte $72,$69,$70,$73,$20,$79,$6f,$75
+	.byte $72,$20,$74,$68,$72,$6f,$61,$74
+	.byte $20,$6f,$75,$74,$21,$d4,$68,$65
+	.byte $20,$64,$6f,$67,$20,$63,$68,$61
+	.byte $73,$65,$73,$20,$74,$68,$65,$20
+	.byte $73,$6e,$65,$61,$6b,$65,$72,$21
+	.byte $c1,$20,$76,$61,$6d,$70,$69,$72
+	.byte $65,$20,$62,$61,$74,$20,$61,$74
+	.byte $74,$61,$63,$6b,$73,$20,$79,$6f
+	.byte $75,$21,$d9,$6f,$75,$72,$20,$73
+	.byte $74,$6f,$6d,$61,$63,$68,$20,$69
+	.byte $73,$20,$67,$72,$6f,$77,$6c,$69
+	.byte $6e,$67,$21,$d9,$6f,$75,$72,$20
+	.byte $74,$6f,$72,$63,$68,$20,$69,$73
+	.byte $20,$64,$79,$69,$6e,$67,$21,$d9
+	.byte $6f,$75,$20,$61,$72,$65,$20,$61
+	.byte $6e,$6f,$74,$68,$65,$72,$20,$76
+	.byte $69,$63,$74,$69,$6d,$20,$6f,$66
+	.byte $20,$74,$68,$65,$20,$6d,$61,$7a
+	.byte $65,$21,$d9,$6f,$75,$20,$68,$61
+	.byte $76,$65,$20,$64,$69,$65,$64,$20
+	.byte $6f,$66,$20,$73,$74,$61,$72,$76
+	.byte $61,$74,$69,$6f,$6e,$21,$d4,$68
+	.byte $65,$20,$6d,$6f,$6e,$73,$74,$65
+	.byte $72,$20,$61,$74,$74,$61,$63,$6b
+	.byte $73,$20,$79,$6f,$75,$20,$61,$6e
+	.byte $64,$f9,$6f,$75,$20,$61,$72,$65
+	.byte $20,$68,$69,$73,$20,$6e,$65,$78
+	.byte $74,$20,$6d,$65,$61,$6c,$21,$f4
+	.byte $68,$65,$20,$6d,$61,$67,$69,$63
+	.byte $20,$77,$6f,$72,$64,$20,$77,$6f
+	.byte $72,$6b,$73,$21,$20,$79,$6f,$75
+	.byte $20,$68,$61,$76,$65,$20,$65,$73
+	.byte $63,$61,$70,$65,$64,$21,$c4,$6f
+	.byte $20,$79,$6f,$75,$20,$77,$61,$6e
+	.byte $74,$20,$74,$6f,$20,$70,$6c,$61
+	.byte $79,$20,$61,$67,$61,$69,$6e,$20
+	.byte $28,$59,$20,$6f,$72,$20,$4e,$29
+	.byte $3f,$d9,$6f,$75,$20,$66,$61,$6c
+	.byte $6c,$20,$74,$68,$72,$6f,$75,$67
+	.byte $68,$20,$74,$68,$65,$20,$66,$6c
+	.byte $6f,$6f,$72,$ef,$6e,$74,$6f,$20
+	.byte $61,$20,$62,$65,$64,$20,$6f,$66
+	.byte $20,$73,$70,$69,$6b,$65,$73,$21
+	.byte $c2,$65,$66,$6f,$72,$65,$20,$49
+	.byte $20,$6c,$65,$74,$20,$79,$6f,$75
+	.byte $20,$67,$6f,$20,$66,$72,$65,$65
+	.byte $f7,$68,$61,$74,$20,$77,$61,$73
+	.byte $20,$74,$68,$65,$20,$6e,$61,$6d
+	.byte $65,$20,$6f,$66,$20,$74,$68,$65
+	.byte $20,$6d,$6f,$6e,$73,$74,$65,$72
+	.byte $3f,$e9,$74,$20,$73,$61,$79,$73
+	.byte $20,$22,$74,$68,$65,$20,$6d,$61
+	.byte $67,$69,$63,$20,$77,$6f,$72,$64
+	.byte $20,$69,$73,$20,$63,$61,$6d,$65
+	.byte $6c,$6f,$74,$22,$2e,$d4,$68,$65
+	.byte $20,$6d,$6f,$6e,$73,$74,$65,$72
+	.byte $20,$67,$72,$61,$62,$73,$20,$74
+	.byte $68,$65,$20,$66,$72,$69,$73,$62
+	.byte $65,$65,$2c,$20,$74,$68,$72,$6f
+	.byte $77,$73,$20,$e9,$74,$20,$62,$61
+	.byte $63,$6b,$2c,$20,$61,$6e,$64,$20
+	.byte $69,$74,$20,$73,$61,$77,$73,$20
+	.byte $79,$6f,$75,$72,$20,$68,$65,$61
+	.byte $64,$20,$6f,$66,$66,$21,$d4,$49
+	.byte $43,$4b,$21,$20,$54,$49,$43,$4b
+	.byte $21,$d4,$68,$65,$20,$6b,$65,$79
+	.byte $20,$62,$6c,$6f,$77,$73,$20,$75
+	.byte $70,$20,$74,$68,$65,$20,$77,$68
+	.byte $6f,$6c,$65,$20,$6d,$61,$7a,$65
+	.byte $21,$d4,$68,$65,$20,$67,$72,$6f
+	.byte $75,$6e,$64,$20,$62,$65,$6e,$65
+	.byte $61,$74,$68,$20,$79,$6f,$75,$72
+	.byte $20,$66,$65,$65,$74,$e2,$65,$67
+	.byte $69,$6e,$73,$20,$74,$6f,$20,$73
+	.byte $68,$61,$6b,$65,$21,$c1,$20,$64
+	.byte $69,$73,$67,$75,$73,$74,$69,$6e
+	.byte $67,$20,$6f,$64,$6f,$72,$20,$70
+	.byte $65,$72,$6d,$65,$61,$74,$65,$73
+	.byte $f4,$68,$65,$20,$68,$61,$6c,$6c
+	.byte $77,$61,$79,$20,$61,$73,$20,$69
+	.byte $74,$20,$64,$61,$72,$6b,$65,$6e
+	.byte $73,$21,$f4,$68,$65,$20,$68,$61
+	.byte $6c,$6c,$77,$61,$79,$21,$c9,$74
+	.byte $20,$69,$73,$20,$74,$68,$65,$20
+	.byte $6d,$6f,$6e,$73,$74,$65,$72,$27
+	.byte $73,$20,$6d,$6f,$74,$68,$65,$72
+	.byte $21,$d3,$68,$65,$20,$68,$61,$73
+	.byte $20,$62,$65,$65,$6e,$20,$73,$65
+	.byte $64,$75,$63,$65,$64,$21,$d3,$68
+	.byte $65,$20,$74,$69,$70,$74,$6f,$65
+	.byte $73,$20,$75,$70,$20,$74,$6f,$20
+	.byte $79,$6f,$75,$21,$d3,$68,$65,$20
+	.byte $73,$6c,$61,$73,$68,$65,$73,$20
+	.byte $79,$6f,$75,$20,$74,$6f,$20,$62
+	.byte $69,$74,$73,$21,$d9,$6f,$75,$20
+	.byte $73,$6c,$61,$73,$68,$20,$68,$65
+	.byte $72,$20,$74,$6f,$20,$62,$69,$74
+	.byte $73,$21,$c3,$6f,$72,$72,$65,$63
+	.byte $74,$21,$20,$59,$6f,$75,$20,$68
+	.byte $61,$76,$65,$20,$73,$75,$72,$76
+	.byte $69,$76,$65,$64,$21,$d9,$6f,$75
+	.byte $20,$62,$72,$65,$61,$6b,$20,$74
+	.byte $68,$65,$e1,$6e,$64,$20,$69,$74
+	.byte $20,$64,$69,$73,$61,$70,$70,$65
+	.byte $61,$72,$73,$21,$d7,$68,$61,$74
+	.byte $20,$61,$20,$6d,$65,$73,$73,$21
+	.byte $20,$54,$68,$65,$20,$76,$61,$6d
+	.byte $70,$69,$72,$65,$20,$62,$61,$74
+	.byte $e4,$72,$69,$6e,$6b,$73,$20,$74
+	.byte $68,$65,$20,$62,$6c,$6f,$6f,$64
+	.byte $20,$61,$6e,$64,$20,$64,$69,$65
+	.byte $73,$21,$c9,$74,$20,$76,$61,$6e
+	.byte $69,$73,$68,$65,$73,$20,$69,$6e
+	.byte $20,$61,$e2,$75,$72,$73,$74,$20
+	.byte $6f,$66,$20,$66,$6c,$61,$6d,$65
+	.byte $73,$21,$d9,$6f,$75,$20,$63,$61
+	.byte $6e,$27,$74,$20,$62,$65,$20,$73
+	.byte $65,$72,$69,$6f,$75,$73,$21,$d9
+	.byte $6f,$75,$20,$61,$72,$65,$20,$6d
+	.byte $61,$6b,$69,$6e,$67,$20,$6c,$69
+	.byte $74,$74,$6c,$65,$20,$73,$65,$6e
+	.byte $73,$65,$2e,$a0,$77,$68,$61,$74
+	.byte $3f,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$e1,$6c,$6c,$20
+	.byte $66,$6f,$72,$6d,$20,$69,$6e,$74
+	.byte $6f,$20,$64,$61,$72,$74,$73,$21
+	.byte $d4,$68,$65,$20,$66,$6f,$6f,$64
+	.byte $20,$69,$73,$20,$62,$65,$69,$6e
+	.byte $67,$20,$64,$69,$67,$65,$73,$74
+	.byte $65,$64,$2e,$d4,$68,$65,$20,$ed
+	.byte $61,$67,$69,$63,$61,$6c,$6c,$79
+	.byte $20,$73,$61,$69,$6c,$73,$e1,$72
+	.byte $6f,$75,$6e,$64,$20,$61,$20,$6e
+	.byte $65,$61,$72,$62,$79,$20,$63,$6f
+	.byte $72,$6e,$65,$72,$e1,$6e,$64,$20
+	.byte $69,$73,$20,$65,$61,$74,$65,$6e
+	.byte $20,$62,$79,$f4,$68,$65,$20,$6d
+	.byte $6f,$6e,$73,$74,$65,$72,$20,$21
+	.byte $21,$21,$21,$e1,$6e,$64,$20,$74
+	.byte $68,$65,$20,$6d,$6f,$6e,$73,$74
+	.byte $65,$72,$20,$67,$72,$61,$62,$73
+	.byte $20,$69,$74,$2c,$e7,$65,$74,$73
+	.byte $20,$74,$61,$6e,$67,$6c,$65,$64
+	.byte $2c,$20,$61,$6e,$64,$20,$74,$6f
+	.byte $70,$70,$6c,$65,$73,$20,$6f,$76
+	.byte $65,$72,$21,$c9,$74,$20,$69,$73
+	.byte $20,$6e,$6f,$77,$20,$66,$75,$6c
+	.byte $6c,$20,$6f,$66,$20,$62,$6c,$6f
+	.byte $6f,$64,$2e,$d4,$68,$65,$20,$6d
+	.byte $6f,$6e,$73,$74,$65,$72,$20,$69
+	.byte $73,$20,$64,$65,$61,$64,$20,$61
+	.byte $6e,$64,$ed,$75,$63,$68,$20,$62
+	.byte $6c,$6f,$6f,$64,$20,$69,$73,$20
+	.byte $73,$70,$69,$6c,$74,$21,$d9,$6f
+	.byte $75,$20,$68,$61,$76,$65,$20,$6b
+	.byte $69,$6c,$6c,$65,$64,$20,$69,$74
+	.byte $2e,$d4,$68,$65,$20,$64,$61,$67
+	.byte $67,$65,$72,$20,$64,$69,$73,$61
+	.byte $70,$70,$65,$61,$72,$73,$21,$d4
+	.byte $68,$65,$20,$74,$6f,$72,$63,$68
+	.byte $20,$69,$73,$20,$6c,$69,$74,$20
+	.byte $61,$6e,$64,$20,$74,$68,$65,$ef
+	.byte $6c,$64,$20,$74,$6f,$72,$63,$68
+	.byte $20,$64,$69,$65,$73,$20,$61,$6e
+	.byte $64,$20,$76,$61,$6e,$69,$73,$68
+	.byte $65,$73,$21,$c1,$20,$63,$6c,$6f
+	.byte $73,$65,$20,$69,$6e,$73,$70,$65
+	.byte $63,$74,$69,$6f,$6e,$20,$72,$65
+	.byte $76,$65,$61,$6c,$73,$e1,$62,$73
+	.byte $6f,$6c,$75,$74,$65,$6c,$79,$20
+	.byte $6e,$6f,$74,$68,$69,$6e,$67,$20
+	.byte $6f,$66,$20,$76,$61,$6c,$75,$65
+	.byte $21,$e1,$20,$73,$6d,$75,$64,$67
+	.byte $65,$64,$20,$64,$69,$73,$70,$6c
+	.byte $61,$79,$21,$c1,$20,$63,$61,$6e
+	.byte $20,$6f,$66,$20,$73,$70,$69,$6e
+	.byte $61,$63,$68,$3f,$f2,$65,$74,$75
+	.byte $72,$6e,$73,$20,$61,$6e,$64,$20
+	.byte $68,$69,$74,$73,$20,$79,$6f,$75
+	.byte $e9,$6e,$20,$74,$68,$65,$20,$65
+	.byte $79,$65,$21,$d9,$6f,$75,$20,$61
+	.byte $72,$65,$20,$74,$72,$61,$70,$70
+	.byte $65,$64,$20,$69,$6e,$20,$61,$20
+	.byte $66,$61,$6b,$65,$e5,$6c,$65,$76
+	.byte $61,$74,$6f,$72,$2e,$20,$54,$68
+	.byte $65,$72,$65,$20,$69,$73,$20,$6e
+	.byte $6f,$20,$65,$73,$63,$61,$70,$65
+	.byte $21,$d7,$69,$74,$68,$20,$77,$68
+	.byte $61,$74,$3f,$20,$54,$6f,$65,$6e
+	.byte $61,$69,$6c,$20,$70,$6f,$6c,$69
+	.byte $73,$68,$3f,$c1,$20,$64,$72,$61
+	.byte $66,$74,$20,$62,$6c,$6f,$77,$73
+	.byte $20,$79,$6f,$75,$72,$20,$74,$6f
+	.byte $72,$63,$68,$20,$6f,$75,$74,$21
+	.byte $d4,$68,$65,$20,$72,$69,$6e,$67
+	.byte $20,$69,$73,$20,$61,$63,$74,$69
+	.byte $76,$61,$74,$65,$64,$20,$61,$6e
+	.byte $64,$f3,$68,$69,$6e,$65,$73,$20
+	.byte $6c,$69,$67,$68,$74,$20,$65,$76
+	.byte $65,$72,$79,$77,$68,$65,$72,$65
+	.byte $21,$d4,$68,$65,$20,$73,$74,$61
+	.byte $66,$66,$20,$62,$65,$67,$69,$6e
+	.byte $73,$20,$74,$6f,$20,$71,$75,$61
+	.byte $6b,$65,$21,$d4,$68,$65,$20,$63
+	.byte $61,$6c,$63,$75,$6c,$61,$74,$6f
+	.byte $72,$20,$76,$61,$6e,$69,$73,$68
+	.byte $65,$73,$2e,$ce,$45,$56,$45,$52
+	.byte $2c,$20,$45,$56,$45,$52,$20,$72
+	.byte $61,$69,$64,$20,$61,$20,$6d,$6f
+	.byte $6e,$73,$74,$65,$72,$27,$73,$20
+	.byte $6c,$61,$69,$72,$2e,$cf,$4b,$2e
+	.byte $2e,$2e,$e8,$61,$73,$20,$76,$61
+	.byte $6e,$69,$73,$68,$65,$64,$2e,$d4
+	.byte $68,$65,$20,$62,$6f,$64,$79,$20
+	.byte $68,$61,$73,$20,$76,$61,$6e,$69
+	.byte $73,$68,$65,$64,$21,$c7,$4c,$49
+	.byte $54,$43,$48,$21,$cf,$4b,$2e,$2e
+	.byte $2e,$69,$74,$20,$69,$73,$20,$63
+	.byte $6c,$65,$61,$6e,$2e,$c3,$68,$65
+	.byte $63,$6b,$20,$79,$6f,$75,$72,$20
+	.byte $69,$6e,$76,$65,$6e,$74,$6f,$72
+	.byte $79,$2c,$20,$44,$4f,$4c,$54,$21
+	.byte $d3,$50,$4c,$41,$54,$21,$d9,$6f
+	.byte $75,$20,$65,$61,$74,$20,$74,$68
+	.byte $65,$e1,$6e,$64,$20,$79,$6f,$75
+	.byte $20,$67,$65,$74,$20,$68,$65,$61
+	.byte $72,$74,$62,$75,$72,$6e,$21,$c1
+	.byte $20,$64,$65,$61,$66,$65,$6e,$69
+	.byte $6e,$67,$20,$72,$6f,$61,$72,$20
+	.byte $65,$6e,$76,$65,$6c,$6f,$70,$65
+	.byte $73,$f9,$6f,$75,$2e,$20,$59,$6f
+	.byte $75,$72,$20,$65,$61,$72,$73,$20
+	.byte $61,$72,$65,$20,$72,$69,$6e,$67
+	.byte $69,$6e,$67,$21,$c6,$4f,$4f,$44
+	.byte $20,$46,$49,$47,$48,$54,$21,$21
+	.byte $20,$46,$4f,$4f,$44,$20,$46,$49
+	.byte $47,$48,$54,$21,$21,$d4,$68,$65
+	.byte $20,$68,$61,$6c,$6c,$77,$61,$79
+	.byte $20,$69,$73,$20,$74,$6f,$6f,$20
+	.byte $63,$72,$6f,$77,$64,$65,$64,$2e
+	.byte $c1,$20,$68,$69,$67,$68,$20,$73
+	.byte $68,$72,$69,$6c,$6c,$20,$6e,$6f
+	.byte $74,$65,$20,$63,$6f,$6d,$65,$73
+	.byte $e6,$72,$6f,$6d,$20,$74,$68,$65
+	.byte $20,$66,$6c,$75,$74,$65,$21,$d4
+	.byte $68,$65,$20,$63,$61,$6c,$63,$75
+	.byte $6c,$61,$74,$6f,$72,$20,$64,$69
+	.byte $73,$70,$6c,$61,$79,$73,$d9,$6f
+	.byte $75,$20,$68,$61,$76,$65,$20,$62
+	.byte $65,$65,$6e,$20,$74,$65,$6c,$65
+	.byte $70,$6f,$72,$74,$65,$64,$21,$d7
+	.byte $69,$74,$68,$20,$77,$68,$6f,$3f
+	.byte $20,$54,$68,$65,$20,$6d,$6f,$6e
+	.byte $73,$74,$65,$72,$3f,$d9,$6f,$75
+	.byte $20,$68,$61,$76,$65,$20,$6e,$6f
+	.byte $20,$66,$69,$72,$65,$2e,$d7,$69
+	.byte $74,$68,$20,$77,$68,$61,$74,$3f
+	.byte $20,$41,$69,$72,$3f,$c9,$74,$27
+	.byte $73,$20,$61,$77,$66,$75,$6c,$6c
+	.byte $79,$20,$64,$61,$72,$6b,$2e,$cc
+	.byte $6f,$6f,$6b,$20,$61,$74,$20,$79
+	.byte $6f,$75,$72,$20,$6d,$6f,$6e,$69
+	.byte $74,$6f,$72,$2e,$c9,$74,$20,$6c
+	.byte $6f,$6f,$6b,$73,$20,$76,$65,$72
+	.byte $79,$20,$64,$61,$6e,$67,$65,$72
+	.byte $6f,$75,$73,$21,$c9,$27,$6d,$20
+	.byte $73,$6f,$72,$72,$79,$2c,$20,$62
+	.byte $75,$74,$20,$49,$20,$63,$61,$6e
+	.byte $27,$74,$20,$d9,$6f,$75,$20,$61
+	.byte $72,$65,$20,$63,$6f,$6e,$66,$75
+	.byte $73,$69,$6e,$67,$20,$6d,$65,$2e
+	.byte $d7,$68,$61,$74,$20,$69,$6e,$20
+	.byte $74,$61,$72,$6e,$61,$74,$69,$6f
+	.byte $6e,$20,$69,$73,$20,$61,$20,$c9
+	.byte $20,$64,$6f,$6e,$27,$74,$20,$73
+	.byte $65,$65,$20,$74,$68,$61,$74,$20
+	.byte $68,$65,$72,$65,$2e,$cf,$4b,$2e
+	.byte $2e,$2e,$69,$66,$20,$79,$6f,$75
+	.byte $20,$72,$65,$61,$6c,$6c,$79,$20
+	.byte $77,$61,$6e,$74,$20,$74,$6f,$2c
+	.byte $c2,$75,$74,$20,$79,$6f,$75,$20
 	.byte $68,$61,$76,$65,$20,$6e,$6f,$20
-	.byte $66,$69,$72,$65,$2e,$d7,$69,$74
-	.byte $68,$20,$77,$68,$61,$74,$3f,$20
-	.byte $41,$69,$72,$3f,$c9,$74,$27,$73
-	.byte $20,$61,$77,$66,$75,$6c,$6c,$79
-	.byte $20,$64,$61,$72,$6b,$2e,$cc,$6f
-	.byte $6f,$6b,$20,$61,$74,$20,$79,$6f
-	.byte $75,$72,$20,$6d,$6f,$6e,$69,$74
-	.byte $6f,$72,$2e,$c9,$74,$20,$6c,$6f
-	.byte $6f,$6b,$73,$20,$76,$65,$72,$79
-	.byte $20,$64,$61,$6e,$67,$65,$72,$6f
-	.byte $75,$73,$21,$c9,$27,$6d,$20,$73
-	.byte $6f,$72,$72,$79,$2c,$20,$62,$75
-	.byte $74,$20,$49,$20,$63,$61,$6e,$27
-	.byte $74,$20,$d9,$6f,$75,$20,$61,$72
-	.byte $65,$20,$63,$6f,$6e,$66,$75,$73
-	.byte $69,$6e,$67,$20,$6d,$65,$2e,$d7
-	.byte $68,$61,$74,$20,$69,$6e,$20,$74
-	.byte $61,$72,$6e,$61,$74,$69,$6f,$6e
-	.byte $20,$69,$73,$20,$61,$20,$c9,$20
-	.byte $64,$6f,$6e,$27,$74,$20,$73,$65
-	.byte $65,$20,$74,$68,$61,$74,$20,$68
-	.byte $65,$72,$65,$2e,$cf,$4b,$2e,$2e
-	.byte $2e,$69,$66,$20,$79,$6f,$75,$20
-	.byte $72,$65,$61,$6c,$6c,$79,$20,$77
-	.byte $61,$6e,$74,$20,$74,$6f,$2c,$c2
-	.byte $75,$74,$20,$79,$6f,$75,$20,$68
-	.byte $61,$76,$65,$20,$6e,$6f,$20,$6b
-	.byte $65,$79,$2e,$c4,$6f,$20,$79,$6f
-	.byte $75,$20,$77,$69,$73,$68,$20,$74
-	.byte $6f,$20,$73,$61,$76,$65,$20,$74
-	.byte $68,$65,$20,$67,$61,$6d,$65,$20
-	.byte $28,$59,$20,$6f,$72,$20,$4e,$29
-	.byte $3f,$c4,$6f,$20,$79,$6f,$75,$20
-	.byte $77,$69,$73,$68,$20,$74,$6f,$20
-	.byte $63,$6f,$6e,$74,$69,$6e,$75,$65
-	.byte $20,$61,$20,$67,$61,$6d,$65,$20
-	.byte $28,$59,$20,$6f,$72,$20,$4e,$29
-	.byte $3f,$d0,$6c,$65,$61,$73,$65,$20
-	.byte $70,$72,$65,$70,$61,$72,$65,$20
-	.byte $79,$6f,$75,$72,$20,$63,$61,$73
-	.byte $73,$65,$74,$74,$65,$2e,$d7,$68
-	.byte $65,$6e,$20,$72,$65,$61,$64,$79
-	.byte $2c,$20,$70,$72,$65,$73,$73,$20
-	.byte $61,$6e,$79,$20,$6b,$65,$79,$2e
-	.byte $e1,$6e,$64,$20,$69,$74,$20,$76
-	.byte $61,$6e,$69,$73,$68,$65,$73,$21
-	.byte $d9,$6f,$75,$20,$77,$69,$6c,$6c
-	.byte $20,$64,$6f,$20,$6e,$6f,$20,$73
-	.byte $75,$63,$68,$20,$74,$68,$69,$6e
-	.byte $67,$21,$d9,$6f,$75,$20,$61,$72
-	.byte $65,$20,$63,$61,$72,$72,$79,$69
-	.byte $6e,$67,$20,$74,$68,$65,$20,$6c
-	.byte $69,$6d,$69,$74,$2e,$c9,$74,$20
-	.byte $69,$73,$20,$63,$75,$72,$72,$65
-	.byte $6e,$74,$6c,$79,$20,$69,$6d,$70
-	.byte $6f,$73,$73,$69,$62,$6c,$65,$2e
-	.byte $d4,$68,$65,$20,$62,$61,$74,$20
-	.byte $64,$72,$61,$69,$6e,$73,$20,$79
-	.byte $6f,$75,$20,$6f,$66,$20,$79,$6f
-	.byte $75,$72,$20,$76,$69,$74,$61,$6c
-	.byte $20,$66,$6c,$75,$69,$64,$73,$21
-	.byte $c1,$72,$65,$20,$79,$6f,$75,$20
-	.byte $73,$75,$72,$65,$20,$79,$6f,$75
-	.byte $20,$77,$61,$6e,$74,$20,$74,$6f
-	.byte $20,$71,$75,$69,$74,$20,$28,$59
-	.byte $20,$6f,$72,$20,$4e,$29,$3f,$d4
-	.byte $72,$79,$20,$65,$78,$61,$6d,$69
-	.byte $6e,$69,$6e,$67,$20,$74,$68,$69
-	.byte $6e,$67,$73,$2e,$d4,$79,$70,$65
-	.byte $20,$69,$6e,$73,$74,$72,$75,$63
-	.byte $74,$69,$6f,$6e,$73,$2e,$c9,$6e
-	.byte $76,$65,$72,$74,$20,$61,$6e,$64
-	.byte $20,$74,$65,$6c,$65,$70,$68,$6f
-	.byte $6e,$65,$2e,$c4,$6f,$6e,$27,$74
-	.byte $20,$6d,$61,$6b,$65,$20,$75,$6e
-	.byte $6e,$65,$63,$65,$73,$73,$61,$72
-	.byte $79,$20,$74,$75,$72,$6e,$73,$2e
-	.byte $d9,$6f,$75,$20,$68,$61,$76,$65
-	.byte $20,$74,$75,$72,$6e,$65,$64,$20
-	.byte $69,$6e,$74,$6f,$20,$61,$20,$70
-	.byte $69,$6c,$6c,$61,$72,$20,$6f,$66
-	.byte $20,$73,$61,$6c,$74,$21,$c4,$6f
-	.byte $6e,$27,$74,$20,$73,$61,$79,$20
-	.byte $49,$20,$64,$69,$64,$6e,$27,$74
-	.byte $20,$77,$61,$72,$6e,$20,$79,$6f
-	.byte $75,$21,$d4,$68,$65,$20,$65,$6c
-	.byte $65,$76,$61,$74,$6f,$72,$20,$69
-	.byte $73,$20,$6d,$6f,$76,$69,$6e,$67
-	.byte $21,$d9,$6f,$75,$20,$61,$72,$65
-	.byte $20,$64,$65,$70,$6f,$73,$69,$74
-	.byte $65,$64,$20,$61,$74,$20,$74,$68
-	.byte $65,$20,$6e,$65,$78,$74,$20,$6c
-	.byte $65,$76,$65,$6c,$2e,$d9,$6f,$75
-	.byte $72,$20,$68,$65,$61,$64,$20,$73
-	.byte $6d,$61,$73,$68,$65,$73,$20,$69
-	.byte $6e,$74,$6f,$20,$74,$68,$65,$20
-	.byte $63,$65,$69,$6c,$69,$6e,$67,$21
-	.byte $d9,$6f,$75,$20,$66,$61,$6c,$6c
-	.byte $20,$6f,$6e,$20,$74,$68,$65,$20
-	.byte $73,$6e,$61,$6b,$65,$21,$cf,$68
-	.byte $20,$6e,$6f,$21,$20,$41,$20,$70
-	.byte $69,$74,$21,$ff,$46,$45,$d2,$85
-	.byte $59,$20,$53,$54,$41,$20,$2a,$c8
-	.byte $90,$20,$20,$20,$41,$49,$56,$20
-	.byte $44,$45,$59,$41,$4c,$50,$53,$49
-	.byte $44,$20,$59,$4c,$54,$4e,$41,$54
-	.byte $53,$4e,$4f,$43,$20,$53,$49,$20
-	.byte $4e,$4f,$49,$08,$08,$08,$08,$20
-	.byte $4e,$4f,$49,$54,$41,$43,$4f,$0c
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$30,$30
-	.byte $30,$30,$35,$20,$45,$5a,$08,$58
-	.byte $41,$4d,$54,$41,$45,$04,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$25,$60,$47,$52,$45,$4e,$20
-	.byte $44,$45,$43,$20,$2a,$c8,$30,$60
-	.byte $20,$42,$4e,$45,$20,$47,$4f,$4f
-	.byte $4e,$36,$b8,$35,$60,$20,$4a,$4d
-	.byte $50,$20,$55,$4e,$43,$4f,$4d,$d0
-	.byte $40,$60,$47,$4f,$4f,$4e,$36,$38
-	.byte $20,$44,$45,$43,$20,$2a,$c8,$45
-	.byte $60,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$44,$65,$61,$74
-	.byte $68,$6d,$61,$7a,$65,$20,$35,$30
-	.byte $30,$30,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$4c,$6f,$63,$61,$74,$69
-	.byte $6f,$6e,$20,$69,$73,$20,$63,$6f
-	.byte $6e,$73,$74,$61,$6e,$74,$6c,$79
-	.byte $20,$64,$69,$73,$70,$6c,$61,$79
-	.byte $65,$64,$20,$76,$69,$61,$20,$20
-	.byte $20,$33,$2d,$44,$20,$67,$72,$61
-	.byte $70,$68,$69,$63,$73,$2e,$20,$54
-	.byte $6f,$20,$6d,$6f,$76,$65,$20,$66
-	.byte $6f,$72,$77,$61,$72,$64,$20,$6f
-	.byte $6e,$65,$20,$73,$74,$65,$70,$2c
-	.byte $20,$70,$72,$65,$73,$73,$20,$5a
-	.byte $2e,$20,$54,$6f,$20,$74,$75,$72
-	.byte $6e,$20,$74,$6f,$20,$74,$68,$65
-	.byte $20,$6c,$65,$66,$74,$20,$6f,$72
-	.byte $20,$72,$69,$67,$68,$74,$2c,$20
-	.byte $20,$70,$72,$65,$73,$73,$20,$74
-	.byte $68,$65,$20,$6c,$65,$66,$74,$20
-	.byte $6f,$72,$20,$72,$69,$67,$68,$74
-	.byte $20,$61,$72,$72,$6f,$77,$2e,$20
-	.byte $54,$6f,$20,$74,$75,$72,$6e,$20
-	.byte $20,$61,$72,$6f,$75,$6e,$64,$2c
-	.byte $20,$70,$72,$65,$73,$73,$20,$58
-	.byte $2e,$20,$4f,$6e,$6c,$79,$20,$5a
-	.byte $20,$61,$63,$74,$75,$61,$6c,$6c
-	.byte $79,$20,$63,$68,$61,$6e,$67,$65
-	.byte $73,$79,$6f,$75,$72,$20,$70,$6f
-	.byte $73,$69,$74,$69,$6f,$6e,$2e,$20
-	.byte $41,$64,$64,$69,$74,$69,$6f,$6e
-	.byte $61,$6c,$6c,$79,$2c,$20,$77,$6f
-	.byte $72,$64,$73,$20,$73,$75,$63,$68
-	.byte $20,$61,$73,$20,$43,$48,$41,$52
-	.byte $47,$45,$20,$6d,$61,$79,$20,$62
-	.byte $65,$20,$68,$65,$6c,$70,$66,$75
-	.byte $6c,$20,$69,$6e,$20,$6d,$6f,$76
-	.byte $65,$6d,$65,$6e,$74,$2e,$20,$20
-	.byte $20,$20,$41,$74,$20,$61,$6e,$79
-	.byte $20,$74,$69,$6d,$65,$2c,$20,$6f
-	.byte $6e,$65,$20,$61,$6e,$64,$20,$74
-	.byte $77,$6f,$20,$77,$6f,$72,$64,$20
-	.byte $63,$6f,$6d,$6d,$61,$6e,$64,$73
-	.byte $20,$6d,$61,$79,$20,$62,$65,$20
-	.byte $65,$6e,$74,$65,$72,$65,$64,$2e
-	.byte $20,$53,$6f,$6d,$65,$20,$75,$73
-	.byte $65,$66,$75,$6c,$20,$63,$6f,$6d
-	.byte $6d,$61,$6e,$64,$73,$20,$61,$72
-	.byte $65,$4f,$50,$45,$4e,$20,$42,$4f
-	.byte $58,$2c,$20,$47,$45,$54,$20,$42
-	.byte $4f,$58,$2c,$20,$44,$52,$4f,$50
-	.byte $20,$61,$6e,$64,$20,$48,$45,$4c
-	.byte $50,$2e,$20,$4d,$61,$6e,$79,$20
-	.byte $20,$6d,$6f,$72,$65,$20,$65,$78
-	.byte $69,$73,$74,$2e,$20,$54,$6f,$20
-	.byte $6d,$61,$6e,$69,$70,$75,$6c,$61
-	.byte $74,$65,$20,$61,$6e,$20,$6f,$62
-	.byte $6a,$65,$63,$74,$2c,$20,$79,$6f
-	.byte $75,$6d,$75,$73,$74,$20,$62,$65
-	.byte $20,$6f,$6e,$20,$74,$6f,$70,$20
-	.byte $6f,$66,$20,$69,$74,$2c,$20,$6f
-	.byte $72,$20,$62,$65,$20,$63,$61,$72
-	.byte $72,$79,$69,$6e,$67,$20,$69,$74
-	.byte $2e,$20,$54,$6f,$20,$73,$61,$76
+	.byte $6b,$65,$79,$2e,$c4,$6f,$20,$79
+	.byte $6f,$75,$20,$77,$69,$73,$68,$20
+	.byte $74,$6f,$20,$73,$61,$76,$65,$20
+	.byte $74,$68,$65,$20,$67,$61,$6d,$65
+	.byte $20,$28,$59,$20,$6f,$72,$20,$4e
+	.byte $29,$3f,$c4,$6f,$20,$79,$6f,$75
+	.byte $20,$77,$69,$73,$68,$20,$74,$6f
+	.byte $20,$63,$6f,$6e,$74,$69,$6e,$75
 	.byte $65,$20,$61,$20,$67,$61,$6d,$65
-	.byte $20,$69,$6e,$20,$70,$72,$6f,$67
-	.byte $72,$65,$73,$73,$2c,$20,$65,$6e
-	.byte $74,$65,$72,$20,$53,$41,$56,$45
-	.byte $2e,$54,$68,$69,$73,$20,$69,$73
-	.byte $20,$65,$6e,$63,$6f,$75,$72,$61
-	.byte $67,$65,$64,$2e,$20,$44,$65,$61
-	.byte $74,$68,$6d,$61,$7a,$65,$20,$69
-	.byte $73,$20,$68,$75,$67,$65,$2e,$20
-	.byte $20,$49,$74,$20,$77,$69,$6c,$6c
-	.byte $20,$74,$61,$6b,$65,$20,$73,$6f
-	.byte $6d,$65,$20,$74,$69,$6d,$65,$20
-	.byte $74,$6f,$20,$65,$73,$63,$61,$70
-	.byte $65,$2e,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$54,$68,$65,$20,$66,$69
-	.byte $76,$65,$20,$6c,$65,$76,$65,$6c
-	.byte $73,$20,$6f,$66,$20,$44,$65,$61
-	.byte $74,$68,$6d,$61,$7a,$65,$20,$61
-	.byte $72,$65,$20,$63,$6f,$6e,$2d,$20
-	.byte $20,$6e,$65,$63,$74,$65,$64,$20
-	.byte $62,$79,$20,$65,$6c,$65,$76,$61
-	.byte $74,$6f,$72,$73,$2c,$20,$70,$69
-	.byte $74,$73,$2c,$20,$61,$6e,$64,$20
-	.byte $73,$63,$69,$65,$6e,$63,$65,$2e
-	.byte $20,$43,$6f,$6e,$6e,$65,$63,$74
-	.byte $69,$6f,$6e,$73,$20,$61,$72,$65
-	.byte $20,$6e,$6f,$74,$20,$61,$6c,$77
-	.byte $61,$79,$73,$20,$6f,$62,$76,$69
-	.byte $6f,$75,$73,$2e,$20,$20,$20,$20
+	.byte $20,$28,$59,$20,$6f,$72,$20,$4e
+	.byte $29,$3f,$d0,$6c,$65,$61,$73,$65
+	.byte $20,$70,$72,$65,$70,$61,$72,$65
+	.byte $20,$79,$6f,$75,$72,$20,$63,$61
+	.byte $73,$73,$65,$74,$74,$65,$2e,$d7
+	.byte $68,$65,$6e,$20,$72,$65,$61,$64
+	.byte $79,$2c,$20,$70,$72,$65,$73,$73
+	.byte $20,$61,$6e,$79,$20,$6b,$65,$79
+	.byte $2e,$e1,$6e,$64,$20,$69,$74,$20
+	.byte $76,$61,$6e,$69,$73,$68,$65,$73
+	.byte $21,$d9,$6f,$75,$20,$77,$69,$6c
+	.byte $6c,$20,$64,$6f,$20,$6e,$6f,$20
+	.byte $73,$75,$63,$68,$20,$74,$68,$69
+	.byte $6e,$67,$21,$d9,$6f,$75,$20,$61
+	.byte $72,$65,$20,$63,$61,$72,$72,$79
+	.byte $69,$6e,$67,$20,$74,$68,$65,$20
+	.byte $6c,$69,$6d,$69,$74,$2e,$c9,$74
+	.byte $20,$69,$73,$20,$63,$75,$72,$72
+	.byte $65,$6e,$74,$6c,$79,$20,$69,$6d
+	.byte $70,$6f,$73,$73,$69,$62,$6c,$65
+	.byte $2e,$d4,$68,$65,$20,$62,$61,$74
+	.byte $20,$64,$72,$61,$69,$6e,$73,$20
+	.byte $79,$6f,$75,$20,$6f,$66,$20,$79
+	.byte $6f,$75,$72,$20,$76,$69,$74,$61
+	.byte $6c,$20,$66,$6c,$75,$69,$64,$73
+	.byte $21,$c1,$72,$65,$20,$79,$6f,$75
+	.byte $20,$73,$75,$72,$65,$20,$79,$6f
+	.byte $75,$20,$77,$61,$6e,$74,$20,$74
+	.byte $6f,$20,$71,$75,$69,$74,$20,$28
+	.byte $59,$20,$6f,$72,$20,$4e,$29,$3f
+	.byte $d4,$72,$79,$20,$65,$78,$61,$6d
+	.byte $69,$6e,$69,$6e,$67,$20,$74,$68
+	.byte $69,$6e,$67,$73,$2e,$d4,$79,$70
+	.byte $65,$20,$69,$6e,$73,$74,$72,$75
+	.byte $63,$74,$69,$6f,$6e,$73,$2e,$c9
+	.byte $6e,$76,$65,$72,$74,$20,$61,$6e
+	.byte $64,$20,$74,$65,$6c,$65,$70,$68
+	.byte $6f,$6e,$65,$2e,$c4,$6f,$6e,$27
+	.byte $74,$20,$6d,$61,$6b,$65,$20,$75
+	.byte $6e,$6e,$65,$63,$65,$73,$73,$61
+	.byte $72,$79,$20,$74,$75,$72,$6e,$73
+	.byte $2e,$d9,$6f,$75,$20,$68,$61,$76
+	.byte $65,$20,$74,$75,$72,$6e,$65,$64
+	.byte $20,$69,$6e,$74,$6f,$20,$61,$20
+	.byte $70,$69,$6c,$6c,$61,$72,$20,$6f
+	.byte $66,$20,$73,$61,$6c,$74,$21,$c4
+	.byte $6f,$6e,$27,$74,$20,$73,$61,$79
+	.byte $20,$49,$20,$64,$69,$64,$6e,$27
+	.byte $74,$20,$77,$61,$72,$6e,$20,$79
+	.byte $6f,$75,$21,$d4,$68,$65,$20,$65
+	.byte $6c,$65,$76,$61,$74,$6f,$72,$20
+	.byte $69,$73,$20,$6d,$6f,$76,$69,$6e
+	.byte $67,$21,$d9,$6f,$75,$20,$61,$72
+	.byte $65,$20,$64,$65,$70,$6f,$73,$69
+	.byte $74,$65,$64,$20,$61,$74,$20,$74
+	.byte $68,$65,$20,$6e,$65,$78,$74,$20
+	.byte $6c,$65,$76,$65,$6c,$2e,$d9,$6f
+	.byte $75,$72,$20,$68,$65,$61,$64,$20
+	.byte $73,$6d,$61,$73,$68,$65,$73,$20
+	.byte $69,$6e,$74,$6f,$20,$74,$68,$65
+	.byte $20,$63,$65,$69,$6c,$69,$6e,$67
+	.byte $21,$d9,$6f,$75,$20,$66,$61,$6c
+	.byte $6c,$20,$6f,$6e,$20,$74,$68,$65
+	.byte $20,$73,$6e,$61,$6b,$65,$21,$cf
+	.byte $68,$20,$6e,$6f,$21,$20,$41,$20
+	.byte $70,$69,$74,$21,$ff,$46,$45,$d2
+	.byte $85,$59,$20,$53,$54,$41,$20,$2a
+	.byte $c8,$90,$20,$20,$20,$41,$49,$56
+	.byte $20,$44,$45,$59,$41,$4c,$50,$53
+	.byte $49,$44,$20,$59,$4c,$54,$4e,$41
+	.byte $54,$53,$4e,$4f,$43,$20,$53,$49
+	.byte $20,$4e,$4f,$49,$08,$08,$08,$08
+	.byte $20,$4e,$4f,$49,$54,$41,$43,$4f
+	.byte $0c,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$30
+	.byte $30,$30,$30,$35,$20,$45,$5a,$08
+	.byte $58,$41,$4d,$54,$41,$45,$04,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$47,$6f
-	.byte $6f,$64,$20,$4c,$75,$63,$6b,$21
+	.byte $20,$20,$25,$60,$47,$52,$45,$4e
+	.byte $20,$44,$45,$43,$20,$2a,$c8,$30
+	.byte $60,$20,$42,$4e,$45,$20,$47,$4f
+	.byte $4f,$4e,$36,$b8,$35,$60,$20,$4a
+	.byte $4d,$50,$20,$55,$4e,$43,$4f,$4d
+	.byte $d0,$40,$60,$47,$4f,$4f,$4e,$36
+	.byte $38,$20,$44,$45,$43,$20,$2a,$c8
+	.byte $45,$60,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$44,$65,$61
+	.byte $74,$68,$6d,$61,$7a,$65,$20,$35
+	.byte $30,$30,$30,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$4c,$6f,$63,$61,$74
+	.byte $69,$6f,$6e,$20,$69,$73,$20,$63
+	.byte $6f,$6e,$73,$74,$61,$6e,$74,$6c
+	.byte $79,$20,$64,$69,$73,$70,$6c,$61
+	.byte $79,$65,$64,$20,$76,$69,$61,$20
+	.byte $20,$20,$33,$2d,$44,$20,$67,$72
+	.byte $61,$70,$68,$69,$63,$73,$2e,$20
+	.byte $54,$6f,$20,$6d,$6f,$76,$65,$20
+	.byte $66,$6f,$72,$77,$61,$72,$64,$20
+	.byte $6f,$6e,$65,$20,$73,$74,$65,$70
+	.byte $2c,$20,$70,$72,$65,$73,$73,$20
+	.byte $5a,$2e,$20,$54,$6f,$20,$74,$75
+	.byte $72,$6e,$20,$74,$6f,$20,$74,$68
+	.byte $65,$20,$6c,$65,$66,$74,$20,$6f
+	.byte $72,$20,$72,$69,$67,$68,$74,$2c
+	.byte $20,$20,$70,$72,$65,$73,$73,$20
+	.byte $74,$68,$65,$20,$6c,$65,$66,$74
+	.byte $20,$6f,$72,$20,$72,$69,$67,$68
+	.byte $74,$20,$61,$72,$72,$6f,$77,$2e
+	.byte $20,$54,$6f,$20,$74,$75,$72,$6e
+	.byte $20,$20,$61,$72,$6f,$75,$6e,$64
+	.byte $2c,$20,$70,$72,$65,$73,$73,$20
+	.byte $58,$2e,$20,$4f,$6e,$6c,$79,$20
+	.byte $5a,$20,$61,$63,$74,$75,$61,$6c
+	.byte $6c,$79,$20,$63,$68,$61,$6e,$67
+	.byte $65,$73,$79,$6f,$75,$72,$20,$70
+	.byte $6f,$73,$69,$74,$69,$6f,$6e,$2e
+	.byte $20,$41,$64,$64,$69,$74,$69,$6f
+	.byte $6e,$61,$6c,$6c,$79,$2c,$20,$77
+	.byte $6f,$72,$64,$73,$20,$73,$75,$63
+	.byte $68,$20,$61,$73,$20,$43,$48,$41
+	.byte $52,$47,$45,$20,$6d,$61,$79,$20
+	.byte $62,$65,$20,$68,$65,$6c,$70,$66
+	.byte $75,$6c,$20,$69,$6e,$20,$6d,$6f
+	.byte $76,$65,$6d,$65,$6e,$74,$2e,$20
+	.byte $20,$20,$20,$41,$74,$20,$61,$6e
+	.byte $79,$20,$74,$69,$6d,$65,$2c,$20
+	.byte $6f,$6e,$65,$20,$61,$6e,$64,$20
+	.byte $74,$77,$6f,$20,$77,$6f,$72,$64
+	.byte $20,$63,$6f,$6d,$6d,$61,$6e,$64
+	.byte $73,$20,$6d,$61,$79,$20,$62,$65
+	.byte $20,$65,$6e,$74,$65,$72,$65,$64
+	.byte $2e,$20,$53,$6f,$6d,$65,$20,$75
+	.byte $73,$65,$66,$75,$6c,$20,$63,$6f
+	.byte $6d,$6d,$61,$6e,$64,$73,$20,$61
+	.byte $72,$65,$4f,$50,$45,$4e,$20,$42
+	.byte $4f,$58,$2c,$20,$47,$45,$54,$20
+	.byte $42,$4f,$58,$2c,$20,$44,$52,$4f
+	.byte $50,$20,$61,$6e,$64,$20,$48,$45
+	.byte $4c,$50,$2e,$20,$4d,$61,$6e,$79
+	.byte $20,$20,$6d,$6f,$72,$65,$20,$65
+	.byte $78,$69,$73,$74,$2e,$20,$54,$6f
+	.byte $20,$6d,$61,$6e,$69,$70,$75,$6c
+	.byte $61,$74,$65,$20,$61,$6e,$20,$6f
+	.byte $62,$6a,$65,$63,$74,$2c,$20,$79
+	.byte $6f,$75,$6d,$75,$73,$74,$20,$62
+	.byte $65,$20,$6f,$6e,$20,$74,$6f,$70
+	.byte $20,$6f,$66,$20,$69,$74,$2c,$20
+	.byte $6f,$72,$20,$62,$65,$20,$63,$61
+	.byte $72,$72,$79,$69,$6e,$67,$20,$69
+	.byte $74,$2e,$20,$54,$6f,$20,$73,$61
+	.byte $76,$65,$20,$61,$20,$67,$61,$6d
+	.byte $65,$20,$69,$6e,$20,$70,$72,$6f
+	.byte $67,$72,$65,$73,$73,$2c,$20,$65
+	.byte $6e,$74,$65,$72,$20,$53,$41,$56
+	.byte $45,$2e,$54,$68,$69,$73,$20,$69
+	.byte $73,$20,$65,$6e,$63,$6f,$75,$72
+	.byte $61,$67,$65,$64,$2e,$20,$44,$65
+	.byte $61,$74,$68,$6d,$61,$7a,$65,$20
+	.byte $69,$73,$20,$68,$75,$67,$65,$2e
+	.byte $20,$20,$49,$74,$20,$77,$69,$6c
+	.byte $6c,$20,$74,$61,$6b,$65,$20,$73
+	.byte $6f,$6d,$65,$20,$74,$69,$6d,$65
+	.byte $20,$74,$6f,$20,$65,$73,$63,$61
+	.byte $70,$65,$2e,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$54,$68,$65,$20,$66
+	.byte $69,$76,$65,$20,$6c,$65,$76,$65
+	.byte $6c,$73,$20,$6f,$66,$20,$44,$65
+	.byte $61,$74,$68,$6d,$61,$7a,$65,$20
+	.byte $61,$72,$65,$20,$63,$6f,$6e,$2d
+	.byte $20,$20,$6e,$65,$63,$74,$65,$64
+	.byte $20,$62,$79,$20,$65,$6c,$65,$76
+	.byte $61,$74,$6f,$72,$73,$2c,$20,$70
+	.byte $69,$74,$73,$2c,$20,$61,$6e,$64
+	.byte $20,$73,$63,$69,$65,$6e,$63,$65
+	.byte $2e,$20,$43,$6f,$6e,$6e,$65,$63
+	.byte $74,$69,$6f,$6e,$73,$20,$61,$72
+	.byte $65,$20,$6e,$6f,$74,$20,$61,$6c
+	.byte $77,$61,$79,$73,$20,$6f,$62,$76
+	.byte $69,$6f,$75,$73,$2e,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$47
+	.byte $6f,$6f,$64,$20,$4c,$75,$63,$6b
+	.byte $21,$20,$20,$20,$20,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$43,$6f,$70,$79,$72,$69
+	.byte $67,$68,$74,$20,$31,$39,$38,$30
+	.byte $20,$62,$79,$20,$4d,$65,$64,$20
+	.byte $53,$79,$73,$74,$65,$6d,$73,$20
+	.byte $53,$6f,$66,$74,$77,$61,$72,$65
+	.byte $20,$20,$41,$6c,$6c,$20,$72,$69
+	.byte $67,$68,$74,$73,$20,$72,$65,$73
+	.byte $65,$72,$76,$65,$64,$2e,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$43,$6f,$70,$79,$72,$69,$67
-	.byte $68,$74,$20,$31,$39,$38,$30,$20
-	.byte $62,$79,$20,$4d,$65,$64,$20,$53
-	.byte $79,$73,$74,$65,$6d,$73,$20,$53
-	.byte $6f,$66,$74,$77,$61,$72,$65,$20
-	.byte $20,$41,$6c,$6c,$20,$72,$69,$67
-	.byte $68,$74,$73,$20,$72,$65,$73,$65
-	.byte $72,$76,$65,$64,$2e,$20,$20,$20
 	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$a0
-	.byte $80,$52,$54,$d3,$70,$64,$55,$4e
-	.byte $20,$44,$45,$43,$20,$49,$59,$b2
-	.byte $75,$64,$20,$52,$54,$d3,$80,$64
-	.byte $44,$45,$55,$58,$20,$49,$4e,$43
-	.byte $20,$49,$59,$b3,$85,$64,$20,$52
-	.byte $54,$d3,$90,$64,$54,$52,$4f,$49
-	.byte $53,$20,$49,$4e,$43,$20,$49,$59
-	.byte $b2,$95,$64,$20,$52,$54,$d3,$00
-	.byte $65,$4a,$55,$4b,$49,$4c,$4c,$20
-	.byte $4a,$53,$52,$20,$44,$52,$41,$d7
-	.byte $05,$65,$20,$4a,$53,$52,$20,$54
-	.byte $49,$4d,$45,$b1,$10,$65,$20,$4a
-	.byte $53,$52,$20,$57,$48,$49,$54,$c5
-	.byte $15,$65,$20,$4a,$53,$52,$20,$43
-	.byte $4c,$52,$57,$4e,$c4,$20,$65,$20
-	.byte $4c,$44,$41,$20,$23,$34,$b2,$25
-	.byte $65,$20,$4a,$53,$52,$20,$50,$4f
-	.byte $49,$4e,$d4,$30,$65,$20,$4c,$44
-	.byte $41,$20,$23,$34,$b3,$35,$65,$20
-	.byte $4a,$53,$52,$20,$50,$4f,$49,$4e
-	.byte $54,$b5,$40,$65,$20,$4a,$4d,$50
-	.byte $20,$53,$61,$76,$65,$20,$74,$6f
-	.byte $20,$44,$49,$53,$4b,$20,$6f,$72
-	.byte $20,$54,$41,$50,$45,$20,$28,$54
-	.byte $20,$6f,$72,$20,$44,$29,$3f,$80
-	.byte $c7,$65,$74,$20,$66,$72,$6f,$6d
-	.byte $20,$44,$49,$53,$4b,$20,$6f,$72
-	.byte $20,$54,$41,$50,$45,$20,$28,$54
-	.byte $20,$6f,$72,$20,$44,$29,$3f,$80
-	.byte $20,$55,$08,$a2,$00,$86,$06,$86
-	.byte $07,$a2,$1f,$86,$0c,$a2,$7c,$86
-	.byte $0d
+	.byte $a0,$80,$52,$54,$d3,$70,$64,$55
+	.byte $4e,$20,$44,$45,$43,$20,$49,$59
+	.byte $b2,$75,$64,$20,$52,$54,$d3,$80
+	.byte $64,$44,$45,$55,$58,$20,$49,$4e
+	.byte $43,$20,$49,$59,$b3,$85,$64,$20
+	.byte $52,$54,$d3,$90,$64,$54,$52,$4f
+	.byte $49,$53,$20,$49,$4e,$43,$20,$49
+	.byte $59,$b2,$95,$64,$20,$52,$54,$d3
+	.byte $00,$65,$4a,$55,$4b,$49,$4c,$4c
+	.byte $20,$4a,$53,$52,$20,$44,$52,$41
+	.byte $d7,$05,$65,$20,$4a,$53,$52,$20
+	.byte $54,$49,$4d,$45,$b1,$10,$65,$20
+	.byte $4a,$53,$52,$20,$57,$48,$49,$54
+	.byte $c5,$15,$65,$20,$4a,$53,$52,$20
+	.byte $43,$4c,$52,$57,$4e,$c4,$20,$65
+	.byte $20,$4c,$44,$41,$20,$23,$34,$b2
+	.byte $25,$65,$20,$4a,$53,$52,$20,$50
+	.byte $4f,$49,$4e,$d4,$30,$65,$20,$4c
+	.byte $44,$41,$20,$23,$34,$b3,$35,$65
+	.byte $20,$4a,$53,$52,$20,$50,$4f,$49
+	.byte $4e,$54,$b5,$40,$65,$20,$4a,$4d
+	.byte $50,$20,$53,$61,$76,$65,$20,$74
+	.byte $6f,$20,$44,$49,$53,$4b,$20,$6f
+	.byte $72,$20,$54,$41,$50,$45,$20,$28
+	.byte $54,$20,$6f,$72,$20,$44,$29,$3f
+	.byte $80,$c7,$65,$74,$20,$66,$72,$6f
+	.byte $6d,$20,$44,$49,$53,$4b,$20,$6f
+	.byte $72,$20,$54,$41,$50,$45,$20,$28
+	.byte $54,$20,$6f,$72,$20,$44,$29,$3f
+	.byte $80,$20,$55,$08,$a2,$00,$86,$06
+	.byte $86,$07,$a2,$1f,$86,$0c,$a2,$7c
+	.byte $86,$0d
 p5C50:
 	.byte $20,$e5,$08,$20
 p5C54:
@@ -9045,13 +8904,13 @@ data_new_game:
 	.byte $02,$86,$03,$2a,$03,$6a,$04,$57
 	.byte $02,$39,$02,$26,$03,$56,$04,$72
 	.byte $02,$82,$03,$26,$04,$96
-game_state:
+gs_facing:
 	.byte $02
-a6194:
+gs_level:
 	.byte $05
-gs_player_xyH:
+gs_player_x:
 	.byte $04
-gs_player_xyL:
+gs_player_y:
 	.byte $0a
 gs_torches_lit:
 	.byte $00
@@ -9063,9 +8922,9 @@ a619A:
 	.byte $00
 a619B:
 	.byte $00
-a619C:
+gd_parsed_verb:
 	.byte $10
-gd_direct_object:
+gd_parsed_object:
 	.byte $17
 gs_room_lit:
 	.byte $01
@@ -9075,47 +8934,47 @@ gs_food_time_lo:
 	.byte $80
 gs_torch_time:
 	.byte $80
-a61A2:
+gs_teleported_lit:
 	.byte $00
 a61A3:
 	.byte $00
 a61A4:
 	.byte $29
-a61A5:
+gs_special_mode:
 	.byte $00
 a61A6:
 	.byte $00
 a61A7:
 	.byte $00
-a61A8:
+gs_exit_turns:
 	.byte $00,$00,$00
-a61AB:
+gs_bat_alive:
 	.byte $00
 a61AC:
 	.byte $04
-a61AD:
+gs_monster_lurks:
 	.byte $00
-a61AE:
+gs_dog1_alive:
 	.byte $00
-a61AF:
+gs_dog2_alive:
 	.byte $01,$00
-a61B1:
+gs_next_hint:
 	.byte $00
-a61B2:
+gs_monster_proximity:
 	.byte $0c
-a61B3:
+gs_mother_proximity:
 	.byte $00
-a61B4:
+gs_rotate_target:
 	.byte $05
-a61B5:
+gs_rotate_count:
 	.byte $00
-a61B6:
+gs_rotate_direction:
 	.byte $00
-a61B7:
+gs_rotate_total:
 	.byte $00
-a61B8:
+gs_lair_raided:
 	.byte $00
-a61B9:
+gs_snake_used:
 	.byte $01,$00
 gs_item_loc_inv:
 	.byte $08
@@ -9300,7 +9159,7 @@ font:
 	.byte $07,$0f,$1f,$3f,$7f,$7f,$7f,$7f
 	.byte $7f,$7f,$7f,$7f,$7e,$7c,$78,$70
 	.byte $7f,$7f,$7f,$7f,$3f,$1f,$0f,$07
-p6694:
+vocab_table:
 	.byte $ff
 verb_table:
 	.byte $F2, "ais", $E2, "low", $E2, "rea", $E2, "urn", $E3, "hew*", $E5, "at ", $F2, "oll*", $E3, "huc*", $E8, "eav*"
@@ -9462,9 +9321,9 @@ load_disk_or_tape:
 	stx zp_col
 	stx zp_row
 	ldx #<text_load_device
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>text_load_device
-	stx string_ptr+1
+	stx zp_0D
 	jsr print_string
 	jsr input_T_or_D
 	cmp #'D'
@@ -9483,9 +9342,9 @@ save_disk_or_tape:
 	stx zp_col
 	stx zp_row
 	ldx #<text_save_device
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>text_save_device
-	stx string_ptr+1
+	stx zp_0D
 	jsr print_string
 	jsr input_T_or_D
 	cmp #'T'
@@ -9494,9 +9353,9 @@ save_disk_or_tape:
 
 prepare_tape_save:
 	jsr clear_hgr2
-	jsr s1015
+	jsr draw_view
 	ldx #$07
-	stx src+1
+	stx a0F
 	jsr item_exec
 	jmp save_to_tape
 
@@ -9534,9 +9393,9 @@ save_to_disk:
 
 prepare_disk_save:
 	jsr clear_hgr2
-	jsr s1015
+	jsr draw_view
 	ldx #$07
-	stx src+1
+	stx a0F
 	jmp item_exec
 
 load_from_disk:
@@ -9580,9 +9439,9 @@ prompt_insert_disk:
 	lda #char_newline
 	jsr char_out
 	ldx #<text_insert_disk
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>text_insert_disk
-	stx string_ptr+1
+	stx zp_0D
 	jsr print_string
 	lda #$0a     ;char_newline
 	jsr char_out
@@ -9625,11 +9484,11 @@ string_disk_error:
 	.byte "FILE! INPUT REJECTED!", $80
 disk_error_fatal:
 	ldx #$00
-	stx dst
+	stx zp_10_dst
 	beq disk_error
 disk_error_retry:
 	ldx #$ff
-	stx dst
+	stx zp_10_dst
 disk_error:
 	tay
 	dey
@@ -9649,25 +9508,25 @@ disk_error:
 	bne @print_message
 :	ldy #$68
 @print_message:
-	sty count
+	sty zp_19_n
 	ldx #$00
-	stx count+1
+	stx a1A
 	ldx #<string_disk_error
-	stx string_ptr
+	stx zp_0C_string
 	ldx #>string_disk_error
-	stx string_ptr+1
+	stx zp_0D
 	clc
-	lda count
-	adc string_ptr
-	sta string_ptr
-	lda count+1
-	adc string_ptr+1
-	sta string_ptr+1
+	lda zp_19_n
+	adc zp_0C_string
+	sta zp_0C_string
+	lda a1A
+	adc zp_0D
+	sta zp_0D
 	lda #char_newline
 	jsr char_out
 	jsr print_string
 	jsr input_char
-	lda dst
+	lda zp_10_dst
 	beq :+
 	jmp prepare_disk_save
 
@@ -9675,10 +9534,10 @@ disk_error:
 	pla
 	jmp main
 
-	lda a61A5
+	lda gs_special_mode
 	bne b7E81
 	ldx #$06
-	stx a61A5
+	stx gs_special_mode
 	rts
 
 b7E81:
@@ -9814,7 +9673,7 @@ b7F79:
 	rts
 
 	tya
-	sta count+1
+	sta a1A
 b7F82:
 	jsr get_rowcol_addr
 	lda #$02
@@ -9822,24 +9681,24 @@ b7F82:
 	dec zp_col
 	dec zp_col
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne b7F82
 	rts
 
 	tya
-	sta count+1
+	sta a1A
 b7F98:
 	jsr get_rowcol_addr
 	lda #$01
 	jsr char_out
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne b7F98
 	rts
 
 	pha
 	tya
-	sta count+1
+	sta a1A
 	pla
 b7FAC:
 	pha
@@ -9850,7 +9709,7 @@ b7FAC:
 	pla
 	dec zp_col
 	inc zp_row
-	dec count+1
+	dec a1A
 	bne b7FAC
 	rts
 
@@ -9859,7 +9718,7 @@ b7FAC:
 	sta text_ptr
 	lda #>p6000
 	sta text_ptr+1
-	ldx a6194
+	ldx gs_level
 	lda #$00
 	clc
 	dex
@@ -9870,7 +9729,7 @@ b7FAC:
 b7FD7:
 	adc text_ptr
 	sta text_ptr
-	ldx gs_player_xyH
+	ldx gs_player_x
 	dex
 	beq b7FEA
 	inc text_ptr
@@ -9879,7 +9738,7 @@ b7FD7:
 	jmp j17DE
 
 b7FEA:
-	lda gs_player_xyL
+	lda gs_player_y
 	cmp #$05
 	bmi b7FFF
 	cmp #$09
