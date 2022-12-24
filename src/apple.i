@@ -7,6 +7,8 @@ zp_A2 = $003e
 irq_IIgs = $03fe
 
 screen_TEXT = $0400
+screen_GR1  = $0400
+screen_GR2  = $0800
 screen_HGR1 = $2000
 screen_HGR2 = $4000
 
@@ -24,6 +26,7 @@ hw_TEXT       = $c051
 hw_FULLSCREEN = $c052
 hw_PAGE1      = $c054
 hw_PAGE2      = $c055
+hw_LORES      = $c056
 hw_HIRES      = $c057
 
 hw_ROMIN    = $c081

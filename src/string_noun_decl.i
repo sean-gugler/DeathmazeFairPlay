@@ -15,9 +15,17 @@
 	noun_wool = $0f
 	noun_yoyo = $10
 	noun_snake = $11
+
+	nouns_unique_end = $12
+
+	;WARN: cmd_eat assumes food is first
 	noun_food = $12
 	noun_torch = $13
 	noun_box = $14
+
+	nouns_item_end = $15
+
+
 	noun_bat = $15
 	noun_dog = $16
 	noun_elev = $17

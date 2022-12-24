@@ -1,4 +1,5 @@
 
+carried = $06
 ;' ' = $20
 ;'*' = $2a
 ;'.' = $2e
@@ -16,36 +17,81 @@
 ;>font = $62
 ;<font = $94
 
+;$zp_input_word_count = a10
 ;$zp_input_char_count = a11
 ;$zp_string_number = a11
 ;$zp_raw_input = a13
-;$zp_action = a1A
-;$zp_hint_mode = a1A
-;$zp_object = a1A
-;$zp_input_word_count = $_1
+;$zp_action = $1a
+;$zp_hint_mode = $1a
+;$zp_object = $1a
 
-;<(gs_item_loc_inv-2) = $b9
+;<(gs_item_location-2) = $b9
 
-;<gs_item_loc_inv = $bb
+;<dos_iob = $b6
+
+;<food_amount = $aa
+
+;<gs_item_locs = $bb
 
 ;<row8_table = $62
 
-;>(gs_item_loc_inv-2) = $61
+;>(gs_item_location-2) = $61
+
+;>dos_iob = $7c
+
+;>food_amount = $00
 
 ;>row8_table = $11
+
+;>screen_GR2 = $08
+
+carried_closed = $06
+carried_open = $06
+carried_open1 = $07
+carried_open2 = $08
 
 char_cursor = $00
 char_left = $08
 char_newline = $0a
 char_enter = $0d
 char_right = $15
+char_ESC = $1b
 char_esc = $1b
 char_ClearLine = $1e
 char_mask_upper = $5f
 
 cmd_blow = $02
 
+error_write_protect = $01
+error_volume_mismatch = $02
+error_unknown_cause = $03
+error_reading = $04
+error_bad_save = $05
+
+exec_destroy1 = $00
+exec_destroy2 = $01
+exec_take_closed = $02
+exec_take_open1 = $03
+exec_take_open2 = $04
+exec_drop = $05
+exec_where = $06
+exec_draw_inv = $07
+exec_count_inv = $08
+exec_reset_game = $09
+exec_0a = $0a
+exec_inside_box = $0b
+exec_which_food = $0c
+exec_which_torch1 = $0d
+exec_which_torch_lit = $0d
+exec_which_torch2 = $0e
+exec_which_torch_unlit = $0e
+
+execs_location_end = $07
+execs_no_location = $07
+
 food_low = $0a
+
+game_state_begin = s_facing
 
 glyph_X = $05
 glyph_solid = $0b
@@ -63,25 +109,53 @@ glyph_UL_triangle = $60
 
 item_ball = $01
 item_flute = $05
-item_exec_reset_game = $09
+item_food_begin = $12
+item_torch_begin = $15
+
+items_food = $03
+items_torches = $03
+;items_food + items_torches = $06
+items_unique = $12
+;items_unique + items_food = $14
+;items_unique + items_food + items_torches = $17
 
 max_input = $1e
 
+mother_flag_roaming = $04
+
+noun_ball = $01
+noun_brush = $02
+noun_calculator = $03
+noun_dagger = $04
 noun_flute = $05
+noun_frisbee = $06
+noun_hat = $07
 noun_horn = $08
 noun_jar = $09
 ;noun_play - noun_blow = $09
+noun_key = $0a
 noun_ring = $0b
 noun_sneaker = $0c
 noun_staff = $0d
+noun_sword = $0e
+noun_wool = $0f
+;noun_snake-1 = $10
+noun_yoyo = $10
 noun_snake = $11
+noun_food = $12
+noun_torch = $13
+noun_box = $14
 noun_bat = $15
 noun_dog = $16
 noun_door = $17
 noun_monster = $18
 noun_mother = $19
 ;noun_zero-1 = $19
+noun_zero = $1a
 noun_two = $1c
+
+nouns_unique_end = $12
+nouns_item_end = $15
 
 opcode_JMP = $4c
 
@@ -103,7 +177,13 @@ special_climb = $0f
 torch_low = $0a
 torch_lifespan = $96
 
+turns_until_trippable = $29
+turns_until_mother = $32
+turns_until_dog1 = $3c
+turns_until_monster = $50
+
 verb_break = $03
+;verb_light - verb_burn = $06
 verb_throw = $06
 verb_climb = $07
 verb_drop = $08
@@ -125,4 +205,4 @@ verbs_end = $1d
 ;vocab_end-1 = $3f
 vocab_end = $40
 
-zp_object = 1A
+zp_object = p1A_pos_x

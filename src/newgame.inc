@@ -10,18 +10,17 @@
 	.byte $07		;99
 	.byte $bf		;9A
 	.byte $00		;9B
-	.byte $00		;parsed verb
+	.byte $00		;parsed action
 	.byte $00		;parsed object
 	.byte $01		;room lit
 	.byte $00,$a0	;food time (high,low)
 	.byte $c8		;torch time
 	.byte $00		;teleported with lit torch
-	.byte $00		;A3
-	.byte $00		;A4
+	.byte $00,$00	;level turns (high,low)
 	.byte $00		;special input mode
-	.byte $00		;A6
-	.byte $00		;A7
-	.byte $00		;A8
+	.byte $00		;mode stack 1
+	.byte $00		;mode stack 2
+	.byte $00		;gs_exit_turns
 	.byte $00		;A9
 	.byte $00		;AA
 	.byte $02		;bat alive (flag $02)
@@ -40,7 +39,7 @@
 	.byte $00		;lair raided
 	.byte $00		;snake used (useless; written but never checked)
 	.byte $00		;unused
-; item locations: level, position XY
+; item locations: place (level), position XY
 	.byte $01,$35	;ball
 	.byte $03,$a5	;brush
 	.byte $01,$33	;calculator
