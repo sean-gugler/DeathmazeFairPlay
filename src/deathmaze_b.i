@@ -1,5 +1,4 @@
 
-carried = $06
 ;' ' = $20
 ;'*' = $2a
 ;'.' = $2e
@@ -17,19 +16,27 @@ carried = $06
 ;>font = $62
 ;<font = $94
 
-;$zp_input_word_count = a10
-;$zp_input_char_count = a11
-;$zp_string_number = a11
-;$zp_raw_input = a13
-;$zp_action = $1a
-;$zp_hint_mode = $1a
-;$zp_object = $1a
+;''0' - noun_zero = $16
+
+;$zp_string_number = $11
+
+;$zp10_count_words = $10
+
+;$zp11_count_chars = $11
+
+;$zp13_raw_input = a13
+
+;$zp1A_hint_mode = $1a
+;$zp1A_move_action = $1a
+;$zp1A_object = $1a
 
 ;<(gs_item_location-2) = $b9
 
 ;<dos_iob = $b6
 
 ;<food_amount = $aa
+
+;<game_save_begin = <gs_facing
 
 ;<gs_item_locs = $bb
 
@@ -41,14 +48,17 @@ carried = $06
 
 ;>food_amount = $00
 
+;>game_save_begin = >gs_facing
+
 ;>row8_table = $11
 
 ;>screen_GR2 = $08
 
-carried_closed = $06
-carried_open = $06
-carried_open1 = $07
-carried_open2 = $08
+carried_begin = $06
+carried_boxed = $06
+carried_active = $07
+carried_unboxed = $07
+carried_known = $08
 
 char_cursor = $00
 char_left = $08
@@ -62,36 +72,21 @@ char_mask_upper = $5f
 
 cmd_blow = $02
 
+;door_lock_begin - doors_elevators = $15
+;door_lock_begin + door_correct = $1b
+
 error_write_protect = $01
 error_volume_mismatch = $02
 error_unknown_cause = $03
 error_reading = $04
 error_bad_save = $05
 
-exec_destroy1 = $00
-exec_destroy2 = $01
-exec_take_closed = $02
-exec_take_open1 = $03
-exec_take_open2 = $04
-exec_drop = $05
-exec_where = $06
-exec_draw_inv = $07
-exec_count_inv = $08
-exec_reset_game = $09
-exec_0a = $0a
-exec_inside_box = $0b
-exec_which_food = $0c
-exec_which_torch1 = $0d
-exec_which_torch_lit = $0d
-exec_which_torch2 = $0e
-exec_which_torch_unlit = $0e
-
 execs_location_end = $07
 execs_no_location = $07
 
 food_low = $0a
 
-game_state_begin = s_facing
+game_save_begin = s_facing
 
 glyph_X = $05
 glyph_solid = $0b
@@ -107,9 +102,26 @@ glyph_UL_triangle = $60
 
 ;gs_size-1 = $55
 
+icmd_destroy1 = $00
+icmd_destroy2 = $01
+icmd_set_carried_boxed = $02
+icmd_set_carried_active = $03
+icmd_set_carried_known = $04
+icmd_drop = $05
+icmd_where = $06
+icmd_draw_inv = $07
+icmd_count_inv = $08
+icmd_reset_game = $09
+icmd_0a = $0a
+icmd_which_box = $0b
+icmd_which_food = $0c
+icmd_which_torch_lit = $0d
+icmd_which_torch_unlit = $0e
+
 item_ball = $01
 item_flute = $05
 item_food_begin = $12
+item_food_begin = $15
 item_torch_begin = $15
 
 items_food = $03
@@ -191,6 +203,7 @@ verb_fill = $09
 verb_look = $0e
 verb_open = $10
 verb_press = $11
+verb_take = $12
 verb_attack = $13
 verb_intransitive = $14
 verb_movement_begin = $5a
@@ -204,5 +217,3 @@ verbs_end = $1d
 
 ;vocab_end-1 = $3f
 vocab_end = $40
-
-zp_object = p1A_pos_x

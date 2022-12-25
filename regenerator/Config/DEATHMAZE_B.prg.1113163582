@@ -49,43 +49,61 @@
 7D8F-7E1D
 :BLANK LINES
 0C02
+0DAA
 0E4D
 0FDC
 127E
 1A34
 1AFE
 1B25
+1BBB
+1BEC
 1C3B
 2640
+2669
+266D
 26AB
+26AF
+26E5
+275A
 281D
+2948
+29CB
+29DD
+2AE3
+2B24
 2B64
+2B68
 2B7A
+2C26
+2CFA
 2E2A
 3197
+3805
 7CC7
 7CEF
 :REMOVED BYTES
 :FULL COMMENTS
-0D8A BUG? was this supposed to repeat last command?
+0D8A Cancel whatever is currently typed
 0E37 BUG: meant to prevent double-space, but only prevents WORD_L_
-10E9 Leftover code from earlier draft, apparently
-1123 Leftover from an even earlier draft
+10E9 cruft leftover from earlier build
+1123 cruft leftover from even earlier build
 1A1D junk
 1AB5 print inventory
 1C55 Skip over snake
 1C6D Last, check for carrying boxed snake
 2624 junk
 2632 junk
-2CE8 junk
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 7D8F 1-based indexing via 'A'
 :SIDE COMMENTS
 0824 Continue a game?
 082C #'Y'
 0833 Press any key
-0843 #exec_reset_game
+0843 #icmd_reset_game
 084A #char_ESC
+0872 #<game_save_begin
+0876 #>game_save_begin
 088B NOTE: never returns, continues with PLA/PLA/JMP
 08DC #char_ClearLine
 0900 $zp_string_number
@@ -115,15 +133,15 @@
 0B8D #torch_low
 0B91 Torch is dying
 0B9A #nouns_unique_end
-0B9E #exec_where
-0BA7 #carried_open1
+0B9E #icmd_where
+0BA7 #carried_active
 0BAD Check your inventory!
 0BB3 #noun_food
 0BB7 #noun_torch
-0BBB #exec_inside_box
-0BC7 #exec_which_food
-0BD3 #exec_which_torch_unlit
-0BEA #exec_which_torch_lit
+0BBB #icmd_which_box
+0BC7 #icmd_which_food
+0BD3 #icmd_which_torch_unlit
+0BEA #icmd_which_torch_lit
 0BFE You will do no such thing!
 0C61 The ground beneath your feet
 0C66 begins to shake!
@@ -134,10 +152,10 @@
 0C9F It is the monster's mother!
 0CA4 She slashes you to bits!
 0CDB #char_mask_upper
-0D29 $zp_input_char_count
-0D2B $zp_input_word_count
+0D29 $zp11_count_chars
+0D2B $zp10_count_words
 0D4D #char_mask_upper
-0D50 $zp_input_char_count
+0D50 $zp11_count_chars
 0D55 #'Z'
 0D5C #'X'
 0D63 #char_left
@@ -154,30 +172,30 @@
 0DD9 #verb_left
 0DDD #verb_uturn
 0DF0 #' '
-0DFA $zp_input_char_count
+0DFA $zp11_count_chars
 0DFE #' '
-0E02 $zp_input_word_count
-0E08 $zp_input_char_count
-0E0D $zp_raw_input
+0E02 $zp10_count_words
+0E08 $zp11_count_chars
+0E0D $zp13_raw_input
 0E0F #'A'
-0E13 $zp_input_char_count
+0E13 $zp11_count_chars
 0E17 Check previous character
 0E19 #' '
-0E1D $zp_raw_input
+0E1D $zp13_raw_input
 0E1F Make lower-case
-0E23 $zp_raw_input
-0E2A $zp_input_char_count
-0E2C $zp_input_char_count
+0E23 $zp13_raw_input
+0E2A $zp11_count_chars
+0E2C $zp11_count_chars
 0E30 #max_input
-0E37 $zp_input_char_count
+0E37 $zp11_count_chars
 0E39 BUG: remove to fix.
 0E3C #' '
-0E43 $zp_input_word_count
-0E47 $zp_input_word_count
+0E43 $zp10_count_words
+0E47 $zp10_count_words
 0E49 #' '
 0E50 #' '
-0E52 $zp_input_char_count
-0E54 $zp_input_char_count
+0E52 $zp11_count_chars
+0E54 $zp11_count_chars
 0E70 #' '
 0E80 #' '
 0E96 #verbs_end
@@ -203,7 +221,7 @@
 0FC7 #vocab_end-1
 1007 #'Y'
 100B #'N'
-102F #exec_0a
+102F #icmd_0a
 105A Little sense.
 106B #char_ClearLine
 1075 #char_ClearLine
@@ -221,8 +239,8 @@
 113B #noun_door
 1142 I don't see that here.
 114C #noun_brush
-1150 #exec_where
-1159 #carried_open2
+1150 #icmd_where
+1159 #carried_known
 1192 #char_newline
 1196 #char_ClearLine
 11B7 #<font
@@ -233,18 +251,17 @@
 1260 #char_cursor
 127A #' '
 1A36 #execs_no_location
-1A3F zp_FIXME (ptr)
 1A42 #<(gs_item_location-2)
 1A48 #>(gs_item_location-2)
-1A4F #exec_drop
-1A6E #exec_drop
+1A4F #icmd_drop
+1A6E #icmd_drop
 1A94 #execs_location_end
 1AAA char_ClearLine
 1AB5 #items_unique + items_food
 1ABB zp_FIXME
 1ACC Inventory:
 1B06 #items_unique + items_food + items_torches
-1B0E #carried_closed
+1B0E #carried_boxed
 1B30 Torches:
 1B40 Lit:
 1B52 #'0'
@@ -255,25 +272,24 @@
 1B7F #noun_food
 1B81 zp_FIXME
 1BA2 #noun_box
-1BB5 zp_FIXME
 1BBD zp_FIXME
 1BC3 #items_unique + items_food
 1BEC #gs_size-1
 1C29 #items_unique + items_food + items_torches
 1C43 #noun_snake-1
-1C47 #carried_closed
-1C5D #items_food + items_torches ;also carried_closed
+1C47 #carried_boxed
+1C5D #items_food + items_torches
 1C98 clamp min 0
 1CA7 #<gs_item_locs
 1CB3 #items_food
-1CB7 #carried_open2
-1CBB #exec_where
+1CB7 #carried_known
+1CBB #icmd_where
 1CBF #item_food_begin
 1CEC #items_torches
-1CF0 #carried_open1
+1CF0 #carried_active
 1CFA #items_torches
-1CFE #carried_open2
-1D02 #exec_where
+1CFE #carried_known
+1D02 #icmd_where
 1D06 #item_torch_begin
 24E9 #glyph_R_notched
 24EE #glyph_solid
@@ -294,14 +310,14 @@
 2679 Having fun?
 267E Staff begins to quake
 268F #noun_ring
-2693 #exec_take_open1
+2693 #icmd_set_carried_active
 26A2 The ring is activated and
 26A7 shines light everywhere!
 26B1 #noun_flute
 26B5 #noun_horn
 26C3 #special_mother
 26C7 #noun_horn
-26CB #exec_take_open1
+26CB #icmd_set_carried_active
 26D2 A deafening roar envelopes
 26D7 you. Your ears are ringing!
 26DD #noun_play - noun_blow
@@ -312,8 +328,8 @@
 271E and it disappears!
 272E level 5 is lit by ring, not torches
 273D #special_dark
-2746 #exec_which_torch2
-274F #exec_destroy1
+2746 #icmd_which_torch_unlit
+274F #icmd_destroy1
 2761 #noun_ring
 2768 #nouns_unique_end
 276C #noun_torch
@@ -327,8 +343,7 @@
 27BD You eat the
 27C2 #' '
 27CD and you get heartburn!
-27D2 #exec_draw_inv
-27F5 zp_FIXME
+27D2 #icmd_draw_inv
 27FC #<food_amount
 2800 #>food_amount
 2819 Digested
@@ -345,47 +360,48 @@
 288F #turns_until_trippable
 2896 #special_tripped
 289B #noun_wool
-289F #exec_destroy1
+289F #icmd_destroy1
 28A9 and the monster grabs it,
 28AE gets tangled, and topples over!
 28BC returns and hits you
 28C1 in the eye!
-28CD #exec_draw_inv
+28CD #icmd_draw_inv
 28D4 Food fight!
-28D9 #exec_draw_inv
+28D9 #icmd_draw_inv
 28E0 The
+28EE #' '
 2902 magically sails
 2907 around a nearby corner
 291C #noun_frisbee
-2920 #exec_destroy1
+2920 #icmd_destroy1
 292D The monster grabs the frisbee, throws
 2932 it back, and it saws your head off!
 2941 Climbing only possible during special_climb
-294B #exec_inside_box
-2958 #exec_where
-2961 #carried
+294B #icmd_which_box
+2958 #icmd_where
+2961 #carried_begin
 2965 The hallway is too crowded.
 2972 #nouns_unique_end
 2976 #noun_ring
-297D #exec_drop
-2984 #exec_draw_inv
+297D #icmd_drop
+2984 #icmd_draw_inv
 298B #noun_torch
-2996 #exec_which_torch_unlit
-29A5 #exec_which_torch_lit
+2996 #icmd_which_torch_unlit
+29A5 #icmd_which_torch_lit
 29BC #special_dark
 29CD #noun_jar
 29D4 With what? Air?
 29E1 #noun_torch
-29EA #carried_open1
+29EA #carried_active
 29F6 You have no fire.
-29FB #exec_draw_inv
-2A02 #exec_which_torch_lit
-2A0F #exec_destroy2
-2A16 #exec_which_torch_unlit
-2A1F #exec_take_open1
+29FB #icmd_draw_inv
+2A02 #icmd_which_torch_lit
+2A0F #icmd_destroy2
+2A16 #icmd_which_torch_unlit
+2A1F #icmd_set_carried_active
 2A29 The torch is lit and the
 2A2E old torch dies and vanishes!
-2A36 #exec_draw_inv
+2A36 #icmd_draw_inv
 2A3D #torch_lifespan
 2A4C #item_flute
 2A50 #item_ball
@@ -393,14 +409,14 @@
 2A5B #cmd_blow
 2A63 With who? The monster?
 2A68 #noun_snake
-2A6C #exec_where
+2A6C #icmd_where
 2A8C A high shrill note comes
 2A91 from the flute!
 2A93 GUG: saves no bytes, adds time.
 2AA1 #glyph_R_solid
 2AA6 #glyph_X
 2AAB #glyph_L_solid
-2AC6 #exec_take_open1
+2AC6 #icmd_set_carried_active
 2ACA #noun_snake
 2AD4 #special_climb
 2AE5 #noun_staff
@@ -409,7 +425,7 @@
 2B00 #noun_hat
 2B07 OK...if you really want to,
 2B0C you are wearing it.
-2B11 #exec_take_open1
+2B11 #icmd_set_carried_active
 2B26 #noun_hat
 2B2D #nouns_item_end
 2B31 #noun_zero
@@ -422,59 +438,81 @@
 2B6E #noun_calculator
 2B72 Ok, it is clean
 2B76 It displays 317.2 !
-2B91 #exec_inside_box
-2BA4 #exec_where
-2BAD #carried_open
-2BB8 #exec_take_open2
+2B83 #noun_door
+2B8A #noun_box
+2B91 #icmd_which_box
+2BA4 #icmd_where
+2BAD #carried_begin
+2BB8 #icmd_set_carried_known
+2BC1 #noun_snake
+2BC7 #item_food_begin
+2BCB #noun_torch
+2BCF #noun_food
 2BDC Inside the box there is a
-2BFF #exec_where
-2C13 #exec_draw_inv
+2BE3 #noun_calculator
+2BEC #noun_snake
+2BFB #noun_torch
+2BFF #icmd_where
+2C0A #carried_known
+2C13 #icmd_draw_inv
 2C1D #special_snake
+2C22 #noun_snake
 2C3A #noun_key
-2C3E #exec_where
+2C3E #icmd_where
+2C47 #carried_unboxed
+2C4F #door_lock_begin - doors_elevators
+2C51 #door_lock_begin + door_correct
 2C5B You unlock the door...
 2C6C But you have no key.
 2C71 #special_bomb
 2C79 You unlock the door...
-2C7E and the key begins to tick!
+2C7E #door_lock_begin + door_correct
 2C86 #special_elevator
-2D0A #exec_where
+2D03 #noun_zero
+2D0A #icmd_where
 2D0E #noun_calculator
+2D17 #carried_known
 2D2A The calculator displays
 2D2F #' '
+2D38 #''0' - noun_zero
 2D41 #noun_zero-1
 2D95 #noun_two
-2DB3 #exec_which_torch1
-2DBA #exec_take_open2
+2DB3 #icmd_which_torch_lit
+2DBA #icmd_set_carried_known
 2DC3 #noun_calculator
-2DC7 #exec_destroy2
+2DC7 #icmd_destroy2
 2DCB #special_dark
-2DD6 #exec_draw_inv
+2DD6 #icmd_draw_inv
 2DDD You have been teleported!
 2DE2 The calculator vanishes.
 2DEA #noun_two
 2DF9 A draft blows your torch out.
-2E31 #exec_inside_box
-2E42 #exec_where
-2E6C #exec_where
-2E87 #exec_count_inv
-2E9D #exec_take_open2
-2EA4 #exec_draw_inv
+2E31 #icmd_which_box
+2E42 #icmd_where
+2E6C #icmd_where
+2E87 #icmd_count_inv
+2E9D #icmd_set_carried_known
+2EA4 #icmd_draw_inv
+2EAE #noun_calculator
+2EB5 #noun_snake
 2EBC #special_snake
 2EC5 #special_calc_puzzle
+2ECC #verb_take
 2ED6 The calculator displays 317.
-2EEB #exec_take_closed
+2EDB #noun_calculator
+2EEB #icmd_set_carried_boxed
 2F30 It is currently impossible.
-2F68 #exec_where
+2F68 #icmd_where
 2FB7 I don't see that here.
 2FC1 #noun_brush
-2FC5 #exec_where
-2FCE #carried_open2
+2FC5 #icmd_where
+2FCE #carried_known
 2FD5 With what? Toenail polish?
 2FDD GUG: maybe disguise this better
 2FE4 OK...
 303F #noun_hat
-3043 #exec_where
+3043 #icmd_where
+304A #carried_active
 30B1 You have rammed your head into a steel
 30B6 wall and bashed your brains out!
 30CF yellow
@@ -486,77 +524,80 @@
 31B2 #'Y'
 31BC Prepare cassette
 31C1 Press any key
+31C9 #<game_save_begin
+31CD #>game_save_begin
 31E6 Are you sure you want to quit?
-3231 #exec_draw_inv
+3231 #icmd_draw_inv
 323B #special_calc_puzzle
 3244 Try examining things.
 324F Type instructions.
 3258 Invert and telephone.
 3332 #noun_ball
-335C $zp_hint_mode
+335C $zp1A_hint_mode
 337A #verb_forward
-337E $zp_action
+337E $zp1A_move_action
 3385 Set initial turn direction
-3390 $zp_action
-33B1 $zp_action
-33CF $zp_action
+3390 $zp1A_move_action
+33B1 $zp1A_move_action
+33CF $zp1A_move_action
 33E8 Splat!
 33F6 #verb_drop
 33FA #verb_movement_begin
 3401 To everything
-3406 $zp_hint_mode
+3406 $zp1A_hint_mode
 340C Turn turn turn
 3411 There is a season
-3416 $zp_hint_mode
+3416 $zp1A_hint_mode
 341C Turn turn turn
 3427 #puzzle_step1
-344B $zp_hint_mode
-3452 $zp_hint_mode
+344B $zp1A_hint_mode
+3452 $zp1A_hint_mode
 3461 A vampire bat attacks you!
-346F #zp_object
+346F $zp1A_object
 3474 #verb_look
 3478 #verb_throw
 347C #verb_break
 3483 The bat drains you!
-348B #zp_object
+348B $zp1A_object
 348D #noun_bat
 3491 It looks very dangerous!
 349C #noun_jar
-34A0 #exec_where
+34A0 #icmd_where
+34A9 #carried_active
 34B0 #noun_jar
 34B4 What a mess! The vampire bat
 34B9 drinks the blood and dies!
-34BE #exec_destroy1
+34BE #icmd_destroy1
 34C2 #noun_jar
-34C9 #exec_draw_inv
+34C9 #icmd_draw_inv
 3513 A vicious dog attacks you!
 3518 GUG: can this be wait_short?
-3521 $zp_object
+3521 $zp1A_object
 352A #verb_throw
 352E #verb_attack
 3532 #verb_look
 3539 He rips your throat out!
-3541 $zp_object
+3541 $zp1A_object
 3543 #noun_dog
 3547 It displays 317.2!  ;BUG: should be $8c
 354C BUG: should JMP to get_player_input
-354F $zp_object
+354F $zp1A_object
 3551 #noun_dog
 3555 #noun_dagger
-3559 #exec_where
+3559 #icmd_where
 3566 #noun_sword
-356A #exec_where
+356A #icmd_where
 357A and it vanishes!
 357F You have killed it.
-3585 #exec_destroy1
+3585 #icmd_destroy1
 3589 #noun_dagger
-3590 #exec_draw_inv
+3590 #icmd_draw_inv
 3597 The dagger disappears!
 35A1 #noun_sneaker
 35A5 #noun_sneaker
-35A9 #exec_where
+35A9 #icmd_where
 35B6 #noun_sneaker
-35BA #exec_destroy1
+35BA #icmd_destroy1
 35C4 and is eaten by
 35C9 the monster!
 35D4 The dog chases the sneaker!
@@ -571,13 +612,13 @@
 363E Never raid a monster's lair
 369E The ground beneath your feet
 36A3 begins to shake!
-36B2 #exec_where
+36B2 #icmd_where
 36B6 #noun_horn
 36C3 A disgusting odor permeates
 36C8 the hallway as it darkens!
 36D3 It is the monster's mother!
 36D8 #noun_horn
-36DC #exec_where
+36DC #icmd_where
 36E9 She has been seduced!
 36FD #noun_monster
 3701 #noun_mother
@@ -587,7 +628,7 @@
 3725 It looks very dangerous!
 3735 #verb_attack
 3739 #noun_sword
-373D #exec_where
+373D #icmd_where
 3756 She tiptoes up to you!
 375B You slash her to bits!
 3763 The body has vanished!
@@ -605,14 +646,14 @@
 3816 #verb_look
 381A #verb_attack
 381E #noun_dagger
-3822 #exec_where
+3822 #icmd_where
 382F #noun_sword
-3833 #exec_where
+3833 #icmd_where
 3842 #noun_dagger
-3846 #exec_destroy1
-384D #exec_destroy1
+3846 #icmd_destroy1
+384D #icmd_destroy1
 3851 #noun_snake
-3858 #exec_draw_inv
+3858 #icmd_draw_inv
 385F The dagger disappears!
 3864 You have killed it.
 386C It looks very dangerous!
@@ -629,19 +670,19 @@
 3A42 #verb_look
 3A49 #verb_attack
 3A52 #noun_dagger
-3A56 #exec_where
+3A56 #icmd_where
 3A66 #noun_dagger
-3A6A #exec_destroy2
-3A71 #exec_draw_inv
+3A6A #icmd_destroy2
+3A71 #icmd_draw_inv
 3A78 The dagger disappears!
 3A80 The monster is dead and
 3A85 much blood is spilt!
 3AA5 #verb_fill
 3AAC #noun_jar
-3AB0 #exec_where
+3AB0 #icmd_where
 3AB4 #noun_jar
 3AC1 #noun_jar
-3AC5 #exec_take_open1
+3AC5 #icmd_set_carried_active
 3ACC It is now full of blood.
 3AD4 It looks very dangerous!
 3AE2 The body has vanished!
@@ -655,15 +696,15 @@
 3BAD snake
 3BB2 has vanished
 3BB7 #noun_snake
-3BBB #exec_destroy1
-3BC2 #exec_draw_inv
+3BBB #icmd_destroy1
+3BC2 #icmd_draw_inv
 3BDD The
 3BE2 wool
 3BE7 has vanished
-3BEC #exec_destroy1
+3BEC #icmd_destroy1
 3BF0 #noun_wool
-3BFC #exec_draw_inv
-3C08 #exec_draw_inv
+3BFC #icmd_draw_inv
+3C08 #icmd_draw_inv
 3C19 #verb_press
 3C1D You will do no such thing!
 3C6A Splat!
@@ -672,10 +713,10 @@
 3D7C You fall through the floor
 3D81 #char_newline
 3D86 onto a bed of spikes!
-3DA3 #exec_where
+3DA3 #icmd_where
 3DA7 #noun_ball
-3DC7 #noun_ball  ;and #exec_destroy2
-3DD0 #exec_draw_inv
+3DC7 #icmd_destroy2  ;and #noun_ball
+3DD0 #icmd_draw_inv
 3E1B Before I let you go free
 3E20 what was the name of the monster?
 3E92 Correct! You have survived!
@@ -693,11 +734,11 @@
 7C56 #'D'
 7C60 Prepare your cassette
 7C7D #'T'
-7C8A #exec_draw_inv
+7C8A #icmd_draw_inv
 7CA4 #'T'
 7CA8 #'D'
-7CBE #game_state_begin
-7D05 #exec_draw_inv
+7CBE #game_save_begin
+7D05 #icmd_draw_inv
 7D21 #'D'
 7D29 #'E'
 7D31 #'A'
@@ -719,19 +760,19 @@
 0007 zp_row
 0008 screen_ptr
 0009 screen_ptr+1
-000A text_ptr
+000A zp0A_text_ptr
 000B text_ptr+1
 000C zp_0C_string
 000D zp_0D
 000E zp0E_object
 000F zp0F_action
-0014 row_ptr+1
+0010 zp10_noun
+0011 zp11_item
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
-0019 zp19_pos_y
-001A zp1A_pos_x
+001A zp1A_item_place
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -771,7 +812,7 @@
 0949 cmd_movement
 0956 move_turn
 099D move_forward
-0A10 check_special_positi
+0A10 check_special_position
 0A22 +
 0A27 +
 0A36 check_calculator
@@ -815,7 +856,8 @@
 0C0E +
 0C14 +
 0C23 @check_done
-0C29 textbuf_prev_input
+0C29 textbuf_prev_input-1
+0C2A textbuf_prev_input
 0C7A text_buffer1
 0CA2 text_buffer2
 0CCA get_player_input
@@ -824,6 +866,7 @@
 0D22 -
 0D39 input_blink_cursor
 0D3C -
+0D4F process_input_char
 0D5C +
 0D63 +
 0D6A +
@@ -933,12 +976,12 @@
 1286 @clear_row
 128E @clear_raster
 1292 -
-1A34 item_exec
+1A34 item_cmd
 1A5F @destroy_item
 1A69 +
-1A6E code06_where_item
-1A7E code05_drop_item
-1A93 code07_draw_inv
+1A6E icmd06_where_item
+1A7E icmd05_drop_item
+1A93 icmd07_draw_inv
 1A9B @clear_window
 1AA7 -
 1ADC check_item_known
@@ -946,22 +989,22 @@
 1AEE next_known_item
 1AF4 +
 1AFA +
-1B0A check_item_closed
-1B15 next_closed_item
+1B0A check_item_boxed
+1B15 next_boxed_item
 1B1B +
 1B21 +
 1B76 print_known_item
 1B81 +
-1B9C print_closed_item
-1BB5 code08_count_inv
+1B9C print_boxed_item
+1BB5 icmd08_count_inv
 1BCD @check_carried
 1BD5 +
 1BE5 @add_one
 1BE7 @done
-1BE8 code09_new_game
+1BE8 icmd09_new_game
 1BFE -
-1C06 code0A
-1C0D code0B_inside_box
+1C06 icmd0A
+1C0D icmd0B_which_box
 1C14 +
 1C31 @check_is_here
 1C35 @not_here
@@ -970,14 +1013,14 @@
 1C7E @check_level
 1C94 @return_item_num
 1C9A +
-1CAF code0C_which_food
+1CAF icmd0C_which_food
 1CC3 find_which_multiple
 1CE1 @found
-1CE8 code0D_which_torch
-1CF6 code0E_which_torch
+1CE8 icmd0D_which_torch
+1CF6 icmd0E_which_torch
 1D02 set_action
-1D0D code_default
-1D0E code0A_impl
+1D0D icmd_default
+1D0E icmd0A_impl
 1F13 string_elevator
 2262 string_square
 24E2 draw_keyhole_0
@@ -989,7 +1032,9 @@
 25FB @found_start
 2603 @print_char
 260C +
-2640 exec_cmd
+2617 wait_brief
+261B -
+2640 player_cmd
 2651 +
 265A +
 2669 cmd_raise
@@ -1082,9 +1127,33 @@
 2B76 +
 2B7A cmd_open
 2B81 +
-2C8E is_facing_door
+2B8A +
+2B91 @open_box
+2BB4 +
+2BBF @check_contents
+2BCF +
+2BD1 @print_item_name
+2BEA +
+2BF3 +
+2C13 @done
+2C1A @push_mode_snake
+2C26 @open_door
+2C30 +
+2C37 +
+2C69 @no_key
+2C71 @correct_lock
+2C83 @push_mode_elevator
+2C8E which_door
+2CA2 -
+2CBB @find
+2CC9 +
+2CD3 @next
+2CD9 +
+2CDF +
 2CFA cmd_press
 2D01 +
+2D0A +
+2D1E +
 2D2A @display
 2D3D @teleport
 2D4B @find_location
@@ -1098,6 +1167,11 @@
 2E02 teleport_table
 2E2A cmd_take
 2E31 +
+2EB5 +
+2EC1 @done
+2EC2 on_reveal_calc
+2ED3 +
+2EDB @done
 2F98 cmd_attack
 2FB9 @print
 2FBD cmd_paint
@@ -1123,7 +1197,10 @@
 3238 cmd_hint
 324F +
 3258 @calc_hint
+3267 swap_saved_A
 3274 swap_saved_vars
+32BD dec_item_ptr
+32C8 +
 32CA text_hat
 3319 look_hat
 332F throw_react
@@ -1264,6 +1341,7 @@
 61BC (gs_item_locs+1)
 61DB gs_item_snake
 61DD gs_item_food_torch
+61F7 saved_A
 61F8 saved_zp0E
 61F9 saved_zp0F
 61FA saved_zp10
@@ -1275,7 +1353,7 @@
 6202 signature+2
 6203 signature+3
 6204 signature+4
-6292 game_state_end
+6292 game_save_end
 6294 font
 6694 vocab_table
 6695 verb_table
@@ -1330,6 +1408,7 @@ C054 hw_PAGE1
 C055 hw_PAGE2
 C056 hw_LORES
 C057 hw_HIRES
+FDED rom_COUT
 FECD rom_WRITE_TAPE
 FEFD rom_READ_TAPE
 FF69 rom_MONITOR
@@ -1433,6 +1512,7 @@ FF69 rom_MONITOR
 2FC1
 303F
 3182
+3267
 3324
 33E0
 3427
