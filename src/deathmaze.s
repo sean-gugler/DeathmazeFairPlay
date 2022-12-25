@@ -3103,18 +3103,18 @@ next_boxed_item:
 	rts
 
 print_known_item:
-	lda #$15
+	lda #item_food_end
 	sec
-	sbc a1A
-	cmp #items_unique
+	sbc zp1A_count_loop
+	cmp #item_food_begin
 	bmi :+  ;GUG: bcc preferred
 	lda #noun_food
-:	sta a13
+:	sta zp13_temp
 	lda zp_col
 	pha
 	lda zp_row
 	pha
-	lda a13
+	lda zp13_temp
 	jsr print_noun
 	pla
 	sta zp_row
@@ -5390,8 +5390,9 @@ cmd_open:
 	lda zp11_item
 	cmp #noun_snake
 	beq @push_mode_snake
+;	cmp #nouns_unique_end - 1   ;same as #noun_snake
 	bmi @print_item_name  ;GUG: bcc preferred
-	cmp #item_food_begin
+	cmp #item_torch_begin
 	bmi :+  ;GUG: bcc preferred
 	lda #noun_torch
 	bne @print_item_name
@@ -8366,7 +8367,8 @@ verb_table:
 noun_table:
 	.include "string_noun_defs.inc"
 
-vocab_end = verbs_end + nouns_end
+; 1-based indexing.
+vocab_end = 1 + (verbs_end - 1) + (nouns_end - 1)
 
 junk_string:
 	.byte $ff,$ff,$00,$00,$ff,$ff,$00,$00
