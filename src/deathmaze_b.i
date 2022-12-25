@@ -26,6 +26,8 @@
 
 ;$zp13_raw_input = a13
 
+;$zp19_count = a19
+
 ;$zp1A_hint_mode = $1a
 ;$zp1A_move_action = $1a
 ;$zp1A_object = $1a
@@ -118,11 +120,17 @@ icmd_which_food = $0c
 icmd_which_torch_lit = $0d
 icmd_which_torch_unlit = $0e
 
+inventory_max = $08
+
 item_ball = $01
 item_flute = $05
+;item_food_begin - 1 = $11
 item_food_begin = $12
+;item_torch_begin - 1 = $14
 item_food_begin = $15
+item_food_end = $15
 item_torch_begin = $15
+item_torch_end = $18
 
 items_food = $03
 items_torches = $03

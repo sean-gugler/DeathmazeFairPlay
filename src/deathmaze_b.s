@@ -20,7 +20,7 @@ zp_0D = $0d
 zp0E_object = $0e
 zp0F_action = $0f
 zp10_noun = $10
-zp11_item = $11
+zp11_box_item = $11
 a13 = $13
 a14 = $14
 line_count = $15
@@ -675,7 +675,7 @@ memcpy:
 	inc zp0F_action
 :	inc zp10_noun
 	bne :+
-	inc zp11_item
+	inc zp11_box_item
 :	dec a19
 	beq @check_done
 	lda a19
@@ -731,7 +731,7 @@ get_player_input:
 	lda #<text_buffer1
 	sta zp0E_object
 	lda #>textbuf_prev_input
-	sta zp11_item
+	sta zp11_box_item
 	lda #<textbuf_prev_input
 	sta zp10_noun
 	lda #$00
@@ -1079,7 +1079,7 @@ parse_input:
 	lda #char_ClearLine
 	jsr char_out
 	ldy #$00
-	sty zp11_item
+	sty zp11_box_item
 	lda (p19),y
 	and #char_mask_upper
 	bne @echo
@@ -1089,8 +1089,8 @@ parse_input:
 	beq @verb_word_end
 @echo:
 	jsr char_out
-	inc zp11_item
-	ldy zp11_item
+	inc zp11_box_item
+	ldy zp11_box_item
 	bne @next_verb_letter
 @verb_word_end:
 	lda #$56     ;what?
@@ -1138,7 +1138,7 @@ get_vocab:
 	bne :+
 	inc zp0F_action
 :	lda #$04
-	sta zp11_item
+	sta zp11_box_item
 @compare_char:
 	lda (zp0E_object),y
 	and #char_mask_upper
@@ -1153,7 +1153,7 @@ get_vocab:
 :	inc zp0E_object
 	bne :+
 	inc zp0F_action
-:	dec zp11_item
+:	dec zp11_box_item
 	bne @compare_char
 @done:
 	pla
@@ -1333,7 +1333,7 @@ b10E1=*+$02
 	lda #$06
 	cmp zp1A_item_place
 	beq b110D
-	dec zp11_item
+	dec zp11_box_item
 	bne b10E1
 	pla
 	sta zp0E_object
@@ -2321,7 +2321,7 @@ j1802:
 b180A:
 	sta zp1A_item_place
 	stx a19
-	stx zp11_item
+	stx zp11_box_item
 	stx a6199
 	stx a619A
 	ldx gs_facing
@@ -2376,15 +2376,15 @@ b185C:
 	inc a6199
 b1869:
 	jsr s1A10
-	cmp zp11_item
+	cmp zp11_box_item
 	beq b189A
 	jsr s1A10
 	lda #$04
-	cmp zp11_item
+	cmp zp11_box_item
 	beq b1897
 	asl a6199
 	asl a619A
-	inc zp11_item
+	inc zp11_box_item
 	lda zp1A_item_place
 	cmp #$01
 	beq b188E
@@ -2459,16 +2459,16 @@ j18EE:
 	beq b18F5
 	inc a6199
 b18F5:
-	lda zp11_item
+	lda zp11_box_item
 	cmp #$04
 b18F9:
 	beq b1897
 	jsr s1A10
-	cmp zp11_item
+	cmp zp11_box_item
 b1900:
 	beq b189A
 	jsr s1A10
-	inc zp11_item
+	inc zp11_box_item
 	asl a6199
 	asl a619A
 	jmp b18D0
@@ -2522,14 +2522,14 @@ b195D:
 	inc zp0A_text_ptr
 	inc zp0A_text_ptr
 	jsr s1A10
-	cmp zp11_item
+	cmp zp11_box_item
 	beq b1900
 	jsr s1A10
 	lda #$04
-	cmp zp11_item
+	cmp zp11_box_item
 b196F:
 	beq b18F9
-	inc zp11_item
+	inc zp11_box_item
 	asl a6199
 	asl a619A
 	jmp b193B
@@ -2595,17 +2595,17 @@ b19D2:
 	inc a619A
 b19DF:
 	lda #$04
-	cmp zp11_item
+	cmp zp11_box_item
 	beq b196F
 	jsr s1A10
-	cmp zp11_item
+	cmp zp11_box_item
 	bne b19EF
 	jmp b189A
 
 b19EF:
 	jsr s1A10
 	asl a6199
-	inc zp11_item
+	inc zp11_box_item
 	asl a619A
 	lda zp1A_item_place
 	cmp #$40
@@ -2895,7 +2895,7 @@ icmd09_new_game:
 	lda #<gs_facing
 	sta zp10_noun
 	lda #>gs_facing
-	sta zp11_item
+	sta zp11_box_item
 :	lda (zp0E_object),y
 	sta (zp10_noun),y
 	dey
@@ -2919,7 +2919,7 @@ icmd0B_which_box:
 	asl
 	clc
 	adc gs_player_y
-	sta zp11_item
+	sta zp11_box_item
 	lda #>(gs_item_locs+1)
 	sta zp0F_action
 	lda #<(gs_item_locs+1)
@@ -2927,7 +2927,7 @@ icmd0B_which_box:
 	lda #items_unique + items_food + items_torches
 	sta zp1A_item_place
 	ldy #$00
-	lda zp11_item
+	lda zp11_box_item
 @check_is_here:
 	cmp (zp0E_object),y
 	beq @check_level
@@ -2990,7 +2990,7 @@ icmd0B_which_box:
 	cmp gs_level
 	beq @return_item_num
 	iny
-	lda zp11_item
+	lda zp11_box_item
 	jmp @not_here
 
 @return_item_num:
@@ -3016,7 +3016,7 @@ icmd0C_which_food:
 	dec zp1A_item_place
 	bne icmd0D_which_torch
 	lda #items_food
-	sta zp11_item
+	sta zp11_box_item
 	lda #carried_known
 	sta zp10_noun
 	lda #icmd_where
@@ -3037,7 +3037,7 @@ find_which_multiple:
 	pla
 	sta zp0F_action
 	inc zp0E_object
-	dec zp11_item
+	dec zp11_box_item
 	bne find_which_multiple
 	lda #$00
 	rts
@@ -3053,7 +3053,7 @@ icmd0D_which_torch:
 	dec zp1A_item_place
 	bne icmd0E_which_torch
 	lda #items_torches
-	sta zp11_item
+	sta zp11_box_item
 	lda #carried_active
 	sta zp10_noun
 	bne set_action
@@ -3061,7 +3061,7 @@ icmd0E_which_torch:
 	dec zp1A_item_place
 	bne icmd_default
 	lda #items_torches
-	sta zp11_item
+	sta zp11_box_item
 	lda #carried_known
 	sta zp10_noun
 set_action:
@@ -3089,7 +3089,7 @@ icmd0A_impl:
 b1D21:
 	sta zp1A_item_place
 	lda gs_player_x
-	sta zp11_item
+	sta zp11_box_item
 	lda gs_player_y
 	sta zp10_noun
 	lda gs_level
@@ -3132,7 +3132,7 @@ b1D63:
 
 s1D69:
 	pha
-	lda zp11_item
+	lda zp11_box_item
 	pha
 	lda zp10_noun
 	pha
@@ -3140,7 +3140,7 @@ s1D69:
 	pha
 	lda zp0E_object
 	pha
-	lda zp11_item
+	lda zp11_box_item
 	asl
 	asl
 	asl
@@ -3153,7 +3153,7 @@ s1D69:
 	lda #<(gs_item_locs+1)
 	sta zp0E_object
 	lda #$17
-	sta zp11_item
+	sta zp11_box_item
 	pla
 	ldy #$00
 b1D8F:
@@ -3162,7 +3162,7 @@ b1D8F:
 j1D93:
 	iny
 	iny
-	dec zp11_item
+	dec zp11_box_item
 	bne b1D8F
 	pla
 	sta zp0E_object
@@ -3172,7 +3172,7 @@ b1D9F:
 	pla
 	sta zp10_noun
 	pla
-	sta zp11_item
+	sta zp11_box_item
 	pla
 	rts
 
@@ -3207,7 +3207,7 @@ s1DC7:
 	rts
 
 b1DD6:
-	dec zp11_item
+	dec zp11_box_item
 	rts
 
 b1DD9:
@@ -3215,7 +3215,7 @@ b1DD9:
 	rts
 
 b1DDC:
-	inc zp11_item
+	inc zp11_box_item
 	rts
 
 s1DDF:
@@ -3226,7 +3226,7 @@ s1DDF:
 	asl
 	clc
 	adc gs_level
-	sta zp11_item
+	sta zp11_box_item
 	lda gs_player_x
 	asl
 	asl
@@ -3242,7 +3242,7 @@ s1DDF:
 	lda #$26
 	sta a19
 	ldy #$00
-	lda zp11_item
+	lda zp11_box_item
 b1E09:
 	cmp (zp0E_object),y
 	beq b1E1C
@@ -3263,16 +3263,16 @@ b1E1C:
 	iny
 	cmp (zp0E_object),y
 	beq b1E27
-	lda zp11_item
+	lda zp11_box_item
 	bne b1E0E
 b1E27:
 	iny
 	lda (zp0E_object),y
-	sta zp11_item
+	sta zp11_box_item
 	iny
 	lda (zp0E_object),y
 	sta zp0E_object
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0F_action
 	rts
 
@@ -4207,7 +4207,7 @@ j254C:
 	lda #$0b
 	sta a19
 	lda #>p0402
-	sta zp11_item
+	sta zp11_box_item
 	lda #<p0402
 	sta zp10_noun
 b2585:
@@ -4252,7 +4252,7 @@ b2585:
 	inc zp10_noun
 	ldy zp10_noun
 	jsr s1777
-	dec zp11_item
+	dec zp11_box_item
 	bne b2585
 	rts
 
@@ -4317,7 +4317,7 @@ player_cmd:
 	jmp nonsense
 
 :	jsr noun_to_item
-	sta zp11_item
+	sta zp11_box_item
 	lda gd_parsed_object
 	sta zp0E_object
 	lda gd_parsed_action
@@ -4403,17 +4403,17 @@ cmd_break:
 	sta a13
 	lda zp10_noun
 	pha
-	lda zp11_item
+	lda zp11_box_item
 	pha
 	lda a13
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
 :	pla
-	sta zp11_item
+	sta zp11_box_item
 	pla
 	sta zp10_noun
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 @broken:
 	jsr item_cmd
@@ -4465,7 +4465,7 @@ cmd_burn:
 	bmi @burned
 	cmp #noun_torch
 	beq make_cmd_light
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 @burned:
 	jsr item_cmd
@@ -4504,7 +4504,7 @@ cmd_eat:
 	cmp #noun_torch
 	beq @torch
 @torch_return:
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 @eaten:
 	jsr item_cmd
@@ -4525,17 +4525,17 @@ cmd_eat:
 @torch:
 	lda zp10_noun
 	pha
-	lda zp11_item
+	lda zp11_box_item
 	pha
 	jsr lose_one_torch
 	pla
-	sta zp11_item
+	sta zp11_box_item
 	pla
 	sta zp10_noun
 	jmp @torch_return
 
 @food:
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 	jsr item_cmd
 	lda gs_food_time_hi
@@ -4597,7 +4597,7 @@ cmd_throw:
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
-:	lda zp11_item
+:	lda zp11_box_item
 	sta zp0E_object
 @thrown:
 	jsr item_cmd
@@ -4646,7 +4646,7 @@ cmd_throw:
 	jmp print_to_line2
 
 @throw_food:
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 	jsr item_cmd
 	lda #icmd_draw_inv
@@ -4746,7 +4746,7 @@ cmd_drop:
 @multiples:
 	cmp #noun_torch
 	beq @torch_unlit
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 	jmp @dropped
 
@@ -4789,7 +4789,7 @@ cmd_light:
 	dec zp0F_action
 	bne cmd_play
 
-	sta zp11_item
+	sta zp11_box_item
 	lda zp0E_object
 	cmp #noun_torch
 	beq :+
@@ -4903,10 +4903,10 @@ play_flute:
 	lda #glyph_L_solid
 	jsr print_char
 	lda #$30
-	sta zp11_item
+	sta zp11_box_item
 :	dec zp10_noun
 	bne :-
-	dec zp11_item
+	dec zp11_box_item
 	bne :-
 	dec zp_col
 	dec zp_col
@@ -5036,11 +5036,11 @@ cmd_open:
 	lda #icmd_which_box
 	sta zp0F_action
 	jsr item_cmd
-	sta zp11_item
+	sta zp11_box_item
 	beq look_not_here
 	lda zp10_noun
 	pha
-	lda zp11_item
+	lda zp11_box_item
 	pha
 	sta zp0E_object
 	lda #icmd_where
@@ -5051,13 +5051,13 @@ cmd_open:
 	bcs :+
 	jmp @check_contents
 
-:	lda zp11_item
+:	lda zp11_box_item
 	sta zp0E_object
 	lda #icmd_set_carried_known
 	sta zp0F_action
 	jsr item_cmd
 @check_contents:
-	lda zp11_item
+	lda zp11_box_item
 	cmp #noun_snake
 	beq @push_mode_snake
 	bmi @print_item_name
@@ -5083,7 +5083,7 @@ cmd_open:
 	bne :+
 	jsr wait_long
 :	pla
-	sta zp11_item
+	sta zp11_box_item
 	pla
 	sta zp10_noun
 	lda a13
@@ -5092,7 +5092,7 @@ cmd_open:
 	lda #icmd_where
 	sta zp0F_action
 j2C04=*+$01
-	lda zp11_item
+	lda zp11_box_item
 	sta zp0E_object
 	jsr item_cmd
 	lda #carried_known
@@ -5179,7 +5179,7 @@ which_door:
 	bne :-
 	clc
 	adc gs_player_y
-	sta zp11_item
+	sta zp11_box_item
 	lda a19
 	clc
 	adc gs_facing
@@ -5190,7 +5190,7 @@ which_door:
 	ldy #$00
 	cmp (zp0E_object),y
 	bne @next
-	lda zp11_item
+	lda zp11_box_item
 	inc zp0E_object
 	bne :+
 	inc zp0F_action
@@ -5365,70 +5365,66 @@ cmd_take:
 	stx zp0F_action
 	jsr item_cmd
 	tax
-	bne b2E3E
-	jmp j2F30
+	bne :+
+	jmp @cannot
 
-b2E3E:
-	sta zp11_item
+:	sta zp11_box_item
 	sta zp0E_object
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
 	lda gd_parsed_object
-	cmp #$14
-	bne b2E53
-	jmp j2EDE
+	cmp #noun_box
+	bne :+
+	jmp @take_box
 
-b2E53:
-	cmp #$12
-	bmi b2E5A
-	jmp j2EF5
+:	cmp #nouns_unique_end
+	bmi @unique_item
+	jmp @multiple
 
-b2E5A:
-	cmp zp11_item
-	bne b2E6A
-	ldx zp11_item
+@unique_item:
+	cmp zp11_box_item
+	bne @open_if_carried
+	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
-	cmp #$06
-	bne b2E9A
-	lda zp11_item
-b2E6A:
+	cmp #carried_boxed
+	bne @take_if_space ;at feet
+	lda zp11_box_item
+@open_if_carried:
 	sta zp0E_object
 	ldx #icmd_where
 	stx zp0F_action
 j2E72=*+$02
 	jsr item_cmd
-	lda #$06
+	lda #carried_boxed
 	cmp zp1A_item_place
-	beq b2E7C
-	jmp j2F30
+	beq :+
+	jmp @cannot
 
-b2E7C:
-	ldx gd_parsed_object
+:	ldx gd_parsed_object
 	stx zp0E_object
-	jmp j2E9D
+	jmp @take
 
-s2E84:
+@ensure_inv_space:
 	jsr swap_saved_vars
 	ldx #icmd_count_inv
 	stx zp0F_action
 	jsr item_cmd
-	lda a19
-	cmp #$08
-	bcc b2E97
-	jmp j2F35
+	lda zp19_count
+	cmp #inventory_max
+	bcc :+
+	jmp @inventory_full
 
-b2E97:
-	jmp swap_saved_vars
+:	jmp swap_saved_vars
 
-b2E9A:
-	jsr s2E84
-j2E9D:
+@take_if_space:
+	jsr @ensure_inv_space
+@take:
 	ldx #icmd_set_carried_known
 	stx zp0F_action
 	jsr item_cmd
-j2EA4:
+@react_taken:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
@@ -5459,141 +5455,141 @@ on_reveal_calc:
 	lda #noun_calculator
 	rts
 
-j2EDE:
+@take_box:
 	lda zp1A_item_place
-	cmp #$06
-	bpl j2F30
-	jsr s2E84
-	ldx zp11_item
+	cmp #carried_begin
+	bpl @cannot
+	jsr @ensure_inv_space
+	ldx zp11_box_item
 	stx zp0E_object
 	ldx #icmd_set_carried_boxed
 	stx zp0F_action
 	jsr item_cmd
-	jmp j2EA4
+	jmp @react_taken
 
-j2EF5:
-	cmp #$12
-	beq b2F16
-	lda zp11_item
+@multiple:
+	cmp #noun_food
+	beq @food
+
+	lda zp11_box_item
 j2EFB:
-	cmp #$18
-	bpl b2F42
-	cmp #$15
-	bmi b2F42
-	ldx zp11_item
+	cmp #item_torch_end
+	bpl @find_boxed_torch
+	cmp #item_torch_begin
+	bmi @find_boxed_torch
+	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
-	cmp #$06
-	beq j2E9D
-	jsr s2E84
+	cmp #carried_boxed
+	beq @take    ;BUG: get box > get torch: does not increment unlit count if it's the only box
+	jsr @ensure_inv_space
 	inc gs_torches_unlit
-	jmp j2E9D
+	jmp @take
 
-b2F16:
-	lda zp11_item
-	cmp #$15
-	bpl b2F48
-	cmp #$12
-	bmi b2F48
-	ldx zp11_item
+@food:
+	lda zp11_box_item
+	cmp #item_food_end
+	bpl @find_boxed_food
+	cmp #item_food_begin
+	bmi @find_boxed_food
+	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
-	cmp #$06
-	bne b2F2D
-	jmp j2E9D
+	cmp #carried_boxed
+	bne :+
+	jmp @take
 
-b2F2D:
-	jmp b2E9A
+:	jmp @take_if_space
 
-j2F30:
+@cannot:
 	lda #$9a     ;It is currently impossible.
-b2F32:
+@print_rts:
 	jmp print_to_line2
 
-j2F35:
+@inventory_full:
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
 	jsr swap_saved_vars
-	lda #$99
-	bne b2F32
-b2F42:
-	ldx #$14
+	lda #$99     ;Carrying the limit.
+	bne @print_rts
+
+@find_boxed_torch:
+	ldx #item_torch_begin - 1
 	stx zp0E_object
-	bne b2F4C
-b2F48:
-	ldx #$11
+	bne @begin_search
+@find_boxed_food:
+	ldx #item_food_begin - 1
 	stx zp0E_object
-b2F4C:
+@begin_search:
 	lda zp0F_action
 	pha
 	lda zp0E_object
 	pha
-	ldx #$03
-	stx zp11_item
-b2F56:
+	ldx #items_food
+
+; .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
+	stx zp11_box_item ;count
+@next:
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
 	inc zp0E_object
-	bne b2F62
+	bne :+
 	inc zp0F_action
-b2F62:
-	lda zp0F_action
+:	lda zp0F_action
 	pha
 	lda zp0E_object
 	pha
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
-	lda #$06
+	lda #carried_boxed
 	cmp zp1A_item_place
-	beq b2F82
-	dec zp11_item
-	bne b2F56
+	beq @found
+	dec zp11_box_item
+	bne @next
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
-	jmp j2F30
+	jmp @cannot
 
-b2F82:
+@found:
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
 	lda gd_parsed_object
-	cmp #$13
-	beq b2F92
-	jmp j2E9D
+	cmp #noun_torch
+	beq :+
+	jmp @take
 
-b2F92:
-	inc gs_torches_unlit
-	jmp j2E9D
+:	inc gs_torches_unlit
+	jmp @take
 
 cmd_attack:
 	dec zp0F_action
 	bne cmd_paint
+
 	lda zp0E_object
-	cmp #$11
-	beq b2FB7
-	cmp #$15
-	bpl b2FA9
+	cmp #noun_snake
+	beq @not_here
+	cmp #nouns_item_end
+	bpl :+
 	jmp nonsense
 
-b2FA9:
-	cmp #$1a
-	bmi b2FB0
+:	cmp #noun_zero
+	bmi :+
 	jmp nonsense
 
-b2FB0:
-	cmp #$17
-	bne b2FB7
+:	cmp #noun_door
+	bne @not_here
 	jmp nonsense
 
-b2FB7:
+@not_here:
 	lda #$90     ;I don't see that here.
 @print:
 	jsr print_to_line2
@@ -5614,6 +5610,7 @@ cmd_paint:
 
 :	lda #$6f     ;With what? Toenail polish?
 	bne @print
+
 cmd_grendel:
 	dec zp0F_action
 	bne cmd_say
@@ -5993,10 +5990,10 @@ swap_saved_vars:
 	sta zp10_noun
 	txa
 	sta saved_zp10
-	lda zp11_item
+	lda zp11_box_item
 	tax
 	lda saved_zp11
-	sta zp11_item
+	sta zp11_box_item
 	txa
 	sta saved_zp11
 	lda a19
@@ -7564,7 +7561,7 @@ relocate_data:
 	ldx #$40
 	stx zp0F_action
 	ldx #$60
-	stx zp11_item
+	stx zp11_box_item
 	ldx #<p1FFF
 	stx a19
 	ldx #>p1FFF
