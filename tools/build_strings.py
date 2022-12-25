@@ -78,8 +78,8 @@ def declare_message(prefix, T):
         yield i, f'\t{prefix}_{line} = ${i:02x}\n'
 
 ident_illegal = str.maketrans(
-    r' :.,*!?"()\<>' + "'" ,
-    r"______________" )
+    r' :.,*!?"-()\<>' + "'" ,
+    r"_______________" )
 
 
 def main(argv):

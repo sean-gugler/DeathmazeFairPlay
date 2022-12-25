@@ -420,7 +420,7 @@ special_return:
 	rts
 
 at_calculator:
-	ldx #special_calc_puzzle
+	ldx #special_mode_calc_puzzle
 	stx gs_special_mode
 	rts
 
@@ -455,11 +455,11 @@ check_dog_roaming:
 	beq special_return
 	lda gs_special_mode
 	bne :+
-	ldx #special_dog1
+	ldx #special_mode_dog1
 	stx gs_special_mode
 	rts
 
-:	ldx #special_dog1
+:	ldx #special_mode_dog1
 	stx gs_mode_stack1
 	rts
 
@@ -486,7 +486,7 @@ at_guard_dog:
 	lda gs_dog2_alive
 	and #$01
 	beq @return
-	ldx #special_dog2
+	ldx #special_mode_dog2
 	stx gs_special_mode
 @return:
 	rts
@@ -508,7 +508,7 @@ check_mother:
 	beq @return
 	lda gs_special_mode
 	bne :+
-	ldx #special_mother
+	ldx #special_mode_mother
 	stx gs_special_mode
 	rts
 
@@ -524,7 +524,7 @@ check_bat:
 	and #$02
 	beq check_mother
 	jsr push_special_mode2
-	ldx #special_bat
+	ldx #special_mode_bat
 	stx gs_special_mode
 	rts
 
@@ -537,7 +537,7 @@ check_monster:
 :	lda gs_monster_lurks
 	and #$02
 	beq done_timer
-	ldx #special_monster
+	ldx #special_mode_monster
 	stx gs_special_mode
 done_timer:
 	rts
@@ -564,7 +564,7 @@ complete_turn:
 	ldx #$00
 	stx gs_room_lit
 	jsr push_special_mode2
-	ldx #special_dark
+	ldx #special_mode_dark
 	stx gs_special_mode
 @dec_food:
 	dec gs_food_time_lo
@@ -4374,7 +4374,7 @@ cmd_raise:
 	cmp #$05
 	bne :+
 	lda gs_special_mode
-	cmp #special_mother
+	cmp #special_mode_mother
 	bne :+
 	lda #noun_horn
 	sta zp0E_object
@@ -4436,7 +4436,7 @@ lose_one_torch:
 	sta gs_torch_time
 	sta gs_room_lit
 	jsr push_special_mode
-	lda #special_dark
+	lda #special_mode_dark
 	sta gs_special_mode
 @done:
 	rts
@@ -4567,7 +4567,7 @@ lose_ring:
 	sta gs_room_lit
 	lda a61AC
 	beq @done
-	lda #special_dark
+	lda #special_mode_dark
 	sta gs_special_mode
 	jsr clear_maze_window
 @done:
@@ -4585,7 +4585,7 @@ cmd_throw:
 	jsr lose_ring
 :	cmp #noun_frisbee
 	bne :+
-	jmp @throw_frisbee
+	jmp throw_frisbee
 
 :	cmp #noun_wool
 	beq @throw_wool
@@ -4601,7 +4601,7 @@ cmd_throw:
 	sta zp0E_object
 @thrown:
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	jsr throw_react
 	nop
 	nop
@@ -4622,14 +4622,14 @@ cmd_throw:
 	cmp #turns_until_trippable
 	bcc @thrown
 	jsr push_special_mode
-	lda #special_tripped
+	lda #special_mode_tripped
 	sta gs_special_mode
 	lda #noun_wool
 	sta zp0E_object
 	lda #icmd_destroy1
 	sta zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	lda #$5e     ;and the monster grabs it,
 	jsr print_to_line1
 	lda #$5f     ;gets tangled, and topples over!
@@ -4639,7 +4639,7 @@ cmd_throw:
 	rts
 
 @throw_yoyo:
-	jsr @print_thrown
+	jsr print_thrown
 	lda #$6b     ;returns and hits you
 	jsr print_to_line1
 	lda #$6c     ;in the eye!
@@ -4655,7 +4655,7 @@ cmd_throw:
 	lda #$81     ;Food fight!
 	jmp print_to_line2
 
-@print_thrown:
+print_thrown:
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
@@ -4681,7 +4681,7 @@ cmd_throw:
 	jsr wait_long
 	jmp clear_status_lines
 
-@throw_frisbee:
+throw_frisbee:
 	lda gs_monster_lurks
 	and #$02
 	bne :+
@@ -4692,7 +4692,7 @@ cmd_throw:
 	lda #icmd_destroy1
 	sta zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	jsr clear_status_lines
 	lda #$3f     ;The monster grabs the frisbee, throws
 	jsr print_to_line1
@@ -4768,7 +4768,7 @@ cmd_drop:
 	lda #$00
 	sta gs_room_lit
 	sta gs_torches_lit
-	lda #special_dark
+	lda #special_mode_dark
 	sta gs_special_mode
 	jsr clear_maze_window
 	jmp @dropped
@@ -4919,7 +4919,7 @@ play_flute:
 	sta zp0E_object
 	jsr item_cmd
 	jsr push_special_mode
-	lda #special_climb
+	lda #special_mode_climb
 	sta gs_special_mode
 	lda #$00
 	sta gs_snake_used
@@ -5106,7 +5106,7 @@ j2C04=*+$01
 
 @push_mode_snake:
 	jsr push_special_mode
-	ldx #special_snake
+	ldx #special_mode_snake
 	stx gs_special_mode
 	lda #noun_snake
 	bne @print_item_name
@@ -5149,7 +5149,7 @@ j2C04=*+$01
 	jmp print_to_line2
 
 @correct_lock:
-	ldx #special_bomb
+	ldx #special_mode_bomb
 	stx gs_special_mode
 	jsr clear_status_lines
 	lda #$19     ;You unlock the door...
@@ -5159,7 +5159,7 @@ j2C04=*+$01
 
 @push_mode_elevator:
 	jsr push_special_mode
-	ldx #special_elevator
+	ldx #special_mode_elevator
 	stx gs_special_mode
 	jmp j325D
 
@@ -5189,23 +5189,24 @@ which_door:
 @find:
 	ldy #$00
 	cmp (zp0E_object),y
-	bne @next
+	bne @next2
 	lda zp11_box_item
 	inc zp0E_object
 	bne :+
 	inc zp0F_action
 :	cmp (zp0E_object),y
-	bne :+
+	bne @next1
 	lda #$0a
 	sec
 	sbc zp1A_item_place
 	rts
 
-@next:
+@next2:
 	inc zp0E_object
-	bne :+
+	bne @next1
 	inc zp0F_action
-:	inc zp0E_object
+@next1:
+	inc zp0E_object
 	bne :+
 	inc zp0F_action
 :	lda a19
@@ -5250,7 +5251,7 @@ cmd_press:
 	jsr char_out
 	lda gd_parsed_object
 	clc
-	adc #''0' - noun_zero
+	adc #'0' - noun_zero
 	jmp char_out
 
 @teleport:
@@ -5324,7 +5325,7 @@ cmd_press:
 	stx zp0E_object
 	ldx #icmd_destroy2
 	stx zp0F_action
-	ldx #special_dark
+	ldx #special_mode_dark
 	stx gs_special_mode
 	jsr item_cmd
 	jsr clear_maze_window
@@ -5435,14 +5436,14 @@ j2E72=*+$02
 :	cmp #noun_snake
 	bne @done
 	jsr push_special_mode
-	ldx #special_snake
+	ldx #special_mode_snake
 	stx gs_special_mode
 @done:
 	rts
 
 on_reveal_calc:
 	lda gs_special_mode
-	cmp #special_calc_puzzle
+	cmp #special_mode_calc_puzzle
 	bne @done
 	lda gd_parsed_action
 	cmp #verb_take
@@ -5937,7 +5938,7 @@ b3219:
 
 cmd_hint:
 	lda gs_special_mode
-	cmp #special_calc_puzzle
+	cmp #special_mode_calc_puzzle
 	beq @calc_hint
 	lda gs_next_hint
 	beq :+
@@ -6329,7 +6330,7 @@ special_dog:
 	jsr item_cmd
 	lda #$08
 	cmp zp1A_item_place
-	beq b3585
+	beq @with_dagger
 	ldx #noun_sword
 	stx zp0E_object
 	ldx #icmd_where
@@ -6341,12 +6342,12 @@ special_dog:
 	jsr clear_status_lines
 	lda #$97     ;and it vanishes!
 	jsr print_to_line2
-j357F:
+@killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
 	rts
 
-b3585:
+@with_dagger:
 	ldx #icmd_destroy1
 	stx zp0F_action
 	ldx #noun_dagger
@@ -6357,7 +6358,7 @@ b3585:
 	jsr item_cmd
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
-	jmp j357F
+	jmp @killed
 
 @throw:
 	lda zp1A_item_place
@@ -6376,7 +6377,7 @@ b3585:
 	ldx #icmd_destroy1
 	stx zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	lda #$5c     ;and is eaten by
 	jsr print_to_line1
 	lda #$5d     ;the monster!

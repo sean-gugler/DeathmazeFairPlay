@@ -5,7 +5,7 @@
 	verb_eat = $05
 	verb_throw = $06
 	verb_climb = $07
-	verb_put = $08
+	verb_drop = $08
 	verb_fill = $09
 	verb_light = $0a
 	verb_play = $0b
@@ -13,10 +13,10 @@
 	verb_wear = $0d
 	verb_look = $0e
 	verb_rub = $0f
-	verb_unlock = $10
+	verb_open = $10
 	verb_press = $11
 	verb_take = $12
-	verb_hack = $13
+	verb_attack = $13
 	verb_paint = $14
 
 	verb_intransitive = $14

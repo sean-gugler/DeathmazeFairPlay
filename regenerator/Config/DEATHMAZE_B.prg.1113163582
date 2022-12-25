@@ -78,6 +78,10 @@
 2C26
 2CFA
 2E2A
+2EF9
+2F42
+2F9C
+2FD9
 3197
 3805
 7CC7
@@ -94,6 +98,7 @@
 1C6D Last, check for carrying boxed snake
 2624 junk
 2632 junk
+2F54 .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 7D8F 1-based indexing via 'A'
 :SIDE COMMENTS
@@ -114,19 +119,19 @@
 0956 #verb_left
 095A #verb_uturn
 09D9 Splat!
-0A3D #special_calc_puzzle
+0A3D #special_mode_calc_puzzle
 0A55 Invisible guillotine
 0A66 #turns_until_dog1
-0A7B #special_dog1
-0A81 #special_dog1
-0AB6 #special_dog2
+0A7B #special_mode_dog1
+0A81 #special_mode_dog1
+0AB6 #special_mode_dog2
 0AC9 #turns_until_mother
 0AD5 #mother_flag_roaming
-0ADE #special_mother
-0AFA #special_bat
+0ADE #special_mode_mother
+0AFA #special_mode_bat
 0B03 #turns_until_monster
-0B13 #special_monster
-0B4A #special_dark
+0B13 #special_mode_monster
+0B4A #special_mode_dark
 0B67 Died of starvation!
 0B7F #food_low
 0B83 Stomach is growling
@@ -315,7 +320,7 @@
 26A7 shines light everywhere!
 26B1 #noun_flute
 26B5 #noun_horn
-26C3 #special_mother
+26C3 #special_mode_mother
 26C7 #noun_horn
 26CB #icmd_set_carried_active
 26D2 A deafening roar envelopes
@@ -327,7 +332,7 @@
 2713 You break the
 271E and it disappears!
 272E level 5 is lit by ring, not torches
-273D #special_dark
+273D #special_mode_dark
 2746 #icmd_which_torch_unlit
 274F #icmd_destroy1
 2761 #noun_ring
@@ -347,7 +352,7 @@
 27FC #<food_amount
 2800 #>food_amount
 2819 Digested
-282E #special_dark
+282E #special_mode_dark
 2842 #noun_ring
 2849 #noun_frisbee
 2850 #noun_wool
@@ -358,7 +363,7 @@
 287B and is eaten by
 2880 the monster!
 288F #turns_until_trippable
-2896 #special_tripped
+2896 #special_mode_tripped
 289B #noun_wool
 289F #icmd_destroy1
 28A9 and the monster grabs it,
@@ -388,7 +393,7 @@
 298B #noun_torch
 2996 #icmd_which_torch_unlit
 29A5 #icmd_which_torch_lit
-29BC #special_dark
+29BC #special_mode_dark
 29CD #noun_jar
 29D4 With what? Air?
 29E1 #noun_torch
@@ -418,7 +423,7 @@
 2AAB #glyph_L_solid
 2AC6 #icmd_set_carried_active
 2ACA #noun_snake
-2AD4 #special_climb
+2AD4 #special_mode_climb
 2AE5 #noun_staff
 2AEF Thunderbolts shoot out above you!
 2AF4 The staff thunders with uselss energy!
@@ -455,7 +460,7 @@
 2BFF #icmd_where
 2C0A #carried_known
 2C13 #icmd_draw_inv
-2C1D #special_snake
+2C1D #special_mode_snake
 2C22 #noun_snake
 2C3A #noun_key
 2C3E #icmd_where
@@ -464,24 +469,24 @@
 2C51 #door_lock_begin + door_correct
 2C5B You unlock the door...
 2C6C But you have no key.
-2C71 #special_bomb
+2C71 #special_mode_bomb
 2C79 You unlock the door...
 2C7E #door_lock_begin + door_correct
-2C86 #special_elevator
+2C86 #special_mode_elevator
 2D03 #noun_zero
 2D0A #icmd_where
 2D0E #noun_calculator
 2D17 #carried_known
 2D2A The calculator displays
 2D2F #' '
-2D38 #''0' - noun_zero
+2D38 #'0' - noun_zero
 2D41 #noun_zero-1
 2D95 #noun_two
 2DB3 #icmd_which_torch_lit
 2DBA #icmd_set_carried_known
 2DC3 #noun_calculator
 2DC7 #icmd_destroy2
-2DCB #special_dark
+2DCB #special_mode_dark
 2DD6 #icmd_draw_inv
 2DDD You have been teleported!
 2DE2 The calculator vanishes.
@@ -489,20 +494,47 @@
 2DF9 A draft blows your torch out.
 2E31 #icmd_which_box
 2E42 #icmd_where
+2E4C #noun_box
+2E53 #nouns_unique_end
+2E64 #carried_boxed
+2E66 at feet
 2E6C #icmd_where
+2E73 #carried_boxed
 2E87 #icmd_count_inv
+2E8E $zp19_count
+2E90 #inventory_max
 2E9D #icmd_set_carried_known
 2EA4 #icmd_draw_inv
 2EAE #noun_calculator
 2EB5 #noun_snake
-2EBC #special_snake
-2EC5 #special_calc_puzzle
+2EBC #special_mode_snake
+2EC5 #special_mode_calc_puzzle
 2ECC #verb_take
 2ED6 The calculator displays 317.
 2EDB #noun_calculator
+2EE0 #carried_begin
 2EEB #icmd_set_carried_boxed
+2EF5 #noun_food
+2EFB #item_torch_end
+2EFF #item_torch_begin
+2F09 #carried_boxed
+2F0B BUG: get box > get torch: does not increment unlit count if it's the only box
+2F18 #item_food_end
+2F1C #item_food_begin
+2F26 #carried_boxed
 2F30 It is currently impossible.
+2F3E Carrying the limit.
+2F42 #item_torch_begin - 1
+2F48 #item_food_begin - 1
+2F52 #items_food
+2F54 count
 2F68 #icmd_where
+2F6F #carried_boxed
+2F8B #noun_torch
+2F9E #noun_snake
+2FA2 #nouns_item_end
+2FA9 #noun_zero
+2FB0 #noun_door
 2FB7 I don't see that here.
 2FC1 #noun_brush
 2FC5 #icmd_where
@@ -528,7 +560,7 @@
 31CD #>game_save_begin
 31E6 Are you sure you want to quit?
 3231 #icmd_draw_inv
-323B #special_calc_puzzle
+323B #special_mode_calc_puzzle
 3244 Try examining things.
 324F Type instructions.
 3258 Invert and telephone.
@@ -767,7 +799,7 @@
 000E zp0E_object
 000F zp0F_action
 0010 zp10_noun
-0011 zp11_item
+0011 zp11_box_item
 0015 line_count
 0016 zp_counter
 0017 clock
@@ -1079,10 +1111,10 @@
 2885 @throw_wool
 28B9 @throw_yoyo
 28C6 @throw_food
-28D9 @print_thrown
+28D9 print_thrown
 28FC +
 2902 +
-2912 @throw_frisbee
+2912 throw_frisbee
 291C +
 293D cmd_climb
 2944 cmd_drop
@@ -1147,8 +1179,8 @@
 2CA2 -
 2CBB @find
 2CC9 +
-2CD3 @next
-2CD9 +
+2CD3 @next2
+2CD9 @next1
 2CDF +
 2CFA cmd_press
 2D01 +
@@ -1167,12 +1199,39 @@
 2E02 teleport_table
 2E2A cmd_take
 2E31 +
+2E3E +
+2E53 +
+2E5A @unique_item
+2E6A @open_if_carried
+2E7C +
+2E84 @ensure_inv_space
+2E97 +
+2E9A @take_if_space
+2E9D @take
+2EA4 @react_taken
 2EB5 +
 2EC1 @done
 2EC2 on_reveal_calc
 2ED3 +
 2EDB @done
+2EDE @take_box
+2EF5 @multiple
+2F16 @food
+2F2D +
+2F30 @cannot
+2F32 @print_rts
+2F35 @inventory_full
+2F42 @find_boxed_torch
+2F48 @find_boxed_food
+2F4C @begin_search
+2F56 @next
+2F62 +
+2F82 @found
+2F92 +
 2F98 cmd_attack
+2FA9 +
+2FB0 +
+2FB7 @not_here
 2FB9 @print
 2FBD cmd_paint
 2FD5 +
@@ -1238,6 +1297,8 @@
 3536 @dead
 3541 @look
 354F @attack
+357F @killed
+3585 @with_dagger
 359F @throw
 35EA special_monster
 35F0 +

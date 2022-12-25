@@ -15,7 +15,7 @@
 	text_diamond_ring_ = $0f
 	text_rotted_mutilated_sneaker_ = $10
 	text_magic_staff_ = $11
-	text_90_pound_two-handed_sword_ = $12
+	text_90_pound_two_handed_sword_ = $12
 	text_ball_of_blue_wool_ = $13
 	text_yoyo_ = $14
 	text_snake____ = $15
@@ -23,13 +23,14 @@
 	text_torch_ = $17
 	text_Inside_the_box_there_is_a = $18
 	text_You_unlock_the_door___ = $19
-door_lock_begin = $1a
+doormsg_lock_begin = $1a
 	text_and_the_wall_falls_on_you_ = $1a
 	text_and_the_key_begins_to_tick_ = $1b
 	text_and_a_20_000_volt_shock_kills_you_ = $1c
 	text_A_600_pound_gorilla_rips_your_face_off_ = $1d
 	text_Two_men_in_white_coats_take_you_away_ = $1e
-door_correct = $01
+doors_locked = $05
+door_correct = $02  ;1-based
 	text_Having_fun_ = $1f
 	text_The_snake_bites_you_and_you_die_ = $20
 	text_Thunderbolts_shoot_out_above_you_ = $21

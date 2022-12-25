@@ -5,11 +5,31 @@
 	.include "apple.i"
 	.include "dos.i"
 
+	.include "string_verb_decl.i"
+	.include "string_noun_decl.i"
+	.include "string_display_decl.i"
+	.include "string_intro_decl.i"
+
 ;	.feature string_escapes
 
 ; 8-bit variables
+zp0E_wait1 = $0e
+zp0F_wait2 = $0f
+zp10_wait3 = $10
+
+zp0E_count = $0e
+zp0E_item = $0e
+zp0E_object = $0e
+zp0F_action = $0f
+zp0F_index = $0f
+zp10_count_vocab = $10
 zp10_count_words = $10
 zp10_which_place = $10
+zp10_noun = $10
+zp11_action = $11
+zp11_item = $11
+zp11_box_item = $11
+zp11_count = $11
 zp11_count_chars = $11
 zp11_count_string = $11
 zp11_count_which = $11
@@ -19,16 +39,28 @@ zp13_char_input = $13
 zp13_level = $13
 zp13_temp = $13
 zp19_level_facing = $19
+zp19_pos_y = $19
+zp1A_pos_x = $1a
 zp1A_move_action = $1a
 zp1A_hint_mode = $1a
 zp1A_object = $1a
 zp1A_count_loop = $1a
+zp1A_cmds_to_check = $1a
+zp1A_facing = $1a
+
+zp19_item_position = $19
+zp1A_item_place = $1A
 
 ; 16-bit variables
 zp0E_count16 = $0e ;$0f
+zp0E_ptr = $0e ;$0f
+zp0E_src = $0e ;$0f
+zp10_dst = $10 ;$11
 zp13_row_ptr = $13 ;$14
 zp13_font_ptr = $13 ;$14
+zp19_input_ptr = $19 ;$1a
 zp19_delta16 = $19 ;$1a
+zp19_count = $19 ;$1a
 
 
 ; First byte in gs_item_locations is either
@@ -41,11 +73,43 @@ carried_begin = $06
 carried_unboxed = $07
 
 char_cursor = $00
+char_left = $08
 char_newline = $0a
+char_enter = $0d
+char_right = $15
+char_ESC = $1b
+char_esc = $1b
 char_ClearLine = $1e
+char_mask_upper = $5f
+
+cmd_blow = $02
+
+error_write_protect = $01
+error_volume_mismatch = $02
+error_unknown_cause = $03
+error_reading = $04
+error_bad_save = $05
+
+facing_W = $01
+facing_N = $02
+facing_E = $03
 
 food_low = $0a
 food_amount = $00aa
+
+glyph_X = $05
+glyph_solid = $0b
+glyph_keyhole_C = $18
+glyph_keyhole_R = $19
+glyph_keyhole_L = $1a
+glyph_L_solid = $1b
+glyph_R_solid = $1c
+glyph_L_notched = $1d
+glyph_R_notched = $1e
+glyph_UR_triangle = $5f
+glyph_UL_triangle = $60
+
+;gs_size-1 = $55
 
 icmd_destroy1 = $00
 icmd_destroy2 = $01
@@ -54,7 +118,7 @@ icmd_set_carried_active = $03
 icmd_set_carried_known = $04
 icmd_drop = $05
 icmd_where = $06  ;out $19:position $1a:level
-	execs_no_location = $07
+	icmds_location_end = $07
 icmd_draw_inv = $07
 icmd_count_inv = $08
 icmd_reset_game = $09
@@ -64,27 +128,40 @@ icmd_which_food = $0c
 icmd_which_torch_lit = $0d
 icmd_which_torch_unlit = $0e
 
+inventory_max = $08
+
+mother_flag_roaming = $04
+
+puzzle_step1 = $05
+
+
+; Values for gs_special_mode
+special_mode_calc_puzzle = $02
+special_mode_bat = $04
+special_mode_dog1 = $06
+special_mode_dog2 = $07
+special_mode_monster = $08
+special_mode_mother = $09
+special_mode_dark = $0a
+special_mode_snake = $0b
+special_mode_bomb = $0c
+special_mode_elevator = $0d
+special_mode_tripped = $0e
+special_mode_climb = $0f
+special_mode_exit = $10
+
+
+textbuf_max_input = $1E
+textbuf_size = $28 * 2 ;40 columns, 2 lines
+
 torch_low = $0a
 torch_lifespan = $96
 
-facing_W = $01
-facing_N = $02
-facing_E = $03
+turns_until_trippable = $29
+turns_until_mother = $32
+turns_until_dog1 = $3c
+turns_until_monster = $50
 
-; Values for gs_special_mode
-special_calc_puzzle = $02
-special_bat = $04
-special_dog1 = $06
-special_dog2 = $07
-special_monster = $08
-special_mother = $09
-special_dark = $0a
-special_snake = $0b
-special_bomb = $0c
-special_elevator = $0d
-special_tripped = $0e
-special_climb = $0f
-special_exit = $10
 
 vocab_word_size = $04
 
@@ -94,27 +171,6 @@ verb_forward    = $5b
 verb_left       = $5c
 verb_right      = $5d
 verb_uturn      = $5e
-
-zp0C_string_ptr = $0c
-;zp0C_string_ptr+1 = $0d
-src = $0e
-;src+1 = $0f
-zp10_dst = $10
-;zp10_dst+1 = $11
-zp13_row_ptr = $13
-;zp13_row_ptr+1 = $14
-line_count = $15
-zp_counter = $16
-clock = $17
-;clock+1 = $18
-count = $19
-;count+1 = $1a
-
-zp11_count_string = $11
-zp0E_object = $0e
-zp0F_action = $0f
-zp19_pos_y = $19
-zp1A_pos_x = $1a
 
 
 p4015 = $4015
@@ -164,20 +220,21 @@ screen_ptr = $08
 ;screen_ptr+1 = $09
 zp0A_text_ptr = $0a
 ;zp0A_text_ptr+1 = $0b
+a0C = $0c
 zp0C_string_ptr = $0c
 ;zp0C_string_ptr+1 = $0d
-src = $0e
-;src+1 = $0f
-zp10_dst = $10
-;zp10_dst+1 = $11
-zp13_row_ptr = $13
-;zp13_row_ptr+1 = $14
+a0E = $0e
+a0F = $0f
+a10 = $10
+a11 = $11
+a13 = $13
+a14 = $14
 line_count = $15
 zp_counter = $16
 clock = $17
 ;clock+1 = $18
-count = $19
-;count+1 = $1a
+a19 = $19
+a1A = $1a
 tape_addr_start = $3c
 ;tape_addr_start+1 = $3d
 tape_addr_end = $3e
@@ -192,13 +249,6 @@ aEF = $ef
 ;
 ; **** ZP POINTERS ****
 ;
-;screen_ptr = $08
-;zp0A_text_ptr = $0a
-;zp0C_string_ptr = $0c
-;src = $0e
-;zp10_dst = $10
-;zp13_row_ptr = $13
-;count = $19
 p28 = $28
 pC2 = $c2
 ;
@@ -312,9 +362,9 @@ print_to_line1:
 	stx zp_col
 	ldx #$16
 	stx zp_row
-	ldx #<text_buffer1
+	ldx #<text_buffer_line1
 	stx zp0A_text_ptr
-	ldx #>text_buffer1
+	ldx #>text_buffer_line1
 	stx zp0A_text_ptr+1
 	bne print_to_line
 print_to_line2:
@@ -322,9 +372,9 @@ print_to_line2:
 	stx zp_col
 	ldx #$17
 	stx zp_row
-	ldx #<text_buffer2
+	ldx #<text_buffer_line2
 	stx zp0A_text_ptr
-	ldx #>text_buffer2
+	ldx #>text_buffer_line2
 	stx zp0A_text_ptr+1
 print_to_line:
 	jsr get_display_string
@@ -551,7 +601,7 @@ special_return:
 	rts
 
 at_calculator:
-	ldx #special_calc_puzzle
+	ldx #special_mode_calc_puzzle
 	stx gs_special_mode
 	rts
 
@@ -586,11 +636,11 @@ check_dog_roaming:
 	beq special_return
 	lda gs_special_mode
 	bne :+
-	ldx #special_dog1
+	ldx #special_mode_dog1
 	stx gs_special_mode
 	rts
 
-:	ldx #special_dog1
+:	ldx #special_mode_dog1
 	stx gs_mode_stack1
 	rts
 
@@ -616,10 +666,10 @@ check_guarded_pit:
 at_guard_dog:
 	lda gs_dog2_alive
 	and #$01
-	beq @return
-	ldx #special_dog2
+	beq return_dog_monster
+	ldx #special_mode_dog2
 	stx gs_special_mode
-@return:
+return_dog_monster:
 	rts
 
 check_levels_4_5:
@@ -633,13 +683,13 @@ check_mother:
 	cmp #turns_until_mother
 	bcs :+
 	lda gs_level_turns_hi
-	beq @return
+	beq return_dog_monster
 :	lda a61AC
 	and #mother_flag_roaming
-	beq @return
+	beq return_dog_monster
 	lda gs_special_mode
 	bne :+
-	ldx #special_mother
+	ldx #special_mode_mother
 	stx gs_special_mode
 	rts
 
@@ -655,7 +705,7 @@ check_bat:
 	and #$02
 	beq check_mother
 	jsr push_special_mode2
-	ldx #special_bat
+	ldx #special_mode_bat
 	stx gs_special_mode
 	rts
 
@@ -664,11 +714,11 @@ check_monster:
 	cmp #turns_until_monster
 	bcs :+
 	lda gs_level_turns_hi
-	beq @return
+	beq return_dog_monster
 :	lda gs_monster_lurks
 	and #$02
 	beq done_timer
-	ldx #special_monster
+	ldx #special_mode_monster
 	stx gs_special_mode
 done_timer:
 	rts
@@ -695,7 +745,7 @@ complete_turn:
 	ldx #$00
 	stx gs_room_lit
 	jsr push_special_mode2
-	ldx #special_dark
+	ldx #special_mode_dark
 	stx gs_special_mode
 @dec_food:
 	dec gs_food_time_lo
@@ -823,7 +873,7 @@ memcpy:
 
 ; uninitialized buffers contain
 ; cruft leftover from earlier build
-textbuf_prev_input:
+text_buffer_prev:
 	.byte $c9,$50,$90,$03,$20,$15,$10,$ad
 	.byte $9e,$61,$f0,$08,$a2,$00,$8e,$b3
 	.byte $61,$4c,$93,$34,$a2,$00,$8e,$a4
@@ -834,20 +884,20 @@ textbuf_prev_input:
 	.byte $43,$20,$92,$08,$a9,$44,$20,$a4
 	.byte $08,$ee,$b3,$61,$4c,$08,$36,$c9
 	.byte $01,$d0,$13,$20,$26,$36,$ee,$b3
-text_buffer1:
+text_buffer_line1:
 	.byte $61,$a9,$45,$20,$92,$08,$a9,$47
 	.byte $20,$a4,$08,$4c,$08,$36,$20,$26
 	.byte $36,$ad,$94,$61,$c9,$05,$f0,$0d
 	.byte $a9,$36,$20,$92,$08,$a9,$37,$20
 	.byte $a4,$08,$4c,$b9,$10,$a9,$48,$20
-	.assert * - text_buffer1 = textbuf_size, error, "Mismatch text buffer size"
-text_buffer2:
+	.assert * - text_buffer_line1 = textbuf_size / 2, error, "Mismatch text buffer size"
+text_buffer_line2:
 	.byte $92,$08,$a9,$4b,$20,$a4,$08,$4c
 	.byte $b9,$10,$ca,$d0,$6f,$ad,$9d,$61
 	.byte $c9,$11,$f0,$07,$20,$5f,$10,$a9
 	.byte $20,$d0,$e9,$ad,$9c,$61,$c9,$0e
 	.byte $f0,$52,$c9,$13,$d0,$ee,$a2,$04
-	.assert * - text_buffer2 = textbuf_size, error, "Mismatch text buffer size"
+	.assert * - text_buffer_line2 = textbuf_size / 2, error, "Mismatch text buffer size"
 ;
 ; cruft decoded:
 ;	cmp #$50
@@ -858,7 +908,7 @@ text_buffer2:
 ;	beq b0C3E
 ;	ldx #$00
 ;	stx a61B3
-;	jmp j3493
+;	jmp $3493
 ;
 ;b0C3E:
 ;	ldx #$00
@@ -872,7 +922,7 @@ text_buffer2:
 ;	and #$02
 ;	bne b0C5E
 ;b0C56:
-;	jmp j3493
+;	jmp $3493
 ;
 ;b0C59:
 ;	lda a61AC
@@ -945,13 +995,13 @@ get_player_input:
 	bmi :+  ;GUG: bcc preferred
 	and #char_mask_upper
 :	pha
-	lda #>text_buffer1
+	lda #>text_buffer_line1
 	sta zp0E_src+1
-	lda #<text_buffer1
+	lda #<text_buffer_line1
 	sta zp0E_src
-	lda #>textbuf_prev_input
+	lda #>text_buffer_prev
 	sta zp10_dst+1
-	lda #<textbuf_prev_input
+	lda #<text_buffer_prev
 	sta zp10_dst
 	lda #$00
 	sta zp19_count+1
@@ -980,9 +1030,9 @@ get_player_input:
 	nop
 	dec zp_row
 	jsr get_rowcol_addr
-	lda #>(text_buffer1-1)
+	lda #>(text_buffer_line1-1)
 	sta a:zp0C_string_ptr+1
-	lda #<(text_buffer1-1)
+	lda #<(text_buffer_line1-1)
 	sta a:zp0C_string_ptr
 	lda #$80
 	ldy #textbuf_size
@@ -992,12 +1042,12 @@ get_player_input:
 	lda #$00
 	sta zp11_count_chars
 	sta zp10_count_words
-	lda #>(text_buffer1-1)
+	lda #>(text_buffer_line1-1)
 	sta zp19_input_ptr+1
-	lda #<(text_buffer1-1)
+	lda #<(text_buffer_line1-1)
 	sta zp19_input_ptr
 	pla
-	jmp process_input
+	jmp process_input_char
 
 input_blink_cursor:
 	bit hw_STROBE
@@ -1056,9 +1106,9 @@ process_input_char:
 	lda #$16
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #>(textbuf_prev_input-1)
+	lda #>(text_buffer_prev-1)
 	sta zp0E_src+1
-	lda #<(textbuf_prev_input-1)
+	lda #<(text_buffer_prev-1)
 	sta zp0E_src
 	ldy #textbuf_size
 @next_char:
@@ -1148,7 +1198,7 @@ input_letter:
 	inc zp11_count_chars
 	ldy zp11_count_chars
 	sta (zp19_input_ptr),y
-	cpy #max_input
+	cpy #textbuf_max_input
 	beq parse_input
 	jmp input_blink_cursor
 
@@ -1210,9 +1260,9 @@ parse_input:
 	bcc @known_verb
 	lda #$8d     ;I'm sorry, but I can't
 	jsr print_to_line2
-	lda #<text_buffer1
+	lda #<text_buffer_line1
 	sta zp19_input_ptr
-	lda #>text_buffer1
+	lda #>text_buffer_line1
 	sta zp19_input_ptr+1
 	ldy #$00
 @echo_next_char:
@@ -1250,9 +1300,9 @@ parse_input:
 @unknown_object:
 	lda #$8f     ;What in tarnation is a
 	jsr print_to_line2
-	lda #<text_buffer1
+	lda #<text_buffer_line1
 	sta zp19_input_ptr
-	lda #>text_buffer1
+	lda #>text_buffer_line1
 	sta zp19_input_ptr+1
 	ldy #$00
 @find_word_end:
@@ -1290,9 +1340,9 @@ parse_input:
 	bcs @done_verb
 	cmp #verb_look
 	beq @cmd_look
-	lda #>text_buffer1
+	lda #>text_buffer_line1
 	sta zp19_input_ptr+1
-	lda #<text_buffer1
+	lda #<text_buffer_line1
 	sta zp19_input_ptr
 	lda #$00
 	sta zp_col
@@ -1548,7 +1598,7 @@ b10E1=*+$02
 	;[sta] gs_player_x
 	jsr pit
 	jsr draw_view
-	jmp j3493
+	jmp $3493  ;in special_bat
 
 	rts
 
@@ -2846,10 +2896,10 @@ b1A07:
 
 s1A10:
 	sta a13
-	lda a61F7
+	lda saved_A
 	pha
 	lda a13
-	sta a61F7
+	sta saved_A
 	pla
 	rts
 
@@ -2874,7 +2924,7 @@ s1A10:
 ;
 item_cmd:
 	lda zp0F_action
-	cmp #execs_no_location
+	cmp #icmds_location_end
 	bpl icmd07_draw_inv  ;GUG: bcs preferred
 ; Convert object variable from 1-byte Index to 2-byte Pointer
 	asl zp0E_object
@@ -2882,10 +2932,10 @@ item_cmd:
 	lda #$00
 	sta zp0E_item+1
 	clc
-	lda #<(gs_item_location-2)
+	lda #<(gs_item_locs-2)
 	adc zp0E_item
 	sta zp0E_item
-	lda #>(gs_item_location-2)
+	lda #>(gs_item_locs-2)
 	adc zp0E_item+1
 	sta zp0E_item+1
 	pla
@@ -2936,7 +2986,7 @@ icmd05_drop_item:
 
 icmd07_draw_inv:
 	sec
-	sbc #execs_location_end
+	sbc #icmds_location_end
 	beq @clear_window
 	jmp icmd08_count_inv
 
@@ -3189,7 +3239,7 @@ icmd0B_which_box:
 	ldy #$00
 @check_is_carried:
 	cmp (zp0E_item),y
-	beq return_item_num
+	beq @return_item_num
 	iny
 	iny
 	dec zp1A_count_loop
@@ -3638,13 +3688,13 @@ b1F1B:
 
 b1F21:
 	lda #$06
-	sta zp0C
+	sta a0C
 j1F25:
 	lda #$00
 	sta zp_row
 	lda #$06
 	sec
-	sbc zp0C
+	sbc a0C
 	sta zp_col
 	pha
 	lda #$20
@@ -3715,7 +3765,7 @@ j1F25:
 	sta zp_row
 	lda #$10
 	clc
-	adc zp0C
+	adc a0C
 	sta zp_col
 	pha
 	lda #$20
@@ -3783,7 +3833,7 @@ p1FFF:
 	jsr s17A7
 	ldy #$04
 	jsr s1795
-	dec zp0C
+	dec a0C
 	beq b2051
 	jsr wait_brief
 	jmp j1F25
@@ -4444,7 +4494,7 @@ j254C:
 	ldy #$02
 	jsr s1777
 	lda #$0a
-	sta zp0C
+	sta a0C
 	lda #$0b
 	sta a19
 	lda #>p0402
@@ -4453,7 +4503,7 @@ j254C:
 	sta a10
 b2585:
 	jsr wait_brief
-	lda zp0C
+	lda a0C
 	sta zp_col
 	lda #$03
 	sta zp_row
@@ -4467,9 +4517,9 @@ b2585:
 	lda #$20
 	ldy #$12
 	jsr s17A7
-	dec zp0C
+	dec a0C
 	inc a19
-	lda zp0C
+	lda a0C
 	sta zp_col
 	lda #$03
 	sta zp_row
@@ -4484,9 +4534,9 @@ b2585:
 	jsr s17A7
 	lda #$11
 	sta zp_row
-	dec zp0C
-	lda zp0C
-	inc zp0C
+	dec a0C
+	lda a0C
+	inc a0C
 	sta zp_col
 	jsr get_rowcol_addr
 	inc a10
@@ -4631,7 +4681,7 @@ player_cmd:
 	cmp #$05  ;unnecessary. special_mother is sufficient.
 	bne :+
 	lda gs_special_mode
-	cmp #special_mother
+	cmp #special_mode_mother
 	bne :+
 	lda #noun_horn
 	sta zp0E_object
@@ -4645,7 +4695,7 @@ player_cmd:
 	rts
 
 @play:
-	lda #noun_play - noun_blow
+	lda #verb_play - verb_blow
 	sta zp0F_action
 cmd_break:
 	dec zp0F_action
@@ -4696,7 +4746,7 @@ lose_one_torch:
 	sta gs_torch_time
 	sta gs_room_lit
 	jsr push_special_mode
-	lda #special_dark
+	lda #special_mode_dark
 	sta gs_special_mode
 @done:
 	rts
@@ -4835,7 +4885,7 @@ lose_ring:
 	sta gs_room_lit
 	lda a61AC
 	beq @done
-	lda #special_dark
+	lda #special_mode_dark
 	sta gs_special_mode
 	jsr clear_maze_window
 @done:
@@ -4853,26 +4903,26 @@ cmd_throw:
 	jsr lose_ring
 :	cmp #noun_frisbee
 	bne :+
-	jmp @throw_frisbee
+	jmp throw_frisbee
 
 :	cmp #noun_wool
-	beq @throw_wool
+	beq throw_wool
 	cmp #noun_yoyo
-	beq @throw_yoyo
+	beq throw_yoyo
 	cmp #noun_food
-	bmi @thrown  ;GUG: bcc preferred
-	beq @throw_food
+	bmi thrown  ;GUG: bcc preferred
+	beq throw_food
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
 :	lda zp11_item
 	sta zp0E_object
-@thrown:
+thrown:
 ; implicit, already 0
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	jsr throw_react
 	nop
 	nop
@@ -4885,22 +4935,22 @@ cmd_throw:
 	lda #$5d     ;the monster!
 	jmp print_to_line2
 
-@throw_wool:
+throw_wool:
 	lda gs_level
 	cmp #$04
-	bne @thrown
+	bne thrown
 	lda gs_level_turns_lo
 	cmp #turns_until_trippable
-	bcc @thrown
+	bcc thrown
 	jsr push_special_mode
-	lda #special_tripped
+	lda #special_mode_tripped
 	sta gs_special_mode
 	lda #noun_wool
 	sta zp0E_object
 	lda #icmd_destroy1
 	sta zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	lda #$5e     ;and the monster grabs it,
 	jsr print_to_line1
 	lda #$5f     ;gets tangled, and topples over!
@@ -4909,14 +4959,14 @@ cmd_throw:
 	sta gs_monster_proximity
 	rts
 
-@throw_yoyo:
-	jsr @print_thrown
+throw_yoyo:
+	jsr print_thrown
 	lda #$6b     ;returns and hits you
 	jsr print_to_line1
 	lda #$6c     ;in the eye!
 	jmp print_to_line2
 
-@throw_food:
+throw_food:
 	lda zp11_item
 	sta zp0E_object
 	jsr item_cmd
@@ -4926,7 +4976,7 @@ cmd_throw:
 	lda #$81     ;Food fight!
 	jmp print_to_line2
 
-@print_thrown:
+print_thrown:
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
@@ -4959,18 +5009,18 @@ cmd_throw:
 	jsr wait_long
 	jmp clear_status_lines
 
-@throw_frisbee:
+throw_frisbee:
 	lda gs_monster_lurks
 	and #$02
 	bne :+
-	jmp @thrown
+	jmp thrown
 
 :	lda #noun_frisbee
 	sta zp0E_object
 	lda #icmd_destroy1
 	sta zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	jsr clear_status_lines
 	lda #$3f     ;The monster grabs the frisbee, throws
 	jsr print_to_line1
@@ -5046,7 +5096,7 @@ cmd_drop:
 	lda #$00
 	sta gs_room_lit
 	sta gs_torches_lit
-	lda #special_dark
+	lda #special_mode_dark
 	sta gs_special_mode
 	jsr clear_maze_window
 	jmp @dropped
@@ -5126,9 +5176,9 @@ cmd_play:
 	jmp cmd_strike
 
 :	lda zp0E_object
-	cmp #item_flute
+	cmp #noun_flute
 	beq play_flute
-	cmp #item_ball
+	cmp #noun_ball
 	beq play_ball
 	cmp #$08     ;item_horn
 	beq play_horn
@@ -5199,7 +5249,7 @@ play_flute:
 	sta zp0E_object
 	jsr item_cmd
 	jsr push_special_mode
-	lda #special_climb
+	lda #special_mode_climb
 	sta gs_special_mode
 	lda #$00
 	sta gs_snake_used
@@ -5385,7 +5435,7 @@ cmd_open:
 
 @push_mode_snake:
 	jsr push_special_mode
-	ldx #special_snake
+	ldx #special_mode_snake
 	stx gs_special_mode
 	lda #noun_snake
 	bne @print_item_name
@@ -5396,7 +5446,7 @@ cmd_open:
 	bne :+
 	jmp look_not_here
 
-:	cmp #$05
+:	cmp #doors_locked_begin
 	bcs :+
 	jmp @push_mode_elevator
 
@@ -5411,8 +5461,8 @@ cmd_open:
 	bmi @no_key  ;GUG: bcc preferred
 	jsr swap_saved_A
 	clc
-	adc #door_lock_begin - doors_elevators
-	cmp #door_lock_begin + door_correct
+	adc #doormsg_lock_begin - doors_locked_begin
+	cmp #doormsg_lock_begin + (door_correct - 1)
 	beq @correct_lock
 	jsr swap_saved_A
 	jsr clear_status_lines
@@ -5428,17 +5478,17 @@ cmd_open:
 	jmp print_to_line2
 
 @correct_lock:
-	ldx #special_bomb
+	ldx #special_mode_bomb
 	stx gs_special_mode
 	jsr clear_status_lines
 	lda #$19     ;You unlock the door...
 	jsr print_to_line1
-	lda #door_lock_begin + door_correct
+	lda #doormsg_lock_begin + (door_correct - 1)
 	jmp print_to_line2
 
 @push_mode_elevator:
 	jsr push_special_mode
-	ldx #special_elevator
+	ldx #special_mode_elevator
 	stx gs_special_mode
 	jmp j325D
 
@@ -5463,28 +5513,29 @@ which_door:
 	clc
 	adc gs_facing
 	sta zp19_level_facing
-	ldx #$09
+	ldx #doors
 	stx zp1A_count_loop
 @find:
 	ldy #$00
 	cmp (zp0E_ptr),y
-	bne @next
+	bne @next2
 	lda zp11_position
 	inc zp0E_ptr
 	bne :+
 	inc zp0E_ptr+1
 :	cmp (zp0E_ptr),y
-	bne :+
-	lda #$0a
+	bne @next1
+	lda #doors + 1
 	sec
 	sbc zp1A_count_loop
 	rts
 
-@next:
+@next2:
 	inc zp0E_ptr
-	bne :+
+	bne @next1
 	inc zp0E_ptr+1
-:	inc zp0E_ptr
+@next1:
+	inc zp0E_ptr
 	bne :+
 	inc zp0E_ptr+1
 :	lda zp19_level_facing
@@ -5493,17 +5544,18 @@ which_door:
 	lda #$00
 	rts
 
-; Stored in reverse order from value that is returned by which_door.
 door_table:
-	.byte $23,$77 ;$09
-	.byte $31,$44 ;$08
-	.byte $42,$14 ;$07
-	.byte $52,$35 ;$06
-	.byte $52,$4a ;$05
-	.byte $52,$5a ;$04
-	.byte $52,$6a ;$03
-	.byte $52,$7a ;$02
-	.byte $52,$8a ;$01
+	.byte $23,$77
+	.byte $31,$44
+	.byte $42,$14
+	.byte $52,$35
+	.byte $52,$4a
+	.byte $52,$5a
+	.byte $52,$6a
+	.byte $52,$7a
+	.byte $52,$8a
+doors = (* - door_table) / 2
+doors_locked_begin = 1 + (doors - doors_locked)  ;one-based indexing
 
 cmd_press:
 	dec zp0F_action
@@ -5537,7 +5589,7 @@ cmd_press:
 	jsr char_out
 	lda gd_parsed_object
 	clc
-	adc #''0' - noun_zero
+	adc #'0' - noun_zero
 	jmp char_out
 
 @teleport:
@@ -5611,7 +5663,7 @@ cmd_press:
 	stx zp0E_object
 	ldx #icmd_destroy2
 	stx zp0F_action
-	ldx #special_dark
+	ldx #special_mode_dark
 	stx gs_special_mode
 	jsr item_cmd
 	jsr clear_maze_window
@@ -5653,7 +5705,7 @@ cmd_take:
 	jsr item_cmd
 	tax  ;GUG: no effect
 	bne :+
-	jmp @cannot
+	jmp cannot_take
 
 :	sta zp11_box_item
 	sta zp0E_object
@@ -5663,11 +5715,11 @@ cmd_take:
 	lda gd_parsed_object
 	cmp #noun_box
 	bne :+
-	jmp @take_box
+	jmp take_box
 
 :	cmp #nouns_unique_end
 	bmi @unique_item  ;GUG: bcc preferred
-	jmp @multiple
+	jmp take_multiple
 
 @unique_item:
 	cmp zp11_box_item
@@ -5676,7 +5728,7 @@ cmd_take:
 	stx zp0E_object
 	lda zp1A_item_place
 	cmp #carried_boxed
-	bne @take_if_space ;at feet
+	bne take_if_space ;at feet
 	lda zp11_box_item
 @open_if_carried:
 	sta zp0E_object
@@ -5686,13 +5738,13 @@ cmd_take:
 	lda #carried_boxed
 	cmp zp1A_item_place
 	beq :+
-	jmp @cannot
+	jmp cannot_take
 
 :	ldx gd_parsed_object
 	stx zp0E_object
-	jmp @take
+	jmp take_and_reveal
 
-@ensure_inv_space:
+ensure_inv_space:
 	jsr swap_saved_vars
 	ldx #icmd_count_inv
 	stx zp0F_action
@@ -5700,17 +5752,17 @@ cmd_take:
 	lda zp19_count
 	cmp #inventory_max
 	bcc :+
-	jmp @inventory_full
+	jmp inventory_full
 
 :	jmp swap_saved_vars
 
-@take_if_space:
-	jsr @ensure_inv_space
-@take:
+take_if_space:
+	jsr ensure_inv_space
+take_and_reveal:
 	ldx #icmd_set_carried_known
 	stx zp0F_action
 	jsr item_cmd
-@react_taken:
+react_taken:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
@@ -5721,14 +5773,14 @@ cmd_take:
 :	cmp #noun_snake
 	bne @done
 	jsr push_special_mode
-	ldx #special_snake
+	ldx #special_mode_snake
 	stx gs_special_mode
 @done:
 	rts
 
 on_reveal_calc:
 	lda gs_special_mode
-	cmp #special_calc_puzzle
+	cmp #special_mode_calc_puzzle
 	bne @done
 	lda gd_parsed_action
 	cmp #verb_take
@@ -5741,58 +5793,58 @@ on_reveal_calc:
 	lda #noun_calculator
 	rts
 
-@take_box:
+take_box:
 	lda zp1A_item_place
 	cmp #carried_begin
-	bpl @cannot  ;GUG: bcs preferred
-	jsr @ensure_inv_space
+	bpl cannot_take  ;GUG: bcs preferred
+	jsr ensure_inv_space
 	ldx zp11_box_item
 	stx zp0E_object
 	ldx #icmd_set_carried_boxed
 	stx zp0F_action
 	jsr item_cmd
-	jmp @react_taken
+	jmp react_taken
 
-@multiple:
+take_multiple:
 	cmp #noun_food
 	beq @food
 
 ;@torch:
 	lda zp11_box_item
 	cmp #item_torch_end
-	bpl @find_boxed_torch  ;GUG: bcs preferred
+	bpl find_boxed_torch  ;GUG: bcs preferred
 	cmp #item_torch_begin
-	bmi @find_boxed_torch  ;GUG: bcc preferred
+	bmi find_boxed_torch  ;GUG: bcc preferred
 	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
 	cmp #carried_boxed
-	beq @take    ;BUG: get box > get torch: does not increment unlit count if it's the only box
-	jsr @ensure_inv_space
+	beq take_and_reveal    ;BUG: get box > get torch: does not increment unlit count if it's the only box
+	jsr ensure_inv_space
 	inc gs_torches_unlit
-	jmp @take
+	jmp take_and_reveal
 
 @food:
 	lda zp11_box_item
 	cmp #item_food_end
-	bpl @find_boxed_food  ;GUG: bcs preferred
+	bpl find_boxed_food  ;GUG: bcs preferred
 	cmp #item_food_begin
-	bmi @find_boxed_food  ;GUG: bcc preferred
+	bmi find_boxed_food  ;GUG: bcc preferred
 	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
 	cmp #carried_boxed
 	bne :+
-	jmp @take
+	jmp take_and_reveal
 
-:	jmp @take_if_space
+:	jmp take_if_space
 
-@cannot:
+cannot_take:
 	lda #$9a     ;It is currently impossible.
-@print_rts:
+take_print_and_return:
 	jmp print_to_line2
 
-@inventory_full:
+inventory_full:
 	;BUG? suspicious. Stack leak?
 	pla
 	sta zp0E_object
@@ -5800,16 +5852,16 @@ on_reveal_calc:
 	sta zp0F_action
 	jsr swap_saved_vars
 	lda #$99     ;Carrying the limit.
-	bne @print_rts
+	bne take_print_and_return
 
-@find_boxed_torch:
+find_boxed_torch:
 	ldx #item_torch_begin - 1
 	stx zp0E_object
-	bne @begin_search
-@find_boxed_food:
+	bne find_boxed
+find_boxed_food:
 	ldx #item_food_begin - 1
 	stx zp0E_object
-@begin_search:
+find_boxed:
 	; Leftover 16-bit increment from earlier design.
 	; Pointless but harmless.
 	lda zp0F_action
@@ -5817,7 +5869,7 @@ on_reveal_calc:
 	lda zp0E_object
 	pha
 	ldx #items_food
-	.assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
+	.assert items_food = items_torches, error, "Need to edit cmd_take for separate food,torch counts"
 	stx zp11_count
 @next:
 	; Leftover 16-bit increment from earlier design.
@@ -5845,7 +5897,7 @@ on_reveal_calc:
 	sta zp0E_object
 	pla
 	sta zp0F_action
-	jmp @cannot
+	jmp cannot_take
 
 @found:
 	pla
@@ -5855,10 +5907,10 @@ on_reveal_calc:
 	lda gd_parsed_object
 	cmp #noun_torch
 	beq :+
-	jmp @take
+	jmp take_and_reveal
 
 :	inc gs_torches_unlit
-	jmp @take
+	jmp take_and_reveal
 
 cmd_attack:
 	dec zp0F_action
@@ -5881,7 +5933,7 @@ cmd_attack:
 
 @not_here:
 	lda #$90     ;I don't see that here.
-@print:
+print_line2_ap:
 	jsr print_to_line2
 	rts
 
@@ -5899,7 +5951,7 @@ cmd_paint:
 	jmp not_carried
 
 :	lda #$6f     ;With what? Toenail polish?
-	bne @print
+	bne print_line2_ap
 
 cmd_grendel:
 	dec zp0F_action
@@ -5911,9 +5963,9 @@ cmd_say:
 	bne cmd_charge
 	lda #$76     ;OK...
 	jsr print_to_line2
-	lda #<text_buffer1
+	lda #<text_buffer_line1
 	sta zp0E_ptr
-	lda #>text_buffer1
+	lda #>text_buffer_line1
 	sta zp0E_ptr+1
 	ldy #$00
 	lda #$20
@@ -5951,17 +6003,17 @@ cmd_charge:
 @propel_player:
 	lda #$02
 	cmp gs_facing
-	bne b3072
+	bne @b3072
 	tax
 	dex
 	txa
 	cmp gs_level
-	bne b3072
+	bne @b3072
 	cmp gs_player_x
-	bne b3072
+	bne @b3072
 	lda #$0b
 	cmp gs_player_y
-	bne b3072
+	bne @b3072
 	ldx #noun_hat
 	stx zp0E_object
 	ldx #icmd_where
@@ -5983,7 +6035,7 @@ cmd_charge:
 	stx gs_level_turns_lo
 	jmp draw_view
 
-b3072:
+@b3072:
 	lda a619A
 	and #$e0
 	beq b30A5
@@ -6080,14 +6132,14 @@ check_fart:
 	jsr s3085
 	lda gs_level
 	cmp #$01
-	bne b3130
+	bne @b3130
 	lda gs_player_x
 	cmp #$06
-	bne b3130
+	bne @b3130
 	lda gs_player_y
 	cmp #$0a
 	beq b3136
-b3130:
+@b3130:
 	jsr complete_turn
 	jmp @next_propel
 
@@ -6107,7 +6159,7 @@ b313F:
 	lda zp0E_src
 	cmp #$05
 	bcs b3159
-	jmp j0B64
+	jmp starved
 
 b3159:
 	cmp #$0f
@@ -6228,7 +6280,7 @@ b3219:
 
 cmd_hint:
 	lda gs_special_mode
-	cmp #special_calc_puzzle
+	cmp #special_mode_calc_puzzle
 	beq @calc_hint
 	lda gs_next_hint
 	beq :+
@@ -6253,63 +6305,62 @@ j325D:
 	sta a0F
 	jmp s1E5A
 
-s3267:
+swap_saved_A:
 	sta zp13_temp
-	lda a61F7
+	lda saved_A
 	pha
 	lda zp13_temp
-	sta a61F7
+	sta saved_A
 	pla
 	rts
 
-s3274:
-	lda zp0E_src
+swap_saved_vars:
+	lda $0E
 	tax
-	lda a61F8
-	sta zp0E_src
+	lda saved_zp0E
+	sta $0E
 	txa
-	sta a61F8
-	lda a0F
+	sta saved_zp0E
+	lda $0F
 	tax
-	lda a61F9
-	sta a0F
+	lda saved_zp0F
+	sta $0F
 	txa
-	sta a61F9
-	lda a10
+	sta saved_zp0F
+	lda $10
 	tax
-	lda a61FA
-	sta a10
+	lda saved_zp10
+	sta $10
 	txa
-	sta a61FA
-	lda a11
+	sta saved_zp10
+	lda $11
 	tax
-	lda a61FB
-	sta a11
+	lda saved_zp11
+	sta $11
 	txa
-	sta a61FB
-	lda a19
+	sta saved_zp11
+	lda $19
 	tax
-	lda a61FC
-	sta a19
+	lda saved_zp19
+	sta $19
 	txa
-	sta a61FC
-	lda a61FD
+	sta saved_zp19
+	lda saved_zp1A
 	tax
-	lda a1A
-	sta a61FD
+	lda $1A
+	sta saved_zp1A
 	txa
-	sta a1A
+	sta $1A
 	rts
 
-s32BD:
+dec_item_ptr:
 	pha
-	dec zp0E_src
-	lda zp0E_src
+	dec zp0E_item
+	lda zp0E_item
 	cmp #$ff
-	bne b32C8
-	dec a0F
-b32C8:
-	pla
+	bne :+
+	dec zp0E_item+1
+:	pla
 	rts
 
 text_hat:
@@ -6514,7 +6565,6 @@ special_bat:
 	cmp #noun_bat
 	bne @dead
 	lda #$8c     ;It looks very dangerous!
-j3493:
 	jsr print_to_line2
 	jmp @bat_loop
 
@@ -6621,7 +6671,7 @@ special_dog:
 	jsr item_cmd
 	lda #carried_known
 	cmp zp1A_item_place
-	beq b3585
+	beq @with_dagger
 	ldx #noun_sword
 	stx zp0E_object
 	ldx #icmd_where
@@ -6633,12 +6683,12 @@ special_dog:
 	jsr clear_status_lines
 	lda #$97     ;and it vanishes!
 	jsr print_to_line2
-j357F:
+@killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
 	rts
 
-b3585:
+@with_dagger:
 	ldx #icmd_destroy1
 	stx zp0F_action
 	ldx #noun_dagger
@@ -6649,7 +6699,7 @@ b3585:
 	jsr item_cmd
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
-	jmp j357F
+	jmp @killed
 
 @throw:
 	lda a1A
@@ -6668,7 +6718,7 @@ b3585:
 	ldx #icmd_destroy1
 	stx zp0F_action
 	jsr item_cmd
-	jsr @print_thrown
+	jsr print_thrown
 	lda #$5c     ;and is eaten by
 	jsr print_to_line1
 	lda #$5d     ;the monster!
@@ -6748,12 +6798,12 @@ input_near_danger:
 	jmp check_special_mode
 
 wait_if_moved:
-	lda text_buffer1
+	lda text_buffer_line1
 	cmp #$80
 	beq :+
 	cmp #$20
 	bne @wait
-:	lda text_buffer2
+:	lda text_buffer_line2
 	cmp #$80
 	bne @wait
 	rts
@@ -6897,29 +6947,29 @@ special_dark:
 	bcc :+
 	jsr draw_view
 :	lda gs_room_lit
-	beq b3794
+	beq @b3794
 	ldx #$00
 	stx gs_mother_proximity
 	jmp j34D5
 
-b3794:
+@b3794:
 	ldx #$00
 	stx gs_level_turns_lo ;GUG: careful, if I revise to allow re-lighting torch
 	lda gs_mother_proximity
 	bne @monster_smell
 	lda gs_level
 	cmp #$05
-	beq b37AF
+	beq @b37AF
 	lda gs_monster_lurks
 	and #$02
-	bne b37B4
-b37AC:
+	bne @b37B4
+@b37AC:
 	jmp j34D5
 
-b37AF:
+@b37AF:
 	lda a61AC
-	beq b37AC
-b37B4:
+	beq @b37AC
+@b37B4:
 	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
@@ -6983,7 +7033,7 @@ snake_check_verb:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bpl b3842  ;GUG: bcs preferred
+	bpl @b3842  ;GUG: bcs preferred
 	ldx #noun_sword
 	stx zp0E_object
 	ldx #icmd_where
@@ -6993,7 +7043,7 @@ snake_check_verb:
 	cmp #carried_unboxed
 	bmi dead_by_snake  ;GUG: bcc preferred
 	bpl @killed  ;GUG: bcs preferred
-b3842:
+@b3842:
 	ldx #noun_dagger
 	stx zp0E_object
 	ldx #icmd_destroy1
@@ -8102,6 +8152,7 @@ gs_lair_raided:
 	.byte $00
 gs_snake_used:
 	.byte $01,$00
+
 gs_item_locs:
 	.byte $08,$00,$03,$a5,$00,$00,$04,$a9
 	.byte $08,$00,$01,$64,$02,$33,$08,$00
@@ -8109,20 +8160,25 @@ gs_item_locs:
 	.byte $02,$86,$08,$00,$04,$a8,$04,$57
 gs_item_snake:
 	.byte $00,$00
-items_unique = (* - gs_item_locations) / 2
+	.assert * - gs_item_locs = items_unique * 2, error, "Miscount between data and definition"
 
 gs_item_food_torch:
 	.byte $00,$00,$00,$00,$00,$00
-items_food = (* - items_unique) / 2
+	.assert * - gs_item_locs = (item_food_end - item_begin) * 2, error, "Miscount between data and definition"
+
 	.byte $00,$00,$00,$00,$08,$00
-items_torches = (* - items_food) / 2
+	.assert * - gs_item_locs = (item_torch_end - item_begin) * 2, error, "Miscount between data and definition"
 
-	item_begin = 1   ;indexing is 1-based
-	item_food_begin = item_begin + items_unique
-	item_torch_begin = item_food_begin + items_food
+	items_unique = $11
+	items_food = 3
+	items_torches = 3
 
-	item_food_end = item_food_begin = + items_food
-	item_torch_end = item_torch_begin = + items_torches
+	item_begin        = 1   ;indexing is 1-based
+	item_food_begin   = item_begin + items_unique
+	item_torch_begin  = item_food_begin + items_food
+
+	item_food_end = item_food_begin + items_food
+	item_torch_end = item_torch_begin + items_torches
 
 	; Relate items to noun vocabulary
 	.assert item_begin + items_unique = nouns_unique_end, error, "Miscounted unique items"
@@ -8132,19 +8188,19 @@ gs_size = * - game_save_begin
 ;junk
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00
-a61F7:
-	.byte $44
-a61F8:
-	.byte $45
-a61F9:
-	.byte $41
-a61FA:
-	.byte $54
-a61FB:
-	.byte $48
-a61FC:
+saved_A:
+	.byte "D"
+saved_zp0E:
+	.byte "E"
+saved_zp0F:
+	.byte "A"
+saved_zp10:
+	.byte "T"
+saved_zp11:
+	.byte "H"
+saved_zp19:
 	.byte $07
-a61FD:
+saved_zp1A:
 	.byte $00,$00,$00
 signature:
 	.byte "D"
@@ -8302,17 +8358,24 @@ font:
 	.byte $7f,$7f,$7f,$7f,$7e,$7c,$78,$70
 	.byte $7f,$7f,$7f,$7f,$3f,$1f,$0f,$07
 	.assert * = $6694, error, "Unexpected alignment"
+
 vocab_table:
 	.byte $ff
 verb_table:
-	.include "strings_verbs.i"
+	.include "string_verb_defs.inc"
 noun_table:
-	.include "strings_nouns.i"
+	.include "string_noun_defs.inc"
+
+vocab_end = verbs_end + nouns_end
+
 junk_string:
 	.byte $ff,$ff,$00,$00,$ff,$ff,$00,$00
 	.byte $ff
+
 display_string_table:
-	.include "strings_display.i"
+	.include "string_display_defs.inc"
+
+;junk
 	.byte $ff
 	.byte "FE", $D2, $85, "Y STA *", $C8, $90, "   AIV DEYALPSID YLTNATSNOC"
 	.byte " SI NOI", $08, $08, $08, $08, " NOITACO", $0C, "              00005 "
@@ -8321,15 +8384,18 @@ display_string_table:
 	.assert * = $77bf, error, "Unexpected alignment"
 p77BF:
 	.byte "`"
+
 intro_text:
-	.include "strings_intro.i"
+	.include "string_intro_defs.inc"
 	.byte $A0
+
 junk_intro:
 	.byte $80, "RT", $D3, "pdUN DEC IY", $B2, "ud RT", $D3, $80, "dDEUX INC IY", $B3, $85, "d R"
 	.byte "T", $D3, $90, "dTROIS INC IY", $B2, $95, "d RT", $D3, $00, "eJUKILL JSR DRA", $D7
 	.byte $05, "e JSR TIME", $B1, $10, "e JSR WHIT", $C5, $15, "e JSR CLRWN", $C4, " e "
 	.byte "LDA #4", $B2, "%e JSR POIN", $D4, "0e LDA #4", $B3, "5e JSR POIN"
 	.byte "T", $B5, "@e JMP "
+
 text_save_device:
 	.byte "Save to DISK or TAPE (T or D)?"
 	.byte $80
@@ -8405,7 +8471,7 @@ dos_iob:
 iob_dct:
 	.word relocate_data
 iob_buffer:
-	.word #game_save_begin
+	.word game_save_begin
 	.byte $00,$00
 iob_cmd:
 	.byte $01

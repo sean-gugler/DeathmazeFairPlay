@@ -16,7 +16,7 @@
 ;>font = $62
 ;<font = $94
 
-;''0' - noun_zero = $16
+;'0' - noun_zero = $16
 
 ;$zp_string_number = $11
 
@@ -181,18 +181,18 @@ opcode_JMP = $4c
 
 puzzle_step1 = $05
 
-special_calc_puzzle = $02
-special_bat = $04
-special_dog1 = $06
-special_dog2 = $07
-special_monster = $08
-special_mother = $09
-special_dark = $0a
-special_snake = $0b
-special_bomb = $0c
-special_elevator = $0d
-special_tripped = $0e
-special_climb = $0f
+special_mode_calc_puzzle = $02
+special_mode_bat = $04
+special_mode_dog1 = $06
+special_mode_dog2 = $07
+special_mode_monster = $08
+special_mode_mother = $09
+special_mode_dark = $0a
+special_mode_snake = $0b
+special_mode_bomb = $0c
+special_mode_elevator = $0d
+special_mode_tripped = $0e
+special_mode_climb = $0f
 
 torch_low = $0a
 torch_lifespan = $96
