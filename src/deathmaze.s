@@ -8374,32 +8374,52 @@ noun_table:
 ; 1-based indexing.
 vocab_end = 1 + (verbs_end - 1) + (nouns_end - 1)
 
-junk_string:
+;cruft
 	.byte $ff,$ff,$00,$00,$ff,$ff,$00,$00
 	.byte $ff
 
 display_string_table:
 	.include "string_display_defs.inc"
-
-;junk
 	.byte $ff
-	.byte "FE", $D2, $85, "Y STA *", $C8, $90, "   AIV DEYALPSID YLTNATSNOC"
-	.byte " SI NOI", $08, $08, $08, $08, " NOITACO", $0C, "              00005 "
-	.byte "EZ", $08, "XAMTAE", $04, "           %`GREN DEC *", $C8, "0` BNE"
-	.byte " GOON6", $B8, "5` JMP UNCOM", $D0, "@`GOON68 DEC *", $C8, "E"
-	.byte "`"
+
+;cruft
+	.byte           "FE"
+	.byte $D2, $85, "Y STA *"
+	.byte $C8, $90, "   AIV DEYALPSID YLTNATSNOC SI NOI"
+	.byte $08, $08                        ;reversed: ION IS CONSTANTLY DISPLAYED VIA
+	.byte $08, $08, " NOITACO", $0C       ;reversed: [^L]OCATION
+	.byte "              00005 EZ", $08
+	.byte "XAMTAE", $04                   ;reversed: EATMAX
+	.byte "          "
+	.byte $20, $25, $60, "GREN DEC *"
+	.byte $C8, $30, $60, " BNE GOON6"
+	.byte $B8, $35, $60, " JMP UNCOM"
+	.byte $D0, $40, $60, "GOON68 DEC *"
+	.byte $C8, $45, $60
 
 intro_text:
 	.assert * = $77c0, error, "Unexpected alignment"
 	.include "string_intro_defs.inc"
 	.byte $A0
+	.byte $80
 
-junk_intro:
-	.byte $80, "RT", $D3, "pdUN DEC IY", $B2, "ud RT", $D3, $80, "dDEUX INC IY", $B3, $85, "d R"
-	.byte "T", $D3, $90, "dTROIS INC IY", $B2, $95, "d RT", $D3, $00, "eJUKILL JSR DRA", $D7
-	.byte $05, "e JSR TIME", $B1, $10, "e JSR WHIT", $C5, $15, "e JSR CLRWN", $C4, " e "
-	.byte "LDA #4", $B2, "%e JSR POIN", $D4, "0e LDA #4", $B3, "5e JSR POIN"
-	.byte "T", $B5, "@e JMP "
+;cruft:
+	.byte                 "RT"
+	.byte $D3, $70, $64, "UN DEC IY"
+	.byte $B2, $75, $64, " RT"
+	.byte $D3, $80, $64, "DEUX INC IY"
+	.byte $B3, $85, $64, " RT"
+	.byte $D3, $90, $64, "TROIS INC IY"
+	.byte $B2, $95, $64, " RT"
+	.byte $D3, $00, $65, "JUKILL JSR DRA"
+	.byte $D7, $05, $65, " JSR TIME"
+	.byte $B1, $10, $65, " JSR WHIT"
+	.byte $C5, $15, $65, " JSR CLRWN"
+	.byte $C4, $20, $65, " LDA #4"
+	.byte $B2, $25, $65, " JSR POIN"
+	.byte $D4, $30, $65, " LDA #4"
+	.byte $B3, $35, $65, " JSR POINT"
+	.byte $B5, $40, $65, " JMP "
 
 text_save_device:
 	.byte "Save to DISK or TAPE (T or D)?"
