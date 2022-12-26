@@ -1005,7 +1005,7 @@
 10B9 game_over
 10C4 play_again
 10D3 +
-10DC push_special_mode
+10DC push_special_mode2
 111D +
 1134 +
 113B +

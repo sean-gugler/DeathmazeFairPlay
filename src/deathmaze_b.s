@@ -527,7 +527,7 @@ check_bat:
 	lda gs_bat_alive
 	and #$02
 	beq check_mother
-	jsr push_special_mode
+	jsr push_special_mode2
 	ldx #special_mode_bat
 	stx gs_special_mode
 	rts
@@ -567,7 +567,7 @@ complete_turn:
 	dec gs_torches_lit
 	ldx #$00
 	stx gs_room_lit
-	jsr push_special_mode
+	jsr push_special_mode2
 	ldx #special_mode_dark
 	stx gs_special_mode
 @dec_food:
@@ -1316,7 +1316,7 @@ play_again:
 	bit hw_TEXT
 	jmp rom_MONITOR
 
-push_special_mode:
+push_special_mode2:
 	lda gs_mode_stack1
 b10E1=*+$02
 	sta gs_mode_stack2
