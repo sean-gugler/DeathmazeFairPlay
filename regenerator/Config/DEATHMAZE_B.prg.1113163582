@@ -885,7 +885,7 @@
 0A81 +
 0A87 check_guarded_pit
 0AAF at_guard_dog
-0ABB @return
+0ABB return_dog_monster
 0ABC check_levels_4_5
 0AC6 check_mother
 0AD2 +
@@ -1375,6 +1375,10 @@
 3777 special_dark
 377D +
 3787 +
+3794 @unlit
+37AC @cancel
+37AF @check_mother
+37B4 @tremble
 37C7 @monster_smell
 37DE @monster_attacks
 37F5 @mother
@@ -1438,7 +1442,8 @@
 61A7 gs_mode_stack2
 61A8 gs_exit_turns
 61AB gs_bat_alive
-61AD gs_monster_lurks
+61AC gs_mother_alive
+61AD gs_monster_alive
 61AE gs_dog1_alive
 61AF gs_dog2_alive
 61B1 gs_next_hint

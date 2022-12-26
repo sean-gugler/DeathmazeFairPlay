@@ -489,10 +489,10 @@ check_guarded_pit:
 at_guard_dog:
 	lda gs_dog2_alive
 	and #$01
-	beq @return
+	beq return_dog_monster
 	ldx #special_mode_dog2
 	stx gs_special_mode
-@return:
+return_dog_monster:
 	rts
 
 check_levels_4_5:
@@ -506,10 +506,10 @@ check_mother:
 	cmp #turns_until_mother
 	bcs :+
 	lda gs_level_turns_hi
-	beq @return
-:	lda a61AC
+	beq return_dog_monster
+:	lda gs_mother_alive
 	and #mother_flag_roaming
-	beq @return
+	beq return_dog_monster
 	lda gs_special_mode
 	bne :+
 	ldx #special_mode_mother
@@ -527,7 +527,7 @@ check_bat:
 	lda gs_bat_alive
 	and #$02
 	beq check_mother
-	jsr push_special_mode2
+	jsr push_special_mode
 	ldx #special_mode_bat
 	stx gs_special_mode
 	rts
@@ -537,8 +537,8 @@ check_monster:
 	cmp #turns_until_monster
 	bcs :+
 	lda gs_level_turns_hi
-	beq @return
-:	lda gs_monster_lurks
+	beq return_dog_monster
+:	lda gs_monster_alive
 	and #$02
 	beq done_timer
 	ldx #special_mode_monster
@@ -567,7 +567,7 @@ complete_turn:
 	dec gs_torches_lit
 	ldx #$00
 	stx gs_room_lit
-	jsr push_special_mode2
+	jsr push_special_mode
 	ldx #special_mode_dark
 	stx gs_special_mode
 @dec_food:
@@ -1316,7 +1316,7 @@ play_again:
 	bit hw_TEXT
 	jmp rom_MONITOR
 
-push_special_mode2:
+push_special_mode:
 	lda gs_mode_stack1
 b10E1=*+$02
 	sta gs_mode_stack2
@@ -4569,7 +4569,7 @@ lose_ring:
 	bne @done
 	lda #$00
 	sta gs_room_lit
-	lda a61AC
+	lda gs_mother_alive
 	beq @done
 	lda #special_mode_dark
 	sta gs_special_mode
@@ -4686,7 +4686,7 @@ print_thrown:
 	jmp clear_status_lines
 
 throw_frisbee:
-	lda gs_monster_lurks
+	lda gs_monster_alive
 	and #$02
 	bne :+
 	jmp @thrown
@@ -5243,7 +5243,7 @@ cmd_press:
 	beq :+
 	jmp not_carried
 
-:	lda gs_monster_lurks
+:	lda gs_monster_alive
 	and #$02
 	bne @display
 	lda gs_special_mode
@@ -6043,7 +6043,7 @@ throw_react:
 	lda gd_parsed_object
 	cmp #noun_ball
 	beq :+
-	lda gs_monster_lurks
+	lda gs_monster_alive
 	and #$02
 	rts
 
@@ -6104,7 +6104,7 @@ special_calc_puzzle:
 	stx gs_facing
 	jsr draw_view
 	jsr @init_puzzle
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 @new_direction:
 	ldx zp1A_move_action
@@ -6257,7 +6257,7 @@ j3493:
 	jsr item_cmd
 	ldx #$00
 	stx gs_bat_alive
-pop_special_mode2:
+pop_special_mode:
 	lda gs_mode_stack1
 	sta a1A
 	sta gs_special_mode
@@ -6278,7 +6278,7 @@ special_dog:
 	jsr @confront_dog
 	ldx #$00
 	stx gs_dog1_alive
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 @dog2:
 	dex
@@ -6288,7 +6288,7 @@ special_dog:
 :	jsr @confront_dog
 	ldx #$00
 	stx gs_dog2_alive
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 @confront_dog:
 	jsr draw_view
@@ -6593,7 +6593,7 @@ special_mother:
 	jsr print_to_line2
 	ldx #$00
 	stx gs_mother_proximity
-	stx a61AC
+	stx gs_mother_alive
 	stx gs_special_mode
 	stx gs_mode_stack1
 	rts
@@ -6608,29 +6608,29 @@ special_dark:
 	bcc :+
 	jsr draw_view
 :	lda gs_room_lit
-	beq b3794
+	beq @unlit
 	ldx #$00
 	stx gs_mother_proximity
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
-b3794:
+@unlit:
 	ldx #$00
 	stx gs_level_turns_lo ;GUG: careful, if I revise to allow re-lighting torch
 	lda gs_mother_proximity
 	bne @monster_smell
 	lda gs_level
 	cmp #$05
-	beq b37AF
-	lda gs_monster_lurks
+	beq @check_mother
+	lda gs_monster_alive
 	and #$02
-	bne b37B4
-b37AC:
-	jmp pop_special_mode2
+	bne @tremble
+@cancel:
+	jmp pop_special_mode
 
-b37AF:
-	lda a61AC
-	beq b37AC
-b37B4:
+@check_mother:
+	lda gs_mother_alive
+	beq @cancel
+@tremble:
 	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
@@ -6723,7 +6723,7 @@ b3842:
 @killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -6890,7 +6890,7 @@ j399F:
 	jsr print_to_line2
 	jsr wait_long
 	jsr draw_view
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 b39B5:
 	jsr clear_maze_window
@@ -6998,7 +6998,7 @@ special_tripped:
 	lda #$62     ;much blood is spilt!
 	jsr print_to_line2
 	ldx #$00
-	stx gs_monster_lurks
+	stx gs_monster_alive
 	lda gs_mode_stack1
 	cmp #$08
 	bne :+
@@ -7027,7 +7027,7 @@ special_tripped:
 	jsr item_cmd
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -7160,10 +7160,10 @@ j3BA5:
 	lda a19
 	cmp #$01
 	bne b3BD8
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 b3BD8:
-	lda gs_monster_lurks
+	lda gs_monster_alive
 	beq b3C03
 	lda #$59     ;The
 	jsr print_to_line2
@@ -7245,7 +7245,7 @@ b3C72:
 	dec gs_player_x
 	jsr pit
 	jsr draw_view
-	jmp pop_special_mode2
+	jmp pop_special_mode
 
 special_exit:
 	jsr clear_maze_window
@@ -8882,9 +8882,9 @@ gs_exit_turns:
 	.byte $00,$00,$00
 gs_bat_alive:
 	.byte $00
-a61AC:
+gs_mother_alive:
 	.byte $04
-gs_monster_lurks:
+gs_monster_alive:
 	.byte $00
 gs_dog1_alive:
 	.byte $00

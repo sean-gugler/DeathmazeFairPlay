@@ -134,6 +134,7 @@ icmd_which_torch_unlit = $0e
 
 inventory_max = $08
 
+monster_flag_roaming = $02
 mother_flag_roaming = $04
 
 puzzle_step1 = $05
@@ -692,7 +693,7 @@ check_mother:
 	bcs :+
 	lda gs_level_turns_hi
 	beq return_dog_monster
-:	lda a61AC
+:	lda gs_mother_alive
 	and #mother_flag_roaming
 	beq return_dog_monster
 	lda gs_special_mode
@@ -723,8 +724,8 @@ check_monster:
 	bcs :+
 	lda gs_level_turns_hi
 	beq return_dog_monster
-:	lda gs_monster_lurks
-	and #$02
+:	lda gs_monster_alive
+	and #monster_flag_roaming
 	beq done_timer
 	ldx #special_mode_monster
 	stx gs_special_mode
@@ -4890,7 +4891,7 @@ lose_ring:
 	bne @done
 	lda #$00
 	sta gs_room_lit
-	lda a61AC
+	lda gs_mother_alive
 	beq @done
 	lda #special_mode_dark
 	sta gs_special_mode
@@ -5017,8 +5018,8 @@ print_thrown:
 	jmp clear_status_lines
 
 throw_frisbee:
-	lda gs_monster_lurks
-	and #$02
+	lda gs_monster_alive
+	and #monster_flag_roaming
 	bne :+
 	jmp thrown
 
@@ -5585,8 +5586,8 @@ cmd_press:
 	beq :+
 	jmp not_carried
 
-:	lda gs_monster_lurks
-	and #$02
+:	lda gs_monster_alive
+	and #monster_flag_roaming
 	bne @display
 	lda gs_special_mode
 	beq @teleport
@@ -6387,8 +6388,8 @@ throw_react:
 	lda gd_parsed_object
 	cmp #noun_ball
 	beq :+
-	lda gs_monster_lurks
-	and #$02
+	lda gs_monster_alive
+	and #monster_flag_roaming
 	rts
 
 :	jsr flash_screen
@@ -6937,7 +6938,7 @@ special_mother:
 	jsr print_to_line2
 	ldx #$00
 	stx gs_mother_proximity
-	stx a61AC
+	stx gs_mother_alive
 	stx gs_special_mode
 	stx gs_mode_stack1
 	rts
@@ -6952,29 +6953,29 @@ special_dark:
 	bcc :+
 	jsr draw_view
 :	lda gs_room_lit
-	beq @b3794
+	beq @unlit
 	ldx #$00
 	stx gs_mother_proximity
 	jmp pop_special_mode
 
-@b3794:
+@unlit:
 	ldx #$00
 	stx gs_level_turns_lo ;GUG: careful, if I revise to allow re-lighting torch
 	lda gs_mother_proximity
 	bne @monster_smell
 	lda gs_level
 	cmp #$05
-	beq @b37AF
-	lda gs_monster_lurks
-	and #$02
-	bne @b37B4
-@b37AC:
+	beq @check_mother
+	lda gs_monster_alive
+	and #monster_flag_roaming
+	bne @tremble
+@cancel:
 	jmp pop_special_mode
 
-@b37AF:
-	lda a61AC
-	beq @b37AC
-@b37B4:
+@check_mother:
+	lda gs_mother_alive
+	beq @cancel
+@tremble:
 	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
@@ -7342,7 +7343,7 @@ special_tripped:
 	lda #$62     ;much blood is spilt!
 	jsr print_to_line2
 	ldx #$00
-	stx gs_monster_lurks
+	stx gs_monster_alive
 	lda gs_mode_stack1
 	cmp #$08
 	bne :+
@@ -7507,7 +7508,7 @@ j3BA5:
 	jmp pop_special_mode
 
 b3BD8:
-	lda gs_monster_lurks
+	lda gs_monster_alive
 	beq b3C03
 	lda #$59     ;The
 	jsr print_to_line2
@@ -8131,9 +8132,9 @@ gs_exit_turns:
 	.byte $00,$00,$00
 gs_bat_alive:
 	.byte $00
-a61AC:
+gs_mother_alive:
 	.byte $04
-gs_monster_lurks:
+gs_monster_alive:
 	.byte $00
 gs_dog1_alive:
 	.byte $00
