@@ -470,69 +470,72 @@ cmd_movement:
 
 move_turn:
 	cmp #verb_left
-	beq b0975
+	beq @turn_left
 	cmp #verb_uturn
-	beq b0987
+	beq @turn_around
+@turn_right:
 	lda zp1A_facing
 	cmp #$04
-	beq b0969
+	beq @wrap_clockwise
 	inc gs_facing
-	bne b096E
-b0969:
+	bne @turned
+@wrap_clockwise:
 	ldx #$01
 	stx gs_facing
-b096E:
+@turned:
 	jsr draw_view
 	jsr print_timers
 	rts
 
-b0975:
+@turn_left:
 	lda zp1A_facing
 	cmp #$01
-	beq b0980
+	beq @wrap_counterwise
 	dec gs_facing
-	bpl b096E
-b0980:
+	bpl @turned
+@wrap_counterwise:
 	ldx #$04
 	stx gs_facing
-	bne b096E
-b0987:
+	bne @turned
+@turn_around:
 	lda zp1A_facing
 	cmp #$03
-	bmi b0995  ;GUG: bcc preferred
+	bmi :+  ;GUG: bcc preferred
 	dec gs_facing
 	dec gs_facing
-	bpl b096E
-b0995:
+	bpl @turned
+:	inc gs_facing
 	inc gs_facing
-	inc gs_facing
-	bpl b096E
+	bpl @turned
+
+; First check: move through The Perfect Square
 move_forward:
 	lda gs_level
 	cmp #$03
-	bne b09C9
+	bne @normal
 	lda gs_player_x
 	cmp #$07
-	bne b09C9
+	bne @normal
 	lda gs_player_y
 	ldx gs_facing
 	stx zp1A_facing
 	cmp #$08
-	beq b09C3
+	beq @perfect_square_N
 	cmp #$09
-	bne b09C9
+	bne @normal
+@perfect_square_S:
 	lda zp1A_facing
 	cmp #$04
-	bne b09C9
-	beq b09DF
-b09C3:
+	bne @normal
+	beq @move_player
+@perfect_square_N:
 	lda zp1A_facing
 	cmp #$02
-	beq b09DF
-b09C9:
-	lda a619A
+	beq @move_player
+@normal:
+	lda gs_wall_E0
 	and #$e0
-	bne b09DF
+	bne @move_player
 	jsr clear_maze_window
 	lda #$09
 	sta zp_col
@@ -541,32 +544,33 @@ b09C9:
 	jsr print_display_string
 	rts
 
-b09DF:
+@move_player:
 	ldx gs_facing
 	dex
-	beq b09FA
+	beq @west_1
 	dex
-	beq b09F5
+	beq @north_2
 	dex
-	beq b09F0
+	beq east_3
+
+; south_4
 	dec gs_player_y
-	bpl b09FD
-b09F0:
+	bpl @check_special
+east_3:
 	inc gs_player_x
-	bpl b09FD
-b09F5:
+	bpl @check_special
+@north_2:
 	inc gs_player_y
-	bpl b09FD
-b09FA:
+	bpl @check_special
+@west_1:
 	dec gs_player_x
-b09FD:
+@check_special:
 	jsr check_special_position
 	lda gs_special_mode
-	beq b0A06
+	beq :+
 	rts
 
-b0A06:
-	jsr complete_turn
+:	jsr complete_turn
 	jsr draw_view
 	jsr print_timers
 	rts
