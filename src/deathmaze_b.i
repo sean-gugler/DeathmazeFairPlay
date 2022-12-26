@@ -28,14 +28,15 @@
 
 ;$zp19_count = a19
 
-;$zp1A_hint_mode = $1a
-;$zp1A_move_action = $1a
-;$zp1A_object = $1a
+;$zp1A_hint_mode = a1A
+;$zp1A_move_action = a1A
+;$zp1A_object = a1A
 
 ;<(gs_item_location-2) = $b9
 
 ;<dos_iob = $b6
 
+;<food_fart_consume = $0a
 ;<food_amount = $aa
 
 ;<game_save_begin = <gs_facing
@@ -49,6 +50,7 @@
 ;>dos_iob = $7c
 
 ;>food_amount = $00
+;>food_fart_consume = $00
 
 ;>game_save_begin = >gs_facing
 
@@ -86,7 +88,9 @@ error_bad_save = $05
 execs_location_end = $07
 execs_no_location = $07
 
+food_fart_minimum = $05
 food_low = $0a
+;food_fart_minimum + food_fart_consume = $0f
 
 game_save_begin = s_facing
 

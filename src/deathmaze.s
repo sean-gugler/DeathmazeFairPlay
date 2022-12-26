@@ -93,9 +93,12 @@ error_bad_save = $05
 facing_W = $01
 facing_N = $02
 facing_E = $03
+facing_S = $04
 
-food_low = $0a
-food_amount = $00aa
+food_eat_amount = $00aa
+food_fart_consume = $000a
+food_fart_minimum = $05
+food_hungry = $0a
 
 glyph_X = $05
 glyph_solid = $0b
@@ -551,12 +554,12 @@ move_forward:
 	dex
 	beq @north_2
 	dex
-	beq east_3
+	beq @east_3
 
 ; south_4
 	dec gs_player_y
 	bpl @check_special
-east_3:
+@east_3:
 	inc gs_player_x
 	bpl @check_special
 @north_2:
@@ -774,7 +777,7 @@ print_timers:
 	lda gs_food_time_hi
 	bne :+
 	lda gs_food_time_lo
-	cmp #food_low
+	cmp #food_hungry
 	bcs :+
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
@@ -1850,7 +1853,7 @@ clear_maze_window:
 	rts
 
 s12A6:
-	lda a619A
+	lda gs_wall_E0
 	lsr
 	lsr
 	lsr
@@ -2002,7 +2005,7 @@ b13AF:
 	ldy #$01
 	jsr s177F
 j13C5:
-	lda a619A
+	lda gs_wall_E0
 	and #$10
 	bne b1407
 	pla
@@ -2117,7 +2120,7 @@ b1487:
 	ldy #$02
 	jsr s177F
 j14A1:
-	lda a619A
+	lda gs_wall_E0
 	and #$08
 	bne b14E9
 	pla
@@ -2238,7 +2241,7 @@ b156F:
 	ldy #$03
 	jsr s177F
 j1589:
-	lda a619A
+	lda gs_wall_E0
 	and #$04
 	bne b15D1
 	pla
@@ -2359,7 +2362,7 @@ b1657:
 	ldy #$04
 	jsr s177F
 j1671:
-	lda a619A
+	lda gs_wall_E0
 	and #$02
 	bne b16B9
 	pla
@@ -2446,7 +2449,7 @@ j16E8:
 	ldy #$01
 	jsr s1777
 b171B:
-	lda a619A
+	lda gs_wall_E0
 	and #$01
 	bne b174B
 	lda #$16
@@ -2482,7 +2485,7 @@ b174C:
 	ldy #$15
 	jsr s17A7
 b1760:
-	lda a619A
+	lda gs_wall_E0
 	and #$01
 	beq b174B
 	lda #$16
@@ -2601,7 +2604,7 @@ b180A:
 	stx a19
 	stx a11
 	stx a6199
-	stx a619A
+	stx gs_wall_E0
 	ldx gs_facing
 	dex
 	bne b181F
@@ -2644,7 +2647,7 @@ j1853:
 	lda (zp0A_text_ptr),y
 	and a1A
 	beq b185C
-	inc a619A
+	inc gs_wall_E0
 b185C:
 	ldy #$03
 	lda (zp0A_text_ptr),y
@@ -2661,7 +2664,7 @@ b1869:
 	cmp a11
 	beq b1897
 	asl a6199
-	asl a619A
+	asl gs_wall_E0
 	inc a11
 	lda a1A
 	cmp #$01
@@ -2685,8 +2688,8 @@ b189A:
 	asl
 	asl
 	clc
-	adc a619A
-	sta a619A
+	adc gs_wall_E0
+	sta gs_wall_E0
 	rts
 
 b18A7:
@@ -2720,7 +2723,7 @@ b18D0:
 	lda (zp0A_text_ptr),y
 	and a1A
 	beq b18DF
-	inc a619A
+	inc gs_wall_E0
 b18DF:
 	lda a19
 	cmp #$80
@@ -2748,7 +2751,7 @@ b1900:
 	jsr s1A10
 	inc a11
 	asl a6199
-	asl a619A
+	asl gs_wall_E0
 	jmp b18D0
 
 j1910:
@@ -2790,7 +2793,7 @@ b194C:
 	lda (zp0A_text_ptr),y
 	and a19
 	beq b1955
-	inc a619A
+	inc gs_wall_E0
 b1955:
 	lda a19
 	cmp #$80
@@ -2809,7 +2812,7 @@ b196F:
 	beq b18F9
 	inc a11
 	asl a6199
-	asl a619A
+	asl gs_wall_E0
 	jmp b193B
 
 j197C:
@@ -2870,7 +2873,7 @@ b19D2:
 	ldy #$00
 	and a1A
 	beq b19DF
-	inc a619A
+	inc gs_wall_E0
 b19DF:
 	lda #$04
 	cmp a11
@@ -2884,7 +2887,7 @@ b19EF:
 	jsr s1A10
 	asl a6199
 	inc a11
-	asl a619A
+	asl gs_wall_E0
 	lda a1A
 	cmp #$40
 	beq b1A07
@@ -3370,7 +3373,7 @@ icmd_default:
 	rts
 
 icmd0A_impl:
-	lda a619A
+	lda gs_wall_E0
 	and #$e0
 	lsr
 	lsr
@@ -4864,9 +4867,9 @@ cmd_eat:
 	sta zp0E_count16+1
 	lda gs_food_time_lo
 	sta zp0E_count16
-	lda #<food_amount
+	lda #<food_eat_amount
 	sta zp19_delta16
-	lda #>food_amount
+	lda #>food_eat_amount
 	sta zp19_delta16+1
 	clc
 	lda zp19_delta16
@@ -5973,31 +5976,29 @@ cmd_say:
 	lda #>text_buffer_line1
 	sta zp0E_ptr+1
 	ldy #$00
-	lda #$20
-b2FF5:
-	cmp (zp0E_ptr),y
-	beq b300E
+	lda #' '
+:	cmp (zp0E_ptr),y
+	beq @next_char
 	inc zp0E_ptr
-	bne b2FF5
+	bne :-
 	inc zp0E_ptr+1
-	bne b2FF5
-b3001:
+	bne :-
+@echo_word:
 	ldy #$00
 	lda (zp0E_ptr),y
-	cmp #$20
-	beq b301C
+	cmp #' '
+	beq @done
 	sta (zp0A_text_ptr),y
 	jsr print_char
-b300E:
+@next_char:
 	inc zp0A_text_ptr
-	bne b3014
+	bne :+
 	inc zp0A_text_ptr+1
-b3014:
-	inc zp0E_ptr
-	bne b3001
+:	inc zp0E_ptr
+	bne @echo_word
 	inc zp0E_ptr+1
-	bne b3001
-b301C:
+	bne @echo_word
+@done:
 	rts
 
 cmd_charge:
@@ -6008,17 +6009,17 @@ cmd_charge:
 @propel_player:
 	lda #$02
 	cmp gs_facing
-	bne @b3072
-	tax
+	bne @normal
+	tax          ;GUG: or just "lda #$01"
 	dex
 	txa
 	cmp gs_level
-	bne @b3072
+	bne @normal
 	cmp gs_player_x
-	bne @b3072
+	bne @normal
 	lda #$0b
 	cmp gs_player_y
-	bne @b3072
+	bne @normal
 	ldx #noun_hat
 	stx zp0E_object
 	ldx #icmd_where
@@ -6026,7 +6027,7 @@ cmd_charge:
 	jsr item_cmd
 	lda #carried_active
 	cmp zp1A_item_place
-	bne b30A5
+	bne brained
 	jsr draw_view
 	jsr wait_short
 	jsr flash_screen
@@ -6040,43 +6041,44 @@ cmd_charge:
 	stx gs_level_turns_lo
 	jmp draw_view
 
-@b3072:
-	lda a619A
+@normal:
+	lda gs_wall_E0
 	and #$e0
-	beq b30A5
-	jsr s3085
+	beq brained
+	jsr propel_next_step
 	jsr wait_short
 	jsr draw_view
 	jmp @propel_player
 
-s3085:
-	lda gs_facing
+propel_next_step:
+	lda gs_facing ;GUG: no need to use A, just ldx, dex, beq
 	tax
 	dex
 	txa
-	beq b3099
+	beq @west_1
 	dex
 	txa
-	beq b309D
+	beq @north_2
 	dex
 	txa
-	beq b30A1
+	beq @east_3
+@south_4:
 	dec gs_player_y
 	rts
 
-b3099:
+@west_1:
 	dec gs_player_x
 	rts
 
-b309D:
+@north_2:
 	inc gs_player_y
 	rts
 
-b30A1:
+@east_3:
 	inc gs_player_x
 	rts
 
-b30A5:
+brained:
 	jsr draw_view
 	jsr wait_short
 	jsr flash_screen
@@ -6131,60 +6133,60 @@ check_fart:
 	jsr wait_short
 	jsr draw_view
 @propel_player:
-	lda a619A
+	lda gs_wall_E0
 	and #$e0
-	beq b313F
-	jsr s3085
+	beq @wall
+	jsr propel_next_step
 	lda gs_level
 	cmp #$01
-	bne @b3130
+	bne @normal
 	lda gs_player_x
 	cmp #$06
-	bne @b3130
+	bne @normal
 	lda gs_player_y
 	cmp #$0a
-	beq b3136
-@b3130:
+	beq @guillotine
+@normal:
 	jsr complete_turn
 	jmp @next_propel
 
-b3136:
+@guillotine:
 	jsr draw_view
 	jsr wait_short
 	jmp beheaded
 
-b313F:
-	jsr draw_view
+; Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
+@wall:
+	jsr draw_view ;GUG: is this draw necessary?
 	ldx gs_food_time_hi
-	stx a0F
+	stx zp0E_count16+1
 	ldx gs_food_time_lo
-	stx zp0E_src
-	lda a0F
-	bne b315D
-	lda zp0E_src
-	cmp #$05
-	bcs b3159
+	stx zp0E_count16
+	lda zp0E_count16+1
+	bne @consume_food
+	lda zp0E_count16
+	cmp #food_fart_minimum
+	bcs :+
 	jmp starved
 
-b3159:
-	cmp #$0f
-	bcc b3190
-b315D:
-	lda #>zp0A_text_ptr
-	sta a1A
-	lda #<zp0A_text_ptr
-	sta a19
-	lda zp0E_src
+:	cmp #food_fart_minimum + food_fart_consume
+	bcc @clamp_minimum
+@consume_food:
+	lda #>food_fart_consume
+	sta zp19_delta16+1
+	lda #<food_fart_consume
+	sta zp19_delta16
+	lda zp0E_count16
 	sec
-	sbc a19
-	sta zp0E_src
-	lda a0F
-	sbc a1A
-	sta a0F
+	sbc zp19_delta16
+	sta zp0E_count16
+	lda zp0E_count16+1
+	sbc zp19_delta16+1
+	sta zp0E_count16+1
 	sta gs_food_time_hi
-	lda zp0E_src
+	lda zp0E_count16
 	sta gs_food_time_lo
-b317A:
+@wham:
 	jsr wait_short
 	jsr clear_maze_window
 	lda #$2d     ;WHAM!
@@ -6195,20 +6197,20 @@ b317A:
 	jsr print_display_string
 	jmp check_special_position
 
-b3190:
-	ldx #$05
+@clamp_minimum:
+	ldx #food_fart_minimum
 	stx gs_food_time_lo
-	bne b317A
+	bne @wham
 
 cmd_save:
 	dec zp0F_action
 	bne cmd_quit
 	lda gs_special_mode
-	beq b31A5
+	beq ask_save_game
 	lda #$9a     ;It is currently impossible.
 	jmp print_to_line2
 
-b31A5:
+ask_save_game:
 	jsr clear_status_lines
 	lda #$93     ;Save the game?
 	jsr print_to_line1
@@ -6245,11 +6247,10 @@ cmd_quit:
 	jsr print_to_line1
 	jsr input_Y_or_N
 	cmp #$59
-	beq b31F5
+	beq :+
 	jmp clear_status_lines
 
-b31F5:
-	jsr b31A5
+:	jsr ask_save_game
 	jmp play_again
 
 cmd_directions:
@@ -6260,22 +6261,21 @@ cmd_directions:
 	sta zp_col
 	sta zp_row
 	jsr get_rowcol_addr
-	ldx #<p77BF
+	ldx #<(intro_text-1)
 	stx zp0E_ptr
-	ldx #>p77BF
+	ldx #>(intro_text-1)
 	stx zp0E_ptr+1
-b3213:
+@next_char:
 	inc zp0E_ptr
-	bne b3219
+	bne :+
 	inc zp0E_ptr+1
-b3219:
-	ldy #$00
+:	ldy #$00
 	lda (zp0E_ptr),y
 	and #$7f
 	jsr char_out
 	ldy #$00
 	lda (zp0E_ptr),y
-	bpl b3213
+	bpl @next_char
 	jsr input_char
 	jsr clear_hgr2
 	jsr draw_view
@@ -7259,7 +7259,7 @@ b39D2:
 	stx a6199
 	ldx #$23
 	stx zp0E_src
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	ldx #$03
 	stx a0F
@@ -7562,7 +7562,7 @@ j3C37:
 	bne b3C55
 	lda gs_room_lit
 	beq b3C55
-	lda a619A
+	lda gs_wall_E0
 	and #$e0
 	beq b3C55
 	jsr s1E5A
@@ -7596,7 +7596,7 @@ special_exit:
 	lda #$07
 	sta a6199
 	ldx #$47
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	ldx #$08
 	stx a0F
@@ -7628,7 +7628,7 @@ b3CC8:
 	ldx #$03
 	stx a6199
 	ldx #$23
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	ldx #$08
 	stx a0F
@@ -7655,7 +7655,7 @@ b3CFB:
 	ldx #<p01
 	stx a6199
 	ldx #>p01
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	inc gs_exit_turns
 	jmp j3CA6
@@ -7677,7 +7677,7 @@ b3D23:
 	ldx #<p01
 	stx a6199
 	ldx #>p01
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	ldx #$02
 	stx a0F
@@ -7756,7 +7756,7 @@ b3D9C:
 	ldx #$07
 	stx a6199
 	ldx #$46
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	ldx #icmd_destroy2
 	stx zp0F_action
@@ -7788,7 +7788,7 @@ b3DEF:
 	ldx #$03
 	stx a6199
 	ldx #$23
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 	inc gs_exit_turns
 	jmp j3CA6
@@ -7801,7 +7801,7 @@ b3E05:
 	jsr clear_maze_window
 	ldx #$01
 	stx a6199
-	stx a619A
+	stx gs_wall_E0
 	jsr s12A6
 j3E1B:
 	lda #$3c     ;Before I let you go free
@@ -8099,7 +8099,7 @@ gs_torches_unlit:
 	.byte $01
 a6199:
 	.byte $00
-a619A:
+gs_wall_E0:
 	.byte $00
 a619B:
 	.byte $00
@@ -8387,11 +8387,10 @@ display_string_table:
 	.byte " SI NOI", $08, $08, $08, $08, " NOITACO", $0C, "              00005 "
 	.byte "EZ", $08, "XAMTAE", $04, "           %`GREN DEC *", $C8, "0` BNE"
 	.byte " GOON6", $B8, "5` JMP UNCOM", $D0, "@`GOON68 DEC *", $C8, "E"
-	.assert * = $77bf, error, "Unexpected alignment"
-p77BF:
 	.byte "`"
 
 intro_text:
+	.assert * = $77c0, error, "Unexpected alignment"
 	.include "string_intro_defs.inc"
 	.byte $A0
 
@@ -8722,7 +8721,7 @@ b7ECE:
 	ldy #$01
 	jsr s1777
 b7F1B:
-	lda a619A
+	lda gs_wall_E0
 	and #$01
 	bne b7F4B
 	lda #$16
@@ -8758,7 +8757,7 @@ b7F4C:
 	ldy #$15
 	jsr s17A7
 b7F60:
-	lda a619A
+	lda gs_wall_E0
 	and #$01
 	beq b7F4B
 	lda #$16

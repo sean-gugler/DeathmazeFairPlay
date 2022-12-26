@@ -82,12 +82,15 @@
 2F42
 2F9C
 2FD9
+2FE4
 3197
 3805
 7CC7
 7CEF
 :REMOVED BYTES
 :FULL COMMENTS
+099D First check: move through The Perfect Square
+09EB south_4
 0D8A Cancel whatever is currently typed
 0E37 BUG: meant to prevent double-space, but only prevents WORD_L_
 10E9 cruft leftover from earlier build
@@ -99,6 +102,7 @@
 2624 junk
 2632 junk
 2F54 .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
+313F Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 7D8F 1-based indexing via 'A'
 :SIDE COMMENTS
@@ -542,15 +546,25 @@
 2FD5 With what? Toenail polish?
 2FDD GUG: maybe disguise this better
 2FE4 OK...
+2FF3 #' '
+3005 #' '
+302B GUG: or just "lda #$01"
 303F #noun_hat
 3043 #icmd_where
 304A #carried_active
+3085 GUG: no need to use A, just ldx, dex, beq
 30B1 You have rammed your head into a steel
 30B6 wall and bashed your brains out!
 30CF yellow
 30DB #>screen_GR2
 3100 You will do no such thing!
+313F GUG: is this draw necessary?
+3152 #food_fart_minimum
+3159 #food_fart_minimum + food_fart_consume
+315D #>food_fart_consume
+3161 #<food_fart_consume
 3180 WHAM!
+3190 #food_fart_minimum
 31A0 It is currently impossible.
 31A8 Save the game?
 31B2 #'Y'
@@ -793,18 +807,15 @@
 0008 screen_ptr
 0009 screen_ptr+1
 000A zp0A_text_ptr
-000B text_ptr+1
+000B zp0A_text_ptr+1
 000C zp_0C_string
 000D zp_0D
-000E zp0E_object
-000F zp0F_action
 0010 zp10_noun
 0011 zp11_box_item
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
-001A zp1A_item_place
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -843,7 +854,23 @@
 0943 cmd_verbal
 0949 cmd_movement
 0956 move_turn
+095E @turn_right
+0969 @wrap_clockwise
+096E @turned
+0975 @turn_left
+0980 @wrap_counterwise
+0987 @turn_around
+0995 +
 099D move_forward
+09BB @perfect_square_S
+09C3 @perfect_square_N
+09C9 @normal
+09DF @move_player
+09F0 @east_3
+09F5 @north_2
+09FA @west_1
+09FD @check_special
+0A06 +
 0A10 check_special_position
 0A22 +
 0A27 +
@@ -890,8 +917,8 @@
 0C23 @check_done
 0C29 textbuf_prev_input-1
 0C2A textbuf_prev_input
-0C7A text_buffer1
-0CA2 text_buffer2
+0C7A text_buffer_line1
+0CA2 text_buffer_line2
 0CCA get_player_input
 0CCD -
 0CDD +
@@ -1237,8 +1264,20 @@
 2FD5 +
 2FD9 cmd_grendel
 2FE0 cmd_say
+2FF5 -
+3001 @echo_word
+300E @next_char
+3014 +
+301C @done
 301D cmd_charge
 3024 @propel_player
+3072 @normal
+3085 propel_next_step
+3095 @south_4
+3099 @west_1
+309D @north_2
+30A1 @east_3
+30A5 brained
 30BE cmd_fart
 30C5 flash_screen
 30CF @fill
@@ -1247,12 +1286,22 @@
 3105 +
 310B @next_propel
 3111 @propel_player
+3130 @normal
+3136 @guillotine
+313F @wall
 3159 +
+315D @consume_food
+317A @wham
+3190 @clamp_minimum
 3197 cmd_save
+31A5 ask_save_game
 31B9 +
 31BC save_to_tape
 31DF cmd_quit
+31F5 +
 31FB cmd_directions
+3213 @next_char
+3219 +
 3238 cmd_hint
 324F +
 3258 @calc_hint
@@ -1372,6 +1421,7 @@
 6196 gs_player_y
 6197 gs_torches_lit
 6198 gs_torches_unlit
+619A gs_wall_E0
 619C gd_parsed_action
 619D gd_parsed_object
 619E gs_room_lit
@@ -1421,6 +1471,7 @@
 6773 noun_table
 6820 junk_string
 6829 display_string_table
+77BF (intro_text-1)
 77C0 intro_text
 7B57 junk_intro
 7C00 text_save_device
@@ -1572,6 +1623,7 @@ FF69 rom_MONITOR
 2DC3
 2FC1
 303F
+315D
 3182
 3267
 3324
