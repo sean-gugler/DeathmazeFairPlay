@@ -47,6 +47,7 @@ zp1A_object = $1a
 zp1A_count_loop = $1a
 zp1A_cmds_to_check = $1a
 zp1A_facing = $1a
+zp1A_temp = $1a
 
 zp19_item_position = $19
 zp1A_item_place = $1A
@@ -711,7 +712,7 @@ check_bat:
 	lda gs_bat_alive
 	and #$02
 	beq check_mother
-	jsr push_special_mode2
+	jsr push_special_mode
 	ldx #special_mode_bat
 	stx gs_special_mode
 	rts
@@ -751,7 +752,7 @@ complete_turn:
 	dec gs_torches_lit
 	ldx #$00
 	stx gs_room_lit
-	jsr push_special_mode2
+	jsr push_special_mode
 	ldx #special_mode_dark
 	stx gs_special_mode
 @dec_food:
@@ -1592,9 +1593,8 @@ play_again:
 	bit hw_TEXT
 	jmp rom_MONITOR
 
-push_special_mode2:
+push_special_mode:
 	lda gs_mode_stack1
-b10E1=*+$02
 	sta gs_mode_stack2
 	lda gs_special_mode
 	sta gs_mode_stack1
@@ -1615,7 +1615,7 @@ b10E1=*+$02
 	cmp a1A
 	beq b110D
 	dec a11
-	bne b10E1
+	.byte $d0, $dd  ;bne -35
 	pla
 	sta zp0E_object
 	pla
@@ -6444,11 +6444,12 @@ special_calc_puzzle:
 	bne @update_display
 	cmp gs_rotate_count
 	bne @update_display
+;@success
 	ldx #$04
 	stx gs_facing
 	jsr draw_view
 	jsr @init_puzzle
-	jmp j34D5
+	jmp pop_special_mode
 
 @new_direction:
 	ldx zp1A_move_action
@@ -6600,20 +6601,19 @@ special_bat:
 	jsr item_cmd
 	ldx #$00
 	stx gs_bat_alive
-j34D5:
+pop_special_mode:
 	lda gs_mode_stack1
-	sta a1A
+	sta zp1A_temp
 	sta gs_special_mode
 	ldx gs_mode_stack2
 	stx gs_mode_stack1
 	ldx #$00
 	stx gs_mode_stack2
-	lda a1A
-	beq b34EF
+	lda zp1A_temp
+	beq :+
 	jmp check_special_mode
 
-b34EF:
-	rts
+:	rts
 
 special_dog:
 	dex
@@ -6622,7 +6622,7 @@ special_dog:
 	jsr @confront_dog
 	ldx #$00
 	stx gs_dog1_alive
-	jmp j34D5
+	jmp pop_special_mode
 
 @dog2:
 	dex
@@ -6632,7 +6632,7 @@ special_dog:
 :	jsr @confront_dog
 	ldx #$00
 	stx gs_dog2_alive
-	jmp j34D5
+	jmp pop_special_mode
 
 @confront_dog:
 	jsr draw_view
@@ -6955,7 +6955,7 @@ special_dark:
 	beq @b3794
 	ldx #$00
 	stx gs_mother_proximity
-	jmp j34D5
+	jmp pop_special_mode
 
 @b3794:
 	ldx #$00
@@ -6969,7 +6969,7 @@ special_dark:
 	and #$02
 	bne @b37B4
 @b37AC:
-	jmp j34D5
+	jmp pop_special_mode
 
 @b37AF:
 	lda a61AC
@@ -7067,7 +7067,7 @@ snake_check_verb:
 @killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
-	jmp j34D5
+	jmp pop_special_mode
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -7234,7 +7234,7 @@ j399F:
 	jsr print_to_line2
 	jsr wait_long
 	jsr draw_view
-	jmp j34D5
+	jmp pop_special_mode
 
 b39B5:
 	jsr clear_maze_window
@@ -7371,7 +7371,7 @@ special_tripped:
 	jsr item_cmd
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
-	jmp j34D5
+	jmp pop_special_mode
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -7504,7 +7504,7 @@ j3BA5:
 	lda a19
 	cmp #$01
 	bne b3BD8
-	jmp j34D5
+	jmp pop_special_mode
 
 b3BD8:
 	lda gs_monster_lurks
@@ -7589,7 +7589,7 @@ b3C72:
 	dec gs_player_x
 	jsr pit
 	jsr draw_view
-	jmp j34D5
+	jmp pop_special_mode
 
 special_exit:
 	jsr clear_maze_window

@@ -370,12 +370,12 @@ move_forward:
 	dex
 	beq @north_2
 	dex
-	beq east_3
+	beq @east_3
 
 ; south_4
 	dec gs_player_y
 	bpl @check_special
-east_3:
+@east_3:
 	inc gs_player_x
 	bpl @check_special
 @north_2:
@@ -6104,7 +6104,7 @@ special_calc_puzzle:
 	stx gs_facing
 	jsr draw_view
 	jsr @init_puzzle
-	jmp j34D5
+	jmp pop_special_mode2
 
 @new_direction:
 	ldx zp1A_move_action
@@ -6257,7 +6257,7 @@ j3493:
 	jsr item_cmd
 	ldx #$00
 	stx gs_bat_alive
-j34D5:
+pop_special_mode2:
 	lda gs_mode_stack1
 	sta a1A
 	sta gs_special_mode
@@ -6266,11 +6266,10 @@ j34D5:
 	ldx #$00
 	stx gs_mode_stack2
 	lda a1A
-	beq b34EF
+	beq :+
 	jmp check_special_mode
 
-b34EF:
-	rts
+:	rts
 
 special_dog:
 	dex
@@ -6279,7 +6278,7 @@ special_dog:
 	jsr @confront_dog
 	ldx #$00
 	stx gs_dog1_alive
-	jmp j34D5
+	jmp pop_special_mode2
 
 @dog2:
 	dex
@@ -6289,7 +6288,7 @@ special_dog:
 :	jsr @confront_dog
 	ldx #$00
 	stx gs_dog2_alive
-	jmp j34D5
+	jmp pop_special_mode2
 
 @confront_dog:
 	jsr draw_view
@@ -6612,7 +6611,7 @@ special_dark:
 	beq b3794
 	ldx #$00
 	stx gs_mother_proximity
-	jmp j34D5
+	jmp pop_special_mode2
 
 b3794:
 	ldx #$00
@@ -6626,7 +6625,7 @@ b3794:
 	and #$02
 	bne b37B4
 b37AC:
-	jmp j34D5
+	jmp pop_special_mode2
 
 b37AF:
 	lda a61AC
@@ -6724,7 +6723,7 @@ b3842:
 @killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
-	jmp j34D5
+	jmp pop_special_mode2
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -6891,7 +6890,7 @@ j399F:
 	jsr print_to_line2
 	jsr wait_long
 	jsr draw_view
-	jmp j34D5
+	jmp pop_special_mode2
 
 b39B5:
 	jsr clear_maze_window
@@ -7028,7 +7027,7 @@ special_tripped:
 	jsr item_cmd
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
-	jmp j34D5
+	jmp pop_special_mode2
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -7161,7 +7160,7 @@ j3BA5:
 	lda a19
 	cmp #$01
 	bne b3BD8
-	jmp j34D5
+	jmp pop_special_mode2
 
 b3BD8:
 	lda gs_monster_lurks
@@ -7246,7 +7245,7 @@ b3C72:
 	dec gs_player_x
 	jsr pit
 	jsr draw_view
-	jmp j34D5
+	jmp pop_special_mode2
 
 special_exit:
 	jsr clear_maze_window

@@ -1005,7 +1005,7 @@
 10B9 game_over
 10C4 play_again
 10D3 +
-10DC push_special_mode2
+10DC push_special_mode
 111D +
 1134 +
 113B +
@@ -1339,6 +1339,8 @@
 3480 @dead
 348B @look
 3499 @try_action
+34D5 pop_special_mode
+34EF +
 34F0 special_dog
 34FF @dog2
 3505 +
