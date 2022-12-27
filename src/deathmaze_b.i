@@ -19,6 +19,7 @@
 ;'0' - noun_zero = $16
 
 ;$zp_string_number = $11
+;$zp_wall_opposite = $19
 
 ;$zp10_count_words = $10
 
@@ -26,11 +27,11 @@
 
 ;$zp13_raw_input = a13
 
-;$zp19_count = a19
+;$zp19_count = $19
 
-;$zp1A_hint_mode = a1A
-;$zp1A_move_action = a1A
-;$zp1A_object = a1A
+;$zp1A_hint_mode = $1a
+;$zp1A_move_action = $1a
+;$zp1A_object = $1a
 
 ;<(gs_item_location-2) = $b9
 

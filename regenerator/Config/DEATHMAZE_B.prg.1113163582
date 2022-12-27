@@ -53,6 +53,7 @@
 0E4D
 0FDC
 127E
+1828
 1A34
 1AFE
 1B25
@@ -105,6 +106,7 @@
 313F Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 7D8F 1-based indexing via 'A'
+7E76 cruft from here to end of file
 :SIDE COMMENTS
 0824 Continue a game?
 082C #'Y'
@@ -259,6 +261,8 @@
 1231 #' '
 1260 #char_cursor
 127A #' '
+18C5 $zp_wall_opposite
+1935 $zp_wall_opposite
 1A36 #execs_no_location
 1A42 #<(gs_item_location-2)
 1A48 #>(gs_item_location-2)
@@ -806,16 +810,18 @@
 0007 zp_row
 0008 screen_ptr
 0009 screen_ptr+1
-000A zp0A_text_ptr
-000B zp0A_text_ptr+1
+000A zp0A_walls_ptr
+000B zp0A_walls_ptr+1
 000C zp_0C_string
 000D zp_0D
 0010 zp10_noun
-0011 zp11_box_item
+0011 zp11_count
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
+0019 zp19_sight_depth
+001A zp1A_wall_bit
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -993,7 +999,7 @@
 0FF7 input_Y_or_N
 0FFA -
 100F +
-1015 draw_view
+1015 update_view
 102F +
 1044 @done
 1045 wait_long
@@ -1035,6 +1041,59 @@
 1286 @clear_row
 128E @clear_raster
 1292 -
+17BF probe_forward
+17CF -
+17D7 @find_x
+17DE -
+17EA @find_y
+17F5 @shift_2_bytes
+17FA @shift_1_byte
+17FF @find_2bits
+1802 -
+180A @check_facing
+181F +
+1825 +
+1828 probe_south
+1845 +
+184C @S_sight_limit
+1853 S_next_wall
+185C +
+1869 +
+188E +
+1897 S_probed_max
+189A S_probe_done
+18A7 probe_east
+18A9 @next_depth
+18BE @E_sight_limit
+18D0 E_next_wall
+18DF +
+18EA +
+18EE @check_opposite
+18F5 +
+18F9 E_probed_max
+1900 E_probe_done
+1910 probe_west
+1912 @next_depth
+1929 +
+193B W_next_wall
+1944 +
+194C +
+1955 +
+195D +
+196F W_probed_max
+197C probe_north
+198B +
+198F @next_depth
+19AC +
+19B3 @sight_limit
+19BE +
+19C4 @save_depth
+19C9 N_next_wall
+19D2 +
+19DF +
+19EF +
+1A07 +
+1A10 swap_saved_A_2
 1A34 item_cmd
 1A5F @destroy_item
 1A69 +
@@ -1420,6 +1479,7 @@
 3F4E vector_reset
 3FFF relocated
 4000 screen_HGR2
+6000 maze_walls
 613D data_new_game
 6193 gs_facing
 6194 gs_level
@@ -1427,7 +1487,8 @@
 6196 gs_player_y
 6197 gs_torches_lit
 6198 gs_torches_unlit
-619A gs_wall_E0
+6199 gs_walls_left
+619A gs_walls_right_depth
 619C gd_parsed_action
 619D gd_parsed_object
 619E gs_room_lit

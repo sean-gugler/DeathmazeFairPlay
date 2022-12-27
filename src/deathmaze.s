@@ -50,9 +50,14 @@ zp1A_facing = $1a
 zp1A_temp = $1a
 
 zp19_item_position = $19
-zp1A_item_place = $1A
+zp1A_item_place = $1a
+
+zp1A_wall_bit = $1a
+zp19_wall_opposite = $19
+zp19_sight_depth = $19
 
 ; 16-bit variables
+zp0A_walls_ptr = $0a ;$0b
 zp0E_count16 = $0e ;$0f
 zp0E_ptr = $0e ;$0f
 zp0E_src = $0e ;$0f
@@ -357,7 +362,7 @@ load_from_tape:
 	stx tape_addr_end
 	jsr rom_READ_TAPE
 	jsr clear_hgr2
-	jsr draw_view
+	jsr update_view
 	jsr check_signature ;NOTE: never returns, continues with PLA/PLA/JMP
 	nop
 	jmp item_cmd
@@ -488,7 +493,7 @@ move_turn:
 	ldx #$01
 	stx gs_facing
 @turned:
-	jsr draw_view
+	jsr update_view
 	jsr print_timers
 	rts
 
@@ -538,8 +543,8 @@ move_forward:
 	cmp #$02
 	beq @move_player
 @normal:
-	lda gs_wall_E0
-	and #$e0
+	lda gs_walls_right_depth
+	and #%11100000
 	bne @move_player
 	jsr clear_maze_window
 	lda #$09
@@ -576,7 +581,7 @@ move_forward:
 	rts
 
 :	jsr complete_turn
-	jsr draw_view
+	jsr update_view
 	jsr print_timers
 	rts
 
@@ -1493,9 +1498,9 @@ input_Y_or_N:
 	pla
 	rts
 
-draw_view:
+update_view:
 	jsr clear_maze_window
-	jsr s17BF
+	jsr probe_forward
 	lda gs_room_lit
 	beq @done
 	jsr s12A6
@@ -1605,7 +1610,7 @@ push_special_mode2:
 	.byte $95,$61
 	;[sta] gs_player_x
 	jsr pit
-	jsr draw_view
+	jsr update_view
 	jmp $3493  ;in special_bat
 
 	rts
@@ -1854,7 +1859,7 @@ clear_maze_window:
 	rts
 
 s12A6:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	lsr
 	lsr
 	lsr
@@ -1951,7 +1956,7 @@ b133F:
 	jmp j16E8
 
 j135C:
-	lda a6199
+	lda gs_walls_left
 	and #$10
 	bne b139C
 	pla
@@ -2006,7 +2011,7 @@ b13AF:
 	ldy #$01
 	jsr s177F
 j13C5:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$10
 	bne b1407
 	pla
@@ -2062,7 +2067,7 @@ b141A:
 	ldy #$01
 	jsr s1795
 j1430:
-	lda a6199
+	lda gs_walls_left
 	and #$08
 	bne b1474
 	pla
@@ -2121,7 +2126,7 @@ b1487:
 	ldy #$02
 	jsr s177F
 j14A1:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$08
 	bne b14E9
 	pla
@@ -2183,7 +2188,7 @@ b14FE:
 	ldy #$02
 	jsr s1795
 j1518:
-	lda a6199
+	lda gs_walls_left
 	and #$04
 	bne b155C
 	pla
@@ -2242,7 +2247,7 @@ b156F:
 	ldy #$03
 	jsr s177F
 j1589:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$04
 	bne b15D1
 	pla
@@ -2304,7 +2309,7 @@ b15E6:
 	ldy #$03
 	jsr s1795
 j1600:
-	lda a6199
+	lda gs_walls_left
 	and #$02
 	bne b1644
 	pla
@@ -2363,7 +2368,7 @@ b1657:
 	ldy #$04
 	jsr s177F
 j1671:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$02
 	bne b16B9
 	pla
@@ -2428,7 +2433,7 @@ j16E8:
 	pla
 	cmp #$00
 	beq b174C
-	lda a6199
+	lda gs_walls_left
 	and #$01
 	bne b171B
 	lda #$00
@@ -2450,7 +2455,7 @@ j16E8:
 	ldy #$01
 	jsr s1777
 b171B:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$01
 	bne b174B
 	lda #$16
@@ -2476,7 +2481,7 @@ b174B:
 	rts
 
 b174C:
-	lda a6199
+	lda gs_walls_left
 	and #$01
 	beq b1760
 	lda #$00
@@ -2486,7 +2491,7 @@ b174C:
 	ldy #$15
 	jsr s17A7
 b1760:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$01
 	beq b174B
 	lda #$16
@@ -2550,359 +2555,337 @@ b17AC:
 	bne b17AC
 	rts
 
-s17BF:
+probe_forward:
 	ldy #$00
-	lda #<p6000
-	sta zp0A_text_ptr
-	lda #>p6000
-	sta zp0A_text_ptr+1
+	lda #<maze_walls
+	sta zp0A_walls_ptr
+	lda #>maze_walls
+	sta zp0A_walls_ptr+1
 	ldx gs_level
 	lda #$00
 	clc
-j17CF:
-	dex
-	beq b17D7
+:	dex
+	beq @find_x
 	adc #$21
-	jmp j17CF
+	jmp :-
 
-b17D7:
-	adc zp0A_text_ptr
-	sta zp0A_text_ptr
+@find_x:
+	adc zp0A_walls_ptr
+	sta zp0A_walls_ptr
 	ldx gs_player_x
-j17DE:
-	dex
-	beq b17EA
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	jmp j17DE
+:	dex
+	beq @find_y
+	inc zp0A_walls_ptr
+	inc zp0A_walls_ptr
+	inc zp0A_walls_ptr
+	jmp :-
 
-b17EA:
+@find_y:
 	lda gs_player_y
 	cmp #$05
-	bmi b17FF  ;GUG: bcc preferred
+	bmi @find_2bits  ;GUG: bcc preferred
 	cmp #$09
-	bmi b17FA  ;GUG: bcc preferred
-	inc zp0A_text_ptr
+	bmi @shift_1_byte  ;GUG: bcc preferred
+@shift_2_bytes:
+	inc zp0A_walls_ptr
 	sec
 	sbc #$04
-b17FA:
-	inc zp0A_text_ptr
+@shift_1_byte:
+	inc zp0A_walls_ptr
 	sec
 	sbc #$04
-b17FF:
+@find_2bits:
 	tax
 	lda #$80
-j1802:
-	dex
-	beq b180A
+:	dex
+	beq @check_facing
 	lsr
 	lsr
-	jmp j1802
+	jmp :-
 
-b180A:
-	sta a1A
-	stx a19
-	stx a11
-	stx a6199
-	stx gs_wall_E0
+@check_facing:
+	sta zp1A_wall_bit
+	stx zp19_sight_depth
+	stx zp11_count
+	stx gs_walls_left
+	stx gs_walls_right_depth
 	ldx gs_facing
 	dex
-	bne b181F
-	jmp j1910
+	bne :+
+	jmp probe_west
 
-b181F:
-	dex
-	bne b1825
-	jmp j197C
+:	dex
+	bne :+
+	jmp probe_north
 
-b1825:
-	dex
-	beq b18A7
-j1828:
-	lda (zp0A_text_ptr),y
-	and a1A
-	bne b184C
-	inc a19
-	lda a19
+:	dex
+	beq probe_east
+
+probe_south:
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	bne @S_sight_limit
+	inc zp19_sight_depth
+	lda zp19_sight_depth
 	cmp #$05
-	beq b184C
-	lda a1A
+	beq @S_sight_limit
+	lda zp1A_wall_bit
 	cmp #$80
-	bne b1845
-	dec zp0A_text_ptr
+	bne :+
+	dec zp0A_walls_ptr
 	lda #$02
-	sta a1A
-	jmp j1828
+	sta zp1A_wall_bit
+	jmp probe_south
 
-b1845:
-	asl a1A
-	asl a1A
-	jmp j1828
+:	asl zp1A_wall_bit
+	asl zp1A_wall_bit
+	jmp probe_south
 
-b184C:
-	lda a19
-	jsr s1A10
-	lsr a1A
-j1853:
-	lda (zp0A_text_ptr),y
-	and a1A
-	beq b185C
-	inc gs_wall_E0
-b185C:
-	ldy #$03
-	lda (zp0A_text_ptr),y
+@S_sight_limit:
+	lda zp19_sight_depth
+	jsr swap_saved_A_2
+	lsr zp1A_wall_bit
+S_next_wall:
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	beq :+
+	inc gs_walls_right_depth
+:	ldy #$03
+	lda (zp0A_walls_ptr),y
 	ldy #$00
-	and a1A
-	beq b1869
-	inc a6199
-b1869:
-	jsr s1A10
-	cmp a11
-	beq b189A
-	jsr s1A10
+	and zp1A_wall_bit
+	beq :+
+	inc gs_walls_left
+:	jsr swap_saved_A_2
+	cmp zp11_count
+	beq S_probe_done
+	jsr swap_saved_A_2
 	lda #$04
-	cmp a11
-	beq b1897
-	asl a6199
-	asl gs_wall_E0
-	inc a11
-	lda a1A
+	cmp zp11_count
+	beq S_probed_max
+	asl gs_walls_left
+	asl gs_walls_right_depth
+	inc zp11_count
+	lda zp1A_wall_bit
 	cmp #$01
-	beq b188E
-	lsr a1A
-	lsr a1A
-	jmp j1853
+	beq :+
+	lsr zp1A_wall_bit
+	lsr zp1A_wall_bit
+	jmp S_next_wall
 
-b188E:
-	lda #$40
-	sta a1A
-	inc zp0A_text_ptr
-	jmp j1853
+:	lda #$40
+	sta zp1A_wall_bit
+	inc zp0A_walls_ptr
+	jmp S_next_wall
 
-b1897:
-	jsr s1A10
-b189A:
+S_probed_max:
+	jsr swap_saved_A_2
+S_probe_done:
 	asl
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc gs_wall_E0
-	sta gs_wall_E0
+	adc gs_walls_right_depth
+	sta gs_walls_right_depth
 	rts
 
-b18A7:
-	lsr a1A
-b18A9:
+probe_east:
+	lsr zp1A_wall_bit
+@next_depth:
 	clc
-	lda zp0A_text_ptr
+	lda zp0A_walls_ptr
 	adc #$03
-	sta zp0A_text_ptr
-	lda (zp0A_text_ptr),y
-	and a1A
-	bne b18BE
-	inc a19
-	lda a19
+	sta zp0A_walls_ptr
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	bne @E_sight_limit
+	inc zp19_sight_depth
+	lda zp19_sight_depth
 	cmp #$05
-	bne b18A9
-b18BE:
-	lda a19
-	jsr s1A10
-	lda a1A
-	sta a19
-	asl a1A
+	bne @next_depth
+@E_sight_limit:
+	lda zp19_sight_depth
+	jsr swap_saved_A_2
+	lda zp1A_wall_bit
+	sta zp19_wall_opposite
+	asl zp1A_wall_bit
 	clc
-	ror a19
-	bcc b18D0
-	ror a19
-b18D0:
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	lda (zp0A_text_ptr),y
-	and a1A
-	beq b18DF
-	inc gs_wall_E0
-b18DF:
-	lda a19
+	ror zp19_wall_opposite
+	bcc E_next_wall
+	ror zp19_wall_opposite
+E_next_wall:
+	dec zp0A_walls_ptr
+	dec zp0A_walls_ptr
+	dec zp0A_walls_ptr
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	beq :+
+	inc gs_walls_right_depth
+:	lda zp19_wall_opposite
 	cmp #$80
-	beq b18EA
-	lda (zp0A_text_ptr),y
-	jmp j18EE
+	beq :+
+	lda (zp0A_walls_ptr),y
+	jmp @check_opposite
 
-b18EA:
-	iny
-	lda (zp0A_text_ptr),y
+:	iny
+	lda (zp0A_walls_ptr),y
 	dey
-j18EE:
-	and a19
-	beq b18F5
-	inc a6199
-b18F5:
-	lda a11
+@check_opposite:
+	and zp19_wall_opposite
+	beq :+
+	inc gs_walls_left
+:	lda zp11_count
 	cmp #$04
-b18F9:
-	beq b1897
-	jsr s1A10
-	cmp a11
-b1900:
-	beq b189A
-	jsr s1A10
-	inc a11
-	asl a6199
-	asl gs_wall_E0
-	jmp b18D0
+E_probed_max:
+	beq S_probed_max
+	jsr swap_saved_A_2
+	cmp zp11_count
+E_probe_done:
+	beq S_probe_done
+	jsr swap_saved_A_2
+	inc zp11_count
+	asl gs_walls_left
+	asl gs_walls_right_depth
+	jmp E_next_wall
 
-j1910:
-	lsr a1A
-j1912:
-	lda (zp0A_text_ptr),y
-	and a1A
-	bne b1929
-	inc a19
-	lda a19
+probe_west:
+	lsr zp1A_wall_bit
+@next_depth:
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	bne :+
+	inc zp19_sight_depth
+	lda zp19_sight_depth
 	cmp #$05
-	beq b1929
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	jmp j1912
+	beq :+
+	dec zp0A_walls_ptr
+	dec zp0A_walls_ptr
+	dec zp0A_walls_ptr
+	jmp @next_depth
 
-b1929:
-	lda a19
-	jsr s1A10
-	lda a1A
-	sta a19
-	asl a1A
+:	lda zp19_sight_depth
+	jsr swap_saved_A_2
+	lda zp1A_wall_bit
+	sta zp19_wall_opposite
+	asl zp1A_wall_bit
 	clc
-	ror a19
-	bcc b193B
-	ror a19
-b193B:
-	lda (zp0A_text_ptr),y
-	and a1A
-	beq b1944
-	inc a6199
-b1944:
-	lda a19
+	ror zp19_wall_opposite
+	bcc W_next_wall
+	ror zp19_wall_opposite
+W_next_wall:
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	beq :+
+	inc gs_walls_left
+:	lda zp19_wall_opposite
 	cmp #$80
-	bne b194C
-	inc zp0A_text_ptr
-b194C:
-	lda (zp0A_text_ptr),y
-	and a19
-	beq b1955
-	inc gs_wall_E0
-b1955:
-	lda a19
+	bne :+
+	inc zp0A_walls_ptr
+:	lda (zp0A_walls_ptr),y
+	and zp19_wall_opposite
+	beq :+
+	inc gs_walls_right_depth
+:	lda zp19_wall_opposite
 	cmp #$80
-	beq b195D
-	inc zp0A_text_ptr
-b195D:
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	jsr s1A10
-	cmp a11
-	beq b1900
-	jsr s1A10
+	beq :+
+	inc zp0A_walls_ptr
+:	inc zp0A_walls_ptr
+	inc zp0A_walls_ptr
+	jsr swap_saved_A_2
+	cmp zp11_count
+	beq E_probe_done
+	jsr swap_saved_A_2
 	lda #$04
-	cmp a11
-b196F:
-	beq b18F9
-	inc a11
-	asl a6199
-	asl gs_wall_E0
-	jmp b193B
+	cmp zp11_count
+W_probed_max:
+	beq E_probed_max
+	inc zp11_count
+	asl gs_walls_left
+	asl gs_walls_right_depth
+	jmp W_next_wall
 
-j197C:
-	lda a1A
+probe_north:
+	lda zp1A_wall_bit
 	cmp #$02
-	bne b198B
+	bne :+
 	lda #$80
-	sta a1A
-	inc zp0A_text_ptr
-	jmp j198F
+	sta zp1A_wall_bit
+	inc zp0A_walls_ptr
+	jmp @next_depth
 
-b198B:
-	lsr a1A
-	lsr a1A
-j198F:
-	lda (zp0A_text_ptr),y
-	and a1A
-	bne b19B3
-	inc a19
-	lda a19
+:	lsr zp1A_wall_bit
+	lsr zp1A_wall_bit
+@next_depth:
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	bne @sight_limit
+	inc zp19_sight_depth
+	lda zp19_sight_depth
 	cmp #$05
-	beq b19B3
-	lda a1A
+	beq @sight_limit
+	lda zp1A_wall_bit
 	cmp #$02
-	bne b19AC
-	inc zp0A_text_ptr
+	bne :+
+	inc zp0A_walls_ptr
 	lda #$80
-	sta a1A
-	jmp j198F
+	sta zp1A_wall_bit
+	jmp @next_depth
 
-b19AC:
-	lsr a1A
-	lsr a1A
-	jmp j198F
+:	lsr zp1A_wall_bit
+	lsr zp1A_wall_bit
+	jmp @next_depth
 
-b19B3:
-	lda a1A
+@sight_limit:
+	lda zp1A_wall_bit
 	cmp #$80
-	beq b19BE
-	asl a1A
-	jmp j19C4
+	beq :+
+	asl zp1A_wall_bit
+	jmp @save_depth
 
-b19BE:
-	dec zp0A_text_ptr
+:	dec zp0A_walls_ptr
 	lda #$01
-	sta a1A
-j19C4:
-	lda a19
-	jsr s1A10
-j19C9:
-	lda (zp0A_text_ptr),y
-	and a1A
-	beq b19D2
-	inc a6199
-b19D2:
-	ldy #$03
-	lda (zp0A_text_ptr),y
+	sta zp1A_wall_bit
+@save_depth:
+	lda zp19_sight_depth
+	jsr swap_saved_A_2
+N_next_wall:
+	lda (zp0A_walls_ptr),y
+	and zp1A_wall_bit
+	beq :+
+	inc gs_walls_left
+:	ldy #$03
+	lda (zp0A_walls_ptr),y
 	ldy #$00
-	and a1A
-	beq b19DF
-	inc gs_wall_E0
-b19DF:
-	lda #$04
-	cmp a11
-	beq b196F
-	jsr s1A10
-	cmp a11
-	bne b19EF
-	jmp b189A
+	and zp1A_wall_bit
+	beq :+
+	inc gs_walls_right_depth
+:	lda #$04
+	cmp zp11_count
+	beq W_probed_max
+	jsr swap_saved_A_2
+	cmp zp11_count
+	bne :+
+	jmp S_probe_done
 
-b19EF:
-	jsr s1A10
-	asl a6199
-	inc a11
-	asl gs_wall_E0
-	lda a1A
+:	jsr swap_saved_A_2
+	asl gs_walls_left
+	inc zp11_count
+	asl gs_walls_right_depth
+	lda zp1A_wall_bit
 	cmp #$40
-	beq b1A07
-	asl a1A
-	asl a1A
-	jmp j19C9
+	beq :+
+	asl zp1A_wall_bit
+	asl zp1A_wall_bit
+	jmp N_next_wall
 
-b1A07:
-	lda #$01
-	sta a1A
-	dec zp0A_text_ptr
-	jmp j19C9
+:	lda #$01
+	sta zp1A_wall_bit
+	dec zp0A_walls_ptr
+	jmp N_next_wall
 
-s1A10:
+swap_saved_A_2:
 	sta a13
 	lda saved_A
 	pha
@@ -3374,8 +3357,8 @@ icmd_default:
 	rts
 
 icmd0A_impl:
-	lda gs_wall_E0
-	and #$e0
+	lda gs_walls_right_depth
+	and #%11100000
 	lsr
 	lsr
 	lsr
@@ -4670,7 +4653,7 @@ player_cmd:
 	jsr item_cmd
 	lda #$01
 	sta gs_room_lit
-	jsr draw_view
+	jsr update_view
 	lda #$71     ;The ring is activated and
 	jsr print_to_line1
 	lda #$72     ;shines light everywhere!
@@ -4735,7 +4718,7 @@ cmd_break:
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
-	jsr draw_view
+	jsr update_view
 	lda #$4e     ;You break the
 	jsr print_to_line1
 	lda gd_parsed_object
@@ -4831,7 +4814,7 @@ cmd_eat:
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
-	jsr draw_view
+	jsr update_view
 	lda #$7d     ;You eat the
 	jsr print_to_line1
 	lda #' '
@@ -6029,7 +6012,7 @@ cmd_charge:
 	lda #carried_active
 	cmp zp1A_item_place
 	bne brained
-	jsr draw_view
+	jsr update_view
 	jsr wait_short
 	jsr flash_screen
 	jsr pit
@@ -6040,15 +6023,15 @@ cmd_charge:
 	ldx #$00
 	stx gs_level_turns_hi
 	stx gs_level_turns_lo
-	jmp draw_view
+	jmp update_view
 
 @normal:
-	lda gs_wall_E0
-	and #$e0
+	lda gs_walls_right_depth
+	and #%11100000
 	beq brained
 	jsr propel_next_step
 	jsr wait_short
-	jsr draw_view
+	jsr update_view
 	jmp @propel_player
 
 propel_next_step:
@@ -6080,7 +6063,7 @@ propel_next_step:
 	rts
 
 brained:
-	jsr draw_view
+	jsr update_view
 	jsr wait_short
 	jsr flash_screen
 	jsr clear_status_lines
@@ -6132,10 +6115,10 @@ check_fart:
 
 @next_propel:
 	jsr wait_short
-	jsr draw_view
+	jsr update_view
 @propel_player:
-	lda gs_wall_E0
-	and #$e0
+	lda gs_walls_right_depth
+	and #%11100000
 	beq @wall
 	jsr propel_next_step
 	lda gs_level
@@ -6152,13 +6135,13 @@ check_fart:
 	jmp @next_propel
 
 @guillotine:
-	jsr draw_view
+	jsr update_view
 	jsr wait_short
 	jmp beheaded
 
 ; Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
 @wall:
-	jsr draw_view ;GUG: is this draw necessary?
+	jsr update_view ;GUG: is this draw necessary?
 	ldx gs_food_time_hi
 	stx zp0E_count16+1
 	ldx gs_food_time_lo
@@ -6279,7 +6262,7 @@ cmd_directions:
 	bpl @next_char
 	jsr input_char
 	jsr clear_hgr2
-	jsr draw_view
+	jsr update_view
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jmp item_cmd
@@ -6306,7 +6289,7 @@ cmd_hint:
 	jmp print_to_line2
 
 j325D:
-	jsr draw_view
+	jsr update_view
 	lda #$0a
 	sta a0F
 	jmp s1E5A
@@ -6408,7 +6391,7 @@ check_special_mode:
 	jmp special_bat
 
 special_calc_puzzle:
-	jsr draw_view
+	jsr update_view
 	jsr @init_puzzle
 	ldx #$01
 	stx zp1A_hint_mode
@@ -6448,7 +6431,7 @@ special_calc_puzzle:
 ;@success
 	ldx #$04
 	stx gs_facing
-	jsr draw_view
+	jsr update_view
 	jsr @init_puzzle
 	jmp pop_special_mode
 
@@ -6468,7 +6451,7 @@ special_calc_puzzle:
 	ldx zp1A_move_action
 	stx gs_rotate_direction
 @update_display:
-	jsr draw_view
+	jsr update_view
 	inc gs_rotate_total
 	jmp @continue_loop
 
@@ -6546,7 +6529,7 @@ special_bat:
 	beq :+
 	jmp special_dog
 
-:	jsr draw_view
+:	jsr update_view
 	lda #$31     ;A vampire bat attacks you!
 	jsr print_to_line2
 	jsr wait_long
@@ -6636,7 +6619,7 @@ special_dog:
 	jmp pop_special_mode
 
 @confront_dog:
-	jsr draw_view
+	jsr update_view
 	lda #$2e     ;A vicious dog attacks you!
 	jsr print_to_line2
 	jsr wait_long ;GUG: can this be wait_short?
@@ -6749,7 +6732,7 @@ special_monster:
 :	lda gd_parsed_action
 	cmp #$50
 	bcc :+
-	jsr draw_view
+	jsr update_view
 :	lda gs_monster_proximity
 	bne @monster_smell
 	jsr wait_if_moved
@@ -6827,7 +6810,7 @@ special_mother:
 :	lda gd_parsed_action
 	cmp #$50
 	bcc :+
-	jsr draw_view
+	jsr update_view
 :	lda gs_mother_proximity
 	bne @mother_smell
 	jsr wait_if_moved
@@ -6951,7 +6934,7 @@ special_dark:
 :	lda gd_parsed_action
 	cmp #$50
 	bcc :+
-	jsr draw_view
+	jsr update_view
 :	lda gs_room_lit
 	beq @unlit
 	ldx #$00
@@ -7083,7 +7066,7 @@ special_bomb:
 :	lda gd_parsed_action
 	cmp #$50
 	bcc :+
-	jsr draw_view
+	jsr update_view
 :	lda gs_rotate_direction
 	cmp #$09
 	beq b38EA
@@ -7218,7 +7201,7 @@ j397E:
 	ldx #$00
 	stx gs_mode_stack2
 	sta gs_mode_stack1
-	jsr draw_view
+	jsr update_view
 	lda gd_parsed_action
 	cmp #$5b
 	bcc b399C
@@ -7234,7 +7217,7 @@ j399F:
 	lda #$a4     ;You are deposited at the next level.
 	jsr print_to_line2
 	jsr wait_long
-	jsr draw_view
+	jsr update_view
 	jmp pop_special_mode
 
 b39B5:
@@ -7257,10 +7240,10 @@ b39D2:
 	jsr clear_maze_window
 	ldx #$03
 	stx a0F
-	stx a6199
+	stx gs_walls_left
 	ldx #$23
 	stx zp0E_src
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	ldx #$03
 	stx a0F
@@ -7458,7 +7441,7 @@ j3B6A:
 	pha
 	lda a19
 	pha
-	jsr draw_view
+	jsr update_view
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #$5b
@@ -7483,7 +7466,7 @@ j3B6A:
 
 :	inc gs_player_y
 j3BA5:
-	jsr draw_view
+	jsr update_view
 	lda #$59     ;The
 	jsr print_to_line1
 	lda #$11     ;snake
@@ -7563,8 +7546,8 @@ j3C37:
 	bne b3C55
 	lda gs_room_lit
 	beq b3C55
-	lda gs_wall_E0
-	and #$e0
+	lda gs_walls_right_depth
+	and #%11100000
 	beq b3C55
 	jsr s1E5A
 b3C55:
@@ -7589,15 +7572,15 @@ b3C72:
 	stx gs_facing
 	dec gs_player_x
 	jsr pit
-	jsr draw_view
+	jsr update_view
 	jmp pop_special_mode
 
 special_exit:
 	jsr clear_maze_window
 	lda #$07
-	sta a6199
+	sta gs_walls_left
 	ldx #$47
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	ldx #$08
 	stx a0F
@@ -7627,9 +7610,9 @@ b3CC1:
 b3CC8:
 	jsr clear_maze_window
 	ldx #$03
-	stx a6199
+	stx gs_walls_left
 	ldx #$23
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	ldx #$08
 	stx a0F
@@ -7654,9 +7637,9 @@ b3CF4:
 b3CFB:
 	jsr clear_maze_window
 	ldx #<p01
-	stx a6199
+	stx gs_walls_left
 	ldx #>p01
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	inc gs_exit_turns
 	jmp j3CA6
@@ -7676,9 +7659,9 @@ b3D1C:
 b3D23:
 	jsr clear_maze_window
 	ldx #<p01
-	stx a6199
+	stx gs_walls_left
 	ldx #>p01
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	ldx #$02
 	stx a0F
@@ -7755,9 +7738,9 @@ b3D9C:
 	jsr clear_maze_window
 	jsr flash_screen
 	ldx #$07
-	stx a6199
+	stx gs_walls_left
 	ldx #$46
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	ldx #icmd_destroy2
 	stx zp0F_action
@@ -7787,9 +7770,9 @@ b3DEC:
 b3DEF:
 	jsr clear_maze_window
 	ldx #$03
-	stx a6199
+	stx gs_walls_left
 	ldx #$23
-	stx gs_wall_E0
+	stx gs_walls_right_depth
 	jsr s12A6
 	inc gs_exit_turns
 	jmp j3CA6
@@ -7801,8 +7784,8 @@ b3E05:
 	bne b3DEC
 	jsr clear_maze_window
 	ldx #$01
-	stx a6199
-	stx gs_wall_E0
+	stx gs_walls_left
+	stx gs_walls_right_depth
 	jsr s12A6
 j3E1B:
 	lda #$3c     ;Before I let you go free
@@ -8037,24 +8020,32 @@ relocated:
 	.segment "HIGH"
 
 	.assert * = $6000, error, "Unexpected alignment"
-p6000:
-	.byte $d5,$7d,$57,$a6,$95,$d3,$b6,$56
-	.byte $9c,$a5,$da,$48,$96,$13,$6f,$cb
+maze_walls:
+	;Each 3-byte sequence is one column, south to north (max 12 cells)
+	;Each pair of bits is whether there is a wall to South and West of each cell.
+	.byte %11010101,%01111101,%01010111 ;$d5,$7d,$57
+	.byte %10100110,%10010101,%11010011 ;$a6,$95,$d3
+	.byte %10110110,%01010110,%10011100 ;$b6,$56,$9c
+	.byte $a5,$da,$48,$96,$13,$6f,$cb
 	.byte $94,$af,$b8,$57,$2f,$a9,$da,$6f
 	.byte $a3,$49,$2f,$94,$95,$0f,$ff,$ff
-	.byte $ff,$df,$77,$5f,$c8,$aa,$cf,$9d
+	.byte $ff
+	.byte $df,$77,$5f,$c8,$aa,$cf,$9d
 	.byte $1a,$df,$cd,$4a,$6f,$9b,$68,$8f
 	.byte $a2,$a4,$df,$96,$96,$af,$d8,$4e
 	.byte $cf,$b7,$76,$9f,$88,$88,$4f,$ff
-	.byte $ff,$ff,$d5,$d5,$7f,$9c,$bd,$af
+	.byte $ff,$ff
+	.byte $d5,$d5,$7f,$9c,$bd,$af
 	.byte $cb,$a2,$9f,$99,$b6,$2f,$cd,$99
 	.byte $2f,$a2,$55,$af,$b5,$5a,$bf,$8d
 	.byte $e2,$6f,$a2,$37,$2f,$95,$54,$4f
-	.byte $ff,$ff,$ff,$d7,$f7,$7f,$b2,$66
+	.byte $ff,$ff,$ff
+	.byte $d7,$f7,$7f,$b2,$66
 	.byte $af,$a5,$28,$af,$97,$0c,$8f,$c8
 	.byte $bb,$df,$9b,$22,$2f,$ea,$d9,$6f
 	.byte $92,$2d,$af,$d3,$22,$2f,$94,$55
-	.byte $4f,$ff,$ff,$ff,$d7,$55,$df,$9a
+	.byte $4f,$ff,$ff,$ff
+	.byte $d7,$55,$df,$9a
 	.byte $cc,$4f,$da,$b9,$5f,$a0,$f6,$6f
 	.byte $b1,$9b,$2f,$ac,$e0,$6f,$bd,$9d
 	.byte $af,$aa,$4a,$af,$a2,$52,$2f,$9c
@@ -8098,9 +8089,9 @@ gs_torches_lit:
 	.byte $00
 gs_torches_unlit:
 	.byte $01
-a6199:
+gs_walls_left:
 	.byte $00
-gs_wall_E0:
+gs_walls_right_depth:
 	.byte $00
 a619B:
 	.byte $00
@@ -8467,7 +8458,7 @@ save_disk_or_tape:
 
 prepare_tape_save:
 	jsr clear_hgr2
-	jsr draw_view
+	jsr update_view
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
@@ -8519,7 +8510,7 @@ save_to_disk:
 
 prepare_disk_save:
 	jsr clear_hgr2
-	jsr draw_view
+	jsr update_view
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jmp item_cmd
@@ -8659,6 +8650,9 @@ disk_error:
 	pla
 	jmp cold_start
 
+
+; From here to end of file,
+; cruft leftover from earlier build
 	lda gs_special_mode
 	bne b7E81
 	ldx #$06
@@ -8720,7 +8714,7 @@ b7ECE:
 	pla
 	cmp #$00
 	beq b7F4C
-	lda a6199
+	lda gs_walls_left
 	and #$01
 	bne b7F1B
 	lda #$00
@@ -8742,7 +8736,7 @@ b7ECE:
 	ldy #$01
 	jsr s1777
 b7F1B:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$01
 	bne b7F4B
 	lda #$16
@@ -8768,7 +8762,7 @@ b7F4B:
 	rts
 
 b7F4C:
-	lda a6199
+	lda gs_walls_left
 	and #$01
 	beq b7F60
 	lda #$00
@@ -8778,7 +8772,7 @@ b7F4C:
 	ldy #$15
 	jsr s17A7
 b7F60:
-	lda gs_wall_E0
+	lda gs_walls_right_depth
 	and #$01
 	beq b7F4B
 	lda #$16
@@ -8839,28 +8833,28 @@ b7FAC:
 	rts
 
 	ldy #$00
-	lda #<p6000
-	sta zp0A_text_ptr
-	lda #>p6000
-	sta zp0A_text_ptr+1
+	lda #<maze_walls
+	sta zp0A_walls_ptr
+	lda #>maze_walls
+	sta zp0A_walls_ptr+1
 	ldx gs_level
 	lda #$00
 	clc
 	dex
 	beq b7FD7
 	adc #$21
-	jmp j17CF
+	jmp $17CF
 
 b7FD7:
-	adc zp0A_text_ptr
-	sta zp0A_text_ptr
+	adc zp0A_walls_ptr
+	sta zp0A_walls_ptr
 	ldx gs_player_x
 	dex
 	beq b7FEA
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	jmp j17DE
+	inc zp0A_walls_ptr
+	inc zp0A_walls_ptr
+	inc zp0A_walls_ptr
+	jmp $17DE
 
 b7FEA:
 	lda gs_player_y
@@ -8868,11 +8862,11 @@ b7FEA:
 	bmi b7FFF  ;GUG: bcc preferred
 	cmp #$09
 	bmi b7FFA  ;GUG: bcc preferred
-	inc zp0A_text_ptr
+	inc zp0A_walls_ptr
 	sec
 	sbc #$04
 b7FFA:
-	inc zp0A_text_ptr
+	inc zp0A_walls_ptr
 	sec
 	sbc #$04
 	.assert * = $7fff, error, "Unexpected alignment"

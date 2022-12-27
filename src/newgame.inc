@@ -7,8 +7,8 @@
 	.byte $06		;player y
 	.byte $01		;torches lit
 	.byte $00		;torches unlit
-	.byte $07		;99
-	.byte $bf		;9A
+	.byte $07		;[---wwwww] walls on left (bits, lsb = nearest)
+	.byte $bf		;[DDDwwwww] walls on right (bits, lsb = nearest) and Depth (value 0-5)
 	.byte $00		;9B
 	.byte $00		;parsed action
 	.byte $00		;parsed object
@@ -24,8 +24,8 @@
 	.byte $00		;A9
 	.byte $00		;AA
 	.byte $02		;bat alive (flag $02)
-	.byte $04		;AC
-	.byte $02		;monster lurks (flag $02)
+	.byte $04		;mother alive (flag $04)
+	.byte $02		;monster alive (flag $02)
 	.byte $01		;dog 1 alive
 	.byte $01		;dog 2 alive
 	.byte $00		;B0
@@ -38,7 +38,7 @@
 	.byte $00		;rotate puzzle: total turns
 	.byte $00		;lair raided
 	.byte $00		;snake used (useless; written but never checked)
-	.byte $00		;unused
+	.byte $00		;UNUSED
 ; item locations: place (level), position XY
 	.byte $01,$35	;ball
 	.byte $03,$a5	;brush
