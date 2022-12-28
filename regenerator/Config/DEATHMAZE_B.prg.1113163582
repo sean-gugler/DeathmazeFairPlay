@@ -96,6 +96,9 @@
 0E37 BUG: meant to prevent double-space, but only prevents WORD_L_
 10E9 cruft leftover from earlier build
 1123 cruft leftover from even earlier build
+177F Input: Y=count
+1795 Input: Y=count
+17A7 Input: A=char Y=count
 1A1D junk
 1AB5 print inventory
 1C55 Skip over snake
@@ -261,6 +264,55 @@
 1231 #' '
 1260 #char_cursor
 127A #' '
+12AE Top 3 bits = Depth
+12BB #glyph_X
+12D4 #raster_hi 10,10,7
+12F1 #raster_hi 11,9,7
+133F raster 0,0,0
+135F #(1 << 4)
+1371 #glyph_R
+1383 #raster_hi 10,9,7
+1392 #glyph_R
+13AA #glyph_R
+13C8 #(1 << 4)
+13DA #glyph_L
+13EC #raster_hi 10,11,7
+13FD #glyph_L
+1415 #glyph_L
+1433 #(1 << 3)
+1443 #glyph_R
+146A #glyph_R
+1480 #glyph_R
+14A4 #(1 << 3)
+14B6 #glyph_L
+14DF #glyph_L
+14F7 #glyph_L
+151B #(1 << 2)
+152B #glyph_R
+1552 #glyph_R
+158C #(1 << 2)
+159E #glyph_L
+15C7 #glyph_L
+15DF #glyph_L
+1603 #(1 << 1)
+1613 #glyph_R
+163A #glyph_R
+1650 #glyph_R
+1674 #(1 << 1)
+1686 #glyph_L
+16AF #glyph_L
+16C7 #glyph_L
+16F0 #(1 << 0)
+16FA #glyph_R
+1701 #raster 0,-1,0
+171E #(1 << 0)
+172A #glyph_L
+174F #(1 << 0)
+1759 #glyph_R
+1763 #(1 << 0)
+176F #glyph_L
+1785 #glyph_slash_up
+179B #glyph_slash_down
 18C5 $zp_wall_opposite
 1935 $zp_wall_opposite
 1A36 #execs_no_location
@@ -1041,6 +1093,66 @@
 1286 @clear_row
 128E @clear_raster
 1292 -
+12A6 draw_maze
+12C3 @draw_4_center
+12E0 @draw_3_center
+12FD @draw_2_center
+131E @draw_1_center
+133F @draw_0_center
+135C @draw_4_left
+1363 @draw_4_left_open
+1376 +
+139C @draw_4_left_wall
+13AF +
+13C5 @draw_4_right
+13CC @draw_4_right_open
+13DF +
+1407 @draw_4_right_wall
+141A +
+1430 @draw_3_left
+1437 @draw_3_left_open
+144A +
+1474 @draw_3_left_wall
+1487 +
+14A1 @draw_3_right
+14A8 @draw_3_right_open
+14BD +
+14E9 @draw_3_right_wall
+14FE +
+1518 @draw_2_left
+1532 +
+155C @draw_2_left_wall
+156F +
+1589 @draw_2_right
+1590 @draw_2_right_open
+15A5 +
+15D1 @draw_2_right_wall
+15E6 +
+1600 @draw_1_left
+1607 @draw_1_left_open
+161A +
+1644 @draw_1_left_wall
+1657 +
+1671 @draw_1_right
+1678 @draw_1_right_open
+168D +
+16B9 @draw_1_right_wall
+16CE +
+16E8 @draw_0_left
+16F4 @draw_0_left_open
+171B @draw_0_right
+1722 @draw_0_right_open
+174B @draw_0_done
+174C @draw_0_left_wall
+1760 @draw_0_right_wall
+1777 draw_right
+1779 -
+177F draw_down_left
+1782 -
+1795 draw_down_right
+1798 -
+17A7 draw_down
+17AC @next
 17BF probe_forward
 17CF -
 17D7 @find_x
@@ -1479,6 +1591,31 @@
 3F4E vector_reset
 3FFF relocated
 4000 screen_HGR2
+4015 raster 0,21,0
+40AF raster 9,7,0
+40B1 raster 9,9,0
+40B4 raster 9,12,0
+4131 raster 10,9,0
+4132 raster 10,10,0
+4133 raster 10,11,0
+4134 raster 10,12,0
+4200 raster 4,0,0
+4204 raster 4,4,0
+4211 raster 4,17,0
+4384 raster 7,4,0
+4387 raster 7,7,0
+438E raster 7,14,0
+5C50 raster 16,0,7
+5C54 raster 16,4,7
+5C61 raster 16,17,7
+5DAF raster 11,7,7
+5DB4 raster 11,12,7
+5E4F raster 13,-1,7
+5E50 raster 20,0,7
+5E65 raster 20,21,7
+5EAC raster 13,4,7
+5EAF raster 13,7,7
+5EB6 raster 13,14,7
 6000 maze_walls
 613D data_new_game
 6193 gs_facing

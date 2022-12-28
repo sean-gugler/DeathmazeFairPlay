@@ -1220,7 +1220,7 @@ update_view:
 	jsr probe_forward
 	lda gs_room_lit
 	beq @done
-	jsr s12A6
+	jsr draw_maze
 	jsr s1DDF
 	lda a0F
 	ora a0E
@@ -1575,691 +1575,684 @@ clear_maze_window:
 	bpl @clear_row
 	rts
 
-s12A6:
+draw_maze:
 	lda gs_walls_right_depth
 	lsr
 	lsr
 	lsr
 	lsr
 	lsr
-	pha
+	pha          ;Top 3 bits = Depth
 	cmp #$05
-	bcc b12C3
-	lda #<p4133
+	bcc @draw_4_center
+	lda #<raster 10,11,0
 	sta screen_ptr
-	lda #>p4133
+	lda #>raster 10,11,0
 	sta screen_ptr+1
-	lda #$05
+	lda #glyph_X
 	jsr char_out
-	jmp j135C
+	jmp @draw_4_left
 
-b12C3:
+@draw_4_center:
 	cmp #$04
-	bne b12E0
-	lda #<p4132
+	bne @draw_3_center
+	lda #<raster 10,10,0
 	sta screen_ptr
-	lda #>p4132
+	lda #>raster 10,10,0
 	sta screen_ptr+1
 	ldy #$01
-	jsr s1777
-	lda #$5d
+	jsr draw_right
+	lda #raster_hi 10,10,7
 	sta screen_ptr+1
 	ldy #$01
-	jsr s1777
-	jmp j135C
+	jsr draw_right
+	jmp @draw_4_left
 
-b12E0:
+@draw_3_center:
 	cmp #$03
-	bne b12FD
-	lda #>p40B1
+	bne @draw_2_center
+	lda #>raster 9,9,0
 	sta screen_ptr+1
-	lda #<p40B1
+	lda #<raster 9,9,0
 	sta screen_ptr
 	ldy #$03
-	jsr s1777
-	lda #$5d
+	jsr draw_right
+	lda #raster_hi 11,9,7
 	sta screen_ptr+1
 	ldy #$03
-	jsr s1777
-	jmp j1430
+	jsr draw_right
+	jmp @draw_3_left
 
-b12FD:
+@draw_2_center:
 	cmp #$02
-	bne b131E
-	lda #>p4387
+	bne @draw_1_center
+	lda #>raster 7,7,0
 	sta screen_ptr+1
-	lda #<p4387
+	lda #<raster 7,7,0
 	sta screen_ptr
 	ldy #$07
-	jsr s1777
-	lda #>p5EAF
+	jsr draw_right
+	lda #>raster 13,7,7
 	sta screen_ptr+1
-	lda #<p5EAF
+	lda #<raster 13,7,7
 	sta screen_ptr
 	ldy #$07
-	jsr s1777
-	jmp j1518
+	jsr draw_right
+	jmp @draw_2_left
 
-b131E:
+@draw_1_center:
 	cmp #$01
-	bne b133F
-	lda #>p4204
+	bne @draw_0_center
+	lda #>raster 4,4,0
 	sta screen_ptr+1
-	lda #<p4204
+	lda #<raster 4,4,0
 	sta screen_ptr
 	ldy #$0d
-	jsr s1777
-	lda #>p5C54
+	jsr draw_right
+	lda #>raster 16,4,7
 	sta screen_ptr+1
-	lda #<p5C54
+	lda #<raster 16,4,7
 	sta screen_ptr
 	ldy #$0d
-	jsr s1777
-	jmp j1600
+	jsr draw_right
+	jmp @draw_1_left
 
-b133F:
-	lda #>screen_HGR2
+@draw_0_center:
+	lda #>screen_HGR2 ;raster 0,0,0
 	sta screen_ptr+1
 	lda #<screen_HGR2
 	sta screen_ptr
 	ldy #$15
-	jsr s1777
-	lda #>p5E50
+	jsr draw_right
+	lda #>raster 20,0,7
 	sta screen_ptr+1
-	lda #<p5E50
+	lda #<raster 20,0,7
 	sta screen_ptr
 	ldy #$15
-	jsr s1777
-	jmp j16E8
+	jsr draw_right
+	jmp @draw_0_left
 
-j135C:
+@draw_4_left:
 	lda gs_walls_left
-	and #$10
-	bne b139C
+	and #(1 << 4)
+	bne @draw_4_left_wall
+@draw_4_left_open:
 	pla
 	pha
 	cmp #$04
-	beq b1376
-	lda #>p4132
+	beq :+
+	lda #>raster 10,10,0
 	sta screen_ptr+1
-	lda #<p4132
+	lda #<raster 10,10,0
 	sta screen_ptr
-	lda #$04
+	lda #glyph_R
 	jsr char_out
-b1376:
-	lda #>p4131
+:	lda #>raster 10,9,0
 	sta screen_ptr+1
-	lda #<p4131
+	lda #<raster 10,9,0
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-	lda #$5d
+	jsr draw_right
+	lda #raster_hi 10,9,7
 	sta screen_ptr+1
 	ldy #$01
-	jsr s1777
+	jsr draw_right
 	lda #$09
 	sta zp_col
 	sta zp_row
-	lda #$04
-	ldy #$03
-	jsr s17A7
-	jmp j13C5
+	lda #glyph_R
+	ldy #$03     ;count
+	jsr draw_down
+	jmp @draw_4_right
 
-b139C:
+@draw_4_left_wall:
 	pla
 	pha
 	cmp #$04
-	bne b13AF
-	lda #>p4132
+	bne :+
+	lda #>raster 10,10,0
 	sta screen_ptr+1
-	lda #<p4132
+	lda #<raster 10,10,0
 	sta screen_ptr
-	lda #$04
+	lda #glyph_R
 	jsr char_out
-b13AF:
-	lda #$0a
+:	lda #$0a
 	sta zp_col
 	lda #$09
 	sta zp_row
 	ldy #$01
-	jsr s1795
+	jsr draw_down_right
 	dec zp_col
 	inc zp_row
 	ldy #$01
-	jsr s177F
-j13C5:
+	jsr draw_down_left
+@draw_4_right:
 	lda gs_walls_right_depth
-	and #$10
-	bne b1407
+	and #(1 << 4)
+	bne @draw_4_right_wall
+@draw_4_right_open:
 	pla
 	pha
 	cmp #$04
-	beq b13DF
-	lda #>p4134
+	beq :+
+	lda #>raster 10,12,0
 	sta screen_ptr+1
-	lda #<p4134
+	lda #<raster 10,12,0
 	sta screen_ptr
-	lda #$03
+	lda #glyph_L
 	jsr char_out
-b13DF:
-	lda #>p4133
+:	lda #>raster 10,11,0
 	sta screen_ptr+1
-	lda #<p4133
+	lda #<raster 10,11,0
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-	lda #$5d
+	jsr draw_right
+	lda #raster_hi 10,11,7
 	sta screen_ptr+1
 	ldy #$01
-	jsr s1777
+	jsr draw_right
 	lda #$0d
 	sta zp_col
 	lda #$09
 	sta zp_row
-	lda #$03
-	ldy #$03
-	jsr s17A7
-	jmp j1430
+	lda #glyph_L
+	ldy #$03     ;count
+	jsr draw_down
+	jmp @draw_3_left
 
-b1407:
+@draw_4_right_wall:
 	pla
 	pha
 	cmp #$04
-	bne b141A
-	lda #>p4134
+	bne :+
+	lda #>raster 10,12,0
 	sta screen_ptr+1
-	lda #<p4134
+	lda #<raster 10,12,0
 	sta screen_ptr
-	lda #$03
+	lda #glyph_L
 	jsr char_out
-b141A:
-	lda #$0c
+:	lda #$0c
 	sta zp_col
 	lda #$09
 	sta zp_row
 	ldy #$01
-	jsr s177F
+	jsr draw_down_left
 	inc zp_col
 	inc zp_row
 	ldy #$01
-	jsr s1795
-j1430:
+	jsr draw_down_right
+@draw_3_left:
 	lda gs_walls_left
-	and #$08
-	bne b1474
+	and #(1 << 3)
+	bne @draw_3_left_wall
+@draw_3_left_open:
 	pla
 	pha
 	cmp #$03
-	beq b144A
+	beq :+
 	lda #$09
 	sta zp_col
 	sta zp_row
-	lda #$04
-	ldy #$03
-	jsr s17A7
-b144A:
-	lda #>p40AF
+	lda #glyph_R
+	ldy #$03     ;count
+	jsr draw_down
+:	lda #>raster 9,7,0
 	sta screen_ptr+1
-	lda #<p40AF
+	lda #<raster 9,7,0
 	sta screen_ptr
 	ldy #$02
-	jsr s1777
-	lda #>p5DAF
+	jsr draw_right
+	lda #>raster 11,7,7
 	sta screen_ptr+1
-	lda #<p5DAF
+	lda #<raster 11,7,7
 	sta screen_ptr
 	ldy #$02
-	jsr s1777
+	jsr draw_right
 	lda #$07
 	sta zp_col
 	sta zp_row
-	lda #$04
-	ldy #$07
-	jsr s17A7
-	jmp j14A1
+	lda #glyph_R
+	ldy #$07     ;count
+	jsr draw_down
+	jmp @draw_3_right
 
-b1474:
+@draw_3_left_wall:
 	pla
 	pha
 	cmp #$03
-	bne b1487
+	bne :+
 	lda #$09
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$03
-	jsr s17A7
-b1487:
-	lda #$08
+	jsr draw_down
+:	lda #$08
 	sta zp_col
 	lda #$07
 	sta zp_row
 	ldy #$02
-	jsr s1795
+	jsr draw_down_right
 	lda #$09
 	sta zp_col
 	lda #$0c
 	sta zp_row
 	ldy #$02
-	jsr s177F
-j14A1:
+	jsr draw_down_left
+@draw_3_right:
 	lda gs_walls_right_depth
-	and #$08
-	bne b14E9
+	and #(1 << 3)
+	bne @draw_3_right_wall
+@draw_3_right_open:
 	pla
 	pha
 	cmp #$03
-	beq b14BD
+	beq :+
 	lda #$0d
 	sta zp_col
 	lda #$09
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$03
-	jsr s17A7
-b14BD:
-	lda #>p40B4
+	jsr draw_down
+:	lda #>raster 9,12,0
 	sta screen_ptr+1
-	lda #<p40B4
+	lda #<raster 9,12,0
 	sta screen_ptr
 	ldy #$02
-	jsr s1777
-	lda #>p5DB4
+	jsr draw_right
+	lda #>raster 11,12,7
 	sta screen_ptr+1
-	lda #<p5DB4
+	lda #<raster 11,12,7
 	sta screen_ptr
 	ldy #$02
-	jsr s1777
+	jsr draw_right
 	lda #$0f
 	sta zp_col
 	lda #$07
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$07
-	jsr s17A7
-	jmp j1518
+	jsr draw_down
+	jmp @draw_2_left
 
-b14E9:
+@draw_3_right_wall:
 	pla
 	pha
 	cmp #$03
-	bne b14FE
+	bne :+
 	lda #$0d
 	sta zp_col
 	lda #$09
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$03
-	jsr s17A7
-b14FE:
-	lda #$0e
+	jsr draw_down
+:	lda #$0e
 	sta zp_col
 	lda #$07
 	sta zp_row
 	ldy #$02
-	jsr s177F
+	jsr draw_down_left
 	lda #$0d
 	sta zp_col
 	lda #$0c
 	sta zp_row
 	ldy #$02
-	jsr s1795
-j1518:
+	jsr draw_down_right
+@draw_2_left:
 	lda gs_walls_left
-	and #$04
-	bne b155C
+	and #(1 << 2)
+	bne @draw_2_left_wall
 	pla
 	pha
 	cmp #$02
-	beq b1532
+	beq :+
 	lda #$07
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$07
-	jsr s17A7
-b1532:
-	lda #>p4384
+	jsr draw_down
+:	lda #>raster 7,4,0
 	sta screen_ptr+1
-	lda #<p4384
+	lda #<raster 7,4,0
 	sta screen_ptr
 	ldy #$03
-	jsr s1777
-	lda #>p5EAC
+	jsr draw_right
+	lda #>raster 13,4,7
 	sta screen_ptr+1
-	lda #<p5EAC
+	lda #<raster 13,4,7
 	sta screen_ptr
 	ldy #$03
-	jsr s1777
+	jsr draw_right
 	lda #$04
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$0d
-	jsr s17A7
-	jmp j1589
+	jsr draw_down
+	jmp @draw_2_right
 
-b155C:
+@draw_2_left_wall:
 	pla
 	pha
 	cmp #$02
-	bne b156F
+	bne :+
 	lda #$07
 	sta zp_col
 	sta zp_row
 	lda #$04
 	ldy #$07
-	jsr s17A7
-b156F:
-	lda #$05
+	jsr draw_down
+:	lda #$05
 	sta zp_col
 	lda #$04
 	sta zp_row
 	ldy #$03
-	jsr s1795
+	jsr draw_down_right
 	lda #$07
 	sta zp_col
 	lda #$0e
 	sta zp_row
 	ldy #$03
-	jsr s177F
-j1589:
+	jsr draw_down_left
+@draw_2_right:
 	lda gs_walls_right_depth
-	and #$04
-	bne b15D1
+	and #(1 << 2)
+	bne @draw_2_right_wall
+@draw_2_right_open:
 	pla
 	pha
 	cmp #$02
-	beq b15A5
+	beq :+
 	lda #$0f
 	sta zp_col
 	lda #$07
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$07
-	jsr s17A7
-b15A5:
-	lda #>p438E
+	jsr draw_down
+:	lda #>raster 7,14,0
 	sta screen_ptr+1
-	lda #<p438E
+	lda #<raster 7,14,0
 	sta screen_ptr
 	ldy #$03
-	jsr s1777
-	lda #>p5EB6
+	jsr draw_right
+	lda #>raster 13,14,7
 	sta screen_ptr+1
-	lda #<p5EB6
+	lda #<raster 13,14,7
 	sta screen_ptr
 	ldy #$03
-	jsr s1777
+	jsr draw_right
 	lda #$12
 	sta zp_col
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
-	jsr s17A7
-	jmp j1600
+	jsr draw_down
+	jmp @draw_1_left
 
-b15D1:
+@draw_2_right_wall:
 	pla
 	pha
 	cmp #$02
-	bne b15E6
+	bne :+
 	lda #$0f
 	sta zp_col
 	lda #$07
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$07
-	jsr s17A7
-b15E6:
-	lda #$11
+	jsr draw_down
+:	lda #$11
 	sta zp_col
 	lda #$04
 	sta zp_row
 	ldy #$03
-	jsr s177F
+	jsr draw_down_left
 	lda #$0f
 	sta zp_col
 	lda #$0e
 	sta zp_row
 	ldy #$03
-	jsr s1795
-j1600:
+	jsr draw_down_right
+@draw_1_left:
 	lda gs_walls_left
-	and #$02
-	bne b1644
+	and #(1 << 1)
+	bne @draw_1_left_wall
+@draw_1_left_open:
 	pla
 	pha
 	cmp #$01
-	beq b161A
+	beq :+
 	lda #$04
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$0d
-	jsr s17A7
-b161A:
-	lda #>p4200
+	jsr draw_down
+:	lda #>raster 4,0,0
 	sta screen_ptr+1
-	lda #<p4200
+	lda #<raster 4,0,0
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
-	lda #>p5C50
+	jsr draw_right
+	lda #>raster 16,0,7
 	sta screen_ptr+1
-	lda #<p5C50
+	lda #<raster 16,0,7
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
+	jsr draw_right
 	lda #$00
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
-	jsr s17A7
-	jmp j1671
+	jsr draw_down
+	jmp @draw_1_right
 
-b1644:
+@draw_1_left_wall:
 	pla
 	pha
 	cmp #$01
-	bne b1657
+	bne :+
 	lda #$04
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$0d
-	jsr s17A7
-b1657:
-	lda #$01
+	jsr draw_down
+:	lda #$01
 	sta zp_col
 	lda #$00
 	sta zp_row
 	ldy #$04
-	jsr s1795
+	jsr draw_down_right
 	lda #$04
 	sta zp_col
 	lda #$11
 	sta zp_row
 	ldy #$04
-	jsr s177F
-j1671:
+	jsr draw_down_left
+@draw_1_right:
 	lda gs_walls_right_depth
-	and #$02
-	bne b16B9
+	and #(1 << 1)
+	bne @draw_1_right_wall
+@draw_1_right_open:
 	pla
 	pha
 	cmp #$01
-	beq b168D
+	beq :+
 	lda #$12
 	sta zp_col
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
-	jsr s17A7
-b168D:
-	lda #>p4211
+	jsr draw_down
+:	lda #>raster 4,17,0
 	sta screen_ptr+1
-	lda #<p4211
+	lda #<raster 4,17,0
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
-	lda #>p5C61
+	jsr draw_right
+	lda #>raster 16,17,7
 	sta screen_ptr+1
-	lda #<p5C61
+	lda #<raster 16,17,7
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
+	jsr draw_right
 	lda #$16
 	sta zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
-	jsr s17A7
-	jmp j16E8
+	jsr draw_down
+	jmp @draw_0_left
 
-b16B9:
+@draw_1_right_wall:
 	pla
 	pha
 	cmp #$01
-	bne b16CE
+	bne :+
 	lda #$12
 	sta zp_col
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
-	jsr s17A7
-b16CE:
-	lda #$15
+	jsr draw_down
+:	lda #$15
 	sta zp_col
 	lda #$00
 	sta zp_row
 	ldy #$04
-	jsr s177F
+	jsr draw_down_left
 	lda #$12
 	sta zp_col
 	lda #$11
 	sta zp_row
 	ldy #$04
-	jsr s1795
-j16E8:
+	jsr draw_down_right
+@draw_0_left:
 	pla
 	cmp #$00
-	beq b174C
+	beq @draw_0_left_wall
 	lda gs_walls_left
-	and #$01
-	bne b171B
+	and #(1 << 0)
+	bne @draw_0_right
+@draw_0_left_open:
 	lda #$00
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
-	jsr s17A7
-	lda #>relocated
+	jsr draw_down
+	lda #raster 0,-1,0
 	sta screen_ptr+1
 	lda #<relocated
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-	lda #>p5E4F
+	jsr draw_right
+	lda #>raster 13,-1,7
 	sta screen_ptr+1
-	lda #<p5E4F
+	lda #<raster 13,-1,7
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-b171B:
+	jsr draw_right
+@draw_0_right:
 	lda gs_walls_right_depth
-	and #$01
-	bne b174B
+	and #(1 << 0)
+	bne @draw_0_done
+@draw_0_right_open:
 	lda #$16
 	sta zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
-	jsr s17A7
-	lda #>p4015
+	jsr draw_down
+	lda #>raster 0,21,0
 	sta screen_ptr+1
-	lda #<p4015
+	lda #<raster 0,21,0
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-	lda #>p5E65
+	jsr draw_right
+	lda #>raster 20,21,7
 	sta screen_ptr+1
-	lda #<p5E65
+	lda #<raster 20,21,7
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-b174B:
+	jsr draw_right
+@draw_0_done:
 	rts
 
-b174C:
+@draw_0_left_wall:
 	lda gs_walls_left
-	and #$01
-	beq b1760
+	and #(1 << 0)
+	beq @draw_0_right_wall
 	lda #$00
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
-	jsr s17A7
-b1760:
+	jsr draw_down
+@draw_0_right_wall:
 	lda gs_walls_right_depth
-	and #$01
-	beq b174B
+	and #(1 << 0)
+	beq @draw_0_done
 	lda #$16
 	sta zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	rts
 
-s1777:
+draw_right:
 	lda #$ff
-b1779:
-	sta (screen_ptr),y
+:	sta (screen_ptr),y
 	dey
-	bne b1779
+	bne :-
 	rts
 
-s177F:
+; Input: Y=count
+draw_down_left:
 	tya
 	sta zp1A_wall_bit
-b1782:
-	jsr get_rowcol_addr
-	lda #$02
+:	jsr get_rowcol_addr
+	lda #glyph_slash_up
 	jsr char_out
 	dec zp_col
 	dec zp_col
 	inc zp_row
 	dec zp1A_wall_bit
-	bne b1782
+	bne :-
 	rts
 
-s1795:
+; Input: Y=count
+draw_down_right:
 	tya
 	sta zp1A_wall_bit
-b1798:
-	jsr get_rowcol_addr
-	lda #$01
+:	jsr get_rowcol_addr
+	lda #glyph_slash_down
 	jsr char_out
 	inc zp_row
 	dec zp1A_wall_bit
-	bne b1798
+	bne :-
 	rts
 
-s17A7:
+; Input: A=char Y=count
+draw_down:
 	pha
 	tya
 	sta zp1A_wall_bit
 	pla
-b17AC:
+@next:
 	pha
 	jsr get_rowcol_addr
 	pla
@@ -2269,7 +2262,7 @@ b17AC:
 	dec zp_col
 	inc zp_row
 	dec zp1A_wall_bit
-	bne b17AC
+	bne @next
 	rts
 
 probe_forward:
@@ -3318,33 +3311,33 @@ b1EA1:
 	sta zp_col
 	lda #$04
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda #$03
 	sta zp_row
 	lda #$0a
 	sta zp_col
 	lda #$04
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda #$03
 	sta zp_row
 	lda #$10
 	sta zp_col
 	lda #$03
 	ldy #$12
-	jsr s17A7
-	lda #>p5E50
+	jsr draw_down
+	lda #>raster 20,0,7
 	sta screen_ptr+1
-	lda #<p5E50
+	lda #<raster 20,0,7
 	sta screen_ptr
 	ldy #$14
-	jsr s1777
+	jsr draw_right
 	lda #<p5D05
 	sta screen_ptr
 	lda #>p5D05
 	sta screen_ptr+1
 	ldy #$0a
-	jsr s1777
+	jsr draw_right
 	lda #$07
 	sta zp_col
 	lda #$01
@@ -3389,7 +3382,7 @@ j1F25:
 	pha
 	lda #$20
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	pla
 	pha
 	sta zp_col
@@ -3398,7 +3391,7 @@ j1F25:
 	sta zp_row
 	lda #$04
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	pla
 	pha
 	sta zp_col
@@ -3420,7 +3413,7 @@ j1F25:
 	lda #$00
 	sta zp_row
 	ldy #$04
-	jsr s1795
+	jsr draw_down_right
 	dec zp_col
 	dec zp_col
 	lda zp_col
@@ -3430,7 +3423,7 @@ j1F25:
 	dec zp_row
 	lda #$20
 	ldy #$0f
-	jsr s17A7
+	jsr draw_down
 	dec zp_col
 	jsr get_rowcol_addr
 	lda #$20
@@ -3448,9 +3441,9 @@ j1F25:
 	inc zp_col
 	lda #$04
 	ldy #$0d
-	jsr s17A7
+	jsr draw_down
 	ldy #$04
-	jsr s177F
+	jsr draw_down_left
 	lda #$00
 	sta zp_row
 	lda #$10
@@ -3460,7 +3453,7 @@ j1F25:
 	pha
 	lda #$20
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	pla
 	pha
 	sta zp_col
@@ -3469,7 +3462,7 @@ j1F25:
 	sta zp_row
 	lda #$03
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	pla
 	pha
 	sta zp_col
@@ -3494,7 +3487,7 @@ p1FFF:
 	lda #$00
 	sta zp_row
 	ldy #$04
-	jsr s177F
+	jsr draw_down_left
 	inc zp_col
 	inc zp_col
 	lda zp_col
@@ -3504,7 +3497,7 @@ p1FFF:
 	dec zp_row
 	lda #$20
 	ldy #$0f
-	jsr s17A7
+	jsr draw_down
 	inc zp_col
 	jsr get_rowcol_addr
 	lda #$20
@@ -3520,9 +3513,9 @@ p1FFF:
 	dec zp_col
 	lda #$03
 	ldy #$0d
-	jsr s17A7
+	jsr draw_down
 	ldy #$04
-	jsr s1795
+	jsr draw_down_right
 	dec zp_0C_string
 	beq b2051
 	jsr wait_brief
@@ -3564,7 +3557,7 @@ b207F:
 	lda #$02
 	clc
 	adc zp19_sight_depth
-	jsr s17A7
+	jsr draw_down
 	pla
 	tay
 	dec zp19_sight_depth
@@ -3585,7 +3578,7 @@ b20A5:
 	pha
 	lda zp1A_wall_bit
 	tay
-	jsr s1777
+	jsr draw_right
 	pla
 	tay
 	dec zp19_sight_depth
@@ -3706,7 +3699,7 @@ b215D:
 	lda #<p40D8
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
+	jsr draw_right
 b21CB:
 	lda a619B
 	and #$01
@@ -3722,7 +3715,7 @@ b21CB:
 	sta zp_col
 	jsr get_rowcol_addr
 	ldy #$07
-	jsr s1777
+	jsr draw_right
 	lda #$02
 	jsr char_out
 	lda #$06
@@ -3731,14 +3724,14 @@ b21CB:
 	sta zp_row
 	lda #$04
 	ldy #$03
-	jsr s17A7
+	jsr draw_down
 	lda #$0d
 	sta zp_col
 	lda #$12
 	sta zp_row
 	lda #$04
 	ldy #$03
-	jsr s17A7
+	jsr draw_down
 	dec zp_row
 	inc zp_col
 	jsr get_rowcol_addr
@@ -3749,20 +3742,20 @@ b21CB:
 	lda #<p4156
 	sta screen_ptr
 	ldy #$07
-	jsr s1777
+	jsr draw_right
 	lda #$0f
 	sta zp_col
 	lda #$11
 	sta zp_row
 	lda #$03
 	tay
-	jsr s17A7
+	jsr draw_down
 	ldx #>p5E56
 	stx screen_ptr+1
 	ldx #<p5E56
 	stx screen_ptr
 	ldy #$07
-	jsr s1777
+	jsr draw_right
 b2245:
 	rts
 
@@ -3797,7 +3790,7 @@ b2285:
 j228F:
 	lda #$0b
 	ldy #$07
-	jsr s17A7
+	jsr draw_down
 	pla
 	sta zp_row
 	pla
@@ -3922,7 +3915,7 @@ b2356:
 	dec zp_col
 	lda #$0a
 	ldy #$05
-	jsr s17A7
+	jsr draw_down
 	jsr get_rowcol_addr
 	lda #$17
 	jsr char_out
@@ -3936,14 +3929,14 @@ b2356:
 	sta zp_row
 	lda #$16
 	ldy #$06
-	jsr s17A7
+	jsr draw_down
 	lda #$11
 	sta zp_col
 	lda #$08
 	sta zp_row
 	lda #$03
 	ldy #$08
-	jsr s17A7
+	jsr draw_down
 	rts
 
 b23A8:
@@ -3952,25 +3945,25 @@ b23A8:
 	lda #$04
 	sta zp_row
 	ldy #$02
-	jsr s177F
+	jsr draw_down_left
 	inc zp_col
 	lda #$03
 	ldy #$0c
-	jsr s17A7
+	jsr draw_down
 	lda #$14
 	sta zp_col
 	lda #$05
 	sta zp_row
 	lda #$03
 	ldy #$0e
-	jsr s17A7
+	jsr draw_down
 	lda #$15
 	sta zp_col
 	lda #$04
 	sta zp_row
 	lda #$03
 	ldy #$10
-	jsr s17A7
+	jsr draw_down
 	rts
 
 j23DD:
@@ -3979,24 +3972,24 @@ j23DD:
 	lda #$04
 	sta zp_row
 	ldy #$02
-	jsr s1795
+	jsr draw_down_right
 	dec zp_col
 	lda #$04
 	ldy #$0c
-	jsr s17A7
+	jsr draw_down
 	lda #$02
 	sta zp_col
 	lda #$05
 	sta zp_row
 	lda #$04
 	ldy #$0e
-	jsr s17A7
+	jsr draw_down
 	lda #$01
 	sta zp_col
 	lda #$04
 	sta zp_row
 	ldy #$10
-	jsr s17A7
+	jsr draw_down
 	rts
 
 j2410:
@@ -4170,20 +4163,20 @@ j254C:
 	lda #$03
 	sta zp_row
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda #$0b
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #$04
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda #>p40D9
 	sta screen_ptr+1
 	lda #<p40D9
 	sta screen_ptr
 	ldy #$02
-	jsr s1777
+	jsr draw_right
 	lda #$0a
 	sta zp_0C_string
 	lda #$0b
@@ -4200,14 +4193,14 @@ b2585:
 	sta zp_row
 	lda #$20
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda zp19_sight_depth
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #$20
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	dec zp_0C_string
 	inc zp19_sight_depth
 	lda zp_0C_string
@@ -4215,14 +4208,14 @@ b2585:
 	lda #$03
 	sta zp_row
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda zp19_sight_depth
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #$04
 	ldy #$12
-	jsr s17A7
+	jsr draw_down
 	lda #$11
 	sta zp_row
 	dec zp_0C_string
@@ -4233,7 +4226,7 @@ b2585:
 	inc zp10_noun
 	inc zp10_noun
 	ldy zp10_noun
-	jsr s1777
+	jsr draw_right
 	dec zp11_count
 	bne b2585
 	rts
@@ -6894,7 +6887,7 @@ b39D2:
 	ldx #$23
 	stx a0E
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	ldx #$03
 	stx a0F
 	jsr s1E5A
@@ -7231,7 +7224,7 @@ special_exit:
 	sta gs_walls_left
 	ldx #$47
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	ldx #$08
 	stx a0F
 	ldx #$01
@@ -7263,7 +7256,7 @@ b3CC8:
 	stx gs_walls_left
 	ldx #$23
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	ldx #$08
 	stx a0F
 	ldx #$02
@@ -7290,7 +7283,7 @@ b3CFB:
 	stx gs_walls_left
 	ldx #>p01
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	inc gs_exit_turns
 	jmp j3CA6
 
@@ -7312,7 +7305,7 @@ b3D23:
 	stx gs_walls_left
 	ldx #>p01
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	ldx #$02
 	stx a0F
 	jsr s1E5A
@@ -7391,7 +7384,7 @@ b3D9C:
 	stx gs_walls_left
 	ldx #$46
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	ldx #icmd_destroy2  ;and #noun_ball
 	stx a0F
 	stx a0E
@@ -7422,7 +7415,7 @@ b3DEF:
 	stx gs_walls_left
 	ldx #$23
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 	inc gs_exit_turns
 	jmp j3CA6
 
@@ -7435,7 +7428,7 @@ b3E05:
 	ldx #$01
 	stx gs_walls_left
 	stx gs_walls_right_depth
-	jsr s12A6
+	jsr draw_maze
 j3E1B:
 	lda #$3c     ;Before I let you go free
 	jsr print_to_line1
@@ -7692,7 +7685,7 @@ screen_HGR2:
 	.byte $d5,$7d,$57,$a6,$95,$d3,$b6,$56
 	.byte $9c,$a5,$da,$48,$96,$13,$6f,$cb
 	.byte $94,$af,$b8,$57,$2f
-p4015:
+raster 0,21,0:
 	.byte $a9,$da,$6f,$a3,$49,$2f,$94,$95
 	.byte $0f,$ff,$ff,$ff,$df,$77,$5f,$c8
 	.byte $aa,$cf,$9d,$1a,$df,$cd,$4a,$6f
@@ -7713,11 +7706,11 @@ p4015:
 	.byte $52,$2f,$9c,$9d,$07,$ff,$ff,$ff
 	.byte $42,$34,$05,$01,$42,$35,$05,$02
 	.byte $42,$36
-p40AF:
+raster 9,7,0:
 	.byte $05,$00
-p40B1:
+raster 9,9,0:
 	.byte $22,$83,$04
-p40B4:
+raster 9,12,0:
 	.byte $01,$22,$84,$04,$00,$42,$86,$04
 	.byte $00,$22,$75,$08,$01,$22,$76,$08
 	.byte $02,$32,$77,$02,$00,$23,$43,$08
@@ -7737,13 +7730,13 @@ p40D9:
 	.byte $15,$7a,$09,$07,$15,$8a,$09,$0f
 	.byte $15,$9a,$09,$0f,$15,$aa,$09,$0e
 	.byte $25,$4a,$01,$00,$25,$5a,$01,$00
-p4131:
+raster 10,9,0:
 	.byte $25
-p4132:
+raster 10,10,0:
 	.byte $6a
-p4133:
+raster 10,11,0:
 	.byte $01
-p4134:
+raster 10,12,0:
 	.byte $00,$25,$7a,$01,$00,$25,$8a,$01
 	.byte $00,$02,$01,$0a,$06,$01,$00,$07
 	.byte $bf,$00,$00,$00,$01,$00,$a0,$c8
@@ -7772,12 +7765,12 @@ p4156:
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$44,$45,$41,$54,$48,$07,$00
 	.byte $00,$00
-p4200:
+raster 4,0,0:
 	.byte $44,$45,$41,$54
-p4204:
+raster 4,4,0:
 	.byte $48,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00
-p4211:
+raster 4,17,0:
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
@@ -7825,11 +7818,11 @@ p4211:
 	.byte $07,$07,$07,$70,$70,$70,$70,$70
 	.byte $70,$70,$70,$01,$03,$07,$07,$07
 	.byte $07,$07,$07
-p4384:
+raster 7,4,0:
 	.byte $40,$60,$70
-p4387:
+raster 7,7,0:
 	.byte $70,$70,$70,$70,$70,$78,$78
-p438E:
+raster 7,14,0:
 	.byte $78,$78,$7f,$7f,$7f,$7f,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$08,$08
 	.byte $08,$08,$08,$00,$08,$00,$14,$14
@@ -8623,12 +8616,12 @@ p438E:
 	.byte $80,$20,$55,$08,$a2,$00,$86,$06
 	.byte $86,$07,$a2,$1f,$86,$0c,$a2,$7c
 	.byte $86,$0d
-p5C50:
+raster 16,0,7:
 	.byte $20,$e5,$08,$20
-p5C54:
+raster 16,4,7:
 	.byte $94,$7c,$c9,$44,$d0,$03,$4c,$0c
 	.byte $7d,$20,$55,$08,$a9
-p5C61:
+raster 16,17,7:
 	.byte $95,$20,$92,$08,$60,$20,$55,$08
 	.byte $a2,$00,$86,$06,$86,$07,$a2,$00
 	.byte $86,$0c,$a2,$7c,$86,$0d,$20,$e5
@@ -8673,9 +8666,9 @@ p5D05:
 	.byte $20,$50,$52,$4f,$54,$45,$43,$54
 	.byte $45,$44,$21,$80,$56,$4f,$4c,$55
 	.byte $4d,$45
-p5DAF:
+raster 11,7,7:
 	.byte $20,$4d,$49,$53,$4d
-p5DB4:
+raster 11,12,7:
 	.byte $41,$54,$43,$48,$21,$80,$44,$52
 	.byte $49,$56,$45,$20,$45,$52,$52,$4f
 	.byte $52,$21,$20,$43,$41,$55,$53,$45
@@ -8696,14 +8689,14 @@ p5DB4:
 	.byte $d0,$04,$a0,$47,$d0,$02,$a0,$68
 	.byte $84,$19,$a2,$00,$86,$1a,$a2,$8f
 	.byte $86,$0c,$a2
-p5E4F:
+raster 13,-1,7:
 	.byte $7d
-p5E50:
+raster 20,0,7:
 	.byte $86,$0d,$18,$a5,$19,$65
 p5E56:
 	.byte $0c,$85,$0c,$a5,$1a,$65,$0d,$85
 	.byte $0d,$a9,$0a,$20,$92,$11,$20
-p5E65:
+raster 20,21,7:
 	.byte $e5,$08,$20,$e9,$0f,$a5,$10,$f0
 	.byte $03,$4c,$ff,$7c,$68,$68,$4c,$05
 	.byte $08,$ad,$a5,$61,$d0,$06,$a2,$06
@@ -8713,11 +8706,11 @@ p5E65:
 	.byte $a0,$04,$20,$77,$17,$a9,$5c,$85
 	.byte $09,$a9,$61,$85,$08,$a0,$04,$20
 	.byte $77,$17,$a9,$16,$85,$06,$a9
-p5EAC:
+raster 13,4,7:
 	.byte $00,$85,$07
-p5EAF:
+raster 13,7,7:
 	.byte $a9,$03,$a0,$15,$20,$a7,$17
-p5EB6:
+raster 13,14,7:
 	.byte $4c,$e8,$16,$68,$48,$c9,$01,$d0
 	.byte $0f,$a9,$12,$85,$06,$a9,$04,$85
 	.byte $07,$a9,$03,$a0,$0d,$20,$a7,$17
@@ -9464,27 +9457,27 @@ b7E81:
 	sta zp_row
 	lda #$03
 	ldy #$0d
-	jsr s17A7
-	lda #>p4211
+	jsr draw_down
+	lda #>raster 4,17,0
 	sta screen_ptr+1
-	lda #<p4211
+	lda #<raster 4,17,0
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
-	lda #>p5C61
+	jsr draw_right
+	lda #>raster 16,17,7
 	sta screen_ptr+1
-	lda #<p5C61
+	lda #<raster 16,17,7
 	sta screen_ptr
 	ldy #$04
-	jsr s1777
+	jsr draw_right
 	lda #$16
 	sta zp_col
 	lda #$00
 	sta zp_row
 	lda #$03
 	ldy #$15
-	jsr s17A7
-	jmp j16E8
+	jsr draw_down
+	jmp @draw_0_left
 
 	pla
 	pha
@@ -9496,20 +9489,20 @@ b7E81:
 	sta zp_row
 	lda #$03
 	ldy #$0d
-	jsr s17A7
+	jsr draw_down
 b7ECE:
 	lda #$15
 	sta zp_col
 	lda #$00
 	sta zp_row
 	ldy #$04
-	jsr s177F
+	jsr draw_down_left
 	lda #$12
 	sta zp_col
 	lda #$11
 	sta zp_row
 	ldy #$04
-	jsr s1795
+	jsr draw_down_right
 	pla
 	cmp #$00
 	beq b7F4C
@@ -9521,19 +9514,19 @@ b7ECE:
 	sta zp_row
 	lda #$04
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	lda #>relocated
 	sta screen_ptr+1
 	lda #<relocated
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-	lda #>p5E4F
+	jsr draw_right
+	lda #>raster 13,-1,7
 	sta screen_ptr+1
-	lda #<p5E4F
+	lda #<raster 13,-1,7
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
+	jsr draw_right
 b7F1B:
 	lda gs_walls_right_depth
 	and #$01
@@ -9544,19 +9537,19 @@ b7F1B:
 	sta zp_row
 	lda #$03
 	ldy #$15
-	jsr s17A7
-	lda #>p4015
+	jsr draw_down
+	lda #>raster 0,21,0
 	sta screen_ptr+1
-	lda #<p4015
+	lda #<raster 0,21,0
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
-	lda #>p5E65
+	jsr draw_right
+	lda #>raster 20,21,7
 	sta screen_ptr+1
-	lda #<p5E65
+	lda #<raster 20,21,7
 	sta screen_ptr
 	ldy #$01
-	jsr s1777
+	jsr draw_right
 b7F4B:
 	rts
 
@@ -9569,7 +9562,7 @@ b7F4C:
 	sta zp_row
 	lda #$04
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 b7F60:
 	lda gs_walls_right_depth
 	and #$01
@@ -9580,7 +9573,7 @@ b7F60:
 	sta zp_row
 	lda #$03
 	ldy #$15
-	jsr s17A7
+	jsr draw_down
 	rts
 
 	lda #$ff

@@ -1,4 +1,9 @@
 
+;(1 << 0) = $01
+;(1 << 1) = $02
+;(1 << 2) = $04
+;(1 << 3) = $08
+;(1 << 4) = $10
 ;' ' = $20
 ;'*' = $2a
 ;'.' = $2e
@@ -15,6 +20,7 @@
 ;'Z' = $5a
 ;>font = $62
 ;<font = $94
+;raster 0,-1,0 = >relocated
 
 ;'0' - noun_zero = $16
 
@@ -95,6 +101,10 @@ food_low = $0a
 
 game_save_begin = s_facing
 
+glyph_slash_down = $01
+glyph_slash_up = $02
+glyph_L = $03
+glyph_R = $04
 glyph_X = $05
 glyph_solid = $0b
 glyph_keyhole_C = $18
@@ -185,6 +195,11 @@ nouns_item_end = $15
 opcode_JMP = $4c
 
 puzzle_step1 = $05
+
+;raster_hi 10,10,7 = $5d
+;raster_hi 10,11,7 = $5d
+;raster_hi 10,9,7 = $5d
+;raster_hi 11,9,7 = $5d
 
 special_mode_calc_puzzle = $02
 special_mode_bat = $04
