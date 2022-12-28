@@ -20,51 +20,57 @@ def main(argv):
     args = usage(argv)
 
     with open(args.input, 'rt') as f:
-        src = f.readlines()
-    L = iter(src)
+        #remove \n
+        src = (s[:-1] for s in f.readlines())
 
-    asm = []
+    S = group(bitpairs(src), 4)
 
-    B = []
-    b = ''
-    for w,s in bitstream(L):
-        b += s + w
-        if len(b)==8:
-            B.append(b)
-            if len(B)==3:
-                as_bin = ','.join('%'+b for b in B)
-                as_hex = ','.join(f'${int(b,2):02x}' for b in B)
-                asm.append(f'\t.byte {as_bin} ; {as_hex}\n')
-                B = []
-            b = ''
+    asm = [
+        '\t.segment "MAZE"\n',
+        '\n',
+        '\t;Each 3-byte sequence is one column, south to north (max 12 cells)\n',
+        '\t;Each pair of bits is whether there is a wall to South and West of each cell.\n',
+    ]
+    for level in range(5):
+        asm.append(f'\t; Level {level+1}\n')
+
+        for row in range(11):
+            B = [b for _,b in zip(range(3), S)]
+            as_bin = ','.join('%'+b for b in B)
+            as_hex = ','.join(f'${int(b,2):02x}' for b in B)
+            asm.append(f'\t.byte {as_bin} ; {as_hex}\n')
 
     with open(args.output, 'wt') as out:
         out.write(''.join(asm))
 
     return 0
-        
-def bit(a,b):
-    return '1' if a==b else '0'
 
-def bitstream(L):
-    M = []
-    for level in range(5):
+def group(S, n):
+    while True:
+        out = ''
+        for i in range(n):
+            a,b = next(S)
+            out += a + b
+        yield out
+
+def to_bits(p, s, i):
+    return ['1' if c==p else '0'  for c in s[i::4]]
+
+def bitpairs(L):
+    while True:
         next(L) #skip "Level" header
+
         W = []
         S = []
         for row in range(12):
-            line = next(L)[:-1] #remove \n
-            w = [bit(c, '|') for c in line[0::4]]
-            W.append(w)
-
-            line = next(L)[:-1] #remove \n
-            s = [bit(c, '-') for c in line[1::4]]
-            S.append(s)
-
+            W.append(to_bits('|', next(L), 0))
+            S.append(to_bits('-', next(L), 1))
         W = zip(*W)
         S = zip(*S)
+
         for w,s in zip(W,S):
-            yield from zip(reversed(w),reversed(s))
+            # print(s,w)
+            yield from zip(reversed(s),reversed(w))
 
         next(L) #skip blank line
 

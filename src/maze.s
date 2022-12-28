@@ -1,3 +1,5 @@
+	.segment "MAZE"
+
 	;Each 3-byte sequence is one column, south to north (max 12 cells)
 	;Each pair of bits is whether there is a wall to South and West of each cell.
 	; Level 1

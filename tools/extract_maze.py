@@ -47,7 +47,7 @@ def main(argv):
         M.append('')
 
     with open(args.output, 'wt') as out:
-        out.write('\n'.join(M))
+        out.write('\n'.join(M) + '\n')
 
     return 0
 
