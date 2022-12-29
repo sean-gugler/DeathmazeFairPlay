@@ -24,12 +24,14 @@ zp0F_wait2 = $0f
 zp10_wait3 = $10
 
 zp0C_col_animate = $0c
+zp0C_col_left = $0c
 zp0E_count = $0e
 zp0E_item = $0e
 zp0E_object = $0e
 zp0E_draw_param = $0e
 zp0F_action = $0f
 zp0F_index = $0f
+zp10_length = $10
 zp10_count_vocab = $10
 zp10_count_words = $10
 zp10_which_place = $10
@@ -45,11 +47,13 @@ zp11_count_chars = $11
 zp11_count_string = $11
 zp11_count_which = $11
 zp11_position = $11
+zp11_count_loop = $11
 zp13_raw_input = $13
 zp13_char_input = $13
 zp13_level = $13
 zp13_temp = $13
 zp19_level_facing = $19
+zp19_col_right = $19
 zp1A_move_action = $1a
 zp1A_hint_mode = $1a
 zp1A_object = $1a
@@ -117,7 +121,7 @@ drawcmd06_boxes = $06
 drawcmd07_the_square = $07
 drawcmd08_doors = $08
 drawcmd09_keyholes = $09
-drawcmd0A = $0a
+drawcmd0A_door_opening = $0a
 
 error_write_protect = $01
 error_volume_mismatch = $02
@@ -4599,39 +4603,39 @@ draw_A_special:
 	ldy #$02
 	jsr draw_right
 	lda #$0a
-	sta a0C
+	sta zp0C_col_left
 	lda #$0b
-	sta a19
+	sta zp19_col_right
 	lda #$04
-	sta a11
+	sta zp11_count_loop
 	lda #$02
-	sta a10
-b2585:
+	sta zp10_length
+@next_frame_opening:
 	jsr wait_brief
-	lda a0C
+	lda zp0C_col_left
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #' '
 	ldy #$12
 	jsr draw_down
-	lda a19
+	lda zp19_col_right
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #' '
 	ldy #$12
 	jsr draw_down
-	dec a0C
-	inc a19
-	lda a0C
+	dec zp0C_col_left
+	inc zp19_col_right
+	lda zp0C_col_left
 	sta zp_col
 	lda #$03
 	sta zp_row
 ;	lda #glyph_L  ;$03, redundant
 	ldy #$12
 	jsr draw_down
-	lda a19
+	lda zp19_col_right
 	sta zp_col
 	lda #$03
 	sta zp_row
@@ -4640,17 +4644,17 @@ b2585:
 	jsr draw_down
 	lda #$11
 	sta zp_row
-	dec a0C
-	lda a0C
-	inc a0C
+	dec zp0C_col_left
+	lda zp0C_col_left
+	inc zp0C_col_left
 	sta zp_col
 	jsr get_rowcol_addr
-	inc a10
-	inc a10
-	ldy a10
+	inc zp10_length
+	inc zp10_length
+	ldy zp10_length
 	jsr draw_right
-	dec a11
-	bne b2585
+	dec zp11_count_loop
+	bne @next_frame_opening
 	rts
 
 print_noun:
@@ -5597,7 +5601,7 @@ cmd_open:
 	jsr push_special_mode
 	ldx #special_mode_elevator
 	stx gs_special_mode
-	jmp j325D
+	jmp draw_doors_opening
 
 which_door:
 	ldx #<door_table
@@ -6403,9 +6407,9 @@ cmd_hint:
 	lda #$9f     ;Invert and telephone.
 	jmp print_to_line2
 
-j325D:
+draw_doors_opening:
 	jsr update_view
-	lda #drawcmd0A
+	lda #drawcmd0A_door_opening
 	sta zp0F_action
 	jmp draw_special
 
@@ -7803,7 +7807,7 @@ b3D52:
 	jmp j3ECA
 
 b3D5C:
-	ldx #drawcmd0A
+	ldx #drawcmd0A_door_opening
 	stx zp0F_action
 	jsr draw_special
 	inc gs_exit_turns

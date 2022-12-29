@@ -964,15 +964,16 @@
 0009 screen_ptr+1
 000A zp0A_text_ptr
 000B zp0A_text_ptr+1
-000C zp_0C_string
+000C zp0C_col_left
 000D zp_0D
 000E zp0E_draw_param
-0010 zp10_position
-0011 zp11_level_facing
+0010 zp10_length
+0011 zp11_count_loop
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
+0019 zp19_col_right
 001A zp1A_count_loop
 003C tape_addr_start
 003D tape_addr_start+1
@@ -1419,6 +1420,7 @@
 252D draw_keyhole_3
 253F draw_keyhole_4
 254C @draw_A_special
+2585 @next_frame_opening
 25E3 print_noun
 25EF @find_string
 25F3 @next_char
@@ -1639,6 +1641,7 @@
 3238 cmd_hint
 324F +
 3258 @calc_hint
+325D draw_doors_opening
 3267 swap_saved_A
 3274 swap_saved_vars
 32BD dec_item_ptr
