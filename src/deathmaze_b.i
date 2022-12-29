@@ -89,6 +89,8 @@ cmd_blow = $02
 ;door_lock_begin - doors_elevators = $15
 ;door_lock_begin + door_correct = $1b
 
+drawcmd03_compactor = $03
+
 error_write_protect = $01
 error_volume_mismatch = $02
 error_unknown_cause = $03
@@ -260,6 +262,7 @@ verb_attack = $13
 verb_intransitive = $14
 verb_movement_begin = $5a
 verb_forward = $5b
+;verb_movement_begin + 1 = $5b
 verb_left = $5c
 verb_right = $5d
 verb_uturn = $5e

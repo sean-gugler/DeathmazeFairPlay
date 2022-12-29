@@ -54,6 +54,7 @@ zp13_level = $13
 zp13_temp = $13
 zp19_level_facing = $19
 zp19_col_right = $19
+zp19_regular_climb = $19
 zp1A_move_action = $1a
 zp1A_hint_mode = $1a
 zp1A_object = $1a
@@ -7311,9 +7312,9 @@ special_elevator:
 
 :	jsr get_player_input
 	lda gd_parsed_action
-	cmp #$5b
-	beq b39B5
-j397E:
+	cmp #verb_forward
+	beq enter_elevator
+pop_mode_stack:
 	lda gs_mode_stack1
 	sta gs_special_mode
 	lda gs_mode_stack2
@@ -7322,14 +7323,13 @@ j397E:
 	sta gs_mode_stack1
 	jsr update_view
 	lda gd_parsed_action
-	cmp #$5b
-	bcc b399C
+	cmp #verb_movement_begin + 1
+	bcc :+
 	jmp cmd_movement
 
-b399C:
-	jmp player_cmd
+:	jmp player_cmd
 
-j399F:
+ride_elevator:
 	lda #$a3     ;The elevator is moving!
 	jsr print_to_line1
 	jsr wait_long
@@ -7339,29 +7339,30 @@ j399F:
 	jsr update_view
 	jmp pop_special_mode
 
-b39B5:
+enter_elevator:
 	jsr clear_maze_window
 	ldx gs_level
 	dex
 	dex
-	beq b39D2
+	beq @level2
 	dex
-	beq b3A03
+	beq @level3
 	dex
-	beq b3A0D
+	beq @level4
+@level5:
 	lda #$6d     ;You are trapped in a fake
 	jsr print_to_line1
 	lda #$6e     ;elevator. There is no escape!
 	jsr print_to_line2
 	jmp game_over
 
-b39D2:
+@level2:
 	jsr clear_maze_window
 	ldx #$03
-	stx zp0F_action
+	stx zp0F_action  ;GUG: no effect
 	stx gs_walls_left
 	ldx #$23
-	stx a0E
+	stx zp0E_draw_param  ;GUG: no effect
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd03_compactor
@@ -7377,20 +7378,20 @@ b39D2:
 	jsr print_display_string
 	jmp game_over
 
-b3A03:
+@level3:
 	inc gs_level
 	ldx #$01
 	stx gs_player_x
-	bne b3A15
-b3A0D:
+	bne @clear_turns
+@level4:
 	dec gs_level
 	ldx #$04
 	stx gs_player_x
-b3A15:
+@clear_turns:
 	ldx #$00
 	stx gs_level_turns_hi
 	stx gs_level_turns_lo
-	jmp j399F
+	jmp ride_elevator
 
 special_tripped:
 	dex
@@ -7486,7 +7487,7 @@ special_tripped:
 	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
 	jsr print_to_line1
-	jmp j397E
+	jmp pop_mode_stack
 
 special_climb:
 	dex
@@ -7506,30 +7507,31 @@ special_climb:
 	cmp #noun_snake
 	bne @dead
 	lda gs_player_x
-	sta a1A
+	sta zp1A_pos_x
 	lda gs_player_y
-	sta a19
+	sta zp19_pos_y
 	lda gs_level
 	cmp #$03
-	beq b3B2C
+	beq @on_level_3
 	cmp #$04
-	bne b3B38
-	lda a1A
+	bne @ceiling
+@on_level_4:
+	lda zp1A_pos_x
 	cmp #$01
-	bne b3B38
-	lda a19
+	bne @ceiling
+	lda zp19_pos_y
 	cmp #$0a
-	bne b3B38
-	jmp j3B61
+	bne @ceiling
+	jmp @to_level_3
 
-b3B2C:
-	lda a1A
+@on_level_3:
+	lda zp1A_pos_x
 	cmp #$08
-	bne b3B38
-	lda a19
+	bne @ceiling
+	lda zp19_pos_y
 	cmp #$05
-	beq b3B56
-b3B38:
+	beq @to_level_2
+@ceiling:
 	jsr flash_screen
 	lda #$2d     ;Wham!
 	jsr print_to_line1
@@ -7542,28 +7544,28 @@ b3B38:
 	jsr wait_long
 	jmp dead_by_snake
 
-b3B56:
+@to_level_2:
 	ldx #$01
-	stx a19
+	stx zp19_regular_climb
 	inx
 	stx gs_facing
-	jmp j3B6A
+	jmp @up_level
 
-j3B61:
+@to_level_3:
 	ldx #$00
-	stx a19
+	stx zp19_regular_climb
 	ldx #$03
 	stx gs_facing
-j3B6A:
+@up_level:
 	dec gs_level
-	lda a1A
+	lda zp1A_pos_x
 	pha
-	lda a19
+	lda zp19_regular_climb
 	pha
 	jsr update_view
 	jsr get_player_input
 	lda gd_parsed_action
-	cmp #$5b
+	cmp #verb_forward
 	beq :+
 	jsr clear_status_lines
 	lda #$54     ;You can't be serious!
@@ -7572,19 +7574,19 @@ j3B6A:
 	jmp dead_by_snake
 
 :	pla
-	sta a19
+	sta zp19_regular_climb
 	pla
-	sta a1A
+	sta zp1A_pos_x
 	pha
-	lda a19
+	lda zp19_regular_climb
 	pha
 	cmp #$01
 	beq :+
 	inc gs_player_x
-	jmp j3BA5
+	jmp @moved_forward
 
 :	inc gs_player_y
-j3BA5:
+@moved_forward:
 	jsr update_view
 	lda #$59     ;The
 	jsr print_to_line1
@@ -7601,17 +7603,17 @@ j3BA5:
 	stx zp0F_action
 	jsr item_cmd
 	pla
-	sta a19
+	sta zp19_regular_climb
 	pla
-	sta a1A
-	lda a19
+	sta zp1A_pos_x
+	lda zp19_regular_climb
 	cmp #$01
-	bne b3BD8
+	bne @in_lair
 	jmp pop_special_mode
 
-b3BD8:
+@in_lair:
 	lda gs_monster_alive
-	beq b3C03
+	beq :+
 	lda #$59     ;The
 	jsr print_to_line2
 	lda #$0f     ;wool
@@ -7628,54 +7630,52 @@ b3BD8:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-b3C03:
-	ldx #$01
+:	ldx #$01
 	stx gs_snake_used
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-j3C0F:
+lair_input_loop:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #$5a
-	bcs b3C2B
+	bcs @move
 	cmp #verb_press
-	bne b3C25
+	bne @command_allowed
 	lda #$98     ;You will do no such thing!
 	jsr print_to_line2
-	jmp j3C0F
+	jmp lair_input_loop
 
-b3C25:
+@command_allowed:
 	jsr player_cmd
-	jmp j3C37
+	jmp @update_view
 
-b3C2B:
-	cmp #$5b
-	beq b3C58
+@move:
+	cmp #verb_forward
+	beq @forward
 	ldx gs_facing
 	stx a1A
 	jsr move_turn
-j3C37:
+@update_view:
 	lda gs_facing
 	ldx #$00 ;distance
 	stx zp0E_draw_param
 	ldx #drawcmd04_pit_floor
 	stx zp0F_action
 	cmp #$01
-	bne b3C55
+	bne :+
 	lda gs_room_lit
-	beq b3C55
+	beq :+
 	lda gs_walls_right_depth
 	and #%11100000
-	beq b3C55
+	beq :+
 	jsr draw_special
-b3C55:
-	jmp j3C0F
+:	jmp lair_input_loop
 
-b3C58:
+@forward:
 	lda gs_facing
 	cmp #$01
-	beq b3C72
+	beq @into_pit
 	jsr clear_maze_window
 	ldx #$09
 	stx zp_col
@@ -7683,9 +7683,9 @@ b3C58:
 	stx zp_row
 	lda #$7c     ;Splat!
 	jsr print_display_string
-	jmp j3C0F
+	jmp lair_input_loop
 
-b3C72:
+@into_pit:
 	inc gs_level
 	ldx #$03
 	stx gs_facing

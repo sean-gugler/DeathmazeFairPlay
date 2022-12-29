@@ -855,11 +855,12 @@
 393F #verb_open
 3946 #noun_door
 397A #verb_forward
-3995 #verb_forward
+3995 #verb_movement_begin + 1
 399F The elevator is moving!
 39A7 You are deposited at the next level.
 39C5 You are trapped in a fake
 39CA elevator. There is no escape!
+39E6 #drawcmd03_compactor
 39F3 Glitch!
 3A38 #noun_monster
 3A42 #verb_look
@@ -886,6 +887,7 @@
 3B3B Wham!
 3B40 Your head smashes into the ceiling!
 3B4B You fall on the snake!
+3B7C #verb_forward
 3B83 You can't be serious!
 3BA8 The
 3BAD snake
@@ -902,6 +904,7 @@
 3C08 #icmd_draw_inv
 3C19 #verb_press
 3C1D You will do no such thing!
+3C2B #verb_forward
 3C6A Splat!
 3CA6 Don't make unnecessary turns.
 3D55 #noun_door
@@ -973,8 +976,8 @@
 0016 zp_counter
 0017 clock
 0018 clock+1
-0019 zp19_col_right
-001A zp1A_count_loop
+0019 zp19_pos_y
+001A zp1A_pos_x
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -1733,13 +1736,15 @@
 393C +
 396E special_elevator
 3974 +
-397E @pop_mode_stack
+397E pop_mode_stack
 399C +
-399F @moving
-39B5 @enter
+399F ride_elevator
+39B5 enter_elevator
+39C5 @level5
 39D2 @level2
 3A03 @level3
 3A0D @level4
+3A15 @clear_turns
 3A20 special_tripped
 3A26 +
 3A30 +
@@ -1755,8 +1760,24 @@
 3AF0 +
 3AFA @dead
 3AFD +
+3B1D @on_level_4
+3B2C @on_level_3
+3B38 @ceiling
+3B56 @to_level_2
+3B61 @to_level_3
+3B6A @up_level
 3B8E +
 3BA2 +
+3BA5 @moved_forward
+3BD8 @in_lair
+3C03 +
+3C0F lair_input_loop
+3C25 @command_allowed
+3C2B @move
+3C37 @update_view
+3C55 +
+3C58 @forward
+3C72 @into_pit
 3C86 special_exit
 3E65 text_congrats
 3EA7 @infinite_loop
