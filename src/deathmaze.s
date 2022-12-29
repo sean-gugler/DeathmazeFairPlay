@@ -31,6 +31,7 @@ zp0E_object = $0e
 zp0E_draw_param = $0e
 zp0F_action = $0f
 zp0F_index = $0f
+zp10_temp = $10
 zp10_length = $10
 zp10_count_vocab = $10
 zp10_count_words = $10
@@ -62,6 +63,12 @@ zp1A_count_loop = $1a
 zp1A_cmds_to_check = $1a
 zp1A_facing = $1a
 zp1A_temp = $1a
+
+zp0E_box_visible = $0e
+zp0F_sight_depth = $0f
+zp10_pos_y = $10
+zp11_pos_x = $11
+zp19_level = $19
 
 zp19_pos_y = $19
 zp1A_pos_x = $1a
@@ -3101,7 +3108,7 @@ next_known_item:
 	sta zp0E_item
 	lda #>gs_item_locs
 	sta zp0E_item+1
-	lda #items_unique + items_food + items_torches
+	lda #items_total
 	sta zp1A_count_loop
 check_item_boxed:
 	ldy #$00
@@ -3248,7 +3255,7 @@ icmd09_new_game:
 icmd0A:
 	dec zp1A_cmds_to_check
 	bne icmd0B_which_box
-	jmp icmd0A_impl
+	jmp icmd0A_probe_boxes
 
 ; Order of preference for boxes:
 ;   1) at feet
@@ -3271,7 +3278,7 @@ icmd0B_which_box:
 	sta zp0E_item+1
 	lda #<(gs_item_locs+1)
 	sta zp0E_item
-	lda #items_unique + items_food + items_torches
+	lda #items_total
 	sta zp1A_count_loop
 	ldy #$00
 	lda zp11_position
@@ -3420,7 +3427,7 @@ set_action:
 icmd_default:
 	rts
 
-icmd0A_impl:
+icmd0A_probe_boxes:
 	lda gs_walls_right_depth
 	and #%11100000
 	lsr
@@ -3428,141 +3435,141 @@ icmd0A_impl:
 	lsr
 	lsr
 	lsr
-	beq b1D35
+	beq @none  ;GUG: inline to compact better
 	cmp #$05
-	bne b1D21
+	bne :+
 	sec
 	sbc #$01
-b1D21:
-	sta a1A
+:	sta zp1A_count_loop
 	lda gs_player_x
-	sta a11
+	sta zp11_pos_x
 	lda gs_player_y
-	sta a10
+	sta zp10_pos_y
 	lda gs_level
-	sta a19
-	jmp j1D3B
+	sta zp19_level
+	jmp @begin_probe
 
-b1D35:
+@none:
 	lda #$00
 	sta gs_box_visible
 	rts
 
-j1D3B:
-	lda a1A
-	sta a0F
+@begin_probe:
+	lda zp1A_count_loop
+	sta zp0F_sight_depth
 	lda #$00
-	sta a0E
-j1D43:
+	sta zp0E_box_visible
+@next_pos:
 	lda gs_facing
-	jsr s1DC7
-	jsr s1D69
-	dec a1A
-	beq b1D55
-	lsr a0E
-	jmp j1D43
+	jsr move_pos_facing
+	jsr any_item_here
+	dec zp1A_count_loop
+	beq @shift_remainder
+	lsr zp0E_box_visible
+	jmp @next_pos
 
-b1D55:
+@shift_remainder:
 	lda #$04
 	sec
-	sbc a0F
-	beq b1D63
-b1D5C:
-	lsr a0E
+	sbc zp0F_sight_depth
+	beq @done
+:	lsr zp0E_box_visible
 	sec
 	sbc #$01
-	bne b1D5C
-b1D63:
-	lda a0E
+	bne :-
+@done:
+	lda zp0E_box_visible
 	sta gs_box_visible
 	rts
 
-s1D69:
+any_item_here:
 	pha
-	lda a11
+	lda zp11_pos_x
 	pha
-	lda a10
+	lda zp10_pos_y
 	pha
-	lda zp0E_item+1
+	lda zp0F_sight_depth
 	pha
-	lda zp0E_item
+	lda zp0E_box_visible
 	pha
-	lda a11
+	lda zp11_pos_x
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc a10
+	adc zp10_pos_y
 	pha
 	lda #>(gs_item_locs+1)
-	sta zp0E_item+1
+	sta zp0E_ptr+1
 	lda #<(gs_item_locs+1)
-	sta zp0E_item
-	lda #$17
-	sta a11
+	sta zp0E_ptr
+	lda #items_total
+	sta zp11_count_loop
 	pla
 	ldy #$00
-b1D8F:
-	cmp (zp0E_item),y
-	beq b1DA7
-j1D93:
+@next_item:
+	cmp (zp0E_ptr),y
+	beq @match_position
+@continue:
 	iny
 	iny
-	dec a11
-	bne b1D8F
+	dec zp11_count_loop
+	bne @next_item
 	pla
-	sta zp0E_item
+	sta zp0E_box_visible
 	pla
-	sta zp0E_item+1
-b1D9F:
+	sta zp0F_sight_depth
+@done:
 	pla
-	sta a10
+	sta zp10_pos_y
 	pla
-	sta a11
+	sta zp11_pos_x
 	pla
 	rts
 
-b1DA7:
-	sta a10
-	dec zp0E_item
-	lda (zp0E_item),y
-	inc zp0E_item
-	cmp a19
-	beq b1DB8
-	lda a10
-	jmp j1D93
+@match_position:
+	sta zp10_temp
+	dec zp0E_ptr
+	lda (zp0E_ptr),y
+	inc zp0E_ptr
+	cmp zp19_level
+	beq @match_level
+	lda zp10_temp
+	jmp @continue
 
-b1DB8:
+@match_level:
 	pla
-	sta zp0E_item
+	sta zp0E_box_visible
 	pla
-	sta zp0E_item+1
-	lda zp0E_item
+	sta zp0F_sight_depth
+	lda zp0E_box_visible
 	clc
 	adc #$08
-	sta zp0E_item
-	bne b1D9F
-s1DC7:
-	cmp #$01
-	beq b1DD6
-	cmp #$02
-	beq b1DD9
-	cmp #$03
-	beq b1DDC
-	dec a10
+	sta zp0E_box_visible
+	bne @done
+
+move_pos_facing:
+	cmp #facing_W
+	beq @west
+	cmp #facing_N
+	beq @north
+	cmp #facing_E
+	beq @east
+@south:
+	dec zp10_pos_y
 	rts
 
-b1DD6:
-	dec a11
+@west:
+	dec zp11_pos_x
 	rts
 
-b1DD9:
-	inc a10
+@north:
+	inc zp10_pos_y
 	rts
 
-b1DDC:
-	inc a11
+@east:
+	inc zp11_pos_x
 	rts
 
 ; Output: $0F = action, $0E = param (input args for draw_special)
@@ -8344,6 +8351,8 @@ gs_item_food_torch:
 	items_unique = $11
 	items_food = 3
 	items_torches = 3
+
+	items_total = items_unique + items_food + items_torches
 
 	item_begin        = 1   ;indexing is 1-based
 	item_food_begin   = item_begin + items_unique

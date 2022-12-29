@@ -100,6 +100,10 @@ error_bad_save = $05
 execs_location_end = $07
 execs_no_location = $07
 
+facing_W = $01
+facing_N = $02
+facing_E = $03
+
 food_fart_minimum = $05
 food_low = $0a
 ;food_fart_minimum + food_fart_consume = $0f
@@ -176,6 +180,7 @@ items_torches = $03
 ;items_food + items_torches = $06
 items_unique = $12
 ;items_unique + items_food = $14
+items_total = $17
 ;items_unique + items_food + items_torches = $17
 
 max_input = $1e

@@ -9,7 +9,7 @@
 	.byte $00		;torches unlit
 	.byte $07		;[---wwwww] walls on left (bits, lsb = nearest)
 	.byte $bf		;[DDDwwwww] walls on right (bits, lsb = nearest) and Depth (value 0-5)
-	.byte $00		;9B
+	.byte $00		;[----vvvv] boxes visible (bits, lsb = nearest)
 	.byte $00		;parsed action
 	.byte $00		;parsed object
 	.byte $01		;room lit

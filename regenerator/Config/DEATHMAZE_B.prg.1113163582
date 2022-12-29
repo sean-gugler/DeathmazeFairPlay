@@ -60,6 +60,7 @@
 1BBB
 1BEC
 1C3B
+1DC7
 1E5A
 1EA4
 1F1B
@@ -366,6 +367,10 @@
 1CFE #carried_known
 1D02 #icmd_where
 1D06 #item_torch_begin
+1D88 #items_total
+1DC7 #facing_W
+1DCB #facing_N
+1DCF #facing_E
 1E01 #maze_features_end
 1EAC #glyph_R
 1EBB #glyph_R
@@ -969,15 +974,16 @@
 000B zp0A_text_ptr+1
 000C zp0C_col_left
 000D zp_0D
-000E zp0E_draw_param
-0010 zp10_length
-0011 zp11_count_loop
+000E zp0E_ptr
+000F zp0F_sight
+0010 zp10_temp
+0011 zp11_loop_count
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
-0019 zp19_pos_y
-001A zp1A_pos_x
+0019 zp19_level
+001A zp1A_loop_count
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -1354,7 +1360,25 @@
 1CF6 icmd0E_which_torch
 1D02 set_action
 1D0D icmd_default
-1D0E icmd0A_impl
+1D0E icmd0A_probe_boxes
+1D21 +
+1D35 @none
+1D3B @begin_probe
+1D43 @next_pos
+1D55 @shift_remainder
+1D5C -
+1D63 @done
+1D69 any_item_here
+1D8F @next_item
+1D93 @continue
+1D9F @done
+1DA7 @match_position
+1DB8 @match_level
+1DC7 move_pos_facing
+1DD3 @south
+1DD6 @west
+1DD9 @north
+1DDC @east
 1DDF get_maze_feature
 1E09 @next
 1E0E @continue
