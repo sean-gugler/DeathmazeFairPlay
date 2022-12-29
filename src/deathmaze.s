@@ -23,15 +23,20 @@ zp0E_wait1 = $0e
 zp0F_wait2 = $0f
 zp10_wait3 = $10
 
+zp0C_col_animate = $0c
 zp0E_count = $0e
 zp0E_item = $0e
 zp0E_object = $0e
+zp0E_draw_param = $0e
 zp0F_action = $0f
 zp0F_index = $0f
 zp10_count_vocab = $10
 zp10_count_words = $10
 zp10_which_place = $10
 zp10_noun = $10
+zp10_position = $10
+zp11_level_facing = $11
+zp11_temp = $11
 zp11_action = $11
 zp11_item = $11
 zp11_box_item = $11
@@ -45,8 +50,6 @@ zp13_char_input = $13
 zp13_level = $13
 zp13_temp = $13
 zp19_level_facing = $19
-zp19_pos_y = $19
-zp1A_pos_x = $1a
 zp1A_move_action = $1a
 zp1A_hint_mode = $1a
 zp1A_object = $1a
@@ -55,15 +58,24 @@ zp1A_cmds_to_check = $1a
 zp1A_facing = $1a
 zp1A_temp = $1a
 
+zp19_pos_y = $19
+zp1A_pos_x = $1a
+
+zp19_count_col = $19
+zp1A_count_row = $1A
+
 zp19_item_position = $19
 zp1A_item_place = $1a
 
-zp1A_wall_bit = $1a
-zp19_wall_opposite = $19
 zp19_sight_depth = $19
+zp19_wall_opposite = $19
+zp1A_wall_bit = $1a
 
 ; 16-bit variables
 zp0A_walls_ptr = $0a ;$0b
+zp0A_text_ptr = $0a ;$0b
+zp0A_data_ptr = $0a ;$0b
+zp0C_string_ptr = $0c ;$0d
 zp0E_count16 = $0e ;$0f
 zp0E_ptr = $0e ;$0f
 zp0E_src = $0e ;$0f
@@ -96,6 +108,17 @@ char_mask_upper = $5f
 
 cmd_blow = $02
 
+drawcmd01_keyhole = $01
+drawcmd02_elevator = $02
+drawcmd03_compactor = $03
+drawcmd04_pit_floor = $04
+drawcmd05_pit_roof = $05
+drawcmd06_boxes = $06
+drawcmd07_the_square = $07
+drawcmd08_doors = $08
+drawcmd09_keyholes = $09
+drawcmd0A = $0a
+
 error_write_protect = $01
 error_volume_mismatch = $02
 error_unknown_cause = $03
@@ -117,7 +140,20 @@ glyph_slash_up = $02
 glyph_L = $03
 glyph_R = $04
 glyph_X = $05
+glyph_LR = $0a
 glyph_solid = $0b
+glyph_box = $0c
+glyph_box_TL = $0d
+glyph_box_TR = $0e
+glyph_box_BR = $0f
+glyph_box_T = $10
+glyph_box_R = $11
+glyph_box_BL = $12
+glyph_box_B = $13
+glyph_slash_up_C = $14
+glyph_slash_down_C = $15
+glyph_C = $16
+glyph_slash_down_R = $17
 glyph_keyhole_C = $18
 glyph_keyhole_R = $19
 glyph_keyhole_L = $1a
@@ -125,8 +161,14 @@ glyph_L_solid = $1b
 glyph_R_solid = $1c
 glyph_L_notched = $1d
 glyph_R_notched = $1e
+glyph_angle_BR = $1f
 glyph_UR_triangle = $5f
 glyph_UL_triangle = $60
+glyph_angle_BL = $7b
+glyph_solid_BR = $7c
+glyph_solid_BL = $7d
+glyph_solid_TR = $7e
+glyph_solid_TL = $7f
 
 ;gs_size-1 = $55
 
@@ -238,11 +280,7 @@ zp_col = $06
 zp_row = $07
 screen_ptr = $08
 ;screen_ptr+1 = $09
-zp0A_text_ptr = $0a
-;zp0A_text_ptr+1 = $0b
 a0C = $0c
-zp0C_string_ptr = $0c
-;zp0C_string_ptr+1 = $0d
 a0E = $0e
 a0F = $0f
 a10 = $10
@@ -1514,20 +1552,20 @@ update_view:
 	lda gs_room_lit
 	beq @done
 	jsr draw_maze
-	jsr s1DDF
-	lda a0F
-	ora zp0E_src
+	jsr get_maze_feature
+	lda zp0F_action
+	ora zp0E_draw_param
 	beq :+
-	jsr s1E5A
-:	ldx #$0a
+	jsr draw_special
+:	ldx #icmd_0A
 	stx a0F
 	jsr item_cmd
-	lda a619B
+	lda gs_box_visible
 	beq @done
-	sta zp0E_src
-	ldx #$06
-	stx a0F
-	jsr s1E5A
+	sta zp0E_draw_param
+	ldx #drawcmd06_boxes
+	stx zp0F_action
+	jsr draw_special
 @done:
 	rts
 
@@ -3402,21 +3440,21 @@ b1D21:
 
 b1D35:
 	lda #$00
-	sta a619B
+	sta gs_box_visible
 	rts
 
 j1D3B:
 	lda a1A
 	sta a0F
 	lda #$00
-	sta zp0E_src
+	sta a0E
 j1D43:
 	lda gs_facing
 	jsr s1DC7
 	jsr s1D69
 	dec a1A
 	beq b1D55
-	lsr zp0E_src
+	lsr a0E
 	jmp j1D43
 
 b1D55:
@@ -3425,13 +3463,13 @@ b1D55:
 	sbc a0F
 	beq b1D63
 b1D5C:
-	lsr zp0E_src
+	lsr a0E
 	sec
 	sbc #$01
 	bne b1D5C
 b1D63:
-	lda zp0E_src
-	sta a619B
+	lda a0E
+	sta gs_box_visible
 	rts
 
 s1D69:
@@ -3522,7 +3560,8 @@ b1DDC:
 	inc a11
 	rts
 
-s1DDF:
+; Output: $0F = action, $0E = param (input args for draw_special)
+get_maze_feature:
 	lda gs_facing
 	asl
 	asl
@@ -3530,7 +3569,7 @@ s1DDF:
 	asl
 	clc
 	adc gs_level
-	sta a11
+	sta zp11_level_facing
 	lda gs_player_x
 	asl
 	asl
@@ -3538,73 +3577,80 @@ s1DDF:
 	asl
 	clc
 	adc gs_player_y
-	sta a10
-	lda #>p60A5
+	sta zp10_position
+	lda #>maze_features
 	sta zp0E_ptr+1
-	lda #<p60A5
+	lda #<maze_features
 	sta zp0E_ptr
-	lda #$26
-	sta a19
+	lda #maze_features_end
+	sta zp19_count
 	ldy #$00
-	lda a11
-b1E09:
+	lda zp11_level_facing
+@next:
 	cmp (zp0E_ptr),y
-	beq b1E1C
+	beq @check_position
 	iny
-b1E0E:
+@continue:
 	iny
 	iny
 	iny
-	dec a19
-	bne b1E09
+	dec zp19_count
+	bne @next
 	lda #$00
 	sta zp0E_ptr+1
 	sta zp0E_ptr
 	rts
 
-b1E1C:
-	lda a10
+@check_position:
+	lda zp10_position
 	iny
 	cmp (zp0E_ptr),y
-	beq b1E27
-	lda a11
-	bne b1E0E
-b1E27:
+	beq @match
+	lda zp11_level_facing
+	bne @continue
+@match:
 	iny
 	lda (zp0E_ptr),y
-	sta a11
+	sta zp11_temp
 	iny
 	lda (zp0E_ptr),y
-	sta zp0E_ptr
-	lda a11
-	sta zp0E_ptr+1
+	sta zp0E_draw_param
+	lda zp11_temp
+	sta zp0F_action
 	rts
 
-p1E36:
-	.byte $06,$0b,$0b,$07,$0b,$0b,$0b,$0b
-	.byte $0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b
-	.byte $08,$0b,$0b,$09,$20,$0b,$0b,$20
-	.byte $20,$0b,$0b,$20,$0b,$0b,$0b,$0b
+keyhole_0:
+	.byte $06,$0b,$0b,$07
 	.byte $0b,$0b,$0b,$0b
-s1E5A:
-	ldy a0F
+	.byte $0b,$0b,$0b,$0b
+	.byte $0b,$0b,$0b,$0b
+	.byte $08,$0b,$0b,$09
+	.byte $20,$0b,$0b,$20
+	.byte $20,$0b,$0b,$20
+	.byte $0b,$0b,$0b,$0b
+	.byte $0b,$0b,$0b,$0b
+
+draw_special:
+	ldy zp0F_action
 	dey
-	bne b1EA1
+	bne @draw_2_elevator
+
+@draw_1_keyhole:
 	lda #$09
-	sta a1A
+	sta zp1A_count_row
 	sta zp_col
 	lda #$06
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #>p1E36
+	lda #>keyhole_0
 	sta zp0A_text_ptr+1
-	lda #<p1E36
+	lda #<keyhole_0
 	sta zp0A_text_ptr
 	ldy #$00
-j1E76:
+@next_row:
 	lda #$04
-	sta a19
-b1E7A:
+	sta zp19_count_col
+@next_glyph:
 	tya
 	pha
 	lda (zp0A_text_ptr),y
@@ -3612,10 +3658,10 @@ b1E7A:
 	pla
 	tay
 	iny
-	dec a19
-	bne b1E7A
-	dec a1A
-	beq b1EA0
+	dec zp19_count_col
+	bne @next_glyph
+	dec zp1A_count_row
+	beq @done
 	tya
 	pha
 	inc zp_row
@@ -3626,44 +3672,45 @@ b1E7A:
 	jsr get_rowcol_addr
 	pla
 	tay
-	jmp j1E76
+	jmp @next_row
 
-b1EA0:
+@done:
 	rts
 
-b1EA1:
+@draw_2_elevator:
 	dey
-	bne b1F1B
+	bne @draw_3_compactor
+
 	lda #$03
 	sta zp_row
 	lda #$05
 	sta zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
 	lda #$03
 	sta zp_row
 	lda #$0a
 	sta zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
 	lda #$03
 	sta zp_row
 	lda #$10
 	sta zp_col
-	lda #$03
+	lda #glyph_L
 	ldy #$12
 	jsr draw_down
-	lda #>p5E50
+	lda #raster_hi 20,0,7
 	sta screen_ptr+1
-	lda #<p5E50
+	lda #raster_lo 20,0,7
 	sta screen_ptr
 	ldy #$14
 	jsr draw_right
-	lda #<p5D05
+	lda #raster_lo 2,5,7
 	sta screen_ptr
-	lda #>p5D05
+	lda #raster_hi 2,5,7
 	sta screen_ptr+1
 	ldy #$0a
 	jsr draw_right
@@ -3672,44 +3719,43 @@ b1EA1:
 	lda #$01
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #>string_elevator
+	lda #>@string_elevator
 	sta zp0A_text_ptr+1
-	lda #<string_elevator
+	lda #<@string_elevator
 	sta zp0A_text_ptr
 	ldy #$00
 	lda #$08
-	sta a1A
-b1F04:
-	tya
+	sta zp1A_count_loop
+:	tya
 	pha
 	lda (zp0A_text_ptr),y
 	jsr print_char
 	pla
 	tay
 	iny
-	dec a1A
-	bne b1F04
+	dec zp1A_count_loop
+	bne :-
 	rts
 
-string_elevator:
+@string_elevator:
 	.byte "ELEVATOR"
-b1F1B:
-	dey
-	beq b1F21
-	jmp j206A
 
-b1F21:
-	lda #$06
-	sta a0C
-j1F25:
+@draw_3_compactor:
+	dey
+	beq :+
+	jmp @draw_4_pit_floor
+
+:	lda #$06
+	sta zp0C_col_animate
+@next_frame_3:
 	lda #$00
 	sta zp_row
 	lda #$06
 	sec
-	sbc a0C
+	sbc zp0C_col_animate
 	sta zp_col
 	pha
-	lda #$20
+	lda #' '
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3718,7 +3764,7 @@ j1F25:
 	inc zp_col
 	lda #$00
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3729,11 +3775,11 @@ j1F25:
 	lda #$01
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	pla
 	sta zp_col
@@ -3750,25 +3796,25 @@ j1F25:
 	lda zp_row
 	pha
 	dec zp_row
-	lda #$20
+	lda #' '
 	ldy #$0f
 	jsr draw_down
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	pla
 	sta zp_row
 	pla
 	sta zp_col
 	inc zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$0d
 	jsr draw_down
 	ldy #$04
@@ -3777,10 +3823,10 @@ j1F25:
 	sta zp_row
 	lda #$10
 	clc
-	adc a0C
+	adc zp0C_col_animate
 	sta zp_col
 	pha
-	lda #$20
+	lda #' '
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3789,7 +3835,7 @@ j1F25:
 	dec zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3800,7 +3846,7 @@ j1F25:
 	lda #$01
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	dec zp_col
@@ -3810,7 +3856,6 @@ j1F25:
 	jsr char_out
 	pla
 	sta zp_col
-p1FFF:
 	dec zp_col
 	dec zp_col
 	lda #$00
@@ -3824,7 +3869,7 @@ p1FFF:
 	lda zp_row
 	pha
 	dec zp_row
-	lda #$20
+	lda #' '
 	ldy #$0f
 	jsr draw_down
 	inc zp_col
@@ -3840,235 +3885,275 @@ p1FFF:
 	pla
 	sta zp_col
 	dec zp_col
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
 	jsr draw_down
 	ldy #$04
 	jsr draw_down_right
-	dec a0C
-	beq b2051
+	dec zp0C_col_animate
+	beq :+
 	jsr wait_brief
-	jmp j1F25
+	jmp @next_frame_3
 
-b2051:
-	rts
+:	rts
 
-p2052:
-	.byte $11,$11,$04,$05,$11,$04,$40,$d4
-	.byte $0d,$5e,$50,$15,$0e,$0e,$03,$08
-	.byte $0e,$03,$43,$2f,$07,$5c,$54,$0d
-j206A:
+@pit_floor_data:
+	;--- distance 1 (0E = 0)
+	.byte $11,$11,$04      ;X,Y,len
+	.byte $05,$11,$04      ;X,Y,len
+	.byte raster_hi $11,4,0
+	.byte raster_lo $11,4,0
+	.byte $0d              ;len
+	.byte raster_hi $14,0,7
+	.byte raster_lo $14,0,7
+	.byte $15              ;len
+	;--- distance 2 (0E > 0)
+	.byte $0e,$0e,$03      ;X,Y,len
+	.byte $08,$0e,$03      ;X,Y,len
+	.byte raster_hi $0e,7,0
+	.byte raster_lo $0e,7,0
+	.byte $07              ;len
+	.byte raster_hi $10,4,7
+	.byte raster_lo $10,4,7
+	.byte $0d              ;len
+
+@draw_4_pit_floor:
 	dey
-	bne b20E7
-	lda #<p2052
-	sta zp0A_text_ptr
-	lda #>p2052
-	sta zp0A_text_ptr+1
+	bne @draw_5_pit_roof
+
+	lda #<@pit_floor_data
+	sta zp0A_data_ptr
+	lda #>@pit_floor_data
+	sta zp0A_data_ptr+1
 	lda #$02
-	sta a19
-	lda zp0E_src
-	beq b207F
+	sta zp19_count
+	lda zp0E_draw_param
+	beq @pit_walls
 	ldy #$0c
-b207F:
-	lda (zp0A_text_ptr),y
+@pit_walls:
+	lda (zp0A_data_ptr),y
 	sta zp_col
 	iny
-	lda (zp0A_text_ptr),y
+	lda (zp0A_data_ptr),y
 	sta zp_row
 	iny
-	lda (zp0A_text_ptr),y
+	lda (zp0A_data_ptr),y
 	iny
-	sta a1A
+	sta zp1A_temp  ;GUG: sty/ldy instead of pha/pla? or tya/pha before lda(),y
 	tya
 	pha
-	lda a1A
+	lda zp1A_temp
 	tay
 	lda #$02
 	clc
-	adc a19
+	adc zp19_count
 	jsr draw_down
 	pla
 	tay
-	dec a19
-	bne b207F
+	dec zp19_count
+	bne @pit_walls
+
 	lda #$02
-	sta a19
-b20A5:
-	lda (zp0A_text_ptr),y
+	sta zp19_count
+@pit_rim:
+	lda (zp0A_data_ptr),y
 	sta screen_ptr+1
 	iny
-	lda (zp0A_text_ptr),y
+	lda (zp0A_data_ptr),y
 	sta screen_ptr
 	iny
-	lda (zp0A_text_ptr),y
-	sta a1A
+	lda (zp0A_data_ptr),y
+	sta zp1A_temp
 	iny
 	tya
 	pha
-	lda a1A
+	lda zp1A_temp
 	tay
 	jsr draw_right
 	pla
 	tay
-	dec a19
-	bne b20A5
+	dec zp19_count
+	bne @pit_rim
 	rts
 
-p20C3:
-	.byte $11,$00,$04,$05,$00,$04,$40,$00
-	.byte $15,$42,$04,$0d,$0e,$04,$03,$08
-	.byte $04,$03,$42,$04,$0d,$43,$87,$07
-	.byte $0c,$07,$02,$0a,$07,$02,$43,$87
-	.byte $07,$40,$b1,$03
-b20E7:
+@pit_roof_data:
+	;--- distance 1
+	.byte $11,$00,$04      ;X,Y,len
+	.byte $05,$00,$04      ;X,Y,len
+	.byte raster_hi $00,0,0
+	.byte raster_lo $00,0,0
+	.byte $15              ;len
+	.byte raster_hi $04,4,0
+	.byte raster_lo $04,4,0
+	.byte $0d              ;len
+	;--- distance 2
+	.byte $0e,$04,$03      ;X,Y,len
+	.byte $08,$04,$03      ;X,Y,len
+	.byte raster_hi $04,4,0
+	.byte raster_lo $04,4,0
+	.byte $0d              ;len
+	.byte raster_hi $07,7,0
+	.byte raster_lo $07,7,0
+	.byte $07              ;len
+	;--- distance 3 (0E = 0)
+	.byte $0c,$07,$02      ;X,Y,len
+	.byte $0a,$07,$02      ;X,Y,len
+	.byte raster_hi $07,7,0
+	.byte raster_lo $07,7,0
+	.byte $07              ;len
+	.byte raster_hi $09,9,0
+	.byte raster_lo $09,9,0
+	.byte $03              ;len
+
+@draw_5_pit_roof:
 	dey
-	bne b2107
-	lda #<p20C3
-	sta zp0A_text_ptr
-	lda #>p20C3
-	sta zp0A_text_ptr+1
+	bne @draw_6_boxes
+
+	lda #<@pit_roof_data
+	sta zp0A_data_ptr
+	lda #>@pit_roof_data
+	sta zp0A_data_ptr+1
 	lda #$02
-	sta a19
-	ldy zp0E_src
-	beq b2102
+	sta zp19_count
+	ldy zp0E_draw_param
+	beq :+
 	dey
-	beq b207F
+	beq @pit_walls
 	ldy #$0c
-	jmp b207F
+	jmp @pit_walls
 
-b2102:
-	ldy #$18
-	jmp b207F
+:	ldy #$18
+	jmp @pit_walls
 
-b2107:
+@draw_6_boxes:
 	dey
-	beq b210D
-	jmp j2272
+	beq @draw_box_4
+	jmp @draw_7_the_square
 
-b210D:
-	lda a619B
-	and #$08
-	beq b2122
+@draw_box_4:
+	lda gs_box_visible
+	and #(1 << 3)
+	beq @draw_box_3
 	lda #$0b
 	sta zp_col
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$0c
+	lda #glyph_box
 	jsr char_out
-b2122:
-	lda a619B
-	and #$04
-	beq b215D
+@draw_box_3:
+	lda gs_box_visible
+	and #(1 << 2)
+	beq @draw_box_2
 	lda #$0a
 	sta zp_col
 	lda #$0c
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$0d
+	lda #glyph_box_TL
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$0e
+	lda #glyph_box_TR
 	jsr char_out
 	lda #$0a
 	sta zp_col
 	lda #$0d
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$12
+	lda #glyph_box_BL
 	jsr char_out
-	lda #$13
+	lda #glyph_box_B
 	jsr char_out
-	lda #$0f
+	lda #glyph_box_BR
 	jsr char_out
-b215D:
-	lda a619B
-	and #$02
-	beq b21CB
+@draw_box_2:
+	lda gs_box_visible
+	and #(1 << 1)
+	beq @draw_box_1
 	lda #$09
 	sta zp_col
 	lda #$0e
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$0d
+	lda #glyph_box_TL
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$0e
+	lda #glyph_box_TR
 	jsr char_out
 	lda #$09
 	sta zp_col
 	lda #$0f
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$03
+	lda #glyph_L
 	jsr char_out
 	inc zp_col
 	inc zp_col
 	inc zp_col
 	jsr get_rowcol_addr
-	lda #$11
+	lda #glyph_box_R
 	jsr char_out
 	dec zp_col
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$0f
+	lda #glyph_box_BR
 	jsr char_out
 	lda #$09
 	sta zp_col
 	jsr get_rowcol_addr
-	lda #$03
+	lda #glyph_L
 	jsr char_out
-	lda #>p40D8
+	lda #>raster $11,8,0
 	sta screen_ptr+1
-	lda #<p40D8
+	lda #<raster $11,8,0
 	sta screen_ptr
 	ldy #$04
 	jsr draw_right
-b21CB:
-	lda a619B
-	and #$01
-	beq b2245
+@draw_box_1:
+	lda gs_box_visible
+	and #(1 << 0)
+	beq @box_done
 	lda #$0e
 	sta zp_col
 	lda #$11
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$02
+	lda #glyph_slash_up
 	jsr char_out
 	lda #$07
 	sta zp_col
 	jsr get_rowcol_addr
 	ldy #$07
 	jsr draw_right
-	lda #$02
+	lda #glyph_slash_up
 	jsr char_out
 	lda #$06
 	sta zp_col
 	lda #$12
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$03
 	jsr draw_down
 	lda #$0d
 	sta zp_col
 	lda #$12
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$03
 	jsr draw_down
 	dec zp_row
 	inc zp_col
 	jsr get_rowcol_addr
-	lda #$02
+	lda #glyph_slash_up
 	jsr char_out
-	lda #>p4156
+	lda #raster_hi 18,6,0
 	sta screen_ptr+1
-	lda #<p4156
+	lda #raster_lo 18,6,0
 	sta screen_ptr
 	ldy #$07
 	jsr draw_right
@@ -4076,48 +4161,59 @@ b21CB:
 	sta zp_col
 	lda #$11
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	tay
 	jsr draw_down
-	ldx #>p5E56
+	ldx #raster_hi 20,6,7
 	stx screen_ptr+1
-	ldx #<p5E56
+	ldx #raster_lo 20,6,7
 	stx screen_ptr
 	ldy #$07
 	jsr draw_right
-b2245:
+@box_done:
 	rts
 
-p2246:
-	.byte $07,$20,$0b,$07,$0b,$0b,$0b,$0b
-	.byte $0b,$0b,$0b,$09,$09,$20
-p2254:
-	.byte $20,$06,$06,$0b,$0b,$0b,$0b,$0b
-	.byte $0b,$0b,$08,$0b,$20,$08
-string_square:
+@square_data_left:
+	.byte $07,$20
+	.byte $0b,$07
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$09
+	.byte $09,$20
+@square_data_right:
+	.byte $20,$06
+	.byte $06,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $08,$0b
+	.byte $20,$08
+@string_square:
 	.byte "THEPERFECTSQUARE"
-j2272:
+
+; Input: 0E = 1 right, 2 front, 4 left
+@draw_7_the_square:
 	dey
-	beq b2278
-	jmp j2347
+	beq :+
+	jmp @draw_8_doors
 
-b2278:
-	lda zp0E_src
+:	lda zp0E_draw_param
 	cmp #$01
-	beq b22F8
+	beq @square_right
 	cmp #$04
-	bne b2285
-	jmp j2332
+	bne @square_front
+	jmp @square_left
 
-b2285:
+@square_front:
 	lda #$08
 	sta zp_col
 	pha
 	lda #$07
 	sta zp_row
 	pha
-j228F:
-	lda #$0b
+@sq_next_col:
+	lda #glyph_solid
 	ldy #$07
 	jsr draw_down
 	pla
@@ -4127,16 +4223,16 @@ j228F:
 	inc zp_col
 	lda zp_col
 	cmp #$0f
-	beq b22AB
+	beq @sq_sign
 	pha
 	lda zp_row
 	pha
-	jmp j228F
+	jmp @sq_next_col
 
-b22AB:
-	lda #<string_square
+@sq_sign:
+	lda #<@string_square
 	sta zp0A_text_ptr
-	lda #>string_square
+	lda #>@string_square
 	sta zp0A_text_ptr+1
 	lda #$0a
 	sta zp_col
@@ -4144,131 +4240,127 @@ b22AB:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$03
-	sta a1A
-	jsr s22E6
+	sta zp1A_count_loop
+	jsr @print_square_row
 	lda #$08
 	sta zp_col
 	lda #$05
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$07
-	sta a1A
-	jsr s22E6
+	sta zp1A_count_loop
+	jsr @print_square_row
 	lda #$09
 	sta zp_col
 	lda #$06
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$06
-	sta a1A
-s22E6:
+	sta zp1A_count_loop
+@print_square_row:
 	ldy #$00
 	lda (zp0A_text_ptr),y
 	jsr char_out
 	inc zp0A_text_ptr
-	bne b22F3
+	bne :+
 	inc zp0A_text_ptr+1
-b22F3:
-	dec a1A
-	bne s22E6
+:	dec zp1A_count_loop
+	bne @print_square_row
 	rts
 
-b22F8:
-	lda #<p2254
+@square_right:
+	lda #<@square_data_right
 	sta zp0A_text_ptr
-	lda #>p2254
+	lda #>@square_data_right
 	sta zp0A_text_ptr+1
 	lda #$13
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta a1A
-b230A:
+	sta zp1A_count_loop
+@sq_next_row:
 	jsr get_rowcol_addr
 	ldy #$00
 	lda (zp0A_text_ptr),y
 	jsr char_out
 	inc zp0A_text_ptr
-	bne b231A
+	bne :+
 	inc zp0A_text_ptr+1
-b231A:
-	ldy #$00
+:	ldy #$00
 	lda (zp0A_text_ptr),y
 	jsr char_out
 	inc zp0A_text_ptr
-	bne b2327
+	bne :+
 	inc zp0A_text_ptr+1
-b2327:
-	inc zp_row
+:	inc zp_row
 	dec zp_col
 	dec zp_col
-	dec a1A
-	bne b230A
+	dec zp1A_count_loop
+	bne @sq_next_row
 	rts
 
-j2332:
-	lda #<p2246
+@square_left:
+	lda #<@square_data_left
 	sta zp0A_text_ptr
-	lda #>p2246
+	lda #>@square_data_left
 	sta zp0A_text_ptr+1
 	lda #$02
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta a1A
-	jmp b230A
+	sta zp1A_count_loop
+	jmp @sq_next_row
 
-j2347:
+@draw_8_doors:
 	dey
-	beq b234D
-	jmp j2410
+	beq :+
+	jmp @draw_9_keyholes
 
-b234D:
-	lda zp0E_src
+:	lda zp0E_draw_param
 	cmp #$04
-	bne b2356
-	jmp j23DD
+	bne @door_2_right
+	jmp @door_1_left
 
-b2356:
+@door_2_right:
 	cmp #$02
-	beq b23A8
+	beq @door_1_right
 	lda #$10
 	sta zp_col
 	lda #$08
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$14
+	lda #glyph_slash_up_C
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
-	lda #$0a
+	lda #glyph_LR
 	ldy #$05
 	jsr draw_down
 	jsr get_rowcol_addr
-	lda #$17
+	lda #glyph_slash_down_R
 	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$15
+	lda #glyph_slash_down_C
 	jsr char_out
 	lda #$10
 	sta zp_col
 	lda #$09
 	sta zp_row
-	lda #$16
+	lda #glyph_C
 	ldy #$06
 	jsr draw_down
 	lda #$11
 	sta zp_col
 	lda #$08
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$08
 	jsr draw_down
 	rts
 
-b23A8:
+@door_1_right:
 	lda #$14
 	sta zp_col
 	lda #$04
@@ -4276,26 +4368,26 @@ b23A8:
 	ldy #$02
 	jsr draw_down_left
 	inc zp_col
-	lda #$03
+	lda #glyph_L
 	ldy #$0c
 	jsr draw_down
 	lda #$14
 	sta zp_col
 	lda #$05
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0e
 	jsr draw_down
 	lda #$15
 	sta zp_col
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$10
 	jsr draw_down
 	rts
 
-j23DD:
+@door_1_left:
 	lda #$02
 	sta zp_col
 	lda #$04
@@ -4303,137 +4395,137 @@ j23DD:
 	ldy #$02
 	jsr draw_down_right
 	dec zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$0c
 	jsr draw_down
 	lda #$02
 	sta zp_col
 	lda #$05
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$0e
 	jsr draw_down
 	lda #$01
 	sta zp_col
 	lda #$04
 	sta zp_row
+;	lda #glyph_R  ;$04, redundant
 	ldy #$10
 	jsr draw_down
 	rts
 
-j2410:
+@draw_9_keyholes:
 	dey
-	beq b2416
-	jmp j254C
+	beq :+
+	jmp draw_A_special
 
-b2416:
-	lda zp0E_src
+:	lda zp0E_draw_param
 	and #$0f
-	beq b244F
-	and #$08
-	beq b2427
+	beq @keyhole_L_1
+@keyhole_R_4:
+	and #(1 << 3)
+	beq @keyhole_R_3
 	lda #$0c
 	sta zp_col
-	jsr draw_keyhole_2
-b2427:
-	lda zp0E_src
-	and #$04
-	beq b2434
+	jsr draw_keyhole_4
+@keyhole_R_3:
+	lda zp0E_draw_param
+	and #(1 << 2)
+	beq @keyhole_R_2
 	lda #$0d
 	sta zp_col
-	jsr draw_keyhole_1
-b2434:
-	lda zp0E_src
-	and #$02
-	beq b2441
+	jsr draw_keyhole_3
+@keyhole_R_2:
+	lda zp0E_draw_param
+	and #(1 << 1)
+	beq @keyhole_R_1
 	lda #$0f
 	sta zp_col
-	jsr draw_keyhole_0
-b2441:
-	lda zp0E_src
-	and #$01
-	beq b244E
+	jsr draw_keyhole_2
+@keyhole_R_1:
+	lda zp0E_draw_param
+	and #(1 << 0)
+	beq @keyhole_R_done
 	lda #$13
 	sta zp_col
-s244B:
-	jsr s2484
-b244E:
+	jsr draw_keyhole_1
+@keyhole_R_done:
 	rts
 
-b244F:
-	lda zp0E_src
-	and #$10
-	beq b245C
+@keyhole_L_1:
+	lda zp0E_draw_param
+	and #(1 << 4)
+	beq @keyhole_L_2
 	lda #$02
 	sta zp_col
-	jsr s2484
-b245C:
-	lda zp0E_src
-	and #$20
-	beq b2469
+	jsr draw_keyhole_1
+@keyhole_L_2:
+	lda zp0E_draw_param
+	and #(1 << 5)
+	beq @keyhole_L_3
 	lda #$05
 	sta zp_col
-	jsr draw_keyhole_0
-b2469:
-	lda zp0E_src
-	and #$40
-	beq b2476
+	jsr draw_keyhole_2
+@keyhole_L_3:
+	lda zp0E_draw_param
+	and #(1 << 6)
+	beq @keyhole_L_4
 	lda #$08
 	sta zp_col
-	jsr draw_keyhole_1
-b2476:
-	lda zp0E_src
-	and #$80
-	beq b2483
+	jsr draw_keyhole_3
+@keyhole_L_4:
+	lda zp0E_draw_param
+	and #(1 << 7)
+	beq @keyhole_L_done
 	lda #$0a
 	sta zp_col
-	jsr draw_keyhole_2
-b2483:
+	jsr draw_keyhole_4
+@keyhole_L_done:
 	rts
 
-s2484:
+draw_keyhole_1:
 	lda #$08
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$7c
+	lda #glyph_solid_BR
 	jsr char_out
-	lda #$7d
-	jsr char_out
-	inc zp_row
-	dec zp_col
-	dec zp_col
-	jsr get_rowcol_addr
-	lda #$0b
-	jsr char_out
-	lda #$0b
+	lda #glyph_solid_BL
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$7e
+	lda #glyph_solid
 	jsr char_out
-	lda #$7f
-	jsr char_out
-	inc zp_row
-	dec zp_col
-	dec zp_col
-	jsr get_rowcol_addr
-	lda #$1f
-	jsr char_out
-	lda #$7b
+	lda #glyph_solid
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$0b
+	lda #glyph_solid_TR
 	jsr char_out
-	lda #$0b
+	lda #glyph_solid_TL
+	jsr char_out
+	inc zp_row
+	dec zp_col
+	dec zp_col
+	jsr get_rowcol_addr
+	lda #glyph_angle_BR
+	jsr char_out
+	lda #glyph_angle_BL
+	jsr char_out
+	inc zp_row
+	dec zp_col
+	dec zp_col
+	jsr get_rowcol_addr
+	lda #glyph_solid
+	jsr char_out
+	lda #glyph_solid
 	jsr char_out
 	rts
 
-draw_keyhole_0:
+draw_keyhole_2:
 	lda #$09
 	sta zp_row
 	jsr get_rowcol_addr
@@ -4467,7 +4559,7 @@ draw_keyhole_0:
 	jsr char_out
 	rts
 
-draw_keyhole_1:
+draw_keyhole_3:
 	lda #$0a
 	sta zp_row
 	jsr get_rowcol_addr
@@ -4477,7 +4569,7 @@ draw_keyhole_1:
 	jsr char_out
 	rts
 
-draw_keyhole_2:
+draw_keyhole_4:
 	lda #$0a
 	sta zp_row
 	jsr get_rowcol_addr
@@ -4485,23 +4577,24 @@ draw_keyhole_2:
 	jsr char_out
 	rts
 
-j254C:
+draw_A_special:
 	lda #$0a
 	sta zp_col
 	lda #$03
 	sta zp_row
+;	lda #glyph_L  ;$03, redundant
 	ldy #$12
 	jsr draw_down
 	lda #$0b
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
-	lda #>p40D9
+	lda #raster_hi 17,9,0
 	sta screen_ptr+1
-	lda #<p40D9
+	lda #raster_lo 17,9,0
 	sta screen_ptr
 	ldy #$02
 	jsr draw_right
@@ -4509,9 +4602,9 @@ j254C:
 	sta a0C
 	lda #$0b
 	sta a19
-	lda #>p0402
+	lda #$04
 	sta a11
-	lda #<p0402
+	lda #$02
 	sta a10
 b2585:
 	jsr wait_brief
@@ -4519,14 +4612,14 @@ b2585:
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$20
+	lda #' '
 	ldy #$12
 	jsr draw_down
 	lda a19
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$20
+	lda #' '
 	ldy #$12
 	jsr draw_down
 	dec a0C
@@ -4535,13 +4628,14 @@ b2585:
 	sta zp_col
 	lda #$03
 	sta zp_row
+;	lda #glyph_L  ;$03, redundant
 	ldy #$12
 	jsr draw_down
 	lda a19
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
 	lda #$11
@@ -6311,9 +6405,9 @@ cmd_hint:
 
 j325D:
 	jsr update_view
-	lda #$0a
-	sta a0F
-	jmp s1E5A
+	lda #drawcmd0A
+	sta zp0F_action
+	jmp draw_special
 
 swap_saved_A:
 	sta zp13_temp
@@ -7113,17 +7207,17 @@ s3894:
 	lda #$01
 	cmp a1A
 	bne b38DD
-	ldx #$01
-	stx a0F
+	ldx #drawcmd01_keyhole
+	stx zp0F_action
 	bne b38DA
 b38BB:
 	lda #$02
 	cmp a1A
 	bne b38DD
 	ldx #$10
-	stx zp0E_src
-	ldx #$09
-	stx a0F
+	stx zp0E_draw_param
+	ldx #drawcmd09_keyholes
+	stx zp0F_action
 	jmp b38DA
 
 b38CC:
@@ -7131,11 +7225,11 @@ b38CC:
 	cmp a1A
 	bne b38DD
 	ldx #$20
-	stx zp0E_src
-	lda #$09
-	stx a0F
+	stx zp0E_draw_param
+	lda #drawcmd09_keyholes
+	stx zp0F_action
 b38DA:
-	jsr s1E5A
+	jsr draw_special
 b38DD:
 	lda #$41     ;Tick tick
 	ldx #$06
@@ -7260,15 +7354,15 @@ b39B5:
 b39D2:
 	jsr clear_maze_window
 	ldx #$03
-	stx a0F
+	stx zp0F_action
 	stx gs_walls_left
 	ldx #$23
-	stx zp0E_src
+	stx a0E
 	stx gs_walls_right_depth
 	jsr draw_maze
-	ldx #$03
-	stx a0F
-	jsr s1E5A
+	ldx #drawcmd03_compactor
+	stx zp0F_action
+	jsr draw_special
 	jsr wait_short
 	jsr clear_maze_window
 	lda #$79     ;Glitch!
@@ -7559,10 +7653,10 @@ b3C2B:
 	jsr move_turn
 j3C37:
 	lda gs_facing
-	ldx #$00
-	stx a0E
-	ldx #$04
-	stx a0F
+	ldx #$00 ;distance
+	stx zp0E_draw_param
+	ldx #drawcmd04_pit_floor
+	stx zp0F_action
 	cmp #$01
 	bne b3C55
 	lda gs_room_lit
@@ -7570,7 +7664,7 @@ j3C37:
 	lda gs_walls_right_depth
 	and #%11100000
 	beq b3C55
-	jsr s1E5A
+	jsr draw_special
 b3C55:
 	jmp j3C0F
 
@@ -7603,11 +7697,11 @@ special_exit:
 	ldx #$47
 	stx gs_walls_right_depth
 	jsr draw_maze
-	ldx #$08
-	stx a0F
+	ldx #drawcmd08_doors
+	stx zp0F_action
 	ldx #$01
-	stx a0E
-	jsr s1E5A
+	stx zp0E_draw_param
+	jsr draw_special
 	ldx #$01
 	stx gs_exit_turns
 j3CA6:
@@ -7635,11 +7729,11 @@ b3CC8:
 	ldx #$23
 	stx gs_walls_right_depth
 	jsr draw_maze
-	ldx #$08
-	stx a0F
+	ldx #drawcmd08_doors
+	stx zp0F_action
 	ldx #$02
-	stx zp0E_src
-	jsr s1E5A
+	stx zp0E_draw_param
+	jsr draw_special
 	inc gs_exit_turns
 	jmp j3CA6
 
@@ -7684,9 +7778,9 @@ b3D23:
 	ldx #>p01
 	stx gs_walls_right_depth
 	jsr draw_maze
-	ldx #$02
-	stx a0F
-	jsr s1E5A
+	ldx #drawcmd02_elevator
+	stx zp0F_action
+	jsr draw_special
 	inc gs_exit_turns
 	jmp j3CA6
 
@@ -7709,9 +7803,9 @@ b3D52:
 	jmp j3ECA
 
 b3D5C:
-	ldx #$0a
-	stx a0F
-	jsr s1E5A
+	ldx #drawcmd0A
+	stx zp0F_action
+	jsr draw_special
 	inc gs_exit_turns
 	jmp j3CA6
 
@@ -7884,7 +7978,7 @@ j3ECA:
 	inc aC3
 	bne b3EDC
 	ldx #$2e
-	jsr s244B
+	jsr $244B ;within keyhole
 b3EDC:
 	stx aBE
 	stx aBD
@@ -7894,7 +7988,7 @@ b3EDC:
 	cmp #$28
 	beq b3EF4
 	ldx #$25
-	jsr s244B
+	jsr $244B ;within keyhole
 	jmp j3F56
 
 b3EF4:
@@ -7911,17 +8005,17 @@ relocate_data:
 	beq @write_DEATH
 
 ; Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
-	ldx #$00
+	ldx #<screen_HGR2
 	stx zp0E_src
 	stx zp10_dst
 	stx relocated
-	ldx #$40
+	ldx #>screen_HGR2
 	stx zp0E_src+1
-	ldx #$60
+	ldx #>(screen_HGR2 + screen_HGR_size)
 	stx zp10_dst+1
-	ldx #<p1FFF
+	ldx #<(screen_HGR_size - 1)
 	stx zp19_count
-	ldx #>p1FFF
+	ldx #>(screen_HGR_size - 1)
 	stx zp19_count+1
 	jsr memcpy
 	ldx #opcode_JMP
@@ -7969,7 +8063,7 @@ b3F68:
 
 	stx aBC
 	ldx #$2b
-	jsr s244B
+	jsr $244B ;within keyhole
 	jmp $2C04 ;within open_box
 
 s3F77:
@@ -8104,26 +8198,49 @@ maze_walls:
 	.byte %10100010,%01010010,%00101111 ; $a2,$52,$2f
 	.byte %10011100,%10011101,%00000111 ; $9c,$9d,$07
 	.byte %11111111,%11111111,%11111111 ; $ff,$ff,$ff
-p60A5:
-	.byte $42,$34,$05,$01,$42,$35,$05,$02
-	.byte $42,$36,$05,$00,$22,$83,$04,$01
-	.byte $22,$84,$04,$00,$42,$86,$04,$00
-	.byte $22,$75,$08,$01,$22,$76,$08,$02
-	.byte $32,$77,$02,$00,$23,$43,$08,$04
-	.byte $13,$44,$02,$00,$13,$95,$05,$01
-	.byte $33,$68,$07,$04,$23,$78,$07,$02
-	.byte $13,$88,$07,$01,$24,$14,$02,$00
-	.byte $14,$24,$08,$02,$14,$2a,$05,$01
-	.byte $14,$3a,$05,$02,$14,$4a,$05,$00
-	.byte $35,$25,$08,$04,$25,$35,$02,$00
-	.byte $35,$3a,$09,$f0,$35,$4a,$09,$f0
-	.byte $35,$5a,$09,$70,$35,$6a,$09,$30
-	.byte $35,$7a,$09,$10,$15,$5a,$09,$01
-	.byte $15,$6a,$09,$03,$15,$7a,$09,$07
-	.byte $15,$8a,$09,$0f,$15,$9a,$09,$0f
-	.byte $15,$aa,$09,$0e,$25,$4a,$01,$00
-	.byte $25,$5a,$01,$00,$25,$6a,$01,$00
-	.byte $25,$7a,$01,$00,$25,$8a,$01,$00
+
+; facing|level, X|Y, drawcmd, draw_param
+maze_features:
+	.byte $42,$34,$05,$01 ;pit roof
+	.byte $42,$35,$05,$02 ;pit roof
+	.byte $42,$36,$05,$00 ;pit roof
+	.byte $22,$83,$04,$01 ;pit floor
+	.byte $22,$84,$04,$00 ;pit floor
+	.byte $42,$86,$04,$00 ;pit floor
+	.byte $22,$75,$08,$01 ;elevator on right
+	.byte $22,$76,$08,$02 ;elevator on right
+	.byte $32,$77,$02,$00 ;elevator face-on
+	.byte $23,$43,$08,$04 ;elevator on left
+	.byte $13,$44,$02,$00 ;elevator face-on
+	.byte $13,$95,$05,$01 ;pit roof
+	.byte $33,$68,$07,$04 ;square left
+	.byte $23,$78,$07,$02 ;square front
+	.byte $13,$88,$07,$01 ;square right
+	.byte $24,$14,$02,$00 ;elevator face-on
+	.byte $14,$24,$08,$02 ;elevator on right
+	.byte $14,$2a,$05,$01 ;pit roof
+	.byte $14,$3a,$05,$02 ;pit roof
+	.byte $14,$4a,$05,$00 ;pit roof
+	.byte $35,$25,$08,$04 ;elevator on left
+	.byte $25,$35,$02,$00 ;elevator face-on
+	.byte $35,$3a,$09,$f0 ;keyholes on left
+	.byte $35,$4a,$09,$f0 ;keyholes on left
+	.byte $35,$5a,$09,$70 ;keyholes on left
+	.byte $35,$6a,$09,$30 ;keyholes on left
+	.byte $35,$7a,$09,$10 ;keyholes on left
+	.byte $15,$5a,$09,$01 ;keyholes on right
+	.byte $15,$6a,$09,$03 ;keyholes on right
+	.byte $15,$7a,$09,$07 ;keyholes on right
+	.byte $15,$8a,$09,$0f ;keyholes on right
+	.byte $15,$9a,$09,$0f ;keyholes on right
+	.byte $15,$aa,$09,$0e ;keyholes on right
+	.byte $25,$4a,$01,$00 ;keyhole face-on
+	.byte $25,$5a,$01,$00 ;keyhole face-on
+	.byte $25,$6a,$01,$00 ;keyhole face-on
+	.byte $25,$7a,$01,$00 ;keyhole face-on
+	.byte $25,$8a,$01,$00 ;keyhole face-on
+maze_features_end = $26
+	.assert (* - maze_features) / 4 = maze_features_end, error, "Miscount maze features"
 
 data_new_game:
 	.include "newgame.inc"
@@ -8147,7 +8264,7 @@ gs_walls_left:
 	.byte $00
 gs_walls_right_depth:
 	.byte $00
-a619B:
+gs_box_visible:
 	.byte $00
 gd_parsed_action:
 	.byte $10

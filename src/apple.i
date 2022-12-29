@@ -12,6 +12,10 @@ screen_GR2  = $0800
 screen_HGR1 = $2000
 screen_HGR2 = $4000
 
+screen_TEXT_size = $0400
+screen_GR_size   = $0400
+screen_HGR_size  = $2000
+
 hw_KEYBOARD   = $c000
 hw_STROBE     = $c010
 hw_TBCOLOR    = $c022  ;IIgs only. HI/LO 4 bits Foreground/Background.

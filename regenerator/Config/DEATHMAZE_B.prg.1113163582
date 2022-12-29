@@ -60,6 +60,12 @@
 1BBB
 1BEC
 1C3B
+1E5A
+1EA4
+1F1B
+206D
+20E7
+20EA
 2640
 2669
 266D
@@ -86,6 +92,7 @@
 2FE4
 3197
 3805
+3F00
 7CC7
 7CEF
 :REMOVED BYTES
@@ -103,10 +110,13 @@
 1AB5 print inventory
 1C55 Skip over snake
 1C6D Last, check for carrying boxed snake
+206A Input: $0E = distance (0,1)
+2272 Input: 0E = 1 right, 2 front, 4 left
 2624 junk
 2632 junk
 2F54 .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
 313F Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
+3ED2 junk
 3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 7D8F 1-based indexing via 'A'
 7E76 cruft from here to end of file
@@ -356,6 +366,81 @@
 1CFE #carried_known
 1D02 #icmd_where
 1D06 #item_torch_begin
+1E01 #maze_features_end
+1EAC #glyph_R
+1EBB #glyph_R
+1ECA #glyph_L
+1F31 #' '
+1F42 #glyph_R
+1F58 #' '
+1F62 #' '
+1F83 #' '
+1F8F #' '
+1F9D #' '
+1FAA #glyph_R
+1FC2 #' '
+1FD3 #glyph_L
+1FE9 #' '
+2018 #' '
+203B #glyph_L
+2093 glyph_R, then glyph_L
+2110 #(1 << 3)
+211D #glyph_box
+2125 #(1 << 2)
+2134 #glyph_box_TL
+2139 #glyph_box_T
+213E #glyph_box_TR
+214E #glyph_box_BL
+2153 #glyph_box_B
+2158 #glyph_box_BR
+2160 #(1 << 1)
+216F #glyph_box_TL
+2174 #glyph_box_T
+2179 #glyph_box_T
+217E #glyph_box_T
+2183 #glyph_box_TR
+2193 #glyph_L
+21A1 #glyph_box_R
+21AD #glyph_box_BR
+21B9 #glyph_L
+21CE #(1 << 0)
+21DD #glyph_slash_up
+21EE #glyph_slash_up
+21FB #glyph_R
+220A #glyph_R
+2218 #glyph_slash_up
+2232 #glyph_L
+228F #glyph_solid
+2365 #glyph_slash_up_C
+2370 #glyph_LR
+237A #glyph_slash_down_R
+2384 #glyph_slash_down_C
+2391 #glyph_C
+23A0 #glyph_L
+23B7 #glyph_L
+23C6 #glyph_L
+23D5 #glyph_L
+23EC #glyph_R
+23FB #glyph_R
+2406 also glyph_R
+241C #(1 << 3)
+2429 #(1 << 2)
+2436 #(1 << 1)
+2443 #(1 << 0)
+2451 #(1 << 4)
+245E #(1 << 5)
+246B #(1 << 6)
+2478 #(1 << 7)
+248B #glyph_solid_BR
+2490 #glyph_solid_BL
+249E #glyph_solid
+24A3 #glyph_solid
+24B1 #glyph_solid_TR
+24B6 #glyph_solid_TL
+24C4 #glyph_angle_BR
+24C9 #glyph_angle_BL
+24D7 #glyph_solid
+24DC #glyph_solid
 24E9 #glyph_R_notched
 24EE #glyph_solid
 24F3 #glyph_L_notched
@@ -368,6 +453,12 @@
 2534 #glyph_keyhole_R
 2539 #glyph_keyhole_L
 2546 #glyph_keyhole_C
+2550 also glyph_L
+2561 #glyph_R
+2590 #' '
+259F #' '
+25AE also glyph_L
+25BF #glyph_R
 2612 #' '
 2653 #nouns_item_end
 266D #noun_ring
@@ -763,6 +854,8 @@
 3924 The key blows up the whole maze!
 393F #verb_open
 3946 #noun_door
+397A #verb_forward
+3995 #verb_forward
 399F The elevator is moving!
 39A7 You are deposited at the next level.
 39C5 You are trapped in a fake
@@ -857,23 +950,30 @@
 7D89 #error_unknown_cause
 7D8C #error_reading
 7E5F #char_newline
+7E86 #glyph_L
+7EAF #glyph_L
+7EC7 #glyph_L
+7EFA #glyph_R
+7F2A #glyph_L
+7F59 #glyph_R
+7F6F #glyph_L
 :USER LABELS
 0006 zp_col
 0007 zp_row
 0008 screen_ptr
 0009 screen_ptr+1
-000A zp0A_walls_ptr
-000B zp0A_walls_ptr+1
+000A zp0A_text_ptr
+000B zp0A_text_ptr+1
 000C zp_0C_string
 000D zp_0D
-0010 zp10_noun
-0011 zp11_count
+000E zp0E_draw_param
+0010 zp10_position
+0011 zp11_level_facing
 0015 line_count
 0016 zp_counter
 0017 clock
 0018 clock+1
-0019 zp19_sight_depth
-001A zp1A_wall_bit
+001A zp1A_count_loop
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -1251,11 +1351,74 @@
 1D02 set_action
 1D0D icmd_default
 1D0E icmd0A_impl
-1F13 string_elevator
-2262 string_square
-24E2 draw_keyhole_0
-252D draw_keyhole_1
-253F draw_keyhole_2
+1DDF get_maze_feature
+1E09 @next
+1E0E @continue
+1E1C @check_position
+1E27 @match
+1E36 keyhole_0
+1E5A draw_special
+1E5F @draw_1_keyhole
+1E76 @next_row
+1E7A @next_glyph
+1EA0 @done
+1EA1 @draw_2_elevator
+1F04 -
+1F13 @string_elevator
+1F1B @draw_3_compactor
+1F21 +
+1F25 @next_frame_3
+2051 +
+2052 @pit_floor_data
+206A @draw_4_pit_floor
+207F @pit_walls
+20A5 @pit_rim
+20C3 @pit_roof_data
+20E7 @draw_5_pit_roof
+2102 +
+2107 @draw_6_boxes
+210D @draw_box_4
+2122 @draw_box_3
+215D @draw_box_2
+21CB @draw_box_1
+2245 @box_done
+2246 @square_data_left
+2254 @square_data_right
+2262 @string_square
+2272 @draw_7_the_square
+2278 +
+2285 @square_front
+228F @sq_next_col
+22AB @sq_sign
+22E6 @print_square_row
+22F3 +
+22F8 @square_right
+230A @sq_next_row
+231A +
+2327 +
+2332 @square_left
+2347 @draw_8_doors
+234D +
+2356 @door_2_right
+23A8 @door_1_right
+23DD @door_1_left
+2410 @draw_9_keyholes
+2416 +
+241C @keyhole_R_4
+2427 @keyhole_R_3
+2434 @keyhole_R_2
+2441 @keyhole_R_1
+244E @keyhole_R_done
+244F @keyhole_L_1
+245C @keyhole_L_2
+2469 @keyhole_L_3
+2476 @keyhole_L_4
+2483 @keyhole_L_done
+2484 draw_keyhole_1
+24E2 draw_keyhole_2
+252D draw_keyhole_3
+253F draw_keyhole_4
+254C @draw_A_special
 25E3 print_noun
 25EF @find_string
 25F3 @next_char
@@ -1563,9 +1726,17 @@
 3874 special_bomb
 387A +
 3884 +
+38DD @tick
 393C +
 396E special_elevator
 3974 +
+397E @pop_mode_stack
+399C +
+399F @moving
+39B5 @enter
+39D2 @level2
+3A03 @level3
+3A0D @level4
 3A20 special_tripped
 3A26 +
 3A30 +
@@ -1595,10 +1766,13 @@
 40AF raster 9,7,0
 40B1 raster 9,9,0
 40B4 raster 9,12,0
+40D8 raster $11,8,0
+40D9 raster 17,9,0
 4131 raster 10,9,0
 4132 raster 10,10,0
 4133 raster 10,11,0
 4134 raster 10,12,0
+4156 raster 18,6,0
 4200 raster 4,0,0
 4204 raster 4,4,0
 4211 raster 4,17,0
@@ -1608,15 +1782,18 @@
 5C50 raster 16,0,7
 5C54 raster 16,4,7
 5C61 raster 16,17,7
+5D05 raster 2,5,7
 5DAF raster 11,7,7
 5DB4 raster 11,12,7
-5E4F raster 13,-1,7
+5E4F raster 20,-1,7
 5E50 raster 20,0,7
+5E56 raster 20,6,7
 5E65 raster 20,21,7
 5EAC raster 13,4,7
 5EAF raster 13,7,7
 5EB6 raster 13,14,7
 6000 maze_walls
+60A5 maze_features
 613D data_new_game
 6193 gs_facing
 6194 gs_level
@@ -1626,6 +1803,7 @@
 6198 gs_torches_unlit
 6199 gs_walls_left
 619A gs_walls_right_depth
+619B gs_box_visible
 619C gd_parsed_action
 619D gd_parsed_object
 619E gs_room_lit
@@ -1814,6 +1992,7 @@ FF69 rom_MONITOR
 2402
 254C
 2559
+257D
 268F
 26C7
 27FC

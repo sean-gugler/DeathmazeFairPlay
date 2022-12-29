@@ -5,10 +5,12 @@
 ;(1 << 3) = $08
 ;(1 << 4) = $10
 ;' ' = $20
+;(1 << 5) = $20
 ;'*' = $2a
 ;'.' = $2e
 ;'0' = $30
 ;'?' = $3f
+;(1 << 6) = $40
 ;'A' = $41
 ;'D' = $44
 ;'E' = $45
@@ -19,13 +21,14 @@
 ;'Y' = $59
 ;'Z' = $5a
 ;>font = $62
+;(1 << 7) = $80
 ;<font = $94
 ;raster 0,-1,0 = >relocated
 
 ;'0' - noun_zero = $16
 
+;$zp_wall_opposite = a19
 ;$zp_string_number = $11
-;$zp_wall_opposite = $19
 
 ;$zp10_count_words = $10
 
@@ -33,7 +36,7 @@
 
 ;$zp13_raw_input = a13
 
-;$zp19_count = $19
+;$zp19_count = a19
 
 ;$zp1A_hint_mode = $1a
 ;$zp1A_move_action = $1a
@@ -106,7 +109,20 @@ glyph_slash_up = $02
 glyph_L = $03
 glyph_R = $04
 glyph_X = $05
+glyph_LR = $0a
 glyph_solid = $0b
+glyph_box = $0c
+glyph_box_TL = $0d
+glyph_box_TR = $0e
+glyph_box_BR = $0f
+glyph_box_T = $10
+glyph_box_R = $11
+glyph_box_BL = $12
+glyph_box_B = $13
+glyph_slash_up_C = $14
+glyph_slash_down_C = $15
+glyph_C = $16
+glyph_slash_down_R = $17
 glyph_keyhole_C = $18
 glyph_keyhole_R = $19
 glyph_keyhole_L = $1a
@@ -114,8 +130,14 @@ glyph_L_solid = $1b
 glyph_R_solid = $1c
 glyph_L_notched = $1d
 glyph_R_notched = $1e
+glyph_angle_BR = $1f
 glyph_UR_triangle = $5f
 glyph_UL_triangle = $60
+glyph_angle_BL = $7b
+glyph_solid_BR = $7c
+glyph_solid_BL = $7d
+glyph_solid_TR = $7e
+glyph_solid_TL = $7f
 
 ;gs_size-1 = $55
 
@@ -155,6 +177,8 @@ items_unique = $12
 ;items_unique + items_food + items_torches = $17
 
 max_input = $1e
+
+maze_features_end = $26
 
 mother_flag_roaming = $04
 

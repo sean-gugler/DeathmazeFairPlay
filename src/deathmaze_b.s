@@ -13,22 +13,22 @@ zp_col = $06
 zp_row = $07
 screen_ptr = $08
 ;screen_ptr+1 = $09
-zp0A_walls_ptr = $0a
-;zp0A_walls_ptr+1 = $0b
+zp0A_text_ptr = $0a
+;zp0A_text_ptr+1 = $0b
 zp_0C_string = $0c
 zp_0D = $0d
-a0E = $0e
+zp0E_draw_param = $0e
 a0F = $0f
-zp10_noun = $10
-zp11_count = $11
+zp10_position = $10
+zp11_level_facing = $11
 a13 = $13
 a14 = $14
 line_count = $15
 zp_counter = $16
 clock = $17
 ;clock+1 = $18
-zp19_sight_depth = $19
-zp1A_wall_bit = $1a
+a19 = $19
+zp1A_count_loop = $1a
 tape_addr_start = $3c
 ;tape_addr_start+1 = $3d
 tape_addr_end = $3e
@@ -44,12 +44,12 @@ aEF = $ef
 ; **** ZP POINTERS ****
 ;
 ;screen_ptr = $08
-;zp0A_walls_ptr = $0a
+;zp0A_text_ptr = $0a
 ;zp_0C_string = $0c
-p0E = $0e
-;zp10_noun = $10
+;zp0E_draw_param = $0e
+;zp10_position = $10
 p13 = $13
-;zp19_sight_depth = $19
+p19 = $19
 p28 = $28
 pC2 = $c2
 ;
@@ -70,7 +70,6 @@ a018F = $018f
 p01 = $0001
 p00F4 = $00f4
 p00F6 = $00f6
-p0402 = $0402
 ;
 ; **** EXTERNAL JUMPS ****
 ;
@@ -142,14 +141,14 @@ start_game:
 
 clear_hgr2:
 	ldx #<screen_HGR2
-	stx a0E
+	stx zp0E_draw_param
 	ldx #>screen_HGR2
 	stx a0F
 	ldy #$00
 @next_page:
 	tya
-:	sta (p0E),y
-	inc a0E
+:	sta (zp0E_draw_param),y
+	inc zp0E_draw_param
 	bne :-
 	inc a0F
 	lda a0F
@@ -182,9 +181,9 @@ print_to_line1:
 	ldx #$16
 	stx zp_row
 	ldx #<text_buffer_line1
-	stx zp0A_walls_ptr
+	stx zp0A_text_ptr
 	ldx #>text_buffer_line1
-	stx zp0A_walls_ptr+1
+	stx zp0A_text_ptr+1
 	bne print_to_line
 print_to_line2:
 	ldx #$00
@@ -192,9 +191,9 @@ print_to_line2:
 	ldx #$17
 	stx zp_row
 	ldx #<text_buffer_line2
-	stx zp0A_walls_ptr
+	stx zp0A_text_ptr
 	ldx #>text_buffer_line2
-	stx zp0A_walls_ptr+1
+	stx zp0A_text_ptr+1
 print_to_line:
 	jsr get_display_string
 	jsr get_rowcol_addr
@@ -203,14 +202,14 @@ print_to_line:
 	lda (zp_0C_string),y
 	and #$7f
 @next_char:
-	sta (zp0A_walls_ptr),y
+	sta (zp0A_text_ptr),y
 	jsr print_char
 	inc zp_0C_string
 	bne :+
 	inc zp_0D
-:	inc zp0A_walls_ptr
+:	inc zp0A_text_ptr
 	bne :+
-	inc zp0A_walls_ptr+1
+	inc zp0A_text_ptr+1
 :	ldy #$00
 	lda (zp_0C_string),y
 	bpl @next_char
@@ -258,7 +257,7 @@ get_display_string:
 clear_text_buf:
 	ldy #$27
 	lda #' '
-:	sta (zp0A_walls_ptr),y
+:	sta (zp0A_text_ptr),y
 	dey
 	bpl :-
 	rts
@@ -281,7 +280,7 @@ cmd_verbal:
 
 cmd_movement:
 	ldx gs_facing
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 	cmp #verb_forward
 	beq move_forward
 	jsr move_turn
@@ -293,7 +292,7 @@ move_turn:
 	cmp #verb_uturn
 	beq @turn_around
 @turn_right:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$04
 	beq @wrap_clockwise
 	inc gs_facing
@@ -307,7 +306,7 @@ move_turn:
 	rts
 
 @turn_left:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$01
 	beq @wrap_counterwise
 	dec gs_facing
@@ -317,7 +316,7 @@ move_turn:
 	stx gs_facing
 	bne @turned
 @turn_around:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$03
 	bmi :+
 	dec gs_facing
@@ -337,18 +336,18 @@ move_forward:
 	bne @normal
 	lda gs_player_y
 	ldx gs_facing
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 	cmp #$08
 	beq @perfect_square_N
 	cmp #$09
 	bne @normal
 @perfect_square_S:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$04
 	bne @normal
 	beq @move_player
 @perfect_square_N:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$02
 	beq @move_player
 @normal:
@@ -396,9 +395,9 @@ move_forward:
 
 check_special_position:
 	lda gs_player_y
-	sta zp19_sight_depth
+	sta a19
 	lda gs_player_x
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda gs_level
 	cmp #$03
 	bne :+
@@ -409,7 +408,7 @@ check_special_position:
 
 :	cmp #$02
 	beq check_level_2
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$03
 	beq check_calculator
 	cmp #$06
@@ -417,7 +416,7 @@ check_special_position:
 	rts
 
 check_calculator:
-	lda zp19_sight_depth
+	lda a19
 	cmp #$03
 	beq at_calculator
 special_return:
@@ -429,7 +428,7 @@ at_calculator:
 	rts
 
 check_guillotine:
-	lda zp19_sight_depth
+	lda a19
 	cmp #$0a
 	beq beheaded
 	rts
@@ -445,7 +444,7 @@ beheaded:
 	jmp game_over
 
 check_level_2:
-	lda zp19_sight_depth
+	lda a19
 	cmp #$05
 	beq check_guarded_pit
 check_dog_roaming:
@@ -468,7 +467,7 @@ check_dog_roaming:
 	rts
 
 check_guarded_pit:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$05
 	beq at_guard_dog
 	cmp #$08
@@ -498,7 +497,7 @@ return_dog_monster:
 check_levels_4_5:
 	cmp #$04
 	beq check_monster
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$04
 	beq check_bat
 check_mother:
@@ -521,7 +520,7 @@ check_mother:
 	rts
 
 check_bat:
-	lda zp19_sight_depth
+	lda a19
 	cmp #$04
 	bne check_mother
 	lda gs_bat_alive
@@ -612,7 +611,7 @@ noun_to_item:
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_active
 	bpl rts_bb2
 pop_not_carried:
@@ -672,25 +671,25 @@ multiples:
 memcpy:
 	ldy #$00
 @next_byte:
-	lda (p0E),y
-	sta (zp10_noun),y
-	inc a0E
+	lda (zp0E_draw_param),y
+	sta (zp10_position),y
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	inc zp10_noun
+:	inc zp10_position
 	bne :+
-	inc zp11_count
-:	dec zp19_sight_depth
+	inc zp11_level_facing
+:	dec a19
 	beq @check_done
-	lda zp19_sight_depth
+	lda a19
 	cmp #$ff
 	bne @next_byte
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	jmp @next_byte
 
 @check_done:
-	lda zp1A_wall_bit
-	ora zp19_sight_depth
+	lda zp1A_count_loop
+	ora a19
 	bne @next_byte
 textbuf_prev_input-1:
 	rts
@@ -733,15 +732,15 @@ get_player_input:
 	lda #>text_buffer_line1
 	sta a0F
 	lda #<text_buffer_line1
-	sta a0E
+	sta zp0E_draw_param
 	lda #>textbuf_prev_input
-	sta zp11_count
+	sta zp11_level_facing
 	lda #<textbuf_prev_input
-	sta zp10_noun
+	sta zp10_position
 	lda #$00
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #$50
-	sta zp19_sight_depth
+	sta a19
 	jsr memcpy
 	jsr clear_status_lines
 	nop
@@ -778,9 +777,9 @@ get_player_input:
 	sta zp11_count_chars
 	sta zp10_count_words
 	lda #>p0C79
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #<p0C79
-	sta zp19_sight_depth
+	sta a19
 	pla
 	jmp process_input_char
 
@@ -843,27 +842,27 @@ process_input_char:
 	lda #>textbuf_prev_input-1
 	sta a0F
 	lda #<textbuf_prev_input-1
-	sta a0E
+	sta zp0E_draw_param
 	ldy #$50
 @next_char:
-	lda (p0E),y
-	sta (zp19_sight_depth),y
+	lda (zp0E_draw_param),y
+	sta (p19),y
 	dey
 	bne @next_char
 
 	ldy #$50
-	sty a0E
+	sty zp0E_draw_param
 	ldy #$01
 	sty a0F
 @repeat_display:
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #$80
 	bmi :+
 	lda #' '
 :	jsr char_out
 	inc a0F
 	ldy a0F
-	dec a0E
+	dec zp0E_draw_param
 	bne @repeat_display
 	jmp get_player_input
 
@@ -900,12 +899,12 @@ input_backspace:
 	dec zp_col
 	jsr get_rowcol_addr
 	ldy zp11_count_chars
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #' '
 	bne :+
 	dec zp10_count_words
 :	lda #$80
-	sta (zp19_sight_depth),y
+	sta (p19),y
 	dec zp11_count_chars
 	jmp input_blink_cursor
 
@@ -915,7 +914,7 @@ input_letter:
 	bcc @no_modification
 	ldy zp11_count_chars
 	beq @no_modification
-	lda (zp19_sight_depth),y ;Check previous character
+	lda (p19),y  ;Check previous character
 	cmp #' '
 	beq @no_modification
 	lda zp13_raw_input
@@ -928,7 +927,7 @@ input_letter:
 	pla
 	inc zp11_count_chars
 	ldy zp11_count_chars
-	sta (zp19_sight_depth),y
+	sta (p19),y
 	cpy #max_input
 	beq parse_input
 	jmp input_blink_cursor
@@ -937,7 +936,7 @@ input_letter:
 input_space:
 	ldy zp11_count_chars
 	dey          ;BUG: remove to fix.
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #' '
 	bne :+
 	jmp input_blink_cursor
@@ -953,26 +952,26 @@ parse_input:
 	lda #' '
 	inc zp11_count_chars
 	ldy zp11_count_chars
-	sta (zp19_sight_depth),y
-	inc zp19_sight_depth
+	sta (p19),y
+	inc a19
 	bne @parse_verb
-	inc zp1A_wall_bit
+	inc zp1A_count_loop
 @parse_verb:
 	jsr get_vocab
-	lda zp10_noun
+	lda zp10_position
 	sta gd_parsed_action
 	ldy #$00
 @skip_word:
-	inc zp19_sight_depth
+	inc a19
 	bne :+
-	inc zp1A_wall_bit
-:	lda (zp19_sight_depth),y
+	inc zp1A_count_loop
+:	lda (p19),y
 	cmp #' '
 	bne @skip_word
-	inc zp19_sight_depth
+	inc a19
 	bne :+
-	inc zp1A_wall_bit
-:	lda (zp19_sight_depth),y
+	inc zp1A_count_loop
+:	lda (p19),y
 	cmp #$80
 	beq @verb_only
 	cmp #' '
@@ -983,7 +982,7 @@ parse_input:
 	beq @check_verb
 @parse_object:
 	jsr get_vocab
-	lda zp10_noun
+	lda zp10_position
 	sta gd_parsed_object
 @check_verb:
 	lda gd_parsed_action
@@ -992,14 +991,14 @@ parse_input:
 	lda #$8d     ;I'm sorry, but I can't
 	jsr print_to_line2
 	lda #<text_buffer_line1
-	sta zp19_sight_depth
+	sta a19
 	lda #>text_buffer_line1
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	ldy #$00
 @echo_next_char:
 	tya
 	pha
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #' '
 	beq @echo_period
 	jsr char_out
@@ -1032,26 +1031,26 @@ parse_input:
 	lda #$8f     ;What in tarnation is a
 	jsr print_to_line2
 	lda #<text_buffer_line1
-	sta zp19_sight_depth
+	sta a19
 	lda #>text_buffer_line1
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	ldy #$00
 @find_word_end:
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #$20
 	beq @found_word_end
-	inc zp19_sight_depth
+	inc a19
 	bne @find_word_end
-	inc zp1A_wall_bit
+	inc zp1A_count_loop
 	bne @find_word_end
 @found_word_end:
-	inc zp19_sight_depth
+	inc a19
 	bne @obj_next_letter
-	inc zp1A_wall_bit
+	inc zp1A_count_loop
 @obj_next_letter:
 	tya
 	pha
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #$20
 	beq @obj_word_end
 	jsr char_out
@@ -1072,9 +1071,9 @@ parse_input:
 	cmp #verb_look
 	beq @cmd_look
 	lda #>text_buffer_line1
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #<text_buffer_line1
-	sta zp19_sight_depth
+	sta a19
 	lda #$00
 	sta zp_col
 	lda #$17
@@ -1083,18 +1082,18 @@ parse_input:
 	lda #char_ClearLine
 	jsr char_out
 	ldy #$00
-	sty zp11_count
-	lda (zp19_sight_depth),y
+	sty zp11_level_facing
+	lda (p19),y
 	and #char_mask_upper
 	bne @echo
 @next_verb_letter:
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	cmp #$20
 	beq @verb_word_end
 @echo:
 	jsr char_out
-	inc zp11_count
-	ldy zp11_count
+	inc zp11_level_facing
+	ldy zp11_level_facing
 	bne @next_verb_letter
 @verb_word_end:
 	lda #$56     ;what?
@@ -1112,81 +1111,81 @@ parse_input:
 	jmp get_player_input
 
 get_vocab:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	pha
-	lda zp19_sight_depth
+	lda a19
 	pha
 	lda #>vocab_table
 	sta a0F
 	lda #<vocab_table
-	sta a0E
+	sta zp0E_draw_param
 	lda #$00
-	sta zp10_noun
+	sta zp10_position
 @next_word:
 	ldy #$01
 @find_string:
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	and #$80
 	bne @found_start
-	inc a0E
+	inc zp0E_draw_param
 	bne @find_string
 	inc a0F
 	bne @find_string
 @found_start:
 	dey
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	cmp #'*'
 	beq :+
-	inc zp10_noun
-:	inc a0E
+	inc zp10_position
+:	inc zp0E_draw_param
 	bne :+
 	inc a0F
 :	lda #$04
-	sta zp11_count
+	sta zp11_level_facing
 @compare_char:
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	and #char_mask_upper
 	sta a13
-	lda (zp19_sight_depth),y
+	lda (p19),y
 	and #char_mask_upper
 	cmp a13
 	bne @mismatch
-	inc zp19_sight_depth
+	inc a19
 	bne :+
-	inc zp1A_wall_bit
-:	inc a0E
+	inc zp1A_count_loop
+:	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	dec zp11_count
+:	dec zp11_level_facing
 	bne @compare_char
 @done:
 	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	rts
 
 @mismatch:
-	lda zp10_noun
+	lda zp10_position
 	cmp #vocab_end-1
 	beq @fail
 	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	pha
-	lda zp19_sight_depth
+	lda a19
 	pha
 	jmp @next_word
 
 @fail:
-	inc zp10_noun
+	inc zp10_position
 	bne @done
 
 wait_short:
 	ldx #$90
 	stx a0F
-:	dec a0E
+:	dec zp0E_draw_param
 	bne :-
 	dec a0F
 	bne :-
@@ -1221,34 +1220,34 @@ update_view:
 	lda gs_room_lit
 	beq @done
 	jsr draw_maze
-	jsr s1DDF
+	jsr get_maze_feature
 	lda a0F
-	ora a0E
+	ora zp0E_draw_param
 	beq :+
-	jsr s1E5A
+	jsr draw_special
 :	ldx #icmd_0a
 	stx a0F
 	jsr item_cmd
-	lda a619B
+	lda gs_box_visible
 	beq @done
-	sta a0E
+	sta zp0E_draw_param
 	ldx #$06
 	stx a0F
-	jsr s1E5A
+	jsr draw_special
 @done:
 	rts
 
 wait_long:
 	ldx #$05
-	stx zp10_noun
+	stx zp10_position
 @dec16:
 	ldx #$00
 	stx a0F
-:	dec a0E
+:	dec zp0E_draw_param
 	bne :-
 	dec a0F
 	bne :-
-	dec zp10_noun
+	dec zp10_position
 	bne @dec16
 	rts
 
@@ -1335,19 +1334,19 @@ b10E1=*+$02
 	stx a0F
 	jsr item_cmd
 	lda #$06
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	beq b110D
-	dec zp11_count
+	dec zp11_level_facing
 	bne b10E1
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
 	jmp j2EFB
 
 b110D:
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
 	lda gd_parsed_object
@@ -1361,7 +1360,7 @@ b110D:
 ; cruft leftover from even earlier build
 	dec a0F
 	bne cruft_cmd_paint
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_snake
 	beq @not_here
 	cmp #nouns_item_end
@@ -1385,11 +1384,11 @@ cruft_cmd_paint:
 	dec a0F
 	bne cruft_cmd
 	ldx #noun_brush
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_known
 	beq :+
 	jmp not_carried
@@ -1559,7 +1558,7 @@ clear_maze_window:
 	jsr get_rowcol_addr
 	clc
 	lda #$08
-	sta zp19_sight_depth
+	sta a19
 @clear_raster:
 	lda #$00
 	ldy #$16
@@ -1569,7 +1568,7 @@ clear_maze_window:
 	lda #$04
 	adc screen_ptr+1
 	sta screen_ptr+1
-	dec zp19_sight_depth
+	dec a19
 	bne @clear_raster
 	dec zp_row
 	bpl @clear_row
@@ -1701,7 +1700,7 @@ draw_maze:
 	sta zp_col
 	sta zp_row
 	lda #glyph_R
-	ldy #$03     ;count
+	ldy #$03
 	jsr draw_down
 	jmp @draw_4_right
 
@@ -1756,7 +1755,7 @@ draw_maze:
 	lda #$09
 	sta zp_row
 	lda #glyph_L
-	ldy #$03     ;count
+	ldy #$03
 	jsr draw_down
 	jmp @draw_3_left
 
@@ -1794,7 +1793,7 @@ draw_maze:
 	sta zp_col
 	sta zp_row
 	lda #glyph_R
-	ldy #$03     ;count
+	ldy #$03
 	jsr draw_down
 :	lda #>raster 9,7,0
 	sta screen_ptr+1
@@ -1812,7 +1811,7 @@ draw_maze:
 	sta zp_col
 	sta zp_row
 	lda #glyph_R
-	ldy #$07     ;count
+	ldy #$07
 	jsr draw_down
 	jmp @draw_3_right
 
@@ -2157,9 +2156,9 @@ draw_maze:
 	sta screen_ptr
 	ldy #$01
 	jsr draw_right
-	lda #>raster 13,-1,7
+	lda #>raster 20,-1,7
 	sta screen_ptr+1
-	lda #<raster 13,-1,7
+	lda #<raster 20,-1,7
 	sta screen_ptr
 	ldy #$01
 	jsr draw_right
@@ -2223,26 +2222,26 @@ draw_right:
 ; Input: Y=count
 draw_down_left:
 	tya
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 :	jsr get_rowcol_addr
 	lda #glyph_slash_up
 	jsr char_out
 	dec zp_col
 	dec zp_col
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne :-
 	rts
 
 ; Input: Y=count
 draw_down_right:
 	tya
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 :	jsr get_rowcol_addr
 	lda #glyph_slash_down
 	jsr char_out
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne :-
 	rts
 
@@ -2250,7 +2249,7 @@ draw_down_right:
 draw_down:
 	pha
 	tya
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	pla
 @next:
 	pha
@@ -2261,16 +2260,16 @@ draw_down:
 	pla
 	dec zp_col
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne @next
 	rts
 
 probe_forward:
 	ldy #$00
 	lda #<maze_walls
-	sta zp0A_walls_ptr
+	sta zp0A_text_ptr
 	lda #>maze_walls
-	sta zp0A_walls_ptr+1
+	sta zp0A_text_ptr+1
 	ldx gs_level
 	lda #$00
 	clc
@@ -2280,14 +2279,14 @@ probe_forward:
 	jmp :-
 
 @find_x:
-	adc zp0A_walls_ptr
-	sta zp0A_walls_ptr
+	adc zp0A_text_ptr
+	sta zp0A_text_ptr
 	ldx gs_player_x
 :	dex
 	beq @find_y
-	inc zp0A_walls_ptr
-	inc zp0A_walls_ptr
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
+	inc zp0A_text_ptr
+	inc zp0A_text_ptr
 	jmp :-
 
 @find_y:
@@ -2297,11 +2296,11 @@ probe_forward:
 	cmp #$09
 	bmi @shift_1_byte
 @shift_2_bytes:
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
 	sec
 	sbc #$04
 @shift_1_byte:
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
 	sec
 	sbc #$04
 @find_2bits:
@@ -2314,9 +2313,9 @@ probe_forward:
 	jmp :-
 
 @check_facing:
-	sta zp1A_wall_bit
-	stx zp19_sight_depth
-	stx zp11_count
+	sta zp1A_count_loop
+	stx a19
+	stx zp11_level_facing
 	stx gs_walls_left
 	stx gs_walls_right_depth
 	ldx gs_facing
@@ -2332,60 +2331,60 @@ probe_forward:
 	beq probe_east
 
 probe_south:
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	bne @S_sight_limit
-	inc zp19_sight_depth
-	lda zp19_sight_depth
+	inc a19
+	lda a19
 	cmp #$05
 	beq @S_sight_limit
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$80
 	bne :+
-	dec zp0A_walls_ptr
+	dec zp0A_text_ptr
 	lda #$02
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	jmp probe_south
 
-:	asl zp1A_wall_bit
-	asl zp1A_wall_bit
+:	asl zp1A_count_loop
+	asl zp1A_count_loop
 	jmp probe_south
 
 @S_sight_limit:
-	lda zp19_sight_depth
+	lda a19
 	jsr swap_saved_A_2
-	lsr zp1A_wall_bit
+	lsr zp1A_count_loop
 S_next_wall:
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	beq :+
 	inc gs_walls_right_depth
 :	ldy #$03
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	ldy #$00
-	and zp1A_wall_bit
+	and zp1A_count_loop
 	beq :+
 	inc gs_walls_left
 :	jsr swap_saved_A_2
-	cmp zp11_count
+	cmp zp11_level_facing
 	beq S_probe_done
 	jsr swap_saved_A_2
 	lda #$04
-	cmp zp11_count
+	cmp zp11_level_facing
 	beq S_probed_max
 	asl gs_walls_left
 	asl gs_walls_right_depth
-	inc zp11_count
-	lda zp1A_wall_bit
+	inc zp11_level_facing
+	lda zp1A_count_loop
 	cmp #$01
 	beq :+
-	lsr zp1A_wall_bit
-	lsr zp1A_wall_bit
+	lsr zp1A_count_loop
+	lsr zp1A_count_loop
 	jmp S_next_wall
 
 :	lda #$40
-	sta zp1A_wall_bit
-	inc zp0A_walls_ptr
+	sta zp1A_count_loop
+	inc zp0A_text_ptr
 	jmp S_next_wall
 
 S_probed_max:
@@ -2402,197 +2401,197 @@ S_probe_done:
 	rts
 
 probe_east:
-	lsr zp1A_wall_bit
+	lsr zp1A_count_loop
 @next_depth:
 	clc
-	lda zp0A_walls_ptr
+	lda zp0A_text_ptr
 	adc #$03
-	sta zp0A_walls_ptr
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	sta zp0A_text_ptr
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	bne @E_sight_limit
-	inc zp19_sight_depth
-	lda zp19_sight_depth
+	inc a19
+	lda a19
 	cmp #$05
 	bne @next_depth
 @E_sight_limit:
-	lda zp19_sight_depth
+	lda a19
 	jsr swap_saved_A_2
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	sta zp_wall_opposite
-	asl zp1A_wall_bit
+	asl zp1A_count_loop
 	clc
-	ror zp19_sight_depth
+	ror a19
 	bcc E_next_wall
-	ror zp19_sight_depth
+	ror a19
 E_next_wall:
-	dec zp0A_walls_ptr
-	dec zp0A_walls_ptr
-	dec zp0A_walls_ptr
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	dec zp0A_text_ptr
+	dec zp0A_text_ptr
+	dec zp0A_text_ptr
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	beq :+
 	inc gs_walls_right_depth
-:	lda zp19_sight_depth
+:	lda a19
 	cmp #$80
 	beq :+
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	jmp @check_opposite
 
 :	iny
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	dey
 @check_opposite:
-	and zp19_sight_depth
+	and a19
 	beq :+
 	inc gs_walls_left
-:	lda zp11_count
+:	lda zp11_level_facing
 	cmp #$04
 E_probed_max:
 	beq S_probed_max
 	jsr swap_saved_A_2
-	cmp zp11_count
+	cmp zp11_level_facing
 E_probe_done:
 	beq S_probe_done
 	jsr swap_saved_A_2
-	inc zp11_count
+	inc zp11_level_facing
 	asl gs_walls_left
 	asl gs_walls_right_depth
 	jmp E_next_wall
 
 probe_west:
-	lsr zp1A_wall_bit
+	lsr zp1A_count_loop
 @next_depth:
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	bne :+
-	inc zp19_sight_depth
-	lda zp19_sight_depth
+	inc a19
+	lda a19
 	cmp #$05
 	beq :+
-	dec zp0A_walls_ptr
-	dec zp0A_walls_ptr
-	dec zp0A_walls_ptr
+	dec zp0A_text_ptr
+	dec zp0A_text_ptr
+	dec zp0A_text_ptr
 	jmp @next_depth
 
-:	lda zp19_sight_depth
+:	lda a19
 	jsr swap_saved_A_2
-	lda zp1A_wall_bit
-	sta zp19_sight_depth
-	asl zp1A_wall_bit
+	lda zp1A_count_loop
+	sta a19
+	asl zp1A_count_loop
 	clc
 	ror zp_wall_opposite
 	bcc W_next_wall
-	ror zp19_sight_depth
+	ror a19
 W_next_wall:
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	beq :+
 	inc gs_walls_left
-:	lda zp19_sight_depth
+:	lda a19
 	cmp #$80
 	bne :+
-	inc zp0A_walls_ptr
-:	lda (zp0A_walls_ptr),y
-	and zp19_sight_depth
+	inc zp0A_text_ptr
+:	lda (zp0A_text_ptr),y
+	and a19
 	beq :+
 	inc gs_walls_right_depth
-:	lda zp19_sight_depth
+:	lda a19
 	cmp #$80
 	beq :+
-	inc zp0A_walls_ptr
-:	inc zp0A_walls_ptr
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
+:	inc zp0A_text_ptr
+	inc zp0A_text_ptr
 	jsr swap_saved_A_2
-	cmp zp11_count
+	cmp zp11_level_facing
 	beq E_probe_done
 	jsr swap_saved_A_2
 	lda #$04
-	cmp zp11_count
+	cmp zp11_level_facing
 W_probed_max:
 	beq E_probed_max
-	inc zp11_count
+	inc zp11_level_facing
 	asl gs_walls_left
 	asl gs_walls_right_depth
 	jmp W_next_wall
 
 probe_north:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$02
 	bne :+
 	lda #$80
-	sta zp1A_wall_bit
-	inc zp0A_walls_ptr
+	sta zp1A_count_loop
+	inc zp0A_text_ptr
 	jmp @next_depth
 
-:	lsr zp1A_wall_bit
-	lsr zp1A_wall_bit
+:	lsr zp1A_count_loop
+	lsr zp1A_count_loop
 @next_depth:
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	bne @sight_limit
-	inc zp19_sight_depth
-	lda zp19_sight_depth
+	inc a19
+	lda a19
 	cmp #$05
 	beq @sight_limit
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$02
 	bne :+
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
 	lda #$80
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	jmp @next_depth
 
-:	lsr zp1A_wall_bit
-	lsr zp1A_wall_bit
+:	lsr zp1A_count_loop
+	lsr zp1A_count_loop
 	jmp @next_depth
 
 @sight_limit:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$80
 	beq :+
-	asl zp1A_wall_bit
+	asl zp1A_count_loop
 	jmp @save_depth
 
-:	dec zp0A_walls_ptr
+:	dec zp0A_text_ptr
 	lda #$01
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 @save_depth:
-	lda zp19_sight_depth
+	lda a19
 	jsr swap_saved_A_2
 N_next_wall:
-	lda (zp0A_walls_ptr),y
-	and zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	and zp1A_count_loop
 	beq :+
 	inc gs_walls_left
 :	ldy #$03
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	ldy #$00
-	and zp1A_wall_bit
+	and zp1A_count_loop
 	beq :+
 	inc gs_walls_right_depth
 :	lda #$04
-	cmp zp11_count
+	cmp zp11_level_facing
 	beq W_probed_max
 	jsr swap_saved_A_2
-	cmp zp11_count
+	cmp zp11_level_facing
 	bne :+
 	jmp S_probe_done
 
 :	jsr swap_saved_A_2
 	asl gs_walls_left
-	inc zp11_count
+	inc zp11_level_facing
 	asl gs_walls_right_depth
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$40
 	beq :+
-	asl zp1A_wall_bit
-	asl zp1A_wall_bit
+	asl zp1A_count_loop
+	asl zp1A_count_loop
 	jmp N_next_wall
 
 :	lda #$01
-	sta zp1A_wall_bit
-	dec zp0A_walls_ptr
+	sta zp1A_count_loop
+	dec zp0A_text_ptr
 	jmp N_next_wall
 
 swap_saved_A_2:
@@ -2613,14 +2612,14 @@ item_cmd:
 	lda a0F
 	cmp #execs_no_location
 	bpl icmd07_draw_inv
-	asl a0E
+	asl zp0E_draw_param
 	pha
 	lda #$00
 	sta a0F
 	clc
 	lda #<(gs_item_location-2)
-	adc a0E
-	sta a0E
+	adc zp0E_draw_param
+	sta zp0E_draw_param
 	lda #>(gs_item_location-2)
 	adc a0F
 	sta a0F
@@ -2636,29 +2635,29 @@ item_cmd:
 	adc #$05
 @destroy_item:
 	ldy #$00
-	sta (p0E),y
-	inc a0E
+	sta (zp0E_draw_param),y
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
 :	lda #$00
-	sta (p0E),y
+	sta (zp0E_draw_param),y
 	rts
 
 icmd06_where_item:
 	cmp #icmd_drop
 	beq icmd05_drop_item
 	ldy #$00
-	lda (p0E),y
-	sta zp1A_wall_bit
+	lda (zp0E_draw_param),y
+	sta zp1A_count_loop
 	iny
-	lda (p0E),y
-	sta zp19_sight_depth
+	lda (zp0E_draw_param),y
+	sta a19
 	rts
 
 icmd05_drop_item:
 	lda gs_level
 	ldy #$00
-	sta (p0E),y
+	sta (zp0E_draw_param),y
 	lda gs_player_x
 	asl
 	asl
@@ -2666,7 +2665,7 @@ icmd05_drop_item:
 	asl
 	ora gs_player_y
 	iny
-	sta (p0E),y
+	sta (zp0E_draw_param),y
 	rts
 
 icmd07_draw_inv:
@@ -2677,7 +2676,7 @@ icmd07_draw_inv:
 
 @clear_window:
 	lda #$0f
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #$19
 	sta zp_col
 	lda #$03
@@ -2686,14 +2685,14 @@ icmd07_draw_inv:
 	lda #$1e     ;char_ClearLine
 	jsr char_out
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne :-
 
 ; print inventory
 	lda #items_unique + items_food
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #<gs_item_locs
-	sta a0E      ;zp_FIXME
+	sta zp0E_draw_param ;zp_FIXME
 	lda #>gs_item_locs
 	sta a0F
 	lda #$1a
@@ -2710,7 +2709,7 @@ icmd07_draw_inv:
 	jsr get_rowcol_addr
 check_item_known:
 	ldy #$00
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	cmp #$08
 	bne :+
 	jmp print_known_item
@@ -2720,36 +2719,36 @@ check_item_known:
 	jmp print_known_item
 
 next_known_item:
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	inc a0E
+:	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	dec zp1A_wall_bit
+:	dec zp1A_count_loop
 	bne check_item_known
 
 	lda #<gs_item_locs
-	sta a0E
+	sta zp0E_draw_param
 	lda #>gs_item_locs
 	sta a0F
 	lda #items_unique + items_food + items_torches
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 check_item_boxed:
 	ldy #$00
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	cmp #carried_boxed
 	bne next_boxed_item
 	jmp print_boxed_item
 
 next_boxed_item:
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	inc a0E
+:	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	dec zp1A_wall_bit
+:	dec zp1A_count_loop
 	bne check_item_boxed
 
 	lda #$1a
@@ -2792,7 +2791,7 @@ next_boxed_item:
 print_known_item:
 	lda #$15
 	sec
-	sbc zp1A_wall_bit
+	sbc zp1A_count_loop
 	cmp #items_unique
 	bmi :+
 	lda #noun_food
@@ -2827,63 +2826,63 @@ print_boxed_item:
 	jmp next_boxed_item
 
 icmd08_count_inv:
-	sta zp1A_wall_bit
-	dec zp1A_wall_bit
+	sta zp1A_count_loop
+	dec zp1A_count_loop
 	bne icmd09_new_game
 
 	lda #>gs_item_locs
 	sta a0F      ;zp_FIXME
 	lda #<gs_item_locs
-	sta a0E
+	sta zp0E_draw_param
 	lda #items_unique + items_food
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #$00
-	sta zp19_sight_depth
+	sta a19
 	ldy #$00
 @check_carried:
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	cmp #$06
 	bmi :+
-	inc zp19_sight_depth
+	inc a19
 :	iny
 	iny
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne @check_carried
 	lda gs_torch_time
 	bne @add_one
 	lda gs_torches_unlit
 	beq @done
 @add_one:
-	inc zp19_sight_depth
+	inc a19
 @done:
 	rts
 
 icmd09_new_game:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne icmd0A
 
 	ldy #gs_size-1
 	lda #>data_new_game
 	sta a0F
 	lda #<data_new_game
-	sta a0E
+	sta zp0E_draw_param
 	lda #<gs_facing
-	sta zp10_noun
+	sta zp10_position
 	lda #>gs_facing
-	sta zp11_count
-:	lda (p0E),y
-	sta (zp10_noun),y
+	sta zp11_level_facing
+:	lda (zp0E_draw_param),y
+	sta (zp10_position),y
 	dey
 	bpl :-
 	rts
 
 icmd0A:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne icmd0B_which_box
 	jmp icmd0A_impl
 
 icmd0B_which_box:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	beq :+
 	jmp icmd0C_which_food
 
@@ -2894,78 +2893,78 @@ icmd0B_which_box:
 	asl
 	clc
 	adc gs_player_y
-	sta zp11_count
+	sta zp11_level_facing
 	lda #>(gs_item_locs+1)
 	sta a0F
 	lda #<(gs_item_locs+1)
-	sta a0E
+	sta zp0E_draw_param
 	lda #items_unique + items_food + items_torches
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	ldy #$00
-	lda zp11_count
+	lda zp11_level_facing
 @check_is_here:
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	beq @check_level
 @not_here:
 	iny
 	iny
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne @check_is_here
 
 	lda #>gs_item_locs
 	sta a0F
 	lda #<gs_item_locs
-	sta a0E
+	sta zp0E_draw_param
 	lda #noun_snake-1
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #carried_boxed
 	ldy #$00
 @check_is_carried:
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	beq @return_item_num
 	iny
 	iny
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne @check_is_carried
 
 ; Skip over snake
 	lda #>gs_item_food_torch
 	sta a0F
 	lda #<gs_item_food_torch
-	sta a0E
+	sta zp0E_draw_param
 	lda #items_food + items_torches
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	ldy #$00
 @next_other:
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	beq @return_item_num
 	iny
 	iny
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne @next_other
 
 ; Last, check for carrying boxed snake
 	ldx #>gs_item_snake
 	stx a0F
 	ldx #<gs_item_snake
-	stx a0E
+	stx zp0E_draw_param
 	ldy #$00
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	beq @return_item_num
 	lda #$00
 	rts
 
 @check_level:
-	dec a0E
-	lda (p0E),y
+	dec zp0E_draw_param
+	lda (zp0E_draw_param),y
 	sta a13
-	inc a0E
+	inc zp0E_draw_param
 	dey
 	lda a13
 	cmp gs_level
 	beq @return_item_num
 	iny
-	lda zp11_count
+	lda zp11_level_facing
 	jmp @not_here
 
 @return_item_num:
@@ -2973,13 +2972,13 @@ icmd0B_which_box:
 	tya
 	bpl :+
 	lda #$00     ;clamp min 0
-:	adc a0E
-	sta a0E
+:	adc zp0E_draw_param
+	sta zp0E_draw_param
 	lda #$00
 	adc a0F
 	sta a0F
 	sec
-	lda a0E
+	lda zp0E_draw_param
 	sbc #<gs_item_locs
 	clc
 	ror
@@ -2988,62 +2987,62 @@ icmd0B_which_box:
 	rts
 
 icmd0C_which_food:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne icmd0D_which_torch
 	lda #items_food
-	sta zp11_count
+	sta zp11_level_facing
 	lda #carried_known
-	sta zp10_noun
+	sta zp10_position
 	lda #icmd_where
 	sta a0F
 	lda #item_food_begin
-	sta a0E
+	sta zp0E_draw_param
 find_which_multiple:
 	lda a0F
 	pha
-	lda a0E
+	lda zp0E_draw_param
 	pha
 	jsr item_cmd
-	lda zp10_noun
-	cmp zp1A_wall_bit
+	lda zp10_position
+	cmp zp1A_count_loop
 	beq @found
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
-	inc a0E
-	dec zp11_count
+	inc zp0E_draw_param
+	dec zp11_level_facing
 	bne find_which_multiple
 	lda #$00
 	rts
 
 @found:
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
-	lda a0E
+	lda zp0E_draw_param
 	rts
 
 icmd0D_which_torch:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne icmd0E_which_torch
 	lda #items_torches
-	sta zp11_count
+	sta zp11_level_facing
 	lda #carried_active
-	sta zp10_noun
+	sta zp10_position
 	bne set_action
 icmd0E_which_torch:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne icmd_default
 	lda #items_torches
-	sta zp11_count
+	sta zp11_level_facing
 	lda #carried_known
-	sta zp10_noun
+	sta zp10_position
 set_action:
 	lda #icmd_where
 	sta a0F
 	lda #item_torch_begin
-	sta a0E
+	sta zp0E_draw_param
 	jsr find_which_multiple
 icmd_default:
 	rts
@@ -3062,32 +3061,32 @@ icmd0A_impl:
 	sec
 	sbc #$01
 b1D21:
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda gs_player_x
-	sta zp11_count
+	sta zp11_level_facing
 	lda gs_player_y
-	sta zp10_noun
+	sta zp10_position
 	lda gs_level
-	sta zp19_sight_depth
+	sta a19
 	jmp j1D3B
 
 b1D35:
 	lda #$00
-	sta a619B
+	sta gs_box_visible
 	rts
 
 j1D3B:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	sta a0F
 	lda #$00
-	sta a0E
+	sta zp0E_draw_param
 j1D43:
 	lda gs_facing
 	jsr s1DC7
 	jsr s1D69
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	beq b1D55
-	lsr a0E
+	lsr zp0E_draw_param
 	jmp j1D43
 
 b1D55:
@@ -3096,80 +3095,80 @@ b1D55:
 	sbc a0F
 	beq b1D63
 b1D5C:
-	lsr a0E
+	lsr zp0E_draw_param
 	sec
 	sbc #$01
 	bne b1D5C
 b1D63:
-	lda a0E
-	sta a619B
+	lda zp0E_draw_param
+	sta gs_box_visible
 	rts
 
 s1D69:
 	pha
-	lda zp11_count
+	lda zp11_level_facing
 	pha
-	lda zp10_noun
+	lda zp10_position
 	pha
 	lda a0F
 	pha
-	lda a0E
+	lda zp0E_draw_param
 	pha
-	lda zp11_count
+	lda zp11_level_facing
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc zp10_noun
+	adc zp10_position
 	pha
 	lda #>(gs_item_locs+1)
 	sta a0F
 	lda #<(gs_item_locs+1)
-	sta a0E
+	sta zp0E_draw_param
 	lda #$17
-	sta zp11_count
+	sta zp11_level_facing
 	pla
 	ldy #$00
 b1D8F:
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	beq b1DA7
 j1D93:
 	iny
 	iny
-	dec zp11_count
+	dec zp11_level_facing
 	bne b1D8F
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
 b1D9F:
 	pla
-	sta zp10_noun
+	sta zp10_position
 	pla
-	sta zp11_count
+	sta zp11_level_facing
 	pla
 	rts
 
 b1DA7:
-	sta zp10_noun
-	dec a0E
-	lda (p0E),y
-	inc a0E
-	cmp zp19_sight_depth
+	sta zp10_position
+	dec zp0E_draw_param
+	lda (zp0E_draw_param),y
+	inc zp0E_draw_param
+	cmp a19
 	beq b1DB8
-	lda zp10_noun
+	lda zp10_position
 	jmp j1D93
 
 b1DB8:
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
-	lda a0E
+	lda zp0E_draw_param
 	clc
 	adc #$08
-	sta a0E
+	sta zp0E_draw_param
 	bne b1D9F
 s1DC7:
 	cmp #$01
@@ -3178,22 +3177,22 @@ s1DC7:
 	beq b1DD9
 	cmp #$03
 	beq b1DDC
-	dec zp10_noun
+	dec zp10_position
 	rts
 
 b1DD6:
-	dec zp11_count
+	dec zp11_level_facing
 	rts
 
 b1DD9:
-	inc zp10_noun
+	inc zp10_position
 	rts
 
 b1DDC:
-	inc zp11_count
+	inc zp11_level_facing
 	rts
 
-s1DDF:
+get_maze_feature:
 	lda gs_facing
 	asl
 	asl
@@ -3201,7 +3200,7 @@ s1DDF:
 	asl
 	clc
 	adc gs_level
-	sta zp11_count
+	sta zp11_level_facing
 	lda gs_player_x
 	asl
 	asl
@@ -3209,84 +3208,86 @@ s1DDF:
 	asl
 	clc
 	adc gs_player_y
-	sta zp10_noun
-	lda #>p60A5
+	sta zp10_position
+	lda #>maze_features
 	sta a0F
-	lda #<p60A5
-	sta a0E
-	lda #$26
-	sta zp19_sight_depth
+	lda #<maze_features
+	sta zp0E_draw_param
+	lda #maze_features_end
+	sta a19
 	ldy #$00
-	lda zp11_count
-b1E09:
-	cmp (p0E),y
-	beq b1E1C
+	lda zp11_level_facing
+@next:
+	cmp (zp0E_draw_param),y
+	beq @check_position
 	iny
-b1E0E:
+@continue:
 	iny
 	iny
 	iny
-	dec zp19_sight_depth
-	bne b1E09
+	dec a19
+	bne @next
 	lda #$00
 	sta a0F
-	sta a0E
+	sta zp0E_draw_param
 	rts
 
-b1E1C:
-	lda zp10_noun
+@check_position:
+	lda zp10_position
 	iny
-	cmp (p0E),y
-	beq b1E27
-	lda zp11_count
-	bne b1E0E
-b1E27:
+	cmp (zp0E_draw_param),y
+	beq @match
+	lda zp11_level_facing
+	bne @continue
+@match:
 	iny
-	lda (p0E),y
-	sta zp11_count
+	lda (zp0E_draw_param),y
+	sta zp11_level_facing
 	iny
-	lda (p0E),y
-	sta a0E
-	lda zp11_count
+	lda (zp0E_draw_param),y
+	sta zp0E_draw_param
+	lda zp11_level_facing
 	sta a0F
 	rts
 
-p1E36:
+keyhole_0:
 	.byte $06,$0b,$0b,$07,$0b,$0b,$0b,$0b
 	.byte $0b,$0b,$0b,$0b,$0b,$0b,$0b,$0b
 	.byte $08,$0b,$0b,$09,$20,$0b,$0b,$20
 	.byte $20,$0b,$0b,$20,$0b,$0b,$0b,$0b
 	.byte $0b,$0b,$0b,$0b
-s1E5A:
+
+draw_special:
 	ldy a0F
 	dey
-	bne b1EA1
+	bne @draw_2_elevator
+@draw_1_keyhole:
 	lda #$09
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	sta zp_col
 	lda #$06
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #>p1E36
-	sta zp0A_walls_ptr+1
-	lda #<p1E36
-	sta zp0A_walls_ptr
+	lda #>keyhole_0
+	sta zp0A_text_ptr+1
+	lda #<keyhole_0
+	sta zp0A_text_ptr
 	ldy #$00
-j1E76:
+@next_row:
 	lda #$04
-	sta zp19_sight_depth
-b1E7A:
+	sta a19
+@next_glyph:
 	tya
 	pha
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	jsr print_char
 	pla
 	tay
 	iny
-	dec zp19_sight_depth
-	bne b1E7A
-	dec zp1A_wall_bit
-	beq b1EA0
+	dec a19
+	bne @next_glyph
+	dec zp1A_count_loop
+	beq @done
 	tya
 	pha
 	inc zp_row
@@ -3297,33 +3298,34 @@ b1E7A:
 	jsr get_rowcol_addr
 	pla
 	tay
-	jmp j1E76
+	jmp @next_row
 
-b1EA0:
+@done:
 	rts
 
-b1EA1:
+@draw_2_elevator:
 	dey
-	bne b1F1B
+	bne @draw_3_compactor
+
 	lda #$03
 	sta zp_row
 	lda #$05
 	sta zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
 	lda #$03
 	sta zp_row
 	lda #$0a
 	sta zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
 	lda #$03
 	sta zp_row
 	lda #$10
 	sta zp_col
-	lda #$03
+	lda #glyph_L
 	ldy #$12
 	jsr draw_down
 	lda #>raster 20,0,7
@@ -3332,9 +3334,9 @@ b1EA1:
 	sta screen_ptr
 	ldy #$14
 	jsr draw_right
-	lda #<p5D05
+	lda #<raster 2,5,7
 	sta screen_ptr
-	lda #>p5D05
+	lda #>raster 2,5,7
 	sta screen_ptr+1
 	ldy #$0a
 	jsr draw_right
@@ -3343,36 +3345,35 @@ b1EA1:
 	lda #$01
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #>string_elevator
-	sta zp0A_walls_ptr+1
-	lda #<string_elevator
-	sta zp0A_walls_ptr
+	lda #>@string_elevator
+	sta zp0A_text_ptr+1
+	lda #<@string_elevator
+	sta zp0A_text_ptr
 	ldy #$00
 	lda #$08
-	sta zp1A_wall_bit
-b1F04:
-	tya
+	sta zp1A_count_loop
+:	tya
 	pha
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	jsr print_char
 	pla
 	tay
 	iny
-	dec zp1A_wall_bit
-	bne b1F04
+	dec zp1A_count_loop
+	bne :-
 	rts
 
-string_elevator:
+@string_elevator:
 	.byte "ELEVATOR"
-b1F1B:
-	dey
-	beq b1F21
-	jmp j206A
 
-b1F21:
-	lda #$06
+@draw_3_compactor:
+	dey
+	beq :+
+	jmp @draw_4_pit_floor
+
+:	lda #$06
 	sta zp_0C_string
-j1F25:
+@next_frame_3:
 	lda #$00
 	sta zp_row
 	lda #$06
@@ -3380,7 +3381,7 @@ j1F25:
 	sbc zp_0C_string
 	sta zp_col
 	pha
-	lda #$20
+	lda #' '
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3389,7 +3390,7 @@ j1F25:
 	inc zp_col
 	lda #$00
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3400,11 +3401,11 @@ j1F25:
 	lda #$01
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	pla
 	sta zp_col
@@ -3421,25 +3422,25 @@ j1F25:
 	lda zp_row
 	pha
 	dec zp_row
-	lda #$20
+	lda #' '
 	ldy #$0f
 	jsr draw_down
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	pla
 	sta zp_row
 	pla
 	sta zp_col
 	inc zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$0d
 	jsr draw_down
 	ldy #$04
@@ -3451,7 +3452,7 @@ j1F25:
 	adc zp_0C_string
 	sta zp_col
 	pha
-	lda #$20
+	lda #' '
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3460,7 +3461,7 @@ j1F25:
 	dec zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
 	jsr draw_down
 	pla
@@ -3471,7 +3472,7 @@ j1F25:
 	lda #$01
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	dec zp_col
@@ -3495,7 +3496,7 @@ p1FFF:
 	lda zp_row
 	pha
 	dec zp_row
-	lda #$20
+	lda #' '
 	ldy #$0f
 	jsr draw_down
 	inc zp_col
@@ -3511,235 +3512,238 @@ p1FFF:
 	pla
 	sta zp_col
 	dec zp_col
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
 	jsr draw_down
 	ldy #$04
 	jsr draw_down_right
 	dec zp_0C_string
-	beq b2051
+	beq :+
 	jsr wait_brief
-	jmp j1F25
+	jmp @next_frame_3
 
-b2051:
-	rts
+:	rts
 
-p2052:
+@pit_floor_data:
 	.byte $11,$11,$04,$05,$11,$04,$40,$d4
 	.byte $0d,$5e,$50,$15,$0e,$0e,$03,$08
 	.byte $0e,$03,$43,$2f,$07,$5c,$54,$0d
-j206A:
+
+; Input: $0E = distance (0,1)
+@draw_4_pit_floor:
 	dey
-	bne b20E7
-	lda #<p2052
-	sta zp0A_walls_ptr
-	lda #>p2052
-	sta zp0A_walls_ptr+1
+	bne @draw_5_pit_roof
+
+	lda #<@pit_floor_data
+	sta zp0A_text_ptr
+	lda #>@pit_floor_data
+	sta zp0A_text_ptr+1
 	lda #$02
-	sta zp19_sight_depth
-	lda a0E
-	beq b207F
+	sta a19
+	lda zp0E_draw_param
+	beq @pit_walls
 	ldy #$0c
-b207F:
-	lda (zp0A_walls_ptr),y
+@pit_walls:
+	lda (zp0A_text_ptr),y
 	sta zp_col
 	iny
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	sta zp_row
 	iny
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	iny
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	tya
 	pha
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	tay
-	lda #$02
+	lda #$02     ;glyph_R, then glyph_L
 	clc
-	adc zp19_sight_depth
+	adc a19
 	jsr draw_down
 	pla
 	tay
-	dec zp19_sight_depth
-	bne b207F
+	dec a19
+	bne @pit_walls
 	lda #$02
-	sta zp19_sight_depth
-b20A5:
-	lda (zp0A_walls_ptr),y
+	sta a19
+@pit_rim:
+	lda (zp0A_text_ptr),y
 	sta screen_ptr+1
 	iny
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	sta screen_ptr
 	iny
-	lda (zp0A_walls_ptr),y
-	sta zp1A_wall_bit
+	lda (zp0A_text_ptr),y
+	sta zp1A_count_loop
 	iny
 	tya
 	pha
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	tay
 	jsr draw_right
 	pla
 	tay
-	dec zp19_sight_depth
-	bne b20A5
+	dec a19
+	bne @pit_rim
 	rts
 
-p20C3:
+@pit_roof_data:
 	.byte $11,$00,$04,$05,$00,$04,$40,$00
 	.byte $15,$42,$04,$0d,$0e,$04,$03,$08
 	.byte $04,$03,$42,$04,$0d,$43,$87,$07
 	.byte $0c,$07,$02,$0a,$07,$02,$43,$87
 	.byte $07,$40,$b1,$03
-b20E7:
+
+@draw_5_pit_roof:
 	dey
-	bne b2107
-	lda #<p20C3
-	sta zp0A_walls_ptr
-	lda #>p20C3
-	sta zp0A_walls_ptr+1
+	bne @draw_6_boxes
+
+	lda #<@pit_roof_data
+	sta zp0A_text_ptr
+	lda #>@pit_roof_data
+	sta zp0A_text_ptr+1
 	lda #$02
-	sta zp19_sight_depth
-	ldy a0E
-	beq b2102
+	sta a19
+	ldy zp0E_draw_param
+	beq :+
 	dey
-	beq b207F
+	beq @pit_walls
 	ldy #$0c
-	jmp b207F
+	jmp @pit_walls
 
-b2102:
-	ldy #$18
-	jmp b207F
+:	ldy #$18
+	jmp @pit_walls
 
-b2107:
+@draw_6_boxes:
 	dey
-	beq b210D
-	jmp j2272
+	beq @draw_box_4
+	jmp @draw_7_the_square
 
-b210D:
-	lda a619B
-	and #$08
-	beq b2122
+@draw_box_4:
+	lda gs_box_visible
+	and #(1 << 3)
+	beq @draw_box_3
 	lda #$0b
 	sta zp_col
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$0c
+	lda #glyph_box
 	jsr char_out
-b2122:
-	lda a619B
-	and #$04
-	beq b215D
+@draw_box_3:
+	lda gs_box_visible
+	and #(1 << 2)
+	beq @draw_box_2
 	lda #$0a
 	sta zp_col
 	lda #$0c
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$0d
+	lda #glyph_box_TL
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$0e
+	lda #glyph_box_TR
 	jsr char_out
 	lda #$0a
 	sta zp_col
 	lda #$0d
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$12
+	lda #glyph_box_BL
 	jsr char_out
-	lda #$13
+	lda #glyph_box_B
 	jsr char_out
-	lda #$0f
+	lda #glyph_box_BR
 	jsr char_out
-b215D:
-	lda a619B
-	and #$02
-	beq b21CB
+@draw_box_2:
+	lda gs_box_visible
+	and #(1 << 1)
+	beq @draw_box_1
 	lda #$09
 	sta zp_col
 	lda #$0e
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$0d
+	lda #glyph_box_TL
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$10
+	lda #glyph_box_T
 	jsr char_out
-	lda #$0e
+	lda #glyph_box_TR
 	jsr char_out
 	lda #$09
 	sta zp_col
 	lda #$0f
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$03
+	lda #glyph_L
 	jsr char_out
 	inc zp_col
 	inc zp_col
 	inc zp_col
 	jsr get_rowcol_addr
-	lda #$11
+	lda #glyph_box_R
 	jsr char_out
 	dec zp_col
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$0f
+	lda #glyph_box_BR
 	jsr char_out
 	lda #$09
 	sta zp_col
 	jsr get_rowcol_addr
-	lda #$03
+	lda #glyph_L
 	jsr char_out
-	lda #>p40D8
+	lda #>raster $11,8,0
 	sta screen_ptr+1
-	lda #<p40D8
+	lda #<raster $11,8,0
 	sta screen_ptr
 	ldy #$04
 	jsr draw_right
-b21CB:
-	lda a619B
-	and #$01
-	beq b2245
+@draw_box_1:
+	lda gs_box_visible
+	and #(1 << 0)
+	beq @box_done
 	lda #$0e
 	sta zp_col
 	lda #$11
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$02
+	lda #glyph_slash_up
 	jsr char_out
 	lda #$07
 	sta zp_col
 	jsr get_rowcol_addr
 	ldy #$07
 	jsr draw_right
-	lda #$02
+	lda #glyph_slash_up
 	jsr char_out
 	lda #$06
 	sta zp_col
 	lda #$12
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$03
 	jsr draw_down
 	lda #$0d
 	sta zp_col
 	lda #$12
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$03
 	jsr draw_down
 	dec zp_row
 	inc zp_col
 	jsr get_rowcol_addr
-	lda #$02
+	lda #glyph_slash_up
 	jsr char_out
-	lda #>p4156
+	lda #>raster 18,6,0
 	sta screen_ptr+1
-	lda #<p4156
+	lda #<raster 18,6,0
 	sta screen_ptr
 	ldy #$07
 	jsr draw_right
@@ -3747,48 +3751,49 @@ b21CB:
 	sta zp_col
 	lda #$11
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	tay
 	jsr draw_down
-	ldx #>p5E56
+	ldx #>raster 20,6,7
 	stx screen_ptr+1
-	ldx #<p5E56
+	ldx #<raster 20,6,7
 	stx screen_ptr
 	ldy #$07
 	jsr draw_right
-b2245:
+@box_done:
 	rts
 
-p2246:
+@square_data_left:
 	.byte $07,$20,$0b,$07,$0b,$0b,$0b,$0b
 	.byte $0b,$0b,$0b,$09,$09,$20
-p2254:
+@square_data_right:
 	.byte $20,$06,$06,$0b,$0b,$0b,$0b,$0b
 	.byte $0b,$0b,$08,$0b,$20,$08
-string_square:
+@string_square:
 	.byte "THEPERFECTSQUARE"
-j2272:
+
+; Input: 0E = 1 right, 2 front, 4 left
+@draw_7_the_square:
 	dey
-	beq b2278
-	jmp j2347
+	beq :+
+	jmp @draw_8_doors
 
-b2278:
-	lda a0E
+:	lda zp0E_draw_param
 	cmp #$01
-	beq b22F8
+	beq @square_right
 	cmp #$04
-	bne b2285
-	jmp j2332
+	bne @square_front
+	jmp @square_left
 
-b2285:
+@square_front:
 	lda #$08
 	sta zp_col
 	pha
 	lda #$07
 	sta zp_row
 	pha
-j228F:
-	lda #$0b
+@sq_next_col:
+	lda #glyph_solid
 	ldy #$07
 	jsr draw_down
 	pla
@@ -3798,148 +3803,144 @@ j228F:
 	inc zp_col
 	lda zp_col
 	cmp #$0f
-	beq b22AB
+	beq @sq_sign
 	pha
 	lda zp_row
 	pha
-	jmp j228F
+	jmp @sq_next_col
 
-b22AB:
-	lda #<string_square
-	sta zp0A_walls_ptr
-	lda #>string_square
-	sta zp0A_walls_ptr+1
+@sq_sign:
+	lda #<@string_square
+	sta zp0A_text_ptr
+	lda #>@string_square
+	sta zp0A_text_ptr+1
 	lda #$0a
 	sta zp_col
 	lda #$04
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$03
-	sta zp1A_wall_bit
-	jsr s22E6
+	sta zp1A_count_loop
+	jsr @print_square_row
 	lda #$08
 	sta zp_col
 	lda #$05
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$07
-	sta zp1A_wall_bit
-	jsr s22E6
+	sta zp1A_count_loop
+	jsr @print_square_row
 	lda #$09
 	sta zp_col
 	lda #$06
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$06
-	sta zp1A_wall_bit
-s22E6:
+	sta zp1A_count_loop
+@print_square_row:
 	ldy #$00
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	jsr char_out
-	inc zp0A_walls_ptr
-	bne b22F3
-	inc zp0A_walls_ptr+1
-b22F3:
-	dec zp1A_wall_bit
-	bne s22E6
+	inc zp0A_text_ptr
+	bne :+
+	inc zp0A_text_ptr+1
+:	dec zp1A_count_loop
+	bne @print_square_row
 	rts
 
-b22F8:
-	lda #<p2254
-	sta zp0A_walls_ptr
-	lda #>p2254
-	sta zp0A_walls_ptr+1
+@square_right:
+	lda #<@square_data_right
+	sta zp0A_text_ptr
+	lda #>@square_data_right
+	sta zp0A_text_ptr+1
 	lda #$13
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta zp1A_wall_bit
-b230A:
+	sta zp1A_count_loop
+@sq_next_row:
 	jsr get_rowcol_addr
 	ldy #$00
-	lda (zp0A_walls_ptr),y
+	lda (zp0A_text_ptr),y
 	jsr char_out
-	inc zp0A_walls_ptr
-	bne b231A
-	inc zp0A_walls_ptr+1
-b231A:
-	ldy #$00
-	lda (zp0A_walls_ptr),y
+	inc zp0A_text_ptr
+	bne :+
+	inc zp0A_text_ptr+1
+:	ldy #$00
+	lda (zp0A_text_ptr),y
 	jsr char_out
-	inc zp0A_walls_ptr
-	bne b2327
-	inc zp0A_walls_ptr+1
-b2327:
-	inc zp_row
+	inc zp0A_text_ptr
+	bne :+
+	inc zp0A_text_ptr+1
+:	inc zp_row
 	dec zp_col
 	dec zp_col
-	dec zp1A_wall_bit
-	bne b230A
+	dec zp1A_count_loop
+	bne @sq_next_row
 	rts
 
-j2332:
-	lda #<p2246
-	sta zp0A_walls_ptr
-	lda #>p2246
-	sta zp0A_walls_ptr+1
+@square_left:
+	lda #<@square_data_left
+	sta zp0A_text_ptr
+	lda #>@square_data_left
+	sta zp0A_text_ptr+1
 	lda #$02
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta zp1A_wall_bit
-	jmp b230A
+	sta zp1A_count_loop
+	jmp @sq_next_row
 
-j2347:
+@draw_8_doors:
 	dey
-	beq b234D
-	jmp j2410
+	beq :+
+	jmp @draw_9_keyholes
 
-b234D:
-	lda a0E
+:	lda zp0E_draw_param
 	cmp #$04
-	bne b2356
-	jmp j23DD
+	bne @door_2_right
+	jmp @door_1_left
 
-b2356:
+@door_2_right:
 	cmp #$02
-	beq b23A8
+	beq @door_1_right
 	lda #$10
 	sta zp_col
 	lda #$08
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$14
+	lda #glyph_slash_up_C
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
-	lda #$0a
+	lda #glyph_LR
 	ldy #$05
 	jsr draw_down
 	jsr get_rowcol_addr
-	lda #$17
+	lda #glyph_slash_down_R
 	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$15
+	lda #glyph_slash_down_C
 	jsr char_out
 	lda #$10
 	sta zp_col
 	lda #$09
 	sta zp_row
-	lda #$16
+	lda #glyph_C
 	ldy #$06
 	jsr draw_down
 	lda #$11
 	sta zp_col
 	lda #$08
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$08
 	jsr draw_down
 	rts
 
-b23A8:
+@door_1_right:
 	lda #$14
 	sta zp_col
 	lda #$04
@@ -3947,26 +3948,26 @@ b23A8:
 	ldy #$02
 	jsr draw_down_left
 	inc zp_col
-	lda #$03
+	lda #glyph_L
 	ldy #$0c
 	jsr draw_down
 	lda #$14
 	sta zp_col
 	lda #$05
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0e
 	jsr draw_down
 	lda #$15
 	sta zp_col
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$10
 	jsr draw_down
 	rts
 
-j23DD:
+@door_1_left:
 	lda #$02
 	sta zp_col
 	lda #$04
@@ -3974,137 +3975,137 @@ j23DD:
 	ldy #$02
 	jsr draw_down_right
 	dec zp_col
-	lda #$04
+	lda #glyph_R
 	ldy #$0c
 	jsr draw_down
 	lda #$02
 	sta zp_col
 	lda #$05
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$0e
 	jsr draw_down
 	lda #$01
 	sta zp_col
-	lda #$04
+	lda #$04     ;also glyph_R
 	sta zp_row
 	ldy #$10
 	jsr draw_down
 	rts
 
-j2410:
+@draw_9_keyholes:
 	dey
-	beq b2416
-	jmp j254C
+	beq :+
+	jmp @draw_A_special
 
-b2416:
-	lda a0E
+:	lda zp0E_draw_param
 	and #$0f
-	beq b244F
-	and #$08
-	beq b2427
+	beq @keyhole_L_1
+@keyhole_R_4:
+	and #(1 << 3)
+	beq @keyhole_R_3
 	lda #$0c
 	sta zp_col
-	jsr draw_keyhole_2
-b2427:
-	lda a0E
-	and #$04
-	beq b2434
+	jsr draw_keyhole_4
+@keyhole_R_3:
+	lda zp0E_draw_param
+	and #(1 << 2)
+	beq @keyhole_R_2
 	lda #$0d
 	sta zp_col
-	jsr draw_keyhole_1
-b2434:
-	lda a0E
-	and #$02
-	beq b2441
+	jsr draw_keyhole_3
+@keyhole_R_2:
+	lda zp0E_draw_param
+	and #(1 << 1)
+	beq @keyhole_R_1
 	lda #$0f
 	sta zp_col
-	jsr draw_keyhole_0
-b2441:
-	lda a0E
-	and #$01
-	beq b244E
+	jsr draw_keyhole_2
+@keyhole_R_1:
+	lda zp0E_draw_param
+	and #(1 << 0)
+	beq @keyhole_R_done
 	lda #$13
 	sta zp_col
 s244B:
-	jsr s2484
-b244E:
+	jsr draw_keyhole_1
+@keyhole_R_done:
 	rts
 
-b244F:
-	lda a0E
-	and #$10
-	beq b245C
+@keyhole_L_1:
+	lda zp0E_draw_param
+	and #(1 << 4)
+	beq @keyhole_L_2
 	lda #$02
 	sta zp_col
-	jsr s2484
-b245C:
-	lda a0E
-	and #$20
-	beq b2469
+	jsr draw_keyhole_1
+@keyhole_L_2:
+	lda zp0E_draw_param
+	and #(1 << 5)
+	beq @keyhole_L_3
 	lda #$05
 	sta zp_col
-	jsr draw_keyhole_0
-b2469:
-	lda a0E
-	and #$40
-	beq b2476
+	jsr draw_keyhole_2
+@keyhole_L_3:
+	lda zp0E_draw_param
+	and #(1 << 6)
+	beq @keyhole_L_4
 	lda #$08
 	sta zp_col
-	jsr draw_keyhole_1
-b2476:
-	lda a0E
-	and #$80
-	beq b2483
+	jsr draw_keyhole_3
+@keyhole_L_4:
+	lda zp0E_draw_param
+	and #(1 << 7)
+	beq @keyhole_L_done
 	lda #$0a
 	sta zp_col
-	jsr draw_keyhole_2
-b2483:
+	jsr draw_keyhole_4
+@keyhole_L_done:
 	rts
 
-s2484:
+draw_keyhole_1:
 	lda #$08
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$7c
+	lda #glyph_solid_BR
 	jsr char_out
-	lda #$7d
-	jsr char_out
-	inc zp_row
-	dec zp_col
-	dec zp_col
-	jsr get_rowcol_addr
-	lda #$0b
-	jsr char_out
-	lda #$0b
+	lda #glyph_solid_BL
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$7e
+	lda #glyph_solid
 	jsr char_out
-	lda #$7f
-	jsr char_out
-	inc zp_row
-	dec zp_col
-	dec zp_col
-	jsr get_rowcol_addr
-	lda #$1f
-	jsr char_out
-	lda #$7b
+	lda #glyph_solid
 	jsr char_out
 	inc zp_row
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$0b
+	lda #glyph_solid_TR
 	jsr char_out
-	lda #$0b
+	lda #glyph_solid_TL
+	jsr char_out
+	inc zp_row
+	dec zp_col
+	dec zp_col
+	jsr get_rowcol_addr
+	lda #glyph_angle_BR
+	jsr char_out
+	lda #glyph_angle_BL
+	jsr char_out
+	inc zp_row
+	dec zp_col
+	dec zp_col
+	jsr get_rowcol_addr
+	lda #glyph_solid
+	jsr char_out
+	lda #glyph_solid
 	jsr char_out
 	rts
 
-draw_keyhole_0:
+draw_keyhole_2:
 	lda #$09
 	sta zp_row
 	jsr get_rowcol_addr
@@ -4139,7 +4140,7 @@ s2510=*+$01
 	jsr char_out
 	rts
 
-draw_keyhole_1:
+draw_keyhole_3:
 	lda #$0a
 	sta zp_row
 	jsr get_rowcol_addr
@@ -4149,7 +4150,7 @@ draw_keyhole_1:
 	jsr char_out
 	rts
 
-draw_keyhole_2:
+draw_keyhole_4:
 	lda #$0a
 	sta zp_row
 	jsr get_rowcol_addr
@@ -4157,10 +4158,10 @@ draw_keyhole_2:
 	jsr char_out
 	rts
 
-j254C:
+@draw_A_special:
 	lda #$0a
 	sta zp_col
-	lda #$03
+	lda #$03     ;also glyph_L
 	sta zp_row
 	ldy #$12
 	jsr draw_down
@@ -4168,52 +4169,52 @@ j254C:
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
-	lda #>p40D9
+	lda #>raster 17,9,0
 	sta screen_ptr+1
-	lda #<p40D9
+	lda #<raster 17,9,0
 	sta screen_ptr
 	ldy #$02
 	jsr draw_right
 	lda #$0a
 	sta zp_0C_string
 	lda #$0b
-	sta zp19_sight_depth
-	lda #>p0402
-	sta zp11_count
-	lda #<p0402
-	sta zp10_noun
+	sta a19
+	lda #$04
+	sta zp11_level_facing
+	lda #$02
+	sta zp10_position
 b2585:
 	jsr wait_brief
 	lda zp_0C_string
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$20
+	lda #' '
 	ldy #$12
 	jsr draw_down
-	lda zp19_sight_depth
+	lda a19
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$20
+	lda #' '
 	ldy #$12
 	jsr draw_down
 	dec zp_0C_string
-	inc zp19_sight_depth
+	inc a19
 	lda zp_0C_string
 	sta zp_col
-	lda #$03
+	lda #$03     ;also glyph_L
 	sta zp_row
 	ldy #$12
 	jsr draw_down
-	lda zp19_sight_depth
+	lda a19
 	sta zp_col
 	lda #$03
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$12
 	jsr draw_down
 	lda #$11
@@ -4223,11 +4224,11 @@ b2585:
 	inc zp_0C_string
 	sta zp_col
 	jsr get_rowcol_addr
-	inc zp10_noun
-	inc zp10_noun
-	ldy zp10_noun
+	inc zp10_position
+	inc zp10_position
+	ldy zp10_position
 	jsr draw_right
-	dec zp11_count
+	dec zp11_level_facing
 	bne b2585
 	rts
 
@@ -4265,7 +4266,7 @@ print_noun:
 wait_brief:
 	ldx #$28
 	stx a0F
-:	dec a0E
+:	dec zp0E_draw_param
 	bne :-
 	dec a0F
 	bne :-
@@ -4279,22 +4280,22 @@ wait_brief:
 
 player_cmd:
 	lda gd_parsed_object
-	sta a0E
+	sta zp0E_draw_param
 	lda gd_parsed_action
 	sta a0F
 	cmp #$0e
 	bmi :+
 	jmp cmd_look
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #nouns_item_end
 	bmi :+
 	jmp nonsense
 
 :	jsr noun_to_item
-	sta zp11_count
+	sta zp11_level_facing
 	lda gd_parsed_object
-	sta a0E
+	sta zp0E_draw_param
 	lda gd_parsed_action
 	sta a0F
 
@@ -4303,10 +4304,10 @@ cmd_raise:
 	bne @cmd_blow
 
 	lda #noun_ring
-	cmp a0E
+	cmp zp0E_draw_param
 	beq @ring
 	lda #noun_staff
-	cmp a0E
+	cmp zp0E_draw_param
 	beq @staff
 @having_fun:
 	lda #$1f     ;Having fun?
@@ -4321,10 +4322,10 @@ cmd_raise:
 	cmp #$05
 	bne @having_fun
 	lda #$07
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	beq @having_fun
 	lda #noun_ring
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_set_carried_active
 	sta a0F
 	jsr item_cmd
@@ -4340,7 +4341,7 @@ cmd_raise:
 	dec a0F
 	bne cmd_break
 
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_flute
 	beq @play
 	cmp #noun_horn
@@ -4352,7 +4353,7 @@ cmd_raise:
 	cmp #special_mode_mother
 	bne :+
 	lda #noun_horn
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_set_carried_active
 	sta a0F
 	jsr item_cmd
@@ -4369,27 +4370,27 @@ cmd_break:
 	dec a0F
 	bne cmd_burn
 
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
 :	cmp #nouns_unique_end
 	bmi @broken
 	sta a13
-	lda zp10_noun
+	lda zp10_position
 	pha
-	lda zp11_count
+	lda zp11_level_facing
 	pha
 	lda a13
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
 :	pla
-	sta zp11_count
+	sta zp11_level_facing
 	pla
-	sta zp10_noun
-	lda zp11_count
-	sta a0E
+	sta zp10_position
+	lda zp11_level_facing
+	sta zp0E_draw_param
 @broken:
 	jsr item_cmd
 	jsr update_view
@@ -4421,7 +4422,7 @@ lose_one_torch:
 	lda #icmd_which_torch_unlit
 	sta a0F
 	jsr item_cmd
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_destroy1
 	sta a0F
 	jmp item_cmd
@@ -4432,7 +4433,7 @@ cmd_burn:
 
 	lda gs_torches_lit
 	beq @no_fire
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
@@ -4440,8 +4441,8 @@ cmd_burn:
 	bmi @burned
 	cmp #noun_torch
 	beq make_cmd_light
-	lda zp11_count
-	sta a0E
+	lda zp11_level_facing
+	sta zp0E_draw_param
 @burned:
 	jsr item_cmd
 	jsr clear_status_lines
@@ -4469,7 +4470,7 @@ cmd_eat:
 	beq :+
 	jmp cmd_throw
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
@@ -4479,8 +4480,8 @@ cmd_eat:
 	cmp #noun_torch
 	beq @torch
 @torch_return:
-	lda zp11_count
-	sta a0E
+	lda zp11_level_facing
+	sta zp0E_draw_param
 @eaten:
 	jsr item_cmd
 	jsr update_view
@@ -4498,38 +4499,38 @@ cmd_eat:
 	jmp item_cmd
 
 @torch:
-	lda zp10_noun
+	lda zp10_position
 	pha
-	lda zp11_count
+	lda zp11_level_facing
 	pha
 	jsr lose_one_torch
 	pla
-	sta zp11_count
+	sta zp11_level_facing
 	pla
-	sta zp10_noun
+	sta zp10_position
 	jmp @torch_return
 
 @food:
-	lda zp11_count
-	sta a0E
+	lda zp11_level_facing
+	sta zp0E_draw_param
 	jsr item_cmd
 	lda gs_food_time_hi
 	sta a0F
 	lda gs_food_time_lo
-	sta a0E
+	sta zp0E_draw_param
 	lda #<food_amount
-	sta zp19_sight_depth
+	sta a19
 	lda #>food_amount
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	clc
-	lda zp19_sight_depth
-	adc a0E
-	sta a0E
-	lda zp1A_wall_bit
+	lda a19
+	adc zp0E_draw_param
+	sta zp0E_draw_param
+	lda zp1A_count_loop
 	adc a0F
 	sta a0F
 	sta gs_food_time_hi
-	lda a0E
+	lda zp0E_draw_param
 	sta gs_food_time_lo
 	lda #$58     ;Digested
 	bne @print
@@ -4554,7 +4555,7 @@ cmd_throw:
 	beq :+
 	jmp cmd_climb
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
@@ -4572,8 +4573,8 @@ cmd_throw:
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
-:	lda zp11_count
-	sta a0E
+:	lda zp11_level_facing
+	sta zp0E_draw_param
 @thrown:
 	jsr item_cmd
 	jsr print_thrown
@@ -4600,7 +4601,7 @@ cmd_throw:
 	lda #special_mode_tripped
 	sta gs_special_mode
 	lda #noun_wool
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_destroy1
 	sta a0F
 	jsr item_cmd
@@ -4621,8 +4622,8 @@ cmd_throw:
 	jmp print_to_line2
 
 @throw_food:
-	lda zp11_count
-	sta a0E
+	lda zp11_level_facing
+	sta zp0E_draw_param
 	jsr item_cmd
 	lda #icmd_draw_inv
 	sta a0F
@@ -4641,12 +4642,12 @@ print_thrown:
 	jsr dec_item_ptr
 	lda #' '
 	ldy #$00
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	beq :+
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	inc a0E
+:	inc zp0E_draw_param
 	bne :+
 	inc a0F
 :	lda #$5a     ;magically sails
@@ -4663,7 +4664,7 @@ throw_frisbee:
 	jmp @thrown
 
 :	lda #noun_frisbee
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_destroy1
 	sta a0F
 	jsr item_cmd
@@ -4691,11 +4692,11 @@ cmd_drop:
 	jsr item_cmd
 	cmp #$00
 	beq @vacant_at_feet
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_where
 	sta a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_begin
 	bcs @vacant_at_feet
 	lda #$82     ;The hallway is too crowded.
@@ -4704,7 +4705,7 @@ cmd_drop:
 
 @vacant_at_feet:
 	jsr swap_saved_vars
-	lda a0E
+	lda zp0E_draw_param
 	cmp #nouns_unique_end
 	bpl @multiples
 	cmp #noun_ring
@@ -4721,8 +4722,8 @@ cmd_drop:
 @multiples:
 	cmp #noun_torch
 	beq @torch_unlit
-	lda zp11_count
-	sta a0E
+	lda zp11_level_facing
+	sta zp0E_draw_param
 	jmp @dropped
 
 @torch_unlit:
@@ -4737,7 +4738,7 @@ cmd_drop:
 	lda #icmd_which_torch_lit
 	sta a0F
 	jsr item_cmd
-	sta a0E
+	sta zp0E_draw_param
 	dec gs_torches_lit
 	jsr push_special_mode
 	lda #$00
@@ -4752,7 +4753,7 @@ cmd_fill:
 	dec a0F
 	bne cmd_light
 
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_jar
 	beq :+
 	jmp nonsense
@@ -4764,13 +4765,13 @@ cmd_light:
 	dec a0F
 	bne cmd_play
 
-	sta zp11_count
-	lda a0E
+	sta zp11_level_facing
+	lda zp0E_draw_param
 	cmp #noun_torch
 	beq :+
 	jmp nonsense
 
-:	lda zp1A_wall_bit
+:	lda zp1A_count_loop
 	cmp #carried_active
 	bne cmd_light_impl
 	jmp not_carried
@@ -4790,7 +4791,7 @@ cmd_light_impl:
 	jsr item_cmd
 	cmp #$00
 	beq @light_torch
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_destroy2
 	sta a0F
 	jsr item_cmd
@@ -4798,7 +4799,7 @@ cmd_light_impl:
 	lda #icmd_which_torch_unlit
 	sta a0F
 	jsr item_cmd
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_set_carried_active
 	sta a0F
 	jsr item_cmd
@@ -4820,7 +4821,7 @@ cmd_play:
 	beq :+
 	jmp cmd_strike
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #item_flute
 	beq play_flute
 	cmp #item_ball
@@ -4841,11 +4842,11 @@ print_and_rts:
 
 play_flute:
 	lda #noun_snake
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_where
 	sta a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp gs_level
 	bne @music
 	lda gs_player_x
@@ -4855,7 +4856,7 @@ play_flute:
 	asl
 	clc
 	adc gs_player_y
-	cmp zp19_sight_depth
+	cmp a19
 	beq @charm
 @music:
 	jsr clear_status_lines
@@ -4878,10 +4879,10 @@ play_flute:
 	lda #glyph_L_solid
 	jsr print_char
 	lda #$30
-	sta zp11_count
-:	dec zp10_noun
+	sta zp11_level_facing
+:	dec zp10_position
 	bne :-
-	dec zp11_count
+	dec zp11_level_facing
 	bne :-
 	dec zp_col
 	dec zp_col
@@ -4891,7 +4892,7 @@ play_flute:
 	lda #icmd_set_carried_active
 	sta a0F
 	lda #noun_snake
-	sta a0E
+	sta zp0E_draw_param
 	jsr item_cmd
 	jsr push_special_mode
 	lda #special_mode_climb
@@ -4904,7 +4905,7 @@ cmd_strike:
 	dec a0F
 	bne cmd_wear
 
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_staff
 	beq :+
 	jmp nonsense
@@ -4920,7 +4921,7 @@ cmd_wear:
 	beq :+
 	rts
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #noun_hat
 	beq @hat
 @print:
@@ -4943,7 +4944,7 @@ cmd_look:
 	sta a0F
 	bne cmd_rub
 
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_hat
 	bne :+
 	jmp look_hat
@@ -4998,7 +4999,7 @@ cmd_open:
 	beq :+
 	jmp cmd_press
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #noun_door
 	bne :+
 	jmp @open_door
@@ -5011,28 +5012,28 @@ cmd_open:
 	lda #icmd_which_box
 	sta a0F
 	jsr item_cmd
-	sta zp11_count
+	sta zp11_level_facing
 	beq look_not_here
-	lda zp10_noun
+	lda zp10_position
 	pha
-	lda zp11_count
+	lda zp11_level_facing
 	pha
-	sta a0E
+	sta zp0E_draw_param
 	lda #icmd_where
 	sta a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_begin
 	bcs :+
 	jmp @check_contents
 
-:	lda zp11_count
-	sta a0E
+:	lda zp11_level_facing
+	sta zp0E_draw_param
 	lda #icmd_set_carried_known
 	sta a0F
 	jsr item_cmd
 @check_contents:
-	lda zp11_count
+	lda zp11_level_facing
 	cmp #noun_snake
 	beq @push_mode_snake
 	bmi @print_item_name
@@ -5043,13 +5044,13 @@ cmd_open:
 :	lda #noun_food
 @print_item_name:
 	jsr clear_status_lines
-	sta zp10_noun
+	sta zp10_position
 	clc
 	adc #$04
 	jsr print_to_line2
 	lda #$18     ;Inside the box there is a
 	jsr print_to_line1
-	lda zp10_noun
+	lda zp10_position
 	cmp #noun_calculator
 	bne :+
 	jsr on_reveal_calc
@@ -5058,20 +5059,20 @@ cmd_open:
 	bne :+
 	jsr wait_long
 :	pla
-	sta zp11_count
+	sta zp11_level_facing
 	pla
-	sta zp10_noun
+	sta zp10_position
 	lda a13
 	cmp #noun_torch
 	bne @done
 	lda #icmd_where
 	sta a0F
 j2C04=*+$01
-	lda zp11_count
-	sta a0E
+	lda zp11_level_facing
+	sta zp0E_draw_param
 	jsr item_cmd
 	lda #carried_known
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @done
 	inc gs_torches_unlit
 @done:
@@ -5098,11 +5099,11 @@ j2C04=*+$01
 
 :	jsr swap_saved_A
 	ldx #noun_key
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_unboxed
 	bmi @no_key
 	jsr swap_saved_A
@@ -5140,52 +5141,52 @@ j2C04=*+$01
 
 which_door:
 	ldx #$e8
-	stx a0E
+	stx zp0E_draw_param
 	ldx #$2c
 	stx a0F
 	ldx gs_level
-	stx zp19_sight_depth
+	stx a19
 	lda gs_player_x
 	ldx #$04
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 :	asl
-	asl zp19_sight_depth
-	dec zp1A_wall_bit
+	asl a19
+	dec zp1A_count_loop
 	bne :-
 	clc
 	adc gs_player_y
-	sta zp11_count
-	lda zp19_sight_depth
+	sta zp11_level_facing
+	lda a19
 	clc
 	adc gs_facing
-	sta zp19_sight_depth
+	sta a19
 	ldx #$09
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 @find:
 	ldy #$00
-	cmp (p0E),y
+	cmp (zp0E_draw_param),y
 	bne @next2
-	lda zp11_count
-	inc a0E
+	lda zp11_level_facing
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	cmp (p0E),y
+:	cmp (zp0E_draw_param),y
 	bne @next1
 	lda #$0a
 	sec
-	sbc zp1A_wall_bit
+	sbc zp1A_count_loop
 	rts
 
 @next2:
-	inc a0E
+	inc zp0E_draw_param
 	bne @next1
 	inc a0F
 @next1:
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	lda zp19_sight_depth
-	dec zp1A_wall_bit
+:	lda a19
+	dec zp1A_count_loop
 	bne @find
 	lda #$00
 	rts
@@ -5199,7 +5200,7 @@ cmd_press:
 	beq :+
 	jmp cmd_take
 
-:	lda a0E
+:	lda zp0E_draw_param
 	cmp #noun_zero
 	bpl :+
 	jmp nonsense
@@ -5207,9 +5208,9 @@ cmd_press:
 :	ldx #icmd_where
 	stx a0F
 	ldx #noun_calculator
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_known
 	beq :+
 	jmp not_carried
@@ -5234,7 +5235,7 @@ cmd_press:
 	sec
 	sbc #noun_zero-1
 	ldx #<teleport_table
-	stx a0E
+	stx zp0E_draw_param
 	ldx #>teleport_table
 	stx a0F
 @find_location:
@@ -5244,8 +5245,8 @@ cmd_press:
 	clc
 	pha
 	lda #$04
-	adc a0E
-	sta a0E
+	adc zp0E_draw_param
+	sta zp0E_draw_param
 	lda a0F
 	adc #$00
 	sta a0F
@@ -5254,22 +5255,22 @@ cmd_press:
 
 @found:
 	ldy #$00
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	sta gs_facing
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	lda (p0E),y
+:	lda (zp0E_draw_param),y
 	sta gs_level
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	lda (p0E),y
+:	lda (zp0E_draw_param),y
 	sta gs_player_x
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
-:	lda (p0E),y
+:	lda (zp0E_draw_param),y
 	sta gs_player_y
 	ldx #$00
 	stx gs_level_turns_hi
@@ -5293,11 +5294,11 @@ cmd_press:
 	jsr item_cmd
 	ldx #icmd_set_carried_known
 	stx a0F
-	sta a0E
+	sta zp0E_draw_param
 	jsr item_cmd
 @teleported:
 	ldx #noun_calculator
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_destroy2
 	stx a0F
 	ldx #special_mode_dark
@@ -5344,8 +5345,8 @@ cmd_take:
 	bne :+
 	jmp @cannot
 
-:	sta zp11_count
-	sta a0E
+:	sta zp11_level_facing
+	sta zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
@@ -5359,27 +5360,27 @@ cmd_take:
 	jmp @multiple
 
 @unique_item:
-	cmp zp11_count
+	cmp zp11_level_facing
 	bne @open_if_carried
-	ldx zp11_count
-	stx a0E
-	lda zp1A_wall_bit
+	ldx zp11_level_facing
+	stx zp0E_draw_param
+	lda zp1A_count_loop
 	cmp #carried_boxed
 	bne @take_if_space ;at feet
-	lda zp11_count
+	lda zp11_level_facing
 @open_if_carried:
-	sta a0E
+	sta zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 j2E72=*+$02
 	jsr item_cmd
 	lda #carried_boxed
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	beq :+
 	jmp @cannot
 
 :	ldx gd_parsed_object
-	stx a0E
+	stx zp0E_draw_param
 	jmp @take
 
 @ensure_inv_space:
@@ -5432,12 +5433,12 @@ on_reveal_calc:
 	rts
 
 @take_box:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_begin
 	bpl @cannot
 	jsr @ensure_inv_space
-	ldx zp11_count
-	stx a0E
+	ldx zp11_level_facing
+	stx zp0E_draw_param
 	ldx #icmd_set_carried_boxed
 	stx a0F
 	jsr item_cmd
@@ -5447,15 +5448,15 @@ on_reveal_calc:
 	cmp #noun_food
 	beq @food
 
-	lda zp11_count
+	lda zp11_level_facing
 j2EFB:
 	cmp #item_torch_end
 	bpl @find_boxed_torch
 	cmp #item_torch_begin
 	bmi @find_boxed_torch
-	ldx zp11_count
-	stx a0E
-	lda zp1A_wall_bit
+	ldx zp11_level_facing
+	stx zp0E_draw_param
+	lda zp1A_count_loop
 	cmp #carried_boxed
 	beq @take    ;BUG: get box > get torch: does not increment unlit count if it's the only box
 	jsr @ensure_inv_space
@@ -5463,14 +5464,14 @@ j2EFB:
 	jmp @take
 
 @food:
-	lda zp11_count
+	lda zp11_level_facing
 	cmp #item_food_end
 	bpl @find_boxed_food
 	cmp #item_food_begin
 	bmi @find_boxed_food
-	ldx zp11_count
-	stx a0E
-	lda zp1A_wall_bit
+	ldx zp11_level_facing
+	stx zp0E_draw_param
+	lda zp1A_count_loop
 	cmp #carried_boxed
 	bne :+
 	jmp @take
@@ -5484,7 +5485,7 @@ j2EFB:
 
 @inventory_full:
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
 	jsr swap_saved_vars
@@ -5493,49 +5494,49 @@ j2EFB:
 
 @find_boxed_torch:
 	ldx #item_torch_begin - 1
-	stx a0E
+	stx zp0E_draw_param
 	bne @begin_search
 @find_boxed_food:
 	ldx #item_food_begin - 1
-	stx a0E
+	stx zp0E_draw_param
 @begin_search:
 	lda a0F
 	pha
-	lda a0E
+	lda zp0E_draw_param
 	pha
 	ldx #items_food
 
 ; .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
-	stx zp11_count ;count
+	stx zp11_level_facing ;count
 @next:
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
 :	lda a0F
 	pha
-	lda a0E
+	lda zp0E_draw_param
 	pha
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #carried_boxed
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	beq @found
-	dec zp11_count
+	dec zp11_level_facing
 	bne @next
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
 	jmp @cannot
 
 @found:
 	pla
-	sta a0E
+	sta zp0E_draw_param
 	pla
 	sta a0F
 	lda gd_parsed_object
@@ -5550,7 +5551,7 @@ cmd_attack:
 	dec a0F
 	bne cmd_paint
 
-	lda a0E
+	lda zp0E_draw_param
 	cmp #noun_snake
 	beq @not_here
 	cmp #nouns_item_end
@@ -5575,11 +5576,11 @@ cmd_paint:
 	dec a0F
 	bne cmd_grendel
 	ldx #noun_brush
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_known
 	beq :+
 	jmp not_carried
@@ -5599,29 +5600,29 @@ cmd_say:
 	lda #$76     ;OK...
 	jsr print_to_line2
 	lda #<text_buffer_line1
-	sta a0E
+	sta zp0E_draw_param
 	lda #>text_buffer_line1
 	sta a0F
 	ldy #$00
 	lda #' '
-:	cmp (p0E),y
+:	cmp (zp0E_draw_param),y
 	beq @next_char
-	inc a0E
+	inc zp0E_draw_param
 	bne :-
 	inc a0F
 	bne :-
 @echo_word:
 	ldy #$00
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	cmp #' '
 	beq @done
-	sta (zp0A_walls_ptr),y
+	sta (zp0A_text_ptr),y
 	jsr print_char
 @next_char:
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
 	bne :+
-	inc zp0A_walls_ptr+1
-:	inc a0E
+	inc zp0A_text_ptr+1
+:	inc zp0E_draw_param
 	bne @echo_word
 	inc a0F
 	bne @echo_word
@@ -5648,12 +5649,12 @@ cmd_charge:
 	cmp gs_player_y
 	bne @normal
 	ldx #noun_hat
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #carried_active
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne brained
 	jsr update_view
 	jsr wait_short
@@ -5723,14 +5724,14 @@ cmd_fart:
 
 flash_screen:
 	ldx #<screen_GR1
-	stx a0E
+	stx zp0E_draw_param
 	ldx #>screen_GR1
 	stx a0F
 	ldy #$00
 @fill:
 	lda #$dd     ;yellow
-:	sta (p0E),y
-	inc a0E
+:	sta (zp0E_draw_param),y
+	inc zp0E_draw_param
 	bne :-
 	inc a0F
 	lda a0F
@@ -5788,10 +5789,10 @@ check_fart:
 	ldx gs_food_time_hi
 	stx a0F
 	ldx gs_food_time_lo
-	stx a0E
+	stx zp0E_draw_param
 	lda a0F
 	bne @consume_food
-	lda a0E
+	lda zp0E_draw_param
 	cmp #food_fart_minimum
 	bcs :+
 	jmp starved
@@ -5800,18 +5801,18 @@ check_fart:
 	bcc @clamp_minimum
 @consume_food:
 	lda #>food_fart_consume
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #<food_fart_consume
-	sta zp19_sight_depth
-	lda a0E
+	sta a19
+	lda zp0E_draw_param
 	sec
-	sbc zp19_sight_depth
-	sta a0E
+	sbc a19
+	sta zp0E_draw_param
 	lda a0F
-	sbc zp1A_wall_bit
+	sbc zp1A_count_loop
 	sta a0F
 	sta gs_food_time_hi
-	lda a0E
+	lda zp0E_draw_param
 	sta gs_food_time_lo
 @wham:
 	jsr wait_short
@@ -5889,19 +5890,19 @@ cmd_directions:
 	sta zp_row
 	jsr get_rowcol_addr
 	ldx #<(intro_text-1)
-	stx a0E
+	stx zp0E_draw_param
 	ldx #>(intro_text-1)
 	stx a0F
 @next_char:
-	inc a0E
+	inc zp0E_draw_param
 	bne :+
 	inc a0F
 :	ldy #$00
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	and #$7f
 	jsr char_out
 	ldy #$00
-	lda (p0E),y
+	lda (zp0E_draw_param),y
 	bpl @next_char
 	jsr input_char
 	jsr clear_hgr2
@@ -5935,7 +5936,7 @@ j325D:
 	jsr update_view
 	lda #$0a
 	sta a0F
-	jmp s1E5A
+	jmp draw_special
 
 swap_saved_A:
 	sta a13
@@ -5947,10 +5948,10 @@ swap_saved_A:
 	rts
 
 swap_saved_vars:
-	lda a0E
+	lda zp0E_draw_param
 	tax
 	lda saved_zp0E
-	sta a0E
+	sta zp0E_draw_param
 	txa
 	sta saved_zp0E
 	lda a0F
@@ -5959,36 +5960,36 @@ swap_saved_vars:
 	sta a0F
 	txa
 	sta saved_zp0F
-	lda zp10_noun
+	lda zp10_position
 	tax
 	lda saved_zp10
-	sta zp10_noun
+	sta zp10_position
 	txa
 	sta saved_zp10
-	lda zp11_count
+	lda zp11_level_facing
 	tax
 	lda saved_zp11
-	sta zp11_count
+	sta zp11_level_facing
 	txa
 	sta saved_zp11
-	lda zp19_sight_depth
+	lda a19
 	tax
 	lda saved_zp19
-	sta zp19_sight_depth
+	sta a19
 	txa
 	sta saved_zp19
 	lda saved_zp1A
 	tax
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	sta saved_zp1A
 	txa
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	rts
 
 dec_item_ptr:
 	pha
-	dec a0E
-	lda a0E
+	dec zp0E_draw_param
+	lda zp0E_draw_param
 	cmp #$ff
 	bne :+
 	dec a0F
@@ -6057,7 +6058,7 @@ special_calc_puzzle:
 	sta zp1A_move_action
 	lda gs_rotate_direction
 	bne @check_repeat_turn
-	ldx zp1A_wall_bit ;Set initial turn direction
+	ldx zp1A_count_loop ;Set initial turn direction
 	stx gs_rotate_direction
 	inc gs_rotate_count
 	jmp @update_display
@@ -6204,11 +6205,11 @@ j3493:
 @try_action:
 	jsr clear_status_lines
 	ldx #noun_jar
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #carried_active
 	bne @dead
 	lda gd_parsed_object
@@ -6221,7 +6222,7 @@ j3493:
 	ldx #icmd_destroy1
 	stx a0F
 	ldx #noun_jar
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	ldx #icmd_draw_inv
 	stx a0F
@@ -6230,13 +6231,13 @@ j3493:
 	stx gs_bat_alive
 pop_special_mode:
 	lda gs_mode_stack1
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	sta gs_special_mode
 	ldx gs_mode_stack2
 	stx gs_mode_stack1
 	ldx #$00
 	stx gs_mode_stack2
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	beq :+
 	jmp check_special_mode
 
@@ -6297,20 +6298,20 @@ special_dog:
 	cmp #noun_dog
 	bne @dead
 	ldx #noun_dagger
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	beq @with_dagger
 	ldx #noun_sword
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @dead
 	jsr clear_status_lines
 	lda #$97     ;and it vanishes!
@@ -6324,7 +6325,7 @@ special_dog:
 	ldx #icmd_destroy1
 	stx a0F
 	ldx #noun_dagger
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	ldx #icmd_draw_inv
 	stx a0F
@@ -6334,19 +6335,19 @@ special_dog:
 	jmp @killed
 
 @throw:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #noun_sneaker
 	bne @dead
 	ldx #noun_sneaker
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @dead
 	ldx #noun_sneaker
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_destroy1
 	stx a0F
 	jsr item_cmd
@@ -6471,10 +6472,10 @@ special_mother:
 	ldx #icmd_where
 	stx a0F
 	ldx #noun_horn
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	lda #$07
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	beq @mother_arrives
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
@@ -6487,19 +6488,19 @@ special_mother:
 	lda #$48     ;It is the monster's mother!
 	jsr print_to_line1
 	ldx #noun_horn
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #$07
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @input_near_mother
 	lda #$49     ;She has been seduced!
 	jsr print_to_line2
 @input_near_mother:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	pha
-	lda zp19_sight_depth
+	lda a19
 	pha
 	jsr get_player_input
 	jsr clear_status_lines
@@ -6510,11 +6511,11 @@ special_mother:
 	beq @look
 @dead_pop:
 	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #$07
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @dead
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
@@ -6531,9 +6532,9 @@ special_mother:
 	jsr print_to_line2
 	tax
 	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	txa
 	jmp @input_near_mother
 
@@ -6541,19 +6542,19 @@ special_mother:
 	cmp #verb_attack
 	bne @dead_pop
 	ldx #noun_sword
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @dead_pop
 	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda #$07
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @dead
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
@@ -6659,32 +6660,32 @@ snake_check_verb:
 	bne dead_by_snake
 @attack:
 	ldx #noun_dagger
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$07
 	bpl b3842
 	ldx #noun_sword
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$07
 	bmi dead_by_snake
 	bpl @killed
 b3842:
 	ldx #noun_dagger
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_destroy1
 	stx a0F
 	jsr item_cmd
 	ldx #icmd_destroy1
 	stx a0F
 	ldx #noun_snake
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	ldx #icmd_draw_inv
 	stx a0F
@@ -6719,10 +6720,10 @@ special_bomb:
 
 s3894:
 	lda gs_facing
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda gs_player_x
 	cmp #$0a
-	bne b38DD
+	bne @tick
 	lda gs_player_y
 	sec
 	sbc #$09
@@ -6731,34 +6732,34 @@ s3894:
 	dex
 	beq b38BB
 	dex
-	bne b38DD
+	bne @tick
 	lda #$01
-	cmp zp1A_wall_bit
-	bne b38DD
+	cmp zp1A_count_loop
+	bne @tick
 	ldx #$01
 	stx a0F
 	bne b38DA
 b38BB:
 	lda #$02
-	cmp zp1A_wall_bit
-	bne b38DD
+	cmp zp1A_count_loop
+	bne @tick
 	ldx #$10
-	stx a0E
+	stx zp0E_draw_param
 	ldx #$09
 	stx a0F
 	jmp b38DA
 
 b38CC:
 	lda #$02
-	cmp zp1A_wall_bit
-	bne b38DD
+	cmp zp1A_count_loop
+	bne @tick
 	ldx #$20
-	stx a0E
+	stx zp0E_draw_param
 	lda #$09
 	stx a0F
 b38DA:
-	jsr s1E5A
-b38DD:
+	jsr draw_special
+@tick:
 	lda #$41     ;Tick tick
 	ldx #$06
 	stx zp_col
@@ -6835,9 +6836,9 @@ special_elevator:
 
 :	jsr get_player_input
 	lda gd_parsed_action
-	cmp #$5b
-	beq b39B5
-j397E:
+	cmp #verb_forward
+	beq @enter
+@pop_mode_stack:
 	lda gs_mode_stack1
 	sta gs_special_mode
 	lda gs_mode_stack2
@@ -6846,14 +6847,13 @@ j397E:
 	sta gs_mode_stack1
 	jsr update_view
 	lda gd_parsed_action
-	cmp #$5b
-	bcc b399C
+	cmp #verb_forward
+	bcc :+
 	jmp cmd_movement
 
-b399C:
-	jmp player_cmd
+:	jmp player_cmd
 
-j399F:
+@moving:
 	lda #$a3     ;The elevator is moving!
 	jsr print_to_line1
 	jsr wait_long
@@ -6863,34 +6863,34 @@ j399F:
 	jsr update_view
 	jmp pop_special_mode
 
-b39B5:
+@enter:
 	jsr clear_maze_window
 	ldx gs_level
 	dex
 	dex
-	beq b39D2
+	beq @level2
 	dex
-	beq b3A03
+	beq @level3
 	dex
-	beq b3A0D
+	beq @level4
 	lda #$6d     ;You are trapped in a fake
 	jsr print_to_line1
 	lda #$6e     ;elevator. There is no escape!
 	jsr print_to_line2
 	jmp game_over
 
-b39D2:
+@level2:
 	jsr clear_maze_window
 	ldx #$03
 	stx a0F
 	stx gs_walls_left
 	ldx #$23
-	stx a0E
+	stx zp0E_draw_param
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #$03
 	stx a0F
-	jsr s1E5A
+	jsr draw_special
 	jsr wait_short
 	jsr clear_maze_window
 	lda #$79     ;Glitch!
@@ -6901,12 +6901,12 @@ b39D2:
 	jsr print_display_string
 	jmp game_over
 
-b3A03:
+@level3:
 	inc gs_level
 	ldx #$01
 	stx gs_player_x
 	bne b3A15
-b3A0D:
+@level4:
 	dec gs_level
 	ldx #$04
 	stx gs_player_x
@@ -6914,7 +6914,7 @@ b3A15:
 	ldx #$00
 	stx gs_level_turns_hi
 	stx gs_level_turns_lo
-	jmp j399F
+	jmp @moving
 
 special_tripped:
 	dex
@@ -6945,16 +6945,16 @@ special_tripped:
 	lda gs_room_lit
 	beq @dead
 	ldx #noun_dagger
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_where
 	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @dead
 	jsr clear_status_lines
 	ldx #noun_dagger
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_destroy2
 	stx a0F
 	jsr item_cmd
@@ -6986,13 +6986,13 @@ special_tripped:
 	ldx #icmd_where
 	stx a0F
 	ldx #noun_jar
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_wall_bit
+	cmp zp1A_count_loop
 	bne @done
 	ldx #noun_jar
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_set_carried_active
 	stx a0F
 	jsr item_cmd
@@ -7010,7 +7010,7 @@ special_tripped:
 	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
 	jsr print_to_line1
-	jmp j397E
+	jmp @pop_mode_stack
 
 special_climb:
 	dex
@@ -7030,27 +7030,27 @@ special_climb:
 	cmp #noun_snake
 	bne @dead
 	lda gs_player_x
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda gs_player_y
-	sta zp19_sight_depth
+	sta a19
 	lda gs_level
 	cmp #$03
 	beq b3B2C
 	cmp #$04
 	bne b3B38
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$01
 	bne b3B38
-	lda zp19_sight_depth
+	lda a19
 	cmp #$0a
 	bne b3B38
 	jmp j3B61
 
 b3B2C:
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$08
 	bne b3B38
-	lda zp19_sight_depth
+	lda a19
 	cmp #$05
 	beq b3B56
 b3B38:
@@ -7068,21 +7068,21 @@ b3B38:
 
 b3B56:
 	ldx #$01
-	stx zp19_sight_depth
+	stx a19
 	inx
 	stx gs_facing
 	jmp j3B6A
 
 j3B61:
 	ldx #$00
-	stx zp19_sight_depth
+	stx a19
 	ldx #$03
 	stx gs_facing
 j3B6A:
 	dec gs_level
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	pha
-	lda zp19_sight_depth
+	lda a19
 	pha
 	jsr update_view
 	jsr get_player_input
@@ -7096,11 +7096,11 @@ j3B6A:
 	jmp dead_by_snake
 
 :	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	pha
-	lda zp19_sight_depth
+	lda a19
 	pha
 	cmp #$01
 	beq :+
@@ -7117,7 +7117,7 @@ j3BA5:
 	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #noun_snake
-	stx a0E
+	stx zp0E_draw_param
 	ldx #icmd_destroy1
 	stx a0F
 	jsr item_cmd
@@ -7125,10 +7125,10 @@ j3BA5:
 	stx a0F
 	jsr item_cmd
 	pla
-	sta zp19_sight_depth
+	sta a19
 	pla
-	sta zp1A_wall_bit
-	lda zp19_sight_depth
+	sta zp1A_count_loop
+	lda a19
 	cmp #$01
 	bne b3BD8
 	jmp pop_special_mode
@@ -7145,7 +7145,7 @@ b3BD8:
 	ldx #icmd_destroy1
 	stx a0F
 	ldx #noun_wool
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	ldx #$01
 	stx gs_lair_raided
@@ -7177,12 +7177,12 @@ b3C2B:
 	cmp #$5b
 	beq b3C58
 	ldx gs_facing
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 	jsr move_turn
 j3C37:
 	lda gs_facing
 	ldx #$00
-	stx a0E
+	stx zp0E_draw_param
 	ldx #$04
 	stx a0F
 	cmp #$01
@@ -7192,7 +7192,7 @@ j3C37:
 	lda gs_walls_right_depth
 	and #$e0
 	beq b3C55
-	jsr s1E5A
+	jsr draw_special
 b3C55:
 	jmp j3C0F
 
@@ -7228,8 +7228,8 @@ special_exit:
 	ldx #$08
 	stx a0F
 	ldx #$01
-	stx a0E
-	jsr s1E5A
+	stx zp0E_draw_param
+	jsr draw_special
 	ldx #$01
 	stx gs_exit_turns
 j3CA6:
@@ -7237,9 +7237,9 @@ j3CA6:
 	jsr print_to_line1
 	jsr get_player_input
 	lda gs_exit_turns
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	lda gd_parsed_action
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b3CE9
 	cmp #$5a
 	bpl b3CC1
@@ -7260,13 +7260,13 @@ b3CC8:
 	ldx #$08
 	stx a0F
 	ldx #$02
-	stx a0E
-	jsr s1E5A
+	stx zp0E_draw_param
+	jsr draw_special
 	inc gs_exit_turns
 	jmp j3CA6
 
 b3CE9:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b3D11
 	cmp #$5a
 	bpl b3CF4
@@ -7288,7 +7288,7 @@ b3CFB:
 	jmp j3CA6
 
 b3D11:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b3D40
 	cmp #$5a
 	bpl b3D1C
@@ -7308,12 +7308,12 @@ b3D23:
 	jsr draw_maze
 	ldx #$02
 	stx a0F
-	jsr s1E5A
+	jsr draw_special
 	inc gs_exit_turns
 	jmp j3CA6
 
 b3D40:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b3D69
 	cmp #$5a
 	bmi b3D4B
@@ -7333,12 +7333,12 @@ b3D52:
 b3D5C:
 	ldx #$0a
 	stx a0F
-	jsr s1E5A
+	jsr draw_special
 	inc gs_exit_turns
 	jmp j3CA6
 
 b3D69:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b3DDD
 	cmp #$5b
 	bne b3D8E
@@ -7373,9 +7373,9 @@ b3D9C:
 	ldx #icmd_where
 	stx a0F
 	ldx #noun_ball
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	cmp #$08
 	bne b3D99
 	jsr clear_maze_window
@@ -7387,7 +7387,7 @@ b3D9C:
 	jsr draw_maze
 	ldx #icmd_destroy2  ;and #noun_ball
 	stx a0F
-	stx a0E
+	stx zp0E_draw_param
 	jsr item_cmd
 	ldx #icmd_draw_inv
 	stx a0F
@@ -7396,7 +7396,7 @@ b3D9C:
 	jmp j3CA6
 
 b3DDD:
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b3E05
 	cmp #$5a
 	bpl b3DE8
@@ -7499,6 +7499,7 @@ j3ECA:
 	jsr print_to_line2
 	jmp j3CA6
 
+; junk
 	.byte $86
 	inc aC3
 	bne b3EDC
@@ -7523,23 +7524,24 @@ b3EF4:
 	cmp #$3b
 	beq b3F38
 	cpy #$50
+
 relocate_data:
 	lda relocated
 	beq @write_DEATH
 
 ; Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 	ldx #$00
-	stx a0E
-	stx zp10_noun
+	stx zp0E_draw_param
+	stx zp10_position
 	stx relocated
 	ldx #$40
 	stx a0F
 	ldx #$60
-	stx zp11_count
+	stx zp11_level_facing
 	ldx #<p1FFF
-	stx zp19_sight_depth
+	stx a19
 	ldx #>p1FFF
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 	jsr memcpy
 	ldx #opcode_JMP
 	stx DOS_hook_monitor
@@ -7716,9 +7718,9 @@ raster 9,12,0:
 	.byte $02,$32,$77,$02,$00,$23,$43,$08
 	.byte $04,$13,$44,$02,$00,$13,$95,$05
 	.byte $01,$33,$68,$07
-p40D8:
+raster $11,8,0:
 	.byte $04
-p40D9:
+raster 17,9,0:
 	.byte $23,$78,$07,$02,$13,$88,$07,$01
 	.byte $24,$14,$02,$00,$14,$24,$08,$02
 	.byte $14,$2a,$05,$01,$14,$3a,$05,$02
@@ -7742,7 +7744,7 @@ raster 10,12,0:
 	.byte $bf,$00,$00,$00,$01,$00,$a0,$c8
 	.byte $00,$00,$00,$00,$00,$00,$00,$00
 	.byte $00,$02
-p4156:
+raster 18,6,0:
 	.byte $04,$02,$01,$01,$00,$00,$00,$00
 	.byte $00,$00,$00,$00,$00,$00,$00,$01
 	.byte $35,$03,$a5,$01,$33,$01,$46,$04
@@ -8643,7 +8645,7 @@ raster 16,17,7:
 	.byte $8e,$c2,$7c,$20,$4f,$7d,$90,$06
 	.byte $20,$74,$7d,$4c,$23,$7e,$20,$55
 	.byte $08,$20,$15,$10
-p5D05:
+raster 2,5,7:
 	.byte $a2,$07,$86,$0f,$4c,$34,$1a,$a2
 	.byte $01,$8e,$c2,$7c,$20,$4f,$7d,$90
 	.byte $06,$20,$74,$7d,$4c,$1d,$7e,$a0
@@ -8689,11 +8691,11 @@ raster 11,12,7:
 	.byte $d0,$04,$a0,$47,$d0,$02,$a0,$68
 	.byte $84,$19,$a2,$00,$86,$1a,$a2,$8f
 	.byte $86,$0c,$a2
-raster 13,-1,7:
+raster 20,-1,7:
 	.byte $7d
 raster 20,0,7:
 	.byte $86,$0d,$18,$a5,$19,$65
-p5E56:
+raster 20,6,7:
 	.byte $0c,$85,$0c,$a5,$1a,$65,$0d,$85
 	.byte $0d,$a9,$0a,$20,$92,$11,$20
 raster 20,21,7:
@@ -8775,7 +8777,7 @@ maze_walls:
 	.byte $b1,$9b,$2f,$ac,$e0,$6f,$bd,$9d
 	.byte $af,$aa,$4a,$af,$a2,$52,$2f,$9c
 	.byte $9d,$07,$ff,$ff,$ff
-p60A5:
+maze_features:
 	.byte $42,$34,$05,$01,$42,$35,$05,$02
 	.byte $42,$36,$05,$00,$22,$83,$04,$01
 	.byte $22,$84,$04,$00,$42,$86,$04,$00
@@ -8823,7 +8825,7 @@ gs_walls_left:
 	.byte $00
 gs_walls_right_depth:
 	.byte $00
-a619B:
+gs_box_visible:
 	.byte $00
 gd_parsed_action:
 	.byte $10
@@ -9394,11 +9396,11 @@ string_disk_error:
 	.byte "FILE! INPUT REJECTED!", $80
 disk_error_fatal:
 	ldx #$00
-	stx zp10_noun
+	stx zp10_position
 	beq disk_error
 disk_error_retry:
 	ldx #$ff
-	stx zp10_noun
+	stx zp10_position
 disk_error:
 	tay
 	dey
@@ -9418,25 +9420,25 @@ disk_error:
 	bne @print_message
 :	ldy #$68
 @print_message:
-	sty zp19_sight_depth
+	sty a19
 	ldx #$00
-	stx zp1A_wall_bit
+	stx zp1A_count_loop
 	ldx #<string_disk_error
 	stx zp_0C_string
 	ldx #>string_disk_error
 	stx zp_0D
 	clc
-	lda zp19_sight_depth
+	lda a19
 	adc zp_0C_string
 	sta zp_0C_string
-	lda zp1A_wall_bit
+	lda zp1A_count_loop
 	adc zp_0D
 	sta zp_0D
 	lda #char_newline
 	jsr char_out
 	jsr print_string
 	jsr input_char
-	lda zp10_noun
+	lda zp10_position
 	beq :+
 	jmp prepare_disk_save
 
@@ -9455,7 +9457,7 @@ b7E81:
 	.byte $06
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
 	jsr draw_down
 	lda #>raster 4,17,0
@@ -9474,7 +9476,7 @@ b7E81:
 	sta zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
 	jsr draw_down
 	jmp @draw_0_left
@@ -9487,7 +9489,7 @@ b7E81:
 	sta zp_col
 	lda #$04
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$0d
 	jsr draw_down
 b7ECE:
@@ -9512,7 +9514,7 @@ b7ECE:
 	lda #$00
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
 	jsr draw_down
 	lda #>relocated
@@ -9521,9 +9523,9 @@ b7ECE:
 	sta screen_ptr
 	ldy #$01
 	jsr draw_right
-	lda #>raster 13,-1,7
+	lda #>raster 20,-1,7
 	sta screen_ptr+1
-	lda #<raster 13,-1,7
+	lda #<raster 20,-1,7
 	sta screen_ptr
 	ldy #$01
 	jsr draw_right
@@ -9535,7 +9537,7 @@ b7F1B:
 	sta zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
 	jsr draw_down
 	lda #>raster 0,21,0
@@ -9560,7 +9562,7 @@ b7F4C:
 	lda #$00
 	sta zp_col
 	sta zp_row
-	lda #$04
+	lda #glyph_R
 	ldy #$15
 	jsr draw_down
 b7F60:
@@ -9571,7 +9573,7 @@ b7F60:
 	sta zp_col
 	lda #$00
 	sta zp_row
-	lda #$03
+	lda #glyph_L
 	ldy #$15
 	jsr draw_down
 	rts
@@ -9584,7 +9586,7 @@ b7F79:
 	rts
 
 	tya
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 b7F82:
 	jsr get_rowcol_addr
 	lda #$02
@@ -9592,24 +9594,24 @@ b7F82:
 	dec zp_col
 	dec zp_col
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b7F82
 	rts
 
 	tya
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 b7F98:
 	jsr get_rowcol_addr
 	lda #$01
 	jsr char_out
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b7F98
 	rts
 
 	pha
 	tya
-	sta zp1A_wall_bit
+	sta zp1A_count_loop
 	pla
 b7FAC:
 	pha
@@ -9620,15 +9622,15 @@ b7FAC:
 	pla
 	dec zp_col
 	inc zp_row
-	dec zp1A_wall_bit
+	dec zp1A_count_loop
 	bne b7FAC
 	rts
 
 	ldy #$00
 	lda #<maze_walls
-	sta zp0A_walls_ptr
+	sta zp0A_text_ptr
 	lda #>maze_walls
-	sta zp0A_walls_ptr+1
+	sta zp0A_text_ptr+1
 	ldx gs_level
 	lda #$00
 	clc
@@ -9638,14 +9640,14 @@ b7FAC:
 	jmp :-
 
 b7FD7:
-	adc zp0A_walls_ptr
-	sta zp0A_walls_ptr
+	adc zp0A_text_ptr
+	sta zp0A_text_ptr
 	ldx gs_player_x
 	dex
 	beq b7FEA
-	inc zp0A_walls_ptr
-	inc zp0A_walls_ptr
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
+	inc zp0A_text_ptr
+	inc zp0A_text_ptr
 	jmp :-
 
 b7FEA:
@@ -9654,11 +9656,11 @@ b7FEA:
 	bmi b7FFF
 	cmp #$09
 	bmi b7FFA
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
 	sec
 	sbc #$04
 b7FFA:
-	inc zp0A_walls_ptr
+	inc zp0A_text_ptr
 	sec
 	sbc #$04
 b7FFF:
