@@ -855,7 +855,13 @@
 385F The dagger disappears!
 3864 You have killed it.
 386C It looks very dangerous!
+38B5 #drawcmd01_keyhole
+38B7 $zp0F_action
+38C5 #drawcmd09_keyholes
+38D6 #drawcmd09_keyholes
 38DD Tick tick
+38F3 #verb_open
+38FA #noun_door
 3924 The key blows up the whole maze!
 393F #verb_open
 3946 #noun_door
@@ -974,8 +980,8 @@
 000B zp0A_text_ptr+1
 000C zp0C_col_left
 000D zp_0D
-000E zp0E_ptr
-000F zp0F_sight
+000E zp0E_draw_param
+000F zp0F_action
 0010 zp10_temp
 0011 zp11_loop_count
 0015 line_count
@@ -983,7 +989,7 @@
 0017 clock
 0018 clock+1
 0019 zp19_level
-001A zp1A_loop_count
+001A zp1A_facing
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -1756,8 +1762,16 @@
 3874 special_bomb
 387A +
 3884 +
+3894 @draw_new_keyhole
+38BB @distance_1
+38CC @distance_2
+38DA @draw_keyhole
 38DD @tick
+38EA @last_move
+3916 @boom
+392C @regular_move
 393C +
+3962 @continue
 396E special_elevator
 3974 +
 397E pop_mode_stack
@@ -1875,7 +1889,7 @@
 61B3 gs_mother_proximity
 61B4 gs_rotate_target
 61B5 gs_rotate_count
-61B6 gs_rotate_direction
+61B6 gs_bomb_tick
 61B7 gs_rotate_total
 61B8 gs_lair_raided
 61B9 gs_snake_used

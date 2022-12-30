@@ -30,6 +30,8 @@
 ;$zp_string_number = $11
 ;$zp_wall_opposite = $19
 
+;$zp0F_action = $0f
+
 ;$zp10_count_words = $10
 
 ;$zp11_count_chars = $11
@@ -89,7 +91,11 @@ cmd_blow = $02
 ;door_lock_begin - doors_elevators = $15
 ;door_lock_begin + door_correct = $1b
 
+drawcmd01_keyhole = $01
+
 drawcmd03_compactor = $03
+
+drawcmd09_keyholes = $09
 
 error_write_protect = $01
 error_volume_mismatch = $02

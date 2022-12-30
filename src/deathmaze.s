@@ -7194,55 +7194,55 @@ special_bomb:
 	cmp #$50
 	bcc :+
 	jsr update_view
-:	lda gs_rotate_direction
+:	lda gs_bomb_tick
 	cmp #$09
-	beq b38EA
-	inc gs_rotate_direction
-	jsr s3894
-	jmp j392C
+	beq @last_move
+	inc gs_bomb_tick
+	jsr @draw_new_keyhole
+	jmp @regular_move
 
-s3894:
+@draw_new_keyhole:
 	lda gs_facing
-	sta a1A
+	sta zp1A_facing
 	lda gs_player_x
 	cmp #$0a
-	bne b38DD
+	bne @tick
 	lda gs_player_y
 	sec
 	sbc #$09
-	beq b38CC
+	beq @distance_2
 	tax
 	dex
-	beq b38BB
+	beq @distance_1
 	dex
-	bne b38DD
+	bne @tick
 	lda #$01
-	cmp a1A
-	bne b38DD
+	cmp zp1A_facing
+	bne @tick
 	ldx #drawcmd01_keyhole
 	stx zp0F_action
-	bne b38DA
-b38BB:
+	bne @draw_keyhole
+@distance_1:
 	lda #$02
-	cmp a1A
-	bne b38DD
+	cmp zp1A_facing
+	bne @tick
 	ldx #$10
 	stx zp0E_draw_param
 	ldx #drawcmd09_keyholes
 	stx zp0F_action
-	jmp b38DA
+	jmp @draw_keyhole
 
-b38CC:
+@distance_2:
 	lda #$02
-	cmp a1A
-	bne b38DD
+	cmp zp1A_facing
+	bne @tick
 	ldx #$20
 	stx zp0E_draw_param
 	lda #drawcmd09_keyholes
 	stx zp0F_action
-b38DA:
+@draw_keyhole:
 	jsr draw_special
-b38DD:
+@tick:
 	lda #$41     ;Tick tick
 	ldx #$06
 	stx zp_col
@@ -7250,27 +7250,27 @@ b38DD:
 	stx zp_row
 	jmp print_display_string
 
-b38EA:
-	jsr s3894
+@last_move:
+	jsr @draw_new_keyhole
 	jsr get_player_input
 	lda gd_parsed_action
-	cmp #$10
-	bne b3916
+	cmp #verb_open
+	bne @boom
 	lda gd_parsed_object
-	cmp #$17
-	bne b3916
+	cmp #noun_door
+	bne @boom
 	lda gs_facing
 	cmp #$01
-	bne b3916
+	bne @boom
 	lda gs_player_x
 	cmp #$0a
-	bne b3916
+	bne @boom
 	lda gs_player_y
 	cmp #$0b
-	bne b3916
+	bne @boom
 	jmp special_exit
 
-b3916:
+@boom:
 	jsr flash_screen
 	jsr clear_hgr2
 	ldx #$00
@@ -7281,7 +7281,7 @@ b3916:
 	jsr print_display_string
 	jmp game_over
 
-j392C:
+@regular_move:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #$59
@@ -7291,22 +7291,22 @@ j392C:
 
 :	lda gd_parsed_action
 	cmp #verb_open
-	bne b3962
+	bne @continue
 	lda gd_parsed_object
 	cmp #noun_door
-	bne b3962
+	bne @continue
 	lda gs_facing
 	cmp #$01
-	bne b3962
+	bne @continue
 	lda gs_player_x
 	cmp #$0a
-	bne b3962
+	bne @continue
 	lda gs_player_y
 	cmp #$0b
-	bne b3962
+	bne @continue
 	jmp special_exit
 
-b3962:
+@continue:
 	jsr complete_turn
 	jsr player_cmd
 	jsr print_timers
@@ -8324,6 +8324,7 @@ gs_rotate_target:
 gs_rotate_count:
 	.byte $00
 gs_rotate_direction:
+gs_bomb_tick:
 	.byte $00
 gs_rotate_total:
 	.byte $00
