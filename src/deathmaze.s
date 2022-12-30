@@ -336,7 +336,7 @@ load_from_tape:
 	jsr rom_READ_TAPE
 	jsr clear_hgr2
 	jsr update_view
-	jsr check_signature ;NOTE: never returns, continues with PLA/PLA/JMP
+	jsr check_signature  ;NOTE: never returns, continues with PLA/PLA/JMP
 	nop
 	jmp item_cmd
 
@@ -536,7 +536,7 @@ move_forward:
 	dex
 	beq @east_3
 
-; south_4
+;@south_4
 	dec gs_player_y
 	bpl @check_special
 @east_3:
@@ -680,7 +680,7 @@ check_mother:
 	stx gs_special_mode
 	rts
 
-:	ldx #$09
+:	ldx #special_mode_mother
 	stx gs_mode_stack1
 	rts
 
@@ -762,9 +762,9 @@ print_timers:
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
 :	lda gs_torch_time
-	beq rts_bb2
+	beq noun_return
 	cmp #torch_low
-	bcs rts_bb2
+	bcs noun_return
 	lda #$33     ;Torch is dying
 	jsr print_to_line2
 	rts
@@ -778,7 +778,7 @@ noun_to_item:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bpl rts_bb2	 ;GUG: bcc preferred
+	bpl noun_return	 ;GUG: bcc preferred
 pop_not_carried:
 	pla
 	pla
@@ -786,7 +786,7 @@ not_carried:
 	lda #$7b     ;Check your inventory!
 print_return:
 	jsr print_to_line2
-rts_bb2:
+noun_return:
 	rts
 
 multiples:
@@ -814,7 +814,7 @@ multiples:
 	stx zp0F_action
 	jsr item_cmd
 	cmp #$00
-	bne rts_bb2
+	bne noun_return
 	lda gs_level
 	cmp #$05
 	beq pop_not_carried
@@ -824,7 +824,7 @@ multiples:
 	stx zp0F_action
 	jsr item_cmd
 	cmp #$00
-	bne rts_bb2
+	bne noun_return
 	lda gs_torches_lit
 	cmp #$01
 	bne pop_not_carried
@@ -992,7 +992,7 @@ get_player_input:
 	sta zp10_dst
 	lda #$00
 	sta zp19_count+1
-	lda #textbuf_size ;BUG? should this copy both buffers?
+	lda #textbuf_size
 	sta zp19_count
 	jsr memcpy
 	jsr clear_status_lines
