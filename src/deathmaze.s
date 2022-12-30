@@ -1,3 +1,5 @@
+REVISION = 2
+
 ;	.include "deathmaze_b.i"
 
 	.include "msbstring.i"
@@ -4756,9 +4758,19 @@ cmd_break:
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
+.if REVISION = 1
 	jsr update_view
+.elseif REVISION = 2
+	ldx #icmd_draw_inv
+	stx zp0F_action
+	jsr item_cmd
+.endif
 	lda #$4e     ;You break the
 	jsr print_to_line1
+.if REVISION = 2
+	lda #$20
+	jsr char_out
+.endif
 	lda gd_parsed_object
 	jsr print_noun
 	lda #$4f     ;and it disappears!
@@ -5991,7 +6003,12 @@ cmd_grendel:
 cmd_say:
 	dec zp0F_action
 	bne cmd_charge
-	lda #$76     ;OK...
+.if REVISION = 2
+	lda gd_parsed_object
+	bne :+
+	jmp nonsense
+.endif
+:	lda #$76     ;OK...
 	jsr print_to_line2
 	lda #<text_buffer_line1
 	sta zp0E_ptr
@@ -6417,7 +6434,29 @@ throw_react:
 	jsr clear_hgr2
 	jmp game_over
 
-	.byte $07,$ea
+; cruft leftover from earlier build
+.if REVISION = 1
+	.byte $07
+	nop
+.elseif REVISION = 2
+	.byte $95,$20,$22,$34,$a2,$01,$86,$1a
+	.byte $20,$f3,$33,$20,$ca,$0c,$ad,$9c
+	.byte $61,$c9,$46,$10,$0f,$20,$40,$26
+	.byte $20,$19
+; cruft decoded:
+;	.byte $95
+;	jsr $3422
+;	ldx #$01
+;	stx $1A
+;	jsr $33F3
+;	jsr get_player_input
+;	lda gd_parsed_action
+;	cmp #$46
+;	bpl +15  ;to $337A
+;	jsr player_cmd
+;	jsr $??19
+.endif
+
 check_special_mode:
 	ldx gs_special_mode
 	bne :+
@@ -7881,6 +7920,8 @@ special_endgame:
 
 
 ; cruft leftover from earlier build
+.if REVISION = 1
+; cruft decoded:
 	.byte $86
 	inc $C3
 	bne b3EDC
@@ -7905,6 +7946,14 @@ b3EF4:
 	cmp #$3b
 	.byte $f0,$3a  ;beq +58 to $3F38
 	cpy #$50
+
+.elseif REVISION = 2
+
+	.byte $66,$f0,$3a,$c0,$50
+; cruft decoded
+;	beq +58 ;to $3F38
+;	cpy #$50
+.endif
 ; (end cruft)
 
 relocate_data:
@@ -8491,12 +8540,23 @@ intro_text:
 	.byte $B3, $35, $65, " JSR POINT"
 	.byte $B5, $40, $65, " JMP "
 
+.if REVISION = 1
+
 text_save_device:
 	.byte "Save to DISK or TAPE (T or D)?"
 	.byte $80
 text_load_device:
 	msbstring "Get from DISK or TAPE (T or D)?"
 	.byte $80
+
+.elseif REVISION = 2
+
+text_save_device:
+	.byte "SAVE TO DISK OR TAPE (T OR D)?", $80
+text_load_device:
+	.byte "GET FROM DISK OR TAPE (T OR D)?", $80
+
+.endif
 	.assert * = $7c3f, error, "Unexpected alignment"
 load_disk_or_tape:
 	jsr clear_hgr2
@@ -8575,9 +8635,19 @@ iob_return_code:
 iob_last_volume:
 	.byte $00,$60,$01
 
+.if REVISION = 1
+
 text_insert_disk:
 	msbstring "Place data diskette in DRIVE 1, SLOT 6."
 	.byte $80
+
+.elseif REVISION = 2
+
+text_insert_disk:
+	.byte "PLACE DATA DISKETTE IN DRIVE 1, SLOT 6.", $80
+
+.endif
+
 save_to_disk:
 	ldx #$02
 	stx iob_cmd
@@ -8731,7 +8801,12 @@ disk_error:
 
 ; From here to end of file,
 ; cruft leftover from earlier build
+.if REVISION = 1
 	lda gs_special_mode
+.elseif REVISION = 2
+	php
+	lda #$61
+.endif
 	bne b7E81
 	ldx #$06
 	stx gs_special_mode
@@ -8937,9 +9012,9 @@ b7FD7:
 b7FEA:
 	lda gs_player_y
 	cmp #$05
-	bmi b7FFF  ;GUG: bcc preferred
+	bmi b7FFF
 	cmp #$09
-	bmi b7FFA  ;GUG: bcc preferred
+	bmi b7FFA
 	inc zp0A_walls_ptr
 	sec
 	sbc #$04
@@ -8949,5 +9024,6 @@ b7FFA:
 	sbc #$04
 	.assert * = $7fff, error, "Unexpected alignment"
 b7FFF:
+.if REVISION = 1
 	brk
-
+.endif

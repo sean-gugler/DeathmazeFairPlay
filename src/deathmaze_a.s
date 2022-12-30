@@ -6025,9 +6025,16 @@ throw_react:
 	jsr clear_hgr2
 	jmp game_over
 
-	.byte $95,$20,$22,$34,$a2,$01,$86,$1a
-	.byte $20,$f3,$33,$20,$ca,$0c,$ad,$9c
-	.byte $61,$c9,$46,$10,$0f,$20,$40,$26
+	.byte $95
+	jsr s3422
+	ldx #$01
+	stx a1A
+	jsr s33F3
+	jsr get_player_input
+	lda gd_parsed_action
+	cmp #$46
+	bpl b337A
+	jsr player_cmd
 	.byte $20,$19
 check_special_mode:
 	ldx gs_special_mode
@@ -6037,6 +6044,7 @@ check_special_mode:
 :	dex
 	dex
 	beq special_calc_puzzle
+b337A:
 	jmp special_bat
 
 special_calc_puzzle:
@@ -6094,6 +6102,7 @@ special_calc_puzzle:
 	dec gs_rotate_target
 	jmp @update_display
 
+s33F3=*+$01
 :	jsr @reset_target
 	inc gs_rotate_count
 	ldx zp1A_move_action
@@ -6117,6 +6126,7 @@ special_calc_puzzle:
 @print_hint:
 	lda gd_parsed_action
 	cmp #verb_drop
+s3422=*+$01
 	beq :+
 	cmp #verb_movement_begin
 	bpl :+
