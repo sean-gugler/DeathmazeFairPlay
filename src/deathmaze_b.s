@@ -6665,7 +6665,7 @@ snake_check_verb:
 	jsr item_cmd
 	lda zp1A_endgame_step
 	cmp #$07
-	bpl b3842
+	bpl @kill_snake
 	ldx #noun_sword
 	stx zp0E_draw_param
 	ldx #icmd_where
@@ -6675,7 +6675,7 @@ snake_check_verb:
 	cmp #$07
 	bmi dead_by_snake
 	bpl @killed
-b3842:
+@kill_snake:
 	ldx #noun_dagger
 	stx zp0E_draw_param
 	ldx #icmd_destroy1

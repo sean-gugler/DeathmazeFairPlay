@@ -1776,6 +1776,7 @@
 380C dead_by_snake
 3813 snake_check_verb
 381E @attack
+3842 @kill_snake
 3864 @killed
 386C @look
 3874 special_bomb

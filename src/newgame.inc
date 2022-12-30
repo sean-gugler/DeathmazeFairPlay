@@ -21,14 +21,14 @@
 	.byte $00		;mode stack 1
 	.byte $00		;mode stack 2
 	.byte $00		;endgame step number
-	.byte $00		;A9
-	.byte $00		;AA
+	.byte $00		;UNUSED
+	.byte $00		;UNUSED
 	.byte $02		;bat alive (flag $02)
 	.byte $04		;mother alive (flag $04)
 	.byte $02		;monster alive (flag $02)
 	.byte $01		;dog 1 alive
 	.byte $01		;dog 2 alive
-	.byte $00		;B0
+	.byte $00		;UNUSED
 	.byte $00		;next hint
 	.byte $00		;monster proximity
 	.byte $00		;mother proximity

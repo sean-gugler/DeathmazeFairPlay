@@ -1,8 +1,11 @@
 ; --- ADDRESSES
 
-zp_CSWL = $0036
-zp_A1 = $003c
-zp_A2 = $003e
+zp_CSWL = $0036 ;$37
+zp_A1 = $003c ;$3d
+zp_A2 = $003e ;$3e
+
+tape_addr_start = $003c ;$3d
+tape_addr_end = $003e ;$3f
 
 irq_IIgs = $03fe
 

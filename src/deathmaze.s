@@ -18,11 +18,19 @@
 .define raster_lo(row,col,line) .lobyte(raster row,col,line)
 
 
+a10 = $10
+a11 = $11
+a13 = $13
+a19 = $19
+a1A = $1a
+
 ; 8-bit variables
 zp0E_wait1 = $0e
 zp0F_wait2 = $0f
 zp10_wait3 = $10
 
+zp_col = $06
+zp_row = $07
 zp0C_col_animate = $0c
 zp0C_col_left = $0c
 zp0E_count = $0e
@@ -53,6 +61,8 @@ zp13_raw_input = $13
 zp13_char_input = $13
 zp13_level = $13
 zp13_temp = $13
+zp15_line_count = $15
+zp16_counter = $16
 zp19_level_facing = $19
 zp19_col_right = $19
 zp19_regular_climb = $19
@@ -85,6 +95,7 @@ zp19_wall_opposite = $19
 zp1A_wall_bit = $1a
 
 ; 16-bit variables
+screen_ptr = $08 ;$09
 zp0A_walls_ptr = $0a ;$0b
 zp0A_text_ptr = $0a ;$0b
 zp0A_data_ptr = $0a ;$0b
@@ -95,9 +106,11 @@ zp0E_src = $0e ;$0f
 zp10_dst = $10 ;$11
 zp13_row_ptr = $13 ;$14
 zp13_font_ptr = $13 ;$14
+clock = $17 ;$18
 zp19_input_ptr = $19 ;$1a
 zp19_delta16 = $19 ;$1a
 zp19_count = $19 ;$1a
+
 
 
 ; First byte in gs_item_locations is either
@@ -246,108 +259,6 @@ verb_forward    = $5b
 verb_left       = $5c
 verb_right      = $5d
 verb_uturn      = $5e
-
-
-p4015 = $4015
-p40AF = $40AF
-p40B1 = $40B1
-p40B4 = $40B4
-p40D8 = $40D8
-p40D9 = $40D9
-p4131 = $4131
-p4132 = $4132
-p4133 = $4133
-p4134 = $4134
-p4156 = $4156
-p4200 = $4200
-p4204 = $4204
-p4211 = $4211
-p4384 = $4384
-p4387 = $4387
-p438E = $438E
-p4607 = $4607
-p4707 = $4707
-p5C50 = $5C50
-p5C54 = $5C54
-p5C61 = $5C61
-p5D05 = $5D05
-p5DAF = $5DAF
-p5DB4 = $5DB4
-p5E4F = $5E4F
-p5E50 = $5E50
-p5E56 = $5E56
-p5E65 = $5E65
-p5EAC = $5EAC
-p5EAF = $5EAF
-p5EB6 = $5EB6
-
-
-;
-; **** ZP FIELDS ****
-;
-f61 = $61
-;
-; **** ZP ABSOLUTE ADRESSES ****
-;
-zp_col = $06
-zp_row = $07
-screen_ptr = $08
-;screen_ptr+1 = $09
-a0C = $0c
-a0E = $0e
-a0F = $0f
-a10 = $10
-a11 = $11
-a13 = $13
-a14 = $14
-line_count = $15
-zp_counter = $16
-clock = $17
-;clock+1 = $18
-a19 = $19
-a1A = $1a
-tape_addr_start = $3c
-;tape_addr_start+1 = $3d
-tape_addr_end = $3e
-;tape_addr_end+1 = $3f
-aBC = $bc
-aBD = $bd
-aBE = $be
-aC3 = $c3
-aE5 = $e5
-aEE = $ee
-aEF = $ef
-;
-; **** ZP POINTERS ****
-;
-p28 = $28
-pC2 = $c2
-;
-; **** FIELDS ****
-;
-f0135 = $0135
-;
-; **** ABSOLUTE ADRESSES ****
-;
-a0124 = $0124
-a0125 = $0125
-a0126 = $0126
-a0127 = $0127
-a018F = $018f
-;
-; **** POINTERS ****
-;
-p01 = $0001
-p00F4 = $00f4
-p00F6 = $00f6
-p0402 = $0402
-;
-; **** EXTERNAL JUMPS ****
-;
-eFD35 = $fd35
-;
-; **** USER LABELS ****
-;
 
 
 
@@ -1571,7 +1482,7 @@ update_view:
 	beq :+
 	jsr draw_special
 :	ldx #icmd_0A
-	stx a0F
+	stx zp0F_action
 	jsr item_cmd
 	lda gs_box_visible
 	beq @done
@@ -1679,9 +1590,9 @@ push_special_mode2:
 	stx zp0F_action
 	jsr item_cmd
 	lda #$06
-	cmp a1A
+	cmp $1A
 	beq b110D
-	dec a11
+	dec $11
 	.byte $d0, $dd  ;bne -35
 	pla
 	sta zp0E_object
@@ -1797,7 +1708,7 @@ print_char:
 	ldx #$00
 	ldy #$00
 	lda #$08
-	sta line_count
+	sta zp15_line_count
 	clc
 @next_line:
 	lda (zp13_font_ptr),y
@@ -1806,7 +1717,7 @@ print_char:
 	adc screen_ptr+1
 	sta screen_ptr+1
 	iny
-	dec line_count
+	dec zp15_line_count
 	bne @next_line
 	inc zp_col
 	lda #$28
@@ -1857,14 +1768,14 @@ clear_up_to_3F:
 	sec
 	sbc #$c0
 clear_N:
-	sta zp_counter
+	sta zp16_counter
 	lda zp_col
 	pha
 	lda zp_row
 	pha
 :	lda #' '
 	jsr print_char
-	dec zp_counter
+	dec zp16_counter
 	bne :-
 	pla
 	sta zp_row
@@ -7150,7 +7061,7 @@ snake_check_verb:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bpl @b3842  ;GUG: bcs preferred
+	bpl @kill_snake  ;GUG: bcs preferred
 	ldx #noun_sword
 	stx zp0E_object
 	ldx #icmd_where
@@ -7160,7 +7071,7 @@ snake_check_verb:
 	cmp #carried_unboxed
 	bmi dead_by_snake  ;GUG: bcc preferred
 	bpl @killed  ;GUG: bcs preferred
-@b3842:
+@kill_snake:
 	ldx #noun_dagger
 	stx zp0E_object
 	ldx #icmd_destroy1
@@ -7972,28 +7883,28 @@ special_endgame:
 
 ; cruft leftover from earlier build
 	.byte $86
-	inc aC3
+	inc $C3
 	bne b3EDC
 	ldx #$2e
 	jsr $244B ;within keyhole
 b3EDC:
-	stx aBE
-	stx aBD
-	lda a018F
-	beq b3F40
-	lda f0135,y
+	stx $BE
+	stx $BD
+	lda $018F
+	.byte $f0,$5B  ;beq +71 to $3F40
+	lda $0135,y
 	cmp #$28
 	beq b3EF4
 	ldx #$25
 	jsr $244B ;within keyhole
-	jmp j3F56
+	jmp $3F56
 
 b3EF4:
-	stx aE5
+	stx $E5
 	iny
 	jsr $2510 ;draw_keyhole somewhere
 	cmp #$3b
-	beq b3F38
+	.byte $f0,$3a  ;beq +58 to $3F38
 	cpy #$50
 ; (end cruft)
 
@@ -8025,11 +7936,9 @@ relocate_data:
 	ldx #'D'
 	stx signature
 	ldx #'E'
-b3F38=*+$01
 	stx signature+1
 	ldx #'A'
 	stx signature+2
-b3F40=*+$01
 	ldx #'T'
 	stx signature+3
 	ldx #'H'
@@ -8041,7 +7950,6 @@ b3F40=*+$01
 vector_reset:
 	bit hw_PAGE2
 	bit hw_FULLSCREEN
-j3F56=*+$02
 	bit hw_HIRES
 	bit hw_GRAPHICS
 	jmp next_game_loop
@@ -8049,28 +7957,28 @@ j3F56=*+$02
 ; cruft leftover from earlier build
 	ldy #$00
 	tya
-	sta (pC2),y
+	sta ($C2),y
 	cmp #$ff
 	bne b3F68
-	dec aC3
+	dec $C3
 b3F68:
 	pla
 	pla
 	jmp $2C04 ;within open_box
 
-	stx aBC
+	stx $BC
 	ldx #$2b
 	jsr $244B ;within keyhole
 	jmp $2C04 ;within open_box
 
 s3F77:
-	lda a0124
+	lda $0124
 	sta tape_addr_start
-	lda a0125
+	lda $0125
 	sta tape_addr_start+1
-	lda a0126
+	lda $0126
 	sta tape_addr_end
-	lda a0127
+	lda $0127
 	sta tape_addr_end+1
 	rts
 
@@ -8078,7 +7986,7 @@ s3F77:
 	.byte $00,$00,$00,$00
 
 ; cruft leftover from earlier build
-	lda aEE
+	lda $EE
 	beq b3FA3
 	jsr s3FA0
 	rts
@@ -8098,13 +8006,13 @@ b3FA3:
 	.byte $00,$00,$00,$00
 
 ; cruft leftover from even earlier build
-	lda aEF
+	lda $EF
 	beq b3FD3
 	jsr s3FD0
 	rts
 
 s3FD0:
-	jmp (p00F4)
+	jmp ($00F4)
 
 b3FD3:
 	jsr s3F77
@@ -8114,7 +8022,7 @@ b3FD3:
 	jsr $FD35
 	cmp #$95
 	bne b3FE3
-	lda (p28),y
+	lda ($28),y
 b3FE3:
 	rts
 
