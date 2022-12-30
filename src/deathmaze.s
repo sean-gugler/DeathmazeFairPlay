@@ -63,6 +63,7 @@ zp1A_count_loop = $1a
 zp1A_cmds_to_check = $1a
 zp1A_facing = $1a
 zp1A_temp = $1a
+zp1A_endgame_step = $1a
 
 zp0E_box_visible = $0e
 zp0F_sight_depth = $0f
@@ -222,7 +223,7 @@ special_mode_bomb = $0c
 special_mode_elevator = $0d
 special_mode_tripped = $0e
 special_mode_climb = $0f
-special_mode_exit = $10
+special_mode_endgame = $10
 
 
 textbuf_max_input = $1E
@@ -7268,7 +7269,7 @@ special_bomb:
 	lda gs_player_y
 	cmp #$0b
 	bne @boom
-	jmp special_exit
+	jmp special_endgame
 
 @boom:
 	jsr flash_screen
@@ -7304,7 +7305,7 @@ special_bomb:
 	lda gs_player_y
 	cmp #$0b
 	bne @continue
-	jmp special_exit
+	jmp special_endgame
 
 @continue:
 	jsr complete_turn
@@ -7499,7 +7500,7 @@ special_tripped:
 special_climb:
 	dex
 	beq :+
-	jmp special_exit
+	jmp special_endgame
 
 :	jsr get_player_input
 	lda gd_parsed_action
@@ -7701,11 +7702,11 @@ lair_input_loop:
 	jsr update_view
 	jmp pop_special_mode
 
-special_exit:
+special_endgame:
 	jsr clear_maze_window
 	lda #$07
 	sta gs_walls_left
-	ldx #$47
+	ldx #$47     ;GUG: depth 4? not 3?
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd08_doors
@@ -7714,27 +7715,26 @@ special_exit:
 	stx zp0E_draw_param
 	jsr draw_special
 	ldx #$01
-	stx gs_exit_turns
-j3CA6:
+	stx gs_endgame_step
+@endgame_input_loop:
 	lda #$a0     ;Don't make unnecessary turns.
 	jsr print_to_line1
 	jsr get_player_input
-	lda gs_exit_turns
-	sta a1A
+	lda gs_endgame_step
+	sta zp1A_endgame_step
 	lda gd_parsed_action
-	dec a1A
-	bne b3CE9
+	dec zp1A_endgame_step
+	bne @step2
+@step1:
 	cmp #$5a
-	bpl b3CC1  ;GUG: bcs preferred
-	jmp j3ECA
+	bpl :+  ;GUG: bcs preferred
+	jmp @nope
 
-b3CC1:
-	cmp #$5b
-	beq b3CC8
-	jmp j3EAA
+:	cmp #verb_forward
+	beq :+
+	jmp @dead_salt
 
-b3CC8:
-	jsr clear_maze_window
+:	jsr clear_maze_window
 	ldx #$03
 	stx gs_walls_left
 	ldx #$23
@@ -7745,86 +7745,79 @@ b3CC8:
 	ldx #$02
 	stx zp0E_draw_param
 	jsr draw_special
-	inc gs_exit_turns
-	jmp j3CA6
+	inc gs_endgame_step
+	jmp @endgame_input_loop
 
-b3CE9:
-	dec a1A
-	bne b3D11
+@step2:
+	dec zp1A_endgame_step
+	bne @step3
 	cmp #$5a
-	bpl b3CF4  ;GUG: bcs preferred
-	jmp j3ECA
+	bpl :+  ;GUG: bcs preferred
+	jmp @nope
 
-b3CF4:
-	cmp #$5b
-	beq b3CFB
-	jmp j3EAA
+:	cmp #verb_forward
+	beq :+
+	jmp @dead_salt
 
-b3CFB:
-	jsr clear_maze_window
-	ldx #<p01
+:	jsr clear_maze_window
+	ldx #$01
 	stx gs_walls_left
-	ldx #>p01
+	ldx #$00
 	stx gs_walls_right_depth
 	jsr draw_maze
-	inc gs_exit_turns
-	jmp j3CA6
+	inc gs_endgame_step
+	jmp @endgame_input_loop
 
-b3D11:
-	dec a1A
-	bne b3D40
+@step3:
+	dec zp1A_endgame_step
+	bne @step4
 	cmp #$5a
-	bpl b3D1C  ;GUG: bcs preferred
-	jmp j3ECA
+	bpl :+  ;GUG: bcs preferred
+	jmp @nope
 
-b3D1C:
-	cmp #$5d
-	beq b3D23
-	jmp j3EAA
+:	cmp #verb_right
+	beq :+
+	jmp @dead_salt
 
-b3D23:
-	jsr clear_maze_window
-	ldx #<p01
+:	jsr clear_maze_window
+	ldx #$01
 	stx gs_walls_left
-	ldx #>p01
+	ldx #$00
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd02_elevator
 	stx zp0F_action
 	jsr draw_special
-	inc gs_exit_turns
-	jmp j3CA6
+	inc gs_endgame_step
+	jmp @endgame_input_loop
 
-b3D40:
-	dec a1A
-	bne b3D69
+@step4:
+	dec zp1A_endgame_step
+	bne @step5
 	cmp #$5a
-	bmi b3D4B  ;GUG: bcc preferred
-	jmp j3EAA
+	bmi :+  ;GUG: bcc preferred
+	jmp @dead_salt
 
-b3D4B:
-	cmp #$10
-	beq b3D52
-	jmp j3ECA
+:	cmp #verb_open
+	beq :+
+	jmp @nope
 
-b3D52:
-	lda gd_parsed_object
+:	lda gd_parsed_object
 	cmp #noun_door
-	beq b3D5C
-	jmp j3ECA
+	beq :+
+	jmp @nope
 
-b3D5C:
-	ldx #drawcmd0A_door_opening
+:	ldx #drawcmd0A_door_opening
 	stx zp0F_action
 	jsr draw_special
-	inc gs_exit_turns
-	jmp j3CA6
+	inc gs_endgame_step
+	jmp @endgame_input_loop
 
-b3D69:
-	dec a1A
-	bne b3DDD
-	cmp #$5b
-	bne b3D8E
+@step5:
+	dec zp1A_endgame_step
+	bne @step6
+	cmp #verb_forward
+	bne :+
 	jsr clear_maze_window
 	ldx #$00
 	stx zp_col
@@ -7838,21 +7831,18 @@ b3D69:
 	jsr print_display_string
 	jmp game_over
 
-b3D8E:
-	cmp #$5a
-	bmi b3D95  ;GUG: bcc preferred
-	jmp j3EAA
+:	cmp #$5a
+	bmi :+  ;GUG: bcc preferred
+	jmp @dead_salt
 
-b3D95:
-	cmp #$06
-	beq b3D9C
-b3D99:
-	jmp j3ECA
+:	cmp #verb_throw
+	beq :+
+@nope5:
+	jmp @nope
 
-b3D9C:
-	lda gd_parsed_object
-	cmp #$01
-	bne b3D99
+:	lda gd_parsed_object
+	cmp #noun_ball
+	bne @nope5
 	ldx #icmd_where
 	stx zp0F_action
 	ldx #noun_ball
@@ -7860,7 +7850,7 @@ b3D9C:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_known
-	bne b3D99
+	bne @nope5
 	jsr clear_maze_window
 	jsr flash_screen
 	ldx #$07
@@ -7876,44 +7866,42 @@ b3D9C:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-	inc gs_exit_turns
-	jmp j3CA6
+	inc gs_endgame_step
+	jmp @endgame_input_loop
 
-b3DDD:
-	dec a1A
-	bne b3E05
+@step6:
+	dec zp1A_endgame_step
+	bne @step7
 	cmp #$5a
-	bpl b3DE8  ;GUG: bcs preferred
-b3DE5:
-	jmp j3ECA
+	bpl :+  ;GUG: bcs preferred
+@nope6:
+	jmp @nope
 
-b3DE8:
-	cmp #$5b
-	beq b3DEF
-b3DEC:
-	jmp j3EAA
+:	cmp #verb_forward
+	beq :+
+@dead6:
+	jmp @dead_salt
 
-b3DEF:
-	jsr clear_maze_window
+:	jsr clear_maze_window
 	ldx #$03
 	stx gs_walls_left
 	ldx #$23
 	stx gs_walls_right_depth
 	jsr draw_maze
-	inc gs_exit_turns
-	jmp j3CA6
+	inc gs_endgame_step
+	jmp @endgame_input_loop
 
-b3E05:
+@step7:
 	cmp #$5a
-	bmi b3DE5  ;GUG: bcc preferred
-	cmp #$5b
-	bne b3DEC
+	bmi @nope6  ;GUG: bcc preferred
+	cmp #verb_forward
+	bne @dead6
 	jsr clear_maze_window
 	ldx #$01
 	stx gs_walls_left
 	stx gs_walls_right_depth
 	jsr draw_maze
-j3E1B:
+@final_quiz:
 	lda #$3c     ;Before I let you go free
 	jsr print_to_line1
 	lda #$3d     ;what was the name of the monster?
@@ -7921,32 +7909,30 @@ j3E1B:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #$5a
-	bpl b3DEC  ;GUG: bcs preferred
-	cmp #$15
-	beq b3E89
-	jmp j3E49
+	bpl @dead6  ;GUG: bcs preferred
+	cmp #verb_grendel
+	beq @win
+	jmp @print_hint
 
-p3E36:
-	.byte $42,$45,$4f,$57,$55,$4c,$46,$20
-	.byte $44,$49,$53,$41,$47,$52,$45,$45
-	.byte $53,$21,$80
-j3E49:
+@text_hint:
+	.byte "BEOWULF DISAGREES!", $80
+@print_hint:
 	jsr clear_status_lines
 	ldx #$00
 	stx zp_col
 	ldx #$16
 	stx zp_row
-	ldx #<p3E36
+	ldx #<@text_hint
 	stx zp0C_string_ptr
-	ldx #>p3E36
+	ldx #>@text_hint
 	stx zp0C_string_ptr+1
 	jsr print_string
 	jsr wait_long
-	jmp j3E1B
+	jmp @final_quiz
 
-text_congrats:
+@text_congrats:
 	.byte "RETURN TO SANITY BY PRESSING RESET!", $80
-b3E89:
+@win:
 	jsr clear_hgr2
 	ldx #$00
 	stx zp_col
@@ -7955,15 +7941,15 @@ b3E89:
 	jsr print_display_string
 	lda #char_newline
 	jsr char_out
-	ldx #<text_congrats
+	ldx #<@text_congrats
 	stx zp0C_string_ptr
-	ldx #>text_congrats
+	ldx #>@text_congrats
 	stx zp0C_string_ptr+1
 	jsr print_string
 @infinite_loop:
 	jmp @infinite_loop
 
-j3EAA:
+@dead_salt:
 	jsr clear_maze_window
 	jsr clear_status_lines
 	ldx #$00
@@ -7978,10 +7964,10 @@ j3EAA:
 	jsr print_display_string
 	jmp game_over
 
-j3ECA:
+@nope:
 	lda #$9a     ;It is currently impossible.
 	jsr print_to_line2
-	jmp j3CA6
+	jmp @endgame_input_loop
 
 
 ; cruft leftover from earlier build
@@ -8301,7 +8287,7 @@ gs_mode_stack1:
 	.byte $00
 gs_mode_stack2:
 	.byte $00
-gs_exit_turns:
+gs_endgame_step:
 	.byte $00,$00,$00
 gs_bat_alive:
 	.byte $00

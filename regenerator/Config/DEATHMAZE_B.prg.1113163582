@@ -14,7 +14,6 @@
 2CE8-2CFA
 2E02-2E2A
 3345-3347
-3E36-3E49
 3ED2-3ED3
 3FE9-61F7
 61FC-6200
@@ -39,6 +38,7 @@
 1F13-1F1B
 2262-2272
 32CA-3319
+3E36-3E49
 3E65-3E89
 61F7-61FC
 6200-6205
@@ -917,17 +917,36 @@
 3C1D You will do no such thing!
 3C2B #verb_forward
 3C6A Splat!
+3C8E GUG: depth 4? not 3?
+3C96 #drawcmd08_doors
 3CA6 Don't make unnecessary turns.
+3CC1 #verb_forward
+3CD8 #drawcmd08_doors
+3CF4 #verb_forward
+3D1C #verb_right
+3D33 #drawcmd02_elevator
+3D4B #verb_open
 3D55 #noun_door
+3D5C #drawcmd0A_door_opening
+3D6D #verb_forward
 3D7C You fall through the floor
 3D81 #char_newline
 3D86 onto a bed of spikes!
+3D95 #verb_throw
+3D9F #noun_ball
 3DA3 #icmd_where
 3DA7 #noun_ball
+3DAE $zp1A_item_place
+3DB0 #carried_known
 3DC7 #icmd_destroy2  ;and #noun_ball
 3DD0 #icmd_draw_inv
+3DE8 #verb_forward
+3E09 #verb_forward
 3E1B Before I let you go free
 3E20 what was the name of the monster?
+3E2F #verb_grendel
+3E56 $zp0C_string_ptr
+3E5A $zp0C_string_ptr+1
 3E92 Correct! You have survived!
 3E97 #char_newline
 3EB8 You have turned into a pillar of salt!
@@ -989,7 +1008,7 @@
 0017 clock
 0018 clock+1
 0019 zp19_level
-001A zp1A_facing
+001A zp1A_endgame_step
 003C tape_addr_start
 003D tape_addr_start+1
 003E tape_addr_end
@@ -1816,9 +1835,40 @@
 3C55 +
 3C58 @forward
 3C72 @into_pit
-3C86 special_exit
-3E65 text_congrats
+3C86 special_endgame
+3CA6 @endgame_input_loop
+3CBA @step1
+3CC1 +
+3CC8 +
+3CE9 @step2
+3CF4 +
+3CFB +
+3D11 @step3
+3D1C +
+3D23 +
+3D40 @step4
+3D4B +
+3D52 +
+3D5C +
+3D69 @step5
+3D8E +
+3D95 +
+3D99 @nope5
+3D9C +
+3DDD @step6
+3DE5 @nope6
+3DE8 +
+3DEC @dead6
+3DEF +
+3E05 @step7
+3E1B @final_quiz
+3E36 @text_hint
+3E49 @print_hint
+3E65 @text_congrats
+3E89 @win
 3EA7 @infinite_loop
+3EAA @dead_salt
+3ECA @nope
 3F00 relocate_data
 3F30 @write_DEATH
 3F4E vector_reset
@@ -1878,7 +1928,7 @@
 61A5 gs_special_mode
 61A6 gs_mode_stack1
 61A7 gs_mode_stack2
-61A8 gs_exit_turns
+61A8 gs_endgame_step
 61AB gs_bat_alive
 61AC gs_mother_alive
 61AD gs_monster_alive
@@ -2107,6 +2157,8 @@ FF69 rom_MONITOR
 3C96
 3CCB
 3CD8
+3CFE
+3D26
 3D74
 3DA3
 3DBA

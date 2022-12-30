@@ -20,7 +20,7 @@
 	.byte $00		;special input mode
 	.byte $00		;mode stack 1
 	.byte $00		;mode stack 2
-	.byte $00		;gs_exit_turns
+	.byte $00		;endgame step number
 	.byte $00		;A9
 	.byte $00		;AA
 	.byte $02		;bat alive (flag $02)

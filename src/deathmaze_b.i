@@ -30,6 +30,9 @@
 ;$zp_string_number = $11
 ;$zp_wall_opposite = $19
 
+;$zp0C_string_ptr = $0c
+;;$zp0C_string_ptr+1 = $_0
+
 ;$zp0F_action = $0f
 
 ;$zp10_count_words = $10
@@ -41,6 +44,7 @@
 ;$zp19_count = $19
 
 ;$zp1A_hint_mode = $1a
+;$zp1A_item_place = $1a
 ;$zp1A_move_action = $1a
 ;$zp1A_object = $1a
 
@@ -93,9 +97,15 @@ cmd_blow = $02
 
 drawcmd01_keyhole = $01
 
+drawcmd02_elevator = $02
+
 drawcmd03_compactor = $03
 
+drawcmd08_doors = $08
+
 drawcmd09_keyholes = $09
+
+drawcmd0A_door_opening = $0a
 
 error_write_protect = $01
 error_volume_mismatch = $02
@@ -271,6 +281,7 @@ verb_press = $11
 verb_take = $12
 verb_attack = $13
 verb_intransitive = $14
+verb_grendel = $15
 verb_movement_begin = $5a
 verb_forward = $5b
 ;verb_movement_begin + 1 = $5b
