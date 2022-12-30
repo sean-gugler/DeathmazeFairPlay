@@ -13,22 +13,22 @@ zp_col = $06
 zp_row = $07
 screen_ptr = $08
 ;screen_ptr+1 = $09
-zp0A_text_ptr = $0a
-;zp0A_text_ptr+1 = $0b
-zp0C_col_left = $0c
-zp_0D = $0d
-zp0E_draw_param = $0e
-zp0F_action = $0f
-zp10_temp = $10
-zp11_loop_count = $11
+a0A = $0a
+a0B = $0b
+a0C = $0c
+a0D = $0d
+a0E = $0e
+a0F = $0f
+a10 = $10
+a11 = $11
 a13 = $13
 a14 = $14
 line_count = $15
 zp_counter = $16
 clock = $17
 ;clock+1 = $18
-zp19_level = $19
-zp1A_endgame_step = $1a
+a19 = $19
+a1A = $1a
 tape_addr_start = $3c
 ;tape_addr_start+1 = $3d
 tape_addr_end = $3e
@@ -44,12 +44,12 @@ aEF = $ef
 ; **** ZP POINTERS ****
 ;
 ;screen_ptr = $08
-;zp0A_text_ptr = $0a
-;zp0C_col_left = $0c
-;zp0E_draw_param = $0e
-;zp10_temp = $10
+p0A = $0a
+p0C = $0c
+p0E = $0e
+p10 = $10
 p13 = $13
-;zp19_level = $19
+p19 = $19
 p28 = $28
 pC2 = $c2
 ;
@@ -59,6 +59,8 @@ f0135 = $0135
 ;
 ; **** ABSOLUTE ADRESSES ****
 ;
+a000C = $000c
+a000D = $000d
 a0124 = $0124
 a0125 = $0125
 a0126 = $0126
@@ -130,7 +132,7 @@ new_session:
 
 new_game:
 	ldx #icmd_reset_game
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 start_game:
 	ldx #char_ESC
@@ -140,17 +142,17 @@ start_game:
 
 clear_hgr2:
 	ldx #<screen_HGR2
-	stx zp0E_draw_param
+	stx a0E
 	ldx #>screen_HGR2
-	stx zp0F_action
+	stx a0F
 	ldy #$00
 @next_page:
 	tya
-:	sta (zp0E_draw_param),y
-	inc zp0E_draw_param
+:	sta (p0E),y
+	inc a0E
 	bne :-
-	inc zp0F_action
-	lda zp0F_action
+	inc a0F
+	lda a0F
 	cmp #$60
 	bne @next_page
 	rts
@@ -180,9 +182,9 @@ print_to_line1:
 	ldx #$16
 	stx zp_row
 	ldx #<text_buffer_line1
-	stx zp0A_text_ptr
+	stx a0A
 	ldx #>text_buffer_line1
-	stx zp0A_text_ptr+1
+	stx a0B
 	bne print_to_line
 print_to_line2:
 	ldx #$00
@@ -190,27 +192,27 @@ print_to_line2:
 	ldx #$17
 	stx zp_row
 	ldx #<text_buffer_line2
-	stx zp0A_text_ptr
+	stx a0A
 	ldx #>text_buffer_line2
-	stx zp0A_text_ptr+1
+	stx a0B
 print_to_line:
 	jsr get_display_string
 	jsr get_rowcol_addr
 	jsr clear_text_buf
 	ldy #$00
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	and #$7f
 @next_char:
-	sta (zp0A_text_ptr),y
+	sta (p0A),y
 	jsr print_char
-	inc zp0C_col_left
+	inc a000C
 	bne :+
-	inc zp_0D
-:	inc zp0A_text_ptr
+	inc a000D
+:	inc a0A
 	bne :+
-	inc zp0A_text_ptr+1
+	inc a0B
 :	ldy #$00
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	bpl @next_char
 	lda #char_ClearLine
 	jsr char_out
@@ -221,32 +223,32 @@ print_display_string:
 print_string:
 	jsr get_rowcol_addr
 	ldy #$00
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	and #$7f
 @next_char:
 	jsr print_char
-	inc zp0C_col_left
+	inc a000C
 	bne :+
-	inc zp_0D
+	inc a000D
 :	ldy #$00
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	bpl @next_char
 	rts
 
 get_display_string:
 	sta zp_string_number
 	ldx #<display_string_table
-	stx zp0C_col_left
+	stx a000C
 	ldx #>display_string_table
-	stx zp_0D
+	stx a000D
 	ldy #$00
 @scan:
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	bmi @found_string
 @next_char:
-	inc zp0C_col_left
+	inc a000C
 	bne @scan
-	inc zp_0D
+	inc a000D
 	bne @scan
 @found_string:
 	dec zp_string_number
@@ -256,7 +258,7 @@ get_display_string:
 clear_text_buf:
 	ldy #$27
 	lda #' '
-:	sta (zp0A_text_ptr),y
+:	sta (p0A),y
 	dey
 	bpl :-
 	rts
@@ -279,7 +281,7 @@ cmd_verbal:
 
 cmd_movement:
 	ldx gs_facing
-	stx zp1A_endgame_step
+	stx a1A
 	cmp #verb_forward
 	beq move_forward
 	jsr move_turn
@@ -291,7 +293,7 @@ move_turn:
 	cmp #verb_uturn
 	beq @turn_around
 @turn_right:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$04
 	beq @wrap_clockwise
 	inc gs_facing
@@ -305,7 +307,7 @@ move_turn:
 	rts
 
 @turn_left:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$01
 	beq @wrap_counterwise
 	dec gs_facing
@@ -315,7 +317,7 @@ move_turn:
 	stx gs_facing
 	bne @turned
 @turn_around:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$03
 	bmi :+
 	dec gs_facing
@@ -335,18 +337,18 @@ move_forward:
 	bne @normal
 	lda gs_player_y
 	ldx gs_facing
-	stx zp1A_endgame_step
+	stx a1A
 	cmp #$08
 	beq @perfect_square_N
 	cmp #$09
 	bne @normal
 @perfect_square_S:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$04
 	bne @normal
 	beq @move_player
 @perfect_square_N:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$02
 	beq @move_player
 @normal:
@@ -394,9 +396,9 @@ move_forward:
 
 check_special_position:
 	lda gs_player_y
-	sta zp19_level
+	sta a19
 	lda gs_player_x
-	sta zp1A_endgame_step
+	sta a1A
 	lda gs_level
 	cmp #$03
 	bne :+
@@ -407,7 +409,7 @@ check_special_position:
 
 :	cmp #$02
 	beq check_level_2
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$03
 	beq check_calculator
 	cmp #$06
@@ -415,7 +417,7 @@ check_special_position:
 	rts
 
 check_calculator:
-	lda zp19_level
+	lda a19
 	cmp #$03
 	beq at_calculator
 special_return:
@@ -427,7 +429,7 @@ at_calculator:
 	rts
 
 check_guillotine:
-	lda zp19_level
+	lda a19
 	cmp #$0a
 	beq beheaded
 	rts
@@ -443,7 +445,7 @@ beheaded:
 	jmp game_over
 
 check_level_2:
-	lda zp19_level
+	lda a19
 	cmp #$05
 	beq check_guarded_pit
 check_dog_roaming:
@@ -466,7 +468,7 @@ check_dog_roaming:
 	rts
 
 check_guarded_pit:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$05
 	beq at_guard_dog
 	cmp #$08
@@ -496,7 +498,7 @@ return_dog_monster:
 check_levels_4_5:
 	cmp #$04
 	beq check_monster
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$04
 	beq check_bat
 check_mother:
@@ -519,7 +521,7 @@ check_mother:
 	rts
 
 check_bat:
-	lda zp19_level
+	lda a19
 	cmp #$04
 	bne check_mother
 	lda gs_bat_alive
@@ -608,9 +610,9 @@ noun_to_item:
 	cmp #nouns_unique_end
 	bpl multiples
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_active
 	bpl rts_bb2
 pop_not_carried:
@@ -629,7 +631,7 @@ multiples:
 	cmp #noun_torch
 	beq @torch
 	ldx #icmd_which_box
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	cmp #$00
 	beq pop_not_carried
@@ -637,7 +639,7 @@ multiples:
 
 @food:
 	ldx #icmd_which_food
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	cmp #$00
 	beq pop_not_carried
@@ -645,7 +647,7 @@ multiples:
 
 @torch:
 	ldx #icmd_which_torch_unlit
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	cmp #$00
 	bne rts_bb2
@@ -655,7 +657,7 @@ multiples:
 	lda gs_room_lit
 	beq pop_not_carried
 	ldx #icmd_which_torch_lit
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	cmp #$00
 	bne rts_bb2
@@ -670,25 +672,25 @@ multiples:
 memcpy:
 	ldy #$00
 @next_byte:
-	lda (zp0E_draw_param),y
-	sta (zp10_temp),y
-	inc zp0E_draw_param
+	lda (p0E),y
+	sta (p10),y
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	inc zp10_temp
+	inc a0F
+:	inc a10
 	bne :+
-	inc zp11_loop_count
-:	dec zp19_level
+	inc a11
+:	dec a19
 	beq @check_done
-	lda zp19_level
+	lda a19
 	cmp #$ff
 	bne @next_byte
-	dec zp1A_endgame_step
+	dec a1A
 	jmp @next_byte
 
 @check_done:
-	lda zp1A_endgame_step
-	ora zp19_level
+	lda a1A
+	ora a19
 	bne @next_byte
 textbuf_prev_input-1:
 	rts
@@ -729,17 +731,17 @@ get_player_input:
 	and #char_mask_upper
 :	pha
 	lda #>text_buffer_line1
-	sta zp0F_action
+	sta a0F
 	lda #<text_buffer_line1
-	sta zp0E_draw_param
+	sta a0E
 	lda #>textbuf_prev_input
-	sta zp11_loop_count
+	sta a11
 	lda #<textbuf_prev_input
-	sta zp10_temp
+	sta a10
 	lda #$00
-	sta zp1A_endgame_step
+	sta a1A
 	lda #$50
-	sta zp19_level
+	sta a19
 	jsr memcpy
 	jsr clear_status_lines
 	nop
@@ -764,21 +766,21 @@ get_player_input:
 	dec zp_row
 	jsr get_rowcol_addr
 	lda #>p0C79
-	sta zp_0D
+	sta a000D
 	lda #<p0C79
-	sta zp0C_col_left
+	sta a000C
 	lda #$80
 	ldy #$50
-:	sta (zp0C_col_left),y
+:	sta (p0C),y
 	dey
 	bne :-
 	lda #$00
 	sta zp11_count_chars
 	sta zp10_count_words
 	lda #>p0C79
-	sta zp1A_endgame_step
+	sta a1A
 	lda #<p0C79
-	sta zp19_level
+	sta a19
 	pla
 	jmp process_input_char
 
@@ -839,29 +841,29 @@ process_input_char:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #>textbuf_prev_input-1
-	sta zp0F_action
+	sta a0F
 	lda #<textbuf_prev_input-1
-	sta zp0E_draw_param
+	sta a0E
 	ldy #$50
 @next_char:
-	lda (zp0E_draw_param),y
-	sta (zp19_level),y
+	lda (p0E),y
+	sta (p19),y
 	dey
 	bne @next_char
 
 	ldy #$50
-	sty zp0E_draw_param
+	sty a0E
 	ldy #$01
-	sty zp0F_action
+	sty a0F
 @repeat_display:
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #$80
 	bmi :+
 	lda #' '
 :	jsr char_out
-	inc zp0F_action
-	ldy zp0F_action
-	dec zp0E_draw_param
+	inc a0F
+	ldy a0F
+	dec a0E
 	bne @repeat_display
 	jmp get_player_input
 
@@ -898,12 +900,12 @@ input_backspace:
 	dec zp_col
 	jsr get_rowcol_addr
 	ldy zp11_count_chars
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #' '
 	bne :+
 	dec zp10_count_words
 :	lda #$80
-	sta (zp19_level),y
+	sta (p19),y
 	dec zp11_count_chars
 	jmp input_blink_cursor
 
@@ -913,7 +915,7 @@ input_letter:
 	bcc @no_modification
 	ldy zp11_count_chars
 	beq @no_modification
-	lda (zp19_level),y ;Check previous character
+	lda (p19),y  ;Check previous character
 	cmp #' '
 	beq @no_modification
 	lda zp13_raw_input
@@ -926,7 +928,7 @@ input_letter:
 	pla
 	inc zp11_count_chars
 	ldy zp11_count_chars
-	sta (zp19_level),y
+	sta (p19),y
 	cpy #max_input
 	beq parse_input
 	jmp input_blink_cursor
@@ -935,7 +937,7 @@ input_letter:
 input_space:
 	ldy zp11_count_chars
 	dey          ;BUG: remove to fix.
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #' '
 	bne :+
 	jmp input_blink_cursor
@@ -951,26 +953,26 @@ parse_input:
 	lda #' '
 	inc zp11_count_chars
 	ldy zp11_count_chars
-	sta (zp19_level),y
-	inc zp19_level
+	sta (p19),y
+	inc a19
 	bne @parse_verb
-	inc zp1A_endgame_step
+	inc a1A
 @parse_verb:
 	jsr get_vocab
-	lda zp10_temp
+	lda a10
 	sta gd_parsed_action
 	ldy #$00
 @skip_word:
-	inc zp19_level
+	inc a19
 	bne :+
-	inc zp1A_endgame_step
-:	lda (zp19_level),y
+	inc a1A
+:	lda (p19),y
 	cmp #' '
 	bne @skip_word
-	inc zp19_level
+	inc a19
 	bne :+
-	inc zp1A_endgame_step
-:	lda (zp19_level),y
+	inc a1A
+:	lda (p19),y
 	cmp #$80
 	beq @verb_only
 	cmp #' '
@@ -981,7 +983,7 @@ parse_input:
 	beq @check_verb
 @parse_object:
 	jsr get_vocab
-	lda zp10_temp
+	lda a10
 	sta gd_parsed_object
 @check_verb:
 	lda gd_parsed_action
@@ -990,14 +992,14 @@ parse_input:
 	lda #$8d     ;I'm sorry, but I can't
 	jsr print_to_line2
 	lda #<text_buffer_line1
-	sta zp19_level
+	sta a19
 	lda #>text_buffer_line1
-	sta zp1A_endgame_step
+	sta a1A
 	ldy #$00
 @echo_next_char:
 	tya
 	pha
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #' '
 	beq @echo_period
 	jsr char_out
@@ -1030,26 +1032,26 @@ parse_input:
 	lda #$8f     ;What in tarnation is a
 	jsr print_to_line2
 	lda #<text_buffer_line1
-	sta zp19_level
+	sta a19
 	lda #>text_buffer_line1
-	sta zp1A_endgame_step
+	sta a1A
 	ldy #$00
 @find_word_end:
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #$20
 	beq @found_word_end
-	inc zp19_level
+	inc a19
 	bne @find_word_end
-	inc zp1A_endgame_step
+	inc a1A
 	bne @find_word_end
 @found_word_end:
-	inc zp19_level
+	inc a19
 	bne @obj_next_letter
-	inc zp1A_endgame_step
+	inc a1A
 @obj_next_letter:
 	tya
 	pha
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #$20
 	beq @obj_word_end
 	jsr char_out
@@ -1070,9 +1072,9 @@ parse_input:
 	cmp #verb_look
 	beq @cmd_look
 	lda #>text_buffer_line1
-	sta zp1A_endgame_step
+	sta a1A
 	lda #<text_buffer_line1
-	sta zp19_level
+	sta a19
 	lda #$00
 	sta zp_col
 	lda #$17
@@ -1081,18 +1083,18 @@ parse_input:
 	lda #char_ClearLine
 	jsr char_out
 	ldy #$00
-	sty zp11_loop_count
-	lda (zp19_level),y
+	sty a11
+	lda (p19),y
 	and #char_mask_upper
 	bne @echo
 @next_verb_letter:
-	lda (zp19_level),y
+	lda (p19),y
 	cmp #$20
 	beq @verb_word_end
 @echo:
 	jsr char_out
-	inc zp11_loop_count
-	ldy zp11_loop_count
+	inc a11
+	ldy a11
 	bne @next_verb_letter
 @verb_word_end:
 	lda #$56     ;what?
@@ -1110,83 +1112,83 @@ parse_input:
 	jmp get_player_input
 
 get_vocab:
-	lda zp1A_endgame_step
+	lda a1A
 	pha
-	lda zp19_level
+	lda a19
 	pha
 	lda #>vocab_table
-	sta zp0F_action
+	sta a0F
 	lda #<vocab_table
-	sta zp0E_draw_param
+	sta a0E
 	lda #$00
-	sta zp10_temp
+	sta a10
 @next_word:
 	ldy #$01
 @find_string:
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	and #$80
 	bne @found_start
-	inc zp0E_draw_param
+	inc a0E
 	bne @find_string
-	inc zp0F_action
+	inc a0F
 	bne @find_string
 @found_start:
 	dey
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	cmp #'*'
 	beq :+
-	inc zp10_temp
-:	inc zp0E_draw_param
+	inc a10
+:	inc a0E
 	bne :+
-	inc zp0F_action
+	inc a0F
 :	lda #$04
-	sta zp11_loop_count
+	sta a11
 @compare_char:
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	and #char_mask_upper
 	sta a13
-	lda (zp19_level),y
+	lda (p19),y
 	and #char_mask_upper
 	cmp a13
 	bne @mismatch
-	inc zp19_level
+	inc a19
 	bne :+
-	inc zp1A_endgame_step
-:	inc zp0E_draw_param
+	inc a1A
+:	inc a0E
 	bne :+
-	inc zp0F_action
-:	dec zp11_loop_count
+	inc a0F
+:	dec a11
 	bne @compare_char
 @done:
 	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
+	sta a1A
 	rts
 
 @mismatch:
-	lda zp10_temp
+	lda a10
 	cmp #vocab_end-1
 	beq @fail
 	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
+	sta a1A
 	pha
-	lda zp19_level
+	lda a19
 	pha
 	jmp @next_word
 
 @fail:
-	inc zp10_temp
+	inc a10
 	bne @done
 
 wait_short:
 	ldx #$90
-	stx zp0F_action
-:	dec zp0E_draw_param
+	stx a0F
+:	dec a0E
 	bne :-
-	dec zp0F_action
+	dec a0F
 	bne :-
 	rts
 
@@ -1220,33 +1222,33 @@ update_view:
 	beq @done
 	jsr draw_maze
 	jsr get_maze_feature
-	lda zp0F_action
-	ora zp0E_draw_param
+	lda a0F
+	ora a0E
 	beq :+
 	jsr draw_special
 :	ldx #icmd_0a
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda gs_box_visible
 	beq @done
-	sta zp0E_draw_param
+	sta a0E
 	ldx #$06
-	stx zp0F_action
+	stx a0F
 	jsr draw_special
 @done:
 	rts
 
 wait_long:
 	ldx #$05
-	stx zp10_temp
+	stx a10
 @dec16:
 	ldx #$00
-	stx zp0F_action
-:	dec zp0E_draw_param
+	stx a0F
+:	dec a0E
 	bne :-
-	dec zp0F_action
+	dec a0F
 	bne :-
-	dec zp10_temp
+	dec a10
 	bne @dec16
 	rts
 
@@ -1330,24 +1332,24 @@ b10E1=*+$02
 
 	rts
 
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$06
-	cmp zp1A_endgame_step
+	cmp a1A
 	beq b110D
-	dec zp11_loop_count
+	dec a11
 	bne b10E1
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
+	sta a0F
 	jmp j2EFB
 
 b110D:
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
+	sta a0F
 	lda gd_parsed_object
 	cmp #noun_torch
 	beq :+
@@ -1357,9 +1359,9 @@ b110D:
 	jmp j2E72
 
 ; cruft leftover from even earlier build
-	dec zp0F_action
+	dec a0F
 	bne cruft_cmd_paint
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_snake
 	beq @not_here
 	cmp #nouns_item_end
@@ -1380,14 +1382,14 @@ b110D:
 	rts
 
 cruft_cmd_paint:
-	dec zp0F_action
+	dec a0F
 	bne cruft_cmd
 	ldx #noun_brush
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_known
 	beq :+
 	jmp not_carried
@@ -1557,7 +1559,7 @@ clear_maze_window:
 	jsr get_rowcol_addr
 	clc
 	lda #$08
-	sta zp19_level
+	sta a19
 @clear_raster:
 	lda #$00
 	ldy #$16
@@ -1567,7 +1569,7 @@ clear_maze_window:
 	lda #$04
 	adc screen_ptr+1
 	sta screen_ptr+1
-	dec zp19_level
+	dec a19
 	bne @clear_raster
 	dec zp_row
 	bpl @clear_row
@@ -2221,26 +2223,26 @@ draw_right:
 ; Input: Y=count
 draw_down_left:
 	tya
-	sta zp1A_endgame_step
+	sta a1A
 :	jsr get_rowcol_addr
 	lda #glyph_slash_up
 	jsr char_out
 	dec zp_col
 	dec zp_col
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne :-
 	rts
 
 ; Input: Y=count
 draw_down_right:
 	tya
-	sta zp1A_endgame_step
+	sta a1A
 :	jsr get_rowcol_addr
 	lda #glyph_slash_down
 	jsr char_out
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne :-
 	rts
 
@@ -2248,7 +2250,7 @@ draw_down_right:
 draw_down:
 	pha
 	tya
-	sta zp1A_endgame_step
+	sta a1A
 	pla
 @next:
 	pha
@@ -2259,16 +2261,16 @@ draw_down:
 	pla
 	dec zp_col
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne @next
 	rts
 
 probe_forward:
 	ldy #$00
 	lda #<maze_walls
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>maze_walls
-	sta zp0A_text_ptr+1
+	sta a0B
 	ldx gs_level
 	lda #$00
 	clc
@@ -2278,14 +2280,14 @@ probe_forward:
 	jmp :-
 
 @find_x:
-	adc zp0A_text_ptr
-	sta zp0A_text_ptr
+	adc a0A
+	sta a0A
 	ldx gs_player_x
 :	dex
 	beq @find_y
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
+	inc a0A
+	inc a0A
+	inc a0A
 	jmp :-
 
 @find_y:
@@ -2295,11 +2297,11 @@ probe_forward:
 	cmp #$09
 	bmi @shift_1_byte
 @shift_2_bytes:
-	inc zp0A_text_ptr
+	inc a0A
 	sec
 	sbc #$04
 @shift_1_byte:
-	inc zp0A_text_ptr
+	inc a0A
 	sec
 	sbc #$04
 @find_2bits:
@@ -2312,9 +2314,9 @@ probe_forward:
 	jmp :-
 
 @check_facing:
-	sta zp1A_endgame_step
-	stx zp19_level
-	stx zp11_loop_count
+	sta a1A
+	stx a19
+	stx a11
 	stx gs_walls_left
 	stx gs_walls_right_depth
 	ldx gs_facing
@@ -2330,60 +2332,60 @@ probe_forward:
 	beq probe_east
 
 probe_south:
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	lda (p0A),y
+	and a1A
 	bne @S_sight_limit
-	inc zp19_level
-	lda zp19_level
+	inc a19
+	lda a19
 	cmp #$05
 	beq @S_sight_limit
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$80
 	bne :+
-	dec zp0A_text_ptr
+	dec a0A
 	lda #$02
-	sta zp1A_endgame_step
+	sta a1A
 	jmp probe_south
 
-:	asl zp1A_endgame_step
-	asl zp1A_endgame_step
+:	asl a1A
+	asl a1A
 	jmp probe_south
 
 @S_sight_limit:
-	lda zp19_level
+	lda a19
 	jsr swap_saved_A_2
-	lsr zp1A_endgame_step
+	lsr a1A
 S_next_wall:
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	lda (p0A),y
+	and a1A
 	beq :+
 	inc gs_walls_right_depth
 :	ldy #$03
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	ldy #$00
-	and zp1A_endgame_step
+	and a1A
 	beq :+
 	inc gs_walls_left
 :	jsr swap_saved_A_2
-	cmp zp11_loop_count
+	cmp a11
 	beq S_probe_done
 	jsr swap_saved_A_2
 	lda #$04
-	cmp zp11_loop_count
+	cmp a11
 	beq S_probed_max
 	asl gs_walls_left
 	asl gs_walls_right_depth
-	inc zp11_loop_count
-	lda zp1A_endgame_step
+	inc a11
+	lda a1A
 	cmp #$01
 	beq :+
-	lsr zp1A_endgame_step
-	lsr zp1A_endgame_step
+	lsr a1A
+	lsr a1A
 	jmp S_next_wall
 
 :	lda #$40
-	sta zp1A_endgame_step
-	inc zp0A_text_ptr
+	sta a1A
+	inc a0A
 	jmp S_next_wall
 
 S_probed_max:
@@ -2400,197 +2402,197 @@ S_probe_done:
 	rts
 
 probe_east:
-	lsr zp1A_endgame_step
+	lsr a1A
 @next_depth:
 	clc
-	lda zp0A_text_ptr
+	lda a0A
 	adc #$03
-	sta zp0A_text_ptr
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	sta a0A
+	lda (p0A),y
+	and a1A
 	bne @E_sight_limit
-	inc zp19_level
-	lda zp19_level
+	inc a19
+	lda a19
 	cmp #$05
 	bne @next_depth
 @E_sight_limit:
-	lda zp19_level
+	lda a19
 	jsr swap_saved_A_2
-	lda zp1A_endgame_step
+	lda a1A
 	sta zp_wall_opposite
-	asl zp1A_endgame_step
+	asl a1A
 	clc
-	ror zp19_level
+	ror a19
 	bcc E_next_wall
-	ror zp19_level
+	ror a19
 E_next_wall:
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	dec a0A
+	dec a0A
+	dec a0A
+	lda (p0A),y
+	and a1A
 	beq :+
 	inc gs_walls_right_depth
-:	lda zp19_level
+:	lda a19
 	cmp #$80
 	beq :+
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	jmp @check_opposite
 
 :	iny
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	dey
 @check_opposite:
-	and zp19_level
+	and a19
 	beq :+
 	inc gs_walls_left
-:	lda zp11_loop_count
+:	lda a11
 	cmp #$04
 E_probed_max:
 	beq S_probed_max
 	jsr swap_saved_A_2
-	cmp zp11_loop_count
+	cmp a11
 E_probe_done:
 	beq S_probe_done
 	jsr swap_saved_A_2
-	inc zp11_loop_count
+	inc a11
 	asl gs_walls_left
 	asl gs_walls_right_depth
 	jmp E_next_wall
 
 probe_west:
-	lsr zp1A_endgame_step
+	lsr a1A
 @next_depth:
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	lda (p0A),y
+	and a1A
 	bne :+
-	inc zp19_level
-	lda zp19_level
+	inc a19
+	lda a19
 	cmp #$05
 	beq :+
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
-	dec zp0A_text_ptr
+	dec a0A
+	dec a0A
+	dec a0A
 	jmp @next_depth
 
-:	lda zp19_level
+:	lda a19
 	jsr swap_saved_A_2
-	lda zp1A_endgame_step
-	sta zp19_level
-	asl zp1A_endgame_step
+	lda a1A
+	sta a19
+	asl a1A
 	clc
 	ror zp_wall_opposite
 	bcc W_next_wall
-	ror zp19_level
+	ror a19
 W_next_wall:
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	lda (p0A),y
+	and a1A
 	beq :+
 	inc gs_walls_left
-:	lda zp19_level
+:	lda a19
 	cmp #$80
 	bne :+
-	inc zp0A_text_ptr
-:	lda (zp0A_text_ptr),y
-	and zp19_level
+	inc a0A
+:	lda (p0A),y
+	and a19
 	beq :+
 	inc gs_walls_right_depth
-:	lda zp19_level
+:	lda a19
 	cmp #$80
 	beq :+
-	inc zp0A_text_ptr
-:	inc zp0A_text_ptr
-	inc zp0A_text_ptr
+	inc a0A
+:	inc a0A
+	inc a0A
 	jsr swap_saved_A_2
-	cmp zp11_loop_count
+	cmp a11
 	beq E_probe_done
 	jsr swap_saved_A_2
 	lda #$04
-	cmp zp11_loop_count
+	cmp a11
 W_probed_max:
 	beq E_probed_max
-	inc zp11_loop_count
+	inc a11
 	asl gs_walls_left
 	asl gs_walls_right_depth
 	jmp W_next_wall
 
 probe_north:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$02
 	bne :+
 	lda #$80
-	sta zp1A_endgame_step
-	inc zp0A_text_ptr
+	sta a1A
+	inc a0A
 	jmp @next_depth
 
-:	lsr zp1A_endgame_step
-	lsr zp1A_endgame_step
+:	lsr a1A
+	lsr a1A
 @next_depth:
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	lda (p0A),y
+	and a1A
 	bne @sight_limit
-	inc zp19_level
-	lda zp19_level
+	inc a19
+	lda a19
 	cmp #$05
 	beq @sight_limit
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$02
 	bne :+
-	inc zp0A_text_ptr
+	inc a0A
 	lda #$80
-	sta zp1A_endgame_step
+	sta a1A
 	jmp @next_depth
 
-:	lsr zp1A_endgame_step
-	lsr zp1A_endgame_step
+:	lsr a1A
+	lsr a1A
 	jmp @next_depth
 
 @sight_limit:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$80
 	beq :+
-	asl zp1A_endgame_step
+	asl a1A
 	jmp @save_depth
 
-:	dec zp0A_text_ptr
+:	dec a0A
 	lda #$01
-	sta zp1A_endgame_step
+	sta a1A
 @save_depth:
-	lda zp19_level
+	lda a19
 	jsr swap_saved_A_2
 N_next_wall:
-	lda (zp0A_text_ptr),y
-	and zp1A_endgame_step
+	lda (p0A),y
+	and a1A
 	beq :+
 	inc gs_walls_left
 :	ldy #$03
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	ldy #$00
-	and zp1A_endgame_step
+	and a1A
 	beq :+
 	inc gs_walls_right_depth
 :	lda #$04
-	cmp zp11_loop_count
+	cmp a11
 	beq W_probed_max
 	jsr swap_saved_A_2
-	cmp zp11_loop_count
+	cmp a11
 	bne :+
 	jmp S_probe_done
 
 :	jsr swap_saved_A_2
 	asl gs_walls_left
-	inc zp11_loop_count
+	inc a11
 	asl gs_walls_right_depth
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$40
 	beq :+
-	asl zp1A_endgame_step
-	asl zp1A_endgame_step
+	asl a1A
+	asl a1A
 	jmp N_next_wall
 
 :	lda #$01
-	sta zp1A_endgame_step
-	dec zp0A_text_ptr
+	sta a1A
+	dec a0A
 	jmp N_next_wall
 
 swap_saved_A_2:
@@ -2608,20 +2610,20 @@ swap_saved_A_2:
 	.byte $00,$00,$00,$00,$00,$00,$00
 
 item_cmd:
-	lda zp0F_action
+	lda a0F
 	cmp #execs_no_location
 	bpl icmd07_draw_inv
-	asl zp0E_draw_param
+	asl a0E
 	pha
 	lda #$00
-	sta zp0F_action
+	sta a0F
 	clc
 	lda #<(gs_item_location-2)
-	adc zp0E_draw_param
-	sta zp0E_draw_param
+	adc a0E
+	sta a0E
 	lda #>(gs_item_location-2)
-	adc zp0F_action
-	sta zp0F_action
+	adc a0F
+	sta a0F
 	pla
 	cmp #icmd_drop
 	bpl icmd06_where_item
@@ -2634,29 +2636,29 @@ item_cmd:
 	adc #$05
 @destroy_item:
 	ldy #$00
-	sta (zp0E_draw_param),y
-	inc zp0E_draw_param
+	sta (p0E),y
+	inc a0E
 	bne :+
-	inc zp0F_action
+	inc a0F
 :	lda #$00
-	sta (zp0E_draw_param),y
+	sta (p0E),y
 	rts
 
 icmd06_where_item:
 	cmp #icmd_drop
 	beq icmd05_drop_item
 	ldy #$00
-	lda (zp0E_draw_param),y
-	sta zp1A_endgame_step
+	lda (p0E),y
+	sta a1A
 	iny
-	lda (zp0E_draw_param),y
-	sta zp19_level
+	lda (p0E),y
+	sta a19
 	rts
 
 icmd05_drop_item:
 	lda gs_level
 	ldy #$00
-	sta (zp0E_draw_param),y
+	sta (p0E),y
 	lda gs_player_x
 	asl
 	asl
@@ -2664,7 +2666,7 @@ icmd05_drop_item:
 	asl
 	ora gs_player_y
 	iny
-	sta (zp0E_draw_param),y
+	sta (p0E),y
 	rts
 
 icmd07_draw_inv:
@@ -2675,7 +2677,7 @@ icmd07_draw_inv:
 
 @clear_window:
 	lda #$0f
-	sta zp1A_endgame_step
+	sta a1A
 	lda #$19
 	sta zp_col
 	lda #$03
@@ -2684,16 +2686,16 @@ icmd07_draw_inv:
 	lda #$1e     ;char_ClearLine
 	jsr char_out
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne :-
 
 ; print inventory
 	lda #items_unique + items_food
-	sta zp1A_endgame_step
+	sta a1A
 	lda #<gs_item_locs
-	sta zp0E_draw_param ;zp_FIXME
+	sta a0E      ;zp_FIXME
 	lda #>gs_item_locs
-	sta zp0F_action
+	sta a0F
 	lda #$1a
 	sta zp_col
 	lda #$03
@@ -2708,7 +2710,7 @@ icmd07_draw_inv:
 	jsr get_rowcol_addr
 check_item_known:
 	ldy #$00
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	cmp #$08
 	bne :+
 	jmp print_known_item
@@ -2718,36 +2720,36 @@ check_item_known:
 	jmp print_known_item
 
 next_known_item:
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	inc zp0E_draw_param
+	inc a0F
+:	inc a0E
 	bne :+
-	inc zp0F_action
-:	dec zp1A_endgame_step
+	inc a0F
+:	dec a1A
 	bne check_item_known
 
 	lda #<gs_item_locs
-	sta zp0E_draw_param
+	sta a0E
 	lda #>gs_item_locs
-	sta zp0F_action
+	sta a0F
 	lda #items_unique + items_food + items_torches
-	sta zp1A_endgame_step
+	sta a1A
 check_item_boxed:
 	ldy #$00
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	cmp #carried_boxed
 	bne next_boxed_item
 	jmp print_boxed_item
 
 next_boxed_item:
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	inc zp0E_draw_param
+	inc a0F
+:	inc a0E
 	bne :+
-	inc zp0F_action
-:	dec zp1A_endgame_step
+	inc a0F
+:	dec a1A
 	bne check_item_boxed
 
 	lda #$1a
@@ -2790,7 +2792,7 @@ next_boxed_item:
 print_known_item:
 	lda #$15
 	sec
-	sbc zp1A_endgame_step
+	sbc a1A
 	cmp #items_unique
 	bmi :+
 	lda #noun_food
@@ -2825,63 +2827,63 @@ print_boxed_item:
 	jmp next_boxed_item
 
 icmd08_count_inv:
-	sta zp1A_endgame_step
-	dec zp1A_endgame_step
+	sta a1A
+	dec a1A
 	bne icmd09_new_game
 
 	lda #>gs_item_locs
-	sta zp0F_action ;zp_FIXME
+	sta a0F      ;zp_FIXME
 	lda #<gs_item_locs
-	sta zp0E_draw_param
+	sta a0E
 	lda #items_unique + items_food
-	sta zp1A_endgame_step
+	sta a1A
 	lda #$00
-	sta zp19_level
+	sta a19
 	ldy #$00
 @check_carried:
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	cmp #$06
 	bmi :+
-	inc zp19_level
+	inc a19
 :	iny
 	iny
-	dec zp1A_endgame_step
+	dec a1A
 	bne @check_carried
 	lda gs_torch_time
 	bne @add_one
 	lda gs_torches_unlit
 	beq @done
 @add_one:
-	inc zp19_level
+	inc a19
 @done:
 	rts
 
 icmd09_new_game:
-	dec zp1A_endgame_step
+	dec a1A
 	bne icmd0A
 
 	ldy #gs_size-1
 	lda #>data_new_game
-	sta zp0F_action
+	sta a0F
 	lda #<data_new_game
-	sta zp0E_draw_param
+	sta a0E
 	lda #<gs_facing
-	sta zp10_temp
+	sta a10
 	lda #>gs_facing
-	sta zp11_loop_count
-:	lda (zp0E_draw_param),y
-	sta (zp10_temp),y
+	sta a11
+:	lda (p0E),y
+	sta (p10),y
 	dey
 	bpl :-
 	rts
 
 icmd0A:
-	dec zp1A_endgame_step
+	dec a1A
 	bne icmd0B_which_box
 	jmp icmd0A_probe_boxes
 
 icmd0B_which_box:
-	dec zp1A_endgame_step
+	dec a1A
 	beq :+
 	jmp icmd0C_which_food
 
@@ -2892,78 +2894,78 @@ icmd0B_which_box:
 	asl
 	clc
 	adc gs_player_y
-	sta zp11_loop_count
+	sta a11
 	lda #>(gs_item_locs+1)
-	sta zp0F_action
+	sta a0F
 	lda #<(gs_item_locs+1)
-	sta zp0E_draw_param
+	sta a0E
 	lda #items_unique + items_food + items_torches
-	sta zp1A_endgame_step
+	sta a1A
 	ldy #$00
-	lda zp11_loop_count
+	lda a11
 @check_is_here:
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @check_level
 @not_here:
 	iny
 	iny
-	dec zp1A_endgame_step
+	dec a1A
 	bne @check_is_here
 
 	lda #>gs_item_locs
-	sta zp0F_action
+	sta a0F
 	lda #<gs_item_locs
-	sta zp0E_draw_param
+	sta a0E
 	lda #noun_snake-1
-	sta zp1A_endgame_step
+	sta a1A
 	lda #carried_boxed
 	ldy #$00
 @check_is_carried:
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @return_item_num
 	iny
 	iny
-	dec zp1A_endgame_step
+	dec a1A
 	bne @check_is_carried
 
 ; Skip over snake
 	lda #>gs_item_food_torch
-	sta zp0F_action
+	sta a0F
 	lda #<gs_item_food_torch
-	sta zp0E_draw_param
+	sta a0E
 	lda #items_food + items_torches
-	sta zp1A_endgame_step
+	sta a1A
 	ldy #$00
 @next_other:
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @return_item_num
 	iny
 	iny
-	dec zp1A_endgame_step
+	dec a1A
 	bne @next_other
 
 ; Last, check for carrying boxed snake
 	ldx #>gs_item_snake
-	stx zp0F_action
+	stx a0F
 	ldx #<gs_item_snake
-	stx zp0E_draw_param
+	stx a0E
 	ldy #$00
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @return_item_num
 	lda #$00
 	rts
 
 @check_level:
-	dec zp0E_draw_param
-	lda (zp0E_draw_param),y
+	dec a0E
+	lda (p0E),y
 	sta a13
-	inc zp0E_draw_param
+	inc a0E
 	dey
 	lda a13
 	cmp gs_level
 	beq @return_item_num
 	iny
-	lda zp11_loop_count
+	lda a11
 	jmp @not_here
 
 @return_item_num:
@@ -2971,13 +2973,13 @@ icmd0B_which_box:
 	tya
 	bpl :+
 	lda #$00     ;clamp min 0
-:	adc zp0E_draw_param
-	sta zp0E_draw_param
+:	adc a0E
+	sta a0E
 	lda #$00
-	adc zp0F_action
-	sta zp0F_action
+	adc a0F
+	sta a0F
 	sec
-	lda zp0E_draw_param
+	lda a0E
 	sbc #<gs_item_locs
 	clc
 	ror
@@ -2986,62 +2988,62 @@ icmd0B_which_box:
 	rts
 
 icmd0C_which_food:
-	dec zp1A_endgame_step
+	dec a1A
 	bne icmd0D_which_torch
 	lda #items_food
-	sta zp11_loop_count
+	sta a11
 	lda #carried_known
-	sta zp10_temp
+	sta a10
 	lda #icmd_where
-	sta zp0F_action
+	sta a0F
 	lda #item_food_begin
-	sta zp0E_draw_param
+	sta a0E
 find_which_multiple:
-	lda zp0F_action
+	lda a0F
 	pha
-	lda zp0E_draw_param
+	lda a0E
 	pha
 	jsr item_cmd
-	lda zp10_temp
-	cmp zp1A_endgame_step
+	lda a10
+	cmp a1A
 	beq @found
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
-	inc zp0E_draw_param
-	dec zp11_loop_count
+	sta a0F
+	inc a0E
+	dec a11
 	bne find_which_multiple
 	lda #$00
 	rts
 
 @found:
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	lda zp0E_draw_param
+	lda a0E
 	rts
 
 icmd0D_which_torch:
-	dec zp1A_endgame_step
+	dec a1A
 	bne icmd0E_which_torch
 	lda #items_torches
-	sta zp11_loop_count
+	sta a11
 	lda #carried_active
-	sta zp10_temp
+	sta a10
 	bne set_action
 icmd0E_which_torch:
-	dec zp1A_endgame_step
+	dec a1A
 	bne icmd_default
 	lda #items_torches
-	sta zp11_loop_count
+	sta a11
 	lda #carried_known
-	sta zp10_temp
+	sta a10
 set_action:
 	lda #icmd_where
-	sta zp0F_action
+	sta a0F
 	lda #item_torch_begin
-	sta zp0E_draw_param
+	sta a0E
 	jsr find_which_multiple
 icmd_default:
 	rts
@@ -3059,13 +3061,13 @@ icmd0A_probe_boxes:
 	bne :+
 	sec
 	sbc #$01
-:	sta zp1A_endgame_step
+:	sta a1A
 	lda gs_player_x
-	sta zp11_loop_count
+	sta a11
 	lda gs_player_y
-	sta zp10_temp
+	sta a10
 	lda gs_level
-	sta zp19_level
+	sta a19
 	jmp @begin_probe
 
 @none:
@@ -3074,98 +3076,98 @@ icmd0A_probe_boxes:
 	rts
 
 @begin_probe:
-	lda zp1A_endgame_step
-	sta zp0F_action
+	lda a1A
+	sta a0F
 	lda #$00
-	sta zp0E_draw_param
+	sta a0E
 @next_pos:
 	lda gs_facing
 	jsr move_pos_facing
 	jsr any_item_here
-	dec zp1A_endgame_step
+	dec a1A
 	beq @shift_remainder
-	lsr zp0E_draw_param
+	lsr a0E
 	jmp @next_pos
 
 @shift_remainder:
 	lda #$04
 	sec
-	sbc zp0F_action
+	sbc a0F
 	beq @done
-:	lsr zp0E_draw_param
+:	lsr a0E
 	sec
 	sbc #$01
 	bne :-
 @done:
-	lda zp0E_draw_param
+	lda a0E
 	sta gs_box_visible
 	rts
 
 any_item_here:
 	pha
-	lda zp11_loop_count
+	lda a11
 	pha
-	lda zp10_temp
+	lda a10
 	pha
-	lda zp0F_action
+	lda a0F
 	pha
-	lda zp0E_draw_param
+	lda a0E
 	pha
-	lda zp11_loop_count
+	lda a11
 	asl
 	asl
 	asl
 	asl
 	clc
-	adc zp10_temp
+	adc a10
 	pha
 	lda #>(gs_item_locs+1)
-	sta zp0F_action
+	sta a0F
 	lda #<(gs_item_locs+1)
-	sta zp0E_draw_param
+	sta a0E
 	lda #items_total
-	sta zp11_loop_count
+	sta a11
 	pla
 	ldy #$00
 @next_item:
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @match_position
 @continue:
 	iny
 	iny
-	dec zp11_loop_count
+	dec a11
 	bne @next_item
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
+	sta a0F
 @done:
 	pla
-	sta zp10_temp
+	sta a10
 	pla
-	sta zp11_loop_count
+	sta a11
 	pla
 	rts
 
 @match_position:
-	sta zp10_temp
-	dec zp0E_draw_param
-	lda (zp0E_draw_param),y
-	inc zp0E_draw_param
-	cmp zp19_level
+	sta a10
+	dec a0E
+	lda (p0E),y
+	inc a0E
+	cmp a19
 	beq @match_level
-	lda zp10_temp
+	lda a10
 	jmp @continue
 
 @match_level:
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
-	lda zp0E_draw_param
+	sta a0F
+	lda a0E
 	clc
 	adc #$08
-	sta zp0E_draw_param
+	sta a0E
 	bne @done
 
 move_pos_facing:
@@ -3176,19 +3178,19 @@ move_pos_facing:
 	cmp #facing_E
 	beq @east
 @south:
-	dec zp10_temp
+	dec a10
 	rts
 
 @west:
-	dec zp11_loop_count
+	dec a11
 	rts
 
 @north:
-	inc zp10_temp
+	inc a10
 	rts
 
 @east:
-	inc zp11_loop_count
+	inc a11
 	rts
 
 get_maze_feature:
@@ -3199,7 +3201,7 @@ get_maze_feature:
 	asl
 	clc
 	adc gs_level
-	sta zp11_loop_count
+	sta a11
 	lda gs_player_x
 	asl
 	asl
@@ -3207,46 +3209,46 @@ get_maze_feature:
 	asl
 	clc
 	adc gs_player_y
-	sta zp10_temp
+	sta a10
 	lda #>maze_features
-	sta zp0F_action
+	sta a0F
 	lda #<maze_features
-	sta zp0E_draw_param
+	sta a0E
 	lda #maze_features_end
-	sta zp19_level
+	sta a19
 	ldy #$00
-	lda zp11_loop_count
+	lda a11
 @next:
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @check_position
 	iny
 @continue:
 	iny
 	iny
 	iny
-	dec zp19_level
+	dec a19
 	bne @next
 	lda #$00
-	sta zp0F_action
-	sta zp0E_draw_param
+	sta a0F
+	sta a0E
 	rts
 
 @check_position:
-	lda zp10_temp
+	lda a10
 	iny
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq @match
-	lda zp11_loop_count
+	lda a11
 	bne @continue
 @match:
 	iny
-	lda (zp0E_draw_param),y
-	sta zp11_loop_count
+	lda (p0E),y
+	sta a11
 	iny
-	lda (zp0E_draw_param),y
-	sta zp0E_draw_param
-	lda zp11_loop_count
-	sta zp0F_action
+	lda (p0E),y
+	sta a0E
+	lda a11
+	sta a0F
 	rts
 
 keyhole_0:
@@ -3257,35 +3259,35 @@ keyhole_0:
 	.byte $0b,$0b,$0b,$0b
 
 draw_special:
-	ldy zp0F_action
+	ldy a0F
 	dey
 	bne @draw_2_elevator
 @draw_1_keyhole:
 	lda #$09
-	sta zp1A_endgame_step
+	sta a1A
 	sta zp_col
 	lda #$06
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #>keyhole_0
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #<keyhole_0
-	sta zp0A_text_ptr
+	sta a0A
 	ldy #$00
 @next_row:
 	lda #$04
-	sta zp19_level
+	sta a19
 @next_glyph:
 	tya
 	pha
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	jsr print_char
 	pla
 	tay
 	iny
-	dec zp19_level
+	dec a19
 	bne @next_glyph
-	dec zp1A_endgame_step
+	dec a1A
 	beq @done
 	tya
 	pha
@@ -3345,20 +3347,20 @@ draw_special:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #>@string_elevator
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #<@string_elevator
-	sta zp0A_text_ptr
+	sta a0A
 	ldy #$00
 	lda #$08
-	sta zp1A_endgame_step
+	sta a1A
 :	tya
 	pha
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	jsr print_char
 	pla
 	tay
 	iny
-	dec zp1A_endgame_step
+	dec a1A
 	bne :-
 	rts
 
@@ -3371,13 +3373,13 @@ draw_special:
 	jmp @draw_4_pit_floor
 
 :	lda #$06
-	sta zp0C_col_left
+	sta a0C
 @next_frame_3:
 	lda #$00
 	sta zp_row
 	lda #$06
 	sec
-	sbc zp0C_col_left
+	sbc a0C
 	sta zp_col
 	pha
 	lda #' '
@@ -3448,7 +3450,7 @@ draw_special:
 	sta zp_row
 	lda #$10
 	clc
-	adc zp0C_col_left
+	adc a0C
 	sta zp_col
 	pha
 	lda #' '
@@ -3516,7 +3518,7 @@ p1FFF:
 	jsr draw_down
 	ldy #$04
 	jsr draw_down_right
-	dec zp0C_col_left
+	dec a0C
 	beq :+
 	jsr wait_brief
 	jmp @next_frame_3
@@ -3534,56 +3536,56 @@ p1FFF:
 	bne @draw_5_pit_roof
 
 	lda #<@pit_floor_data
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>@pit_floor_data
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #$02
-	sta zp19_level
-	lda zp0E_draw_param
+	sta a19
+	lda a0E
 	beq @pit_walls
 	ldy #$0c
 @pit_walls:
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	sta zp_col
 	iny
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	sta zp_row
 	iny
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	iny
-	sta zp1A_endgame_step
+	sta a1A
 	tya
 	pha
-	lda zp1A_endgame_step
+	lda a1A
 	tay
 	lda #$02     ;glyph_R, then glyph_L
 	clc
-	adc zp19_level
+	adc a19
 	jsr draw_down
 	pla
 	tay
-	dec zp19_level
+	dec a19
 	bne @pit_walls
 	lda #$02
-	sta zp19_level
+	sta a19
 @pit_rim:
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	sta screen_ptr+1
 	iny
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	sta screen_ptr
 	iny
-	lda (zp0A_text_ptr),y
-	sta zp1A_endgame_step
+	lda (p0A),y
+	sta a1A
 	iny
 	tya
 	pha
-	lda zp1A_endgame_step
+	lda a1A
 	tay
 	jsr draw_right
 	pla
 	tay
-	dec zp19_level
+	dec a19
 	bne @pit_rim
 	rts
 
@@ -3599,12 +3601,12 @@ p1FFF:
 	bne @draw_6_boxes
 
 	lda #<@pit_roof_data
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>@pit_roof_data
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #$02
-	sta zp19_level
-	ldy zp0E_draw_param
+	sta a19
+	ldy a0E
 	beq :+
 	dey
 	beq @pit_walls
@@ -3777,7 +3779,7 @@ p1FFF:
 	beq :+
 	jmp @draw_8_doors
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #$01
 	beq @square_right
 	cmp #$04
@@ -3810,16 +3812,16 @@ p1FFF:
 
 @sq_sign:
 	lda #<@string_square
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>@string_square
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #$0a
 	sta zp_col
 	lda #$04
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$03
-	sta zp1A_endgame_step
+	sta a1A
 	jsr @print_square_row
 	lda #$08
 	sta zp_col
@@ -3827,7 +3829,7 @@ p1FFF:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$07
-	sta zp1A_endgame_step
+	sta a1A
 	jsr @print_square_row
 	lda #$09
 	sta zp_col
@@ -3835,59 +3837,59 @@ p1FFF:
 	sta zp_row
 	jsr get_rowcol_addr
 	lda #$06
-	sta zp1A_endgame_step
+	sta a1A
 @print_square_row:
 	ldy #$00
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	jsr char_out
-	inc zp0A_text_ptr
+	inc a0A
 	bne :+
-	inc zp0A_text_ptr+1
-:	dec zp1A_endgame_step
+	inc a0B
+:	dec a1A
 	bne @print_square_row
 	rts
 
 @square_right:
 	lda #<@square_data_right
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>@square_data_right
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #$13
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta zp1A_endgame_step
+	sta a1A
 @sq_next_row:
 	jsr get_rowcol_addr
 	ldy #$00
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	jsr char_out
-	inc zp0A_text_ptr
+	inc a0A
 	bne :+
-	inc zp0A_text_ptr+1
+	inc a0B
 :	ldy #$00
-	lda (zp0A_text_ptr),y
+	lda (p0A),y
 	jsr char_out
-	inc zp0A_text_ptr
+	inc a0A
 	bne :+
-	inc zp0A_text_ptr+1
+	inc a0B
 :	inc zp_row
 	dec zp_col
 	dec zp_col
-	dec zp1A_endgame_step
+	dec a1A
 	bne @sq_next_row
 	rts
 
 @square_left:
 	lda #<@square_data_left
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>@square_data_left
-	sta zp0A_text_ptr+1
+	sta a0B
 	lda #$02
 	sta zp_col
 	lda #$07
 	sta zp_row
-	sta zp1A_endgame_step
+	sta a1A
 	jmp @sq_next_row
 
 @draw_8_doors:
@@ -3895,7 +3897,7 @@ p1FFF:
 	beq :+
 	jmp @draw_9_keyholes
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #$04
 	bne @door_2_right
 	jmp @door_1_left
@@ -3997,7 +3999,7 @@ p1FFF:
 	beq :+
 	jmp @draw_A_special
 
-:	lda zp0E_draw_param
+:	lda a0E
 	and #$0f
 	beq @keyhole_L_1
 @keyhole_R_4:
@@ -4007,21 +4009,21 @@ p1FFF:
 	sta zp_col
 	jsr draw_keyhole_4
 @keyhole_R_3:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 2)
 	beq @keyhole_R_2
 	lda #$0d
 	sta zp_col
 	jsr draw_keyhole_3
 @keyhole_R_2:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 1)
 	beq @keyhole_R_1
 	lda #$0f
 	sta zp_col
 	jsr draw_keyhole_2
 @keyhole_R_1:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 0)
 	beq @keyhole_R_done
 	lda #$13
@@ -4032,28 +4034,28 @@ s244B:
 	rts
 
 @keyhole_L_1:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 4)
 	beq @keyhole_L_2
 	lda #$02
 	sta zp_col
 	jsr draw_keyhole_1
 @keyhole_L_2:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 5)
 	beq @keyhole_L_3
 	lda #$05
 	sta zp_col
 	jsr draw_keyhole_2
 @keyhole_L_3:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 6)
 	beq @keyhole_L_4
 	lda #$08
 	sta zp_col
 	jsr draw_keyhole_3
 @keyhole_L_4:
-	lda zp0E_draw_param
+	lda a0E
 	and #(1 << 7)
 	beq @keyhole_L_done
 	lda #$0a
@@ -4178,38 +4180,38 @@ draw_keyhole_4:
 	ldy #$02
 	jsr draw_right
 	lda #$0a
-	sta zp0C_col_left
+	sta a0C
 	lda #$0b
-	sta zp19_level
+	sta a19
 	lda #$04
-	sta zp11_loop_count
+	sta a11
 	lda #$02
-	sta zp10_temp
+	sta a10
 @next_frame_opening:
 	jsr wait_brief
-	lda zp0C_col_left
+	lda a0C
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #' '
 	ldy #$12
 	jsr draw_down
-	lda zp19_level
+	lda a19
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #' '
 	ldy #$12
 	jsr draw_down
-	dec zp0C_col_left
-	inc zp19_level
-	lda zp0C_col_left
+	dec a0C
+	inc a19
+	lda a0C
 	sta zp_col
 	lda #$03     ;also glyph_L
 	sta zp_row
 	ldy #$12
 	jsr draw_down
-	lda zp19_level
+	lda a19
 	sta zp_col
 	lda #$03
 	sta zp_row
@@ -4218,56 +4220,56 @@ draw_keyhole_4:
 	jsr draw_down
 	lda #$11
 	sta zp_row
-	dec zp0C_col_left
-	lda zp0C_col_left
-	inc zp0C_col_left
+	dec a0C
+	lda a0C
+	inc a0C
 	sta zp_col
 	jsr get_rowcol_addr
-	inc zp10_temp
-	inc zp10_temp
-	ldy zp10_temp
+	inc a10
+	inc a10
+	ldy a10
 	jsr draw_right
-	dec zp11_loop_count
+	dec a11
 	bne @next_frame_opening
 	rts
 
 print_noun:
 	sta a13
 	lda #<noun_table
-	sta zp0C_col_left
+	sta a0C
 	lda #>noun_table
-	sta zp_0D
+	sta a0D
 	ldy #$00
 @find_string:
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	bmi @found_start
 @next_char:
-	inc zp0C_col_left
+	inc a0C
 	bne @find_string
-	inc zp_0D
+	inc a0D
 	bne @find_string
 @found_start:
 	dec a13
 	bne @next_char
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	and #$7f
 @print_char:
 	jsr char_out
-	inc zp0C_col_left
+	inc a0C
 	bne :+
-	inc zp_0D
+	inc a0D
 :	ldy #$00
-	lda (zp0C_col_left),y
+	lda (p0C),y
 	bpl @print_char
 	lda #' '
 	jmp char_out
 
 wait_brief:
 	ldx #$28
-	stx zp0F_action
-:	dec zp0E_draw_param
+	stx a0F
+:	dec a0E
 	bne :-
-	dec zp0F_action
+	dec a0F
 	bne :-
 	rts
 
@@ -4279,34 +4281,34 @@ wait_brief:
 
 player_cmd:
 	lda gd_parsed_object
-	sta zp0E_draw_param
+	sta a0E
 	lda gd_parsed_action
-	sta zp0F_action
+	sta a0F
 	cmp #$0e
 	bmi :+
 	jmp cmd_look
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #nouns_item_end
 	bmi :+
 	jmp nonsense
 
 :	jsr noun_to_item
-	sta zp11_loop_count
+	sta a11
 	lda gd_parsed_object
-	sta zp0E_draw_param
+	sta a0E
 	lda gd_parsed_action
-	sta zp0F_action
+	sta a0F
 
 cmd_raise:
-	dec zp0F_action
+	dec a0F
 	bne @cmd_blow
 
 	lda #noun_ring
-	cmp zp0E_draw_param
+	cmp a0E
 	beq @ring
 	lda #noun_staff
-	cmp zp0E_draw_param
+	cmp a0E
 	beq @staff
 @having_fun:
 	lda #$1f     ;Having fun?
@@ -4321,12 +4323,12 @@ cmd_raise:
 	cmp #$05
 	bne @having_fun
 	lda #$07
-	cmp zp1A_endgame_step
+	cmp a1A
 	beq @having_fun
 	lda #noun_ring
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_set_carried_active
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	lda #$01
 	sta gs_room_lit
@@ -4337,10 +4339,10 @@ cmd_raise:
 	bne @print_line2
 
 @cmd_blow:
-	dec zp0F_action
+	dec a0F
 	bne cmd_break
 
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_flute
 	beq @play
 	cmp #noun_horn
@@ -4352,9 +4354,9 @@ cmd_raise:
 	cmp #special_mode_mother
 	bne :+
 	lda #noun_horn
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_set_carried_active
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 :	lda #$7f     ;A deafening roar envelopes
 	jsr print_to_line1
@@ -4364,32 +4366,32 @@ cmd_raise:
 
 @play:
 	lda #noun_play - noun_blow
-	sta zp0F_action
+	sta a0F
 cmd_break:
-	dec zp0F_action
+	dec a0F
 	bne cmd_burn
 
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
 :	cmp #nouns_unique_end
 	bmi @broken
 	sta a13
-	lda zp10_temp
+	lda a10
 	pha
-	lda zp11_loop_count
+	lda a11
 	pha
 	lda a13
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
 :	pla
-	sta zp11_loop_count
+	sta a11
 	pla
-	sta zp10_temp
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	sta a10
+	lda a11
+	sta a0E
 @broken:
 	jsr item_cmd
 	jsr update_view
@@ -4419,20 +4421,20 @@ lose_one_torch:
 @unlit:
 	dec gs_torches_unlit
 	lda #icmd_which_torch_unlit
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_destroy1
-	sta zp0F_action
+	sta a0F
 	jmp item_cmd
 
 cmd_burn:
-	dec zp0F_action
+	dec a0F
 	bne cmd_eat
 
 	lda gs_torches_lit
 	beq @no_fire
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
@@ -4440,8 +4442,8 @@ cmd_burn:
 	bmi @burned
 	cmp #noun_torch
 	beq make_cmd_light
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	lda a11
+	sta a0E
 @burned:
 	jsr item_cmd
 	jsr clear_status_lines
@@ -4463,13 +4465,13 @@ push_special_mode:
 
 make_cmd_light:
 	lda #verb_light - verb_burn
-	sta zp0F_action
+	sta a0F
 cmd_eat:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	jmp cmd_throw
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
@@ -4479,8 +4481,8 @@ cmd_eat:
 	cmp #noun_torch
 	beq @torch
 @torch_return:
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	lda a11
+	sta a0E
 @eaten:
 	jsr item_cmd
 	jsr update_view
@@ -4494,42 +4496,42 @@ cmd_eat:
 @print:
 	jsr print_to_line2
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jmp item_cmd
 
 @torch:
-	lda zp10_temp
+	lda a10
 	pha
-	lda zp11_loop_count
+	lda a11
 	pha
 	jsr lose_one_torch
 	pla
-	sta zp11_loop_count
+	sta a11
 	pla
-	sta zp10_temp
+	sta a10
 	jmp @torch_return
 
 @food:
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	lda a11
+	sta a0E
 	jsr item_cmd
 	lda gs_food_time_hi
-	sta zp0F_action
+	sta a0F
 	lda gs_food_time_lo
-	sta zp0E_draw_param
+	sta a0E
 	lda #<food_amount
-	sta zp19_level
+	sta a19
 	lda #>food_amount
-	sta zp1A_endgame_step
+	sta a1A
 	clc
-	lda zp19_level
-	adc zp0E_draw_param
-	sta zp0E_draw_param
-	lda zp1A_endgame_step
-	adc zp0F_action
-	sta zp0F_action
+	lda a19
+	adc a0E
+	sta a0E
+	lda a1A
+	adc a0F
+	sta a0F
 	sta gs_food_time_hi
-	lda zp0E_draw_param
+	lda a0E
 	sta gs_food_time_lo
 	lda #$58     ;Digested
 	bne @print
@@ -4550,11 +4552,11 @@ lose_ring:
 	rts
 
 cmd_throw:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	jmp cmd_climb
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
@@ -4572,8 +4574,8 @@ cmd_throw:
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
-:	lda zp11_loop_count
-	sta zp0E_draw_param
+:	lda a11
+	sta a0E
 @thrown:
 	jsr item_cmd
 	jsr print_thrown
@@ -4600,9 +4602,9 @@ cmd_throw:
 	lda #special_mode_tripped
 	sta gs_special_mode
 	lda #noun_wool
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_destroy1
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	jsr print_thrown
 	lda #$5e     ;and the monster grabs it,
@@ -4621,18 +4623,18 @@ cmd_throw:
 	jmp print_to_line2
 
 @throw_food:
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	lda a11
+	sta a0E
 	jsr item_cmd
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	lda #$81     ;Food fight!
 	jmp print_to_line2
 
 print_thrown:
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	lda #$59     ;The
 	jsr print_to_line1
@@ -4641,14 +4643,14 @@ print_thrown:
 	jsr dec_item_ptr
 	lda #' '
 	ldy #$00
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	beq :+
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	inc zp0E_draw_param
+	inc a0F
+:	inc a0E
 	bne :+
-	inc zp0F_action
+	inc a0F
 :	lda #$5a     ;magically sails
 	jsr print_display_string
 	lda #$5b     ;around a nearby corner
@@ -4663,9 +4665,9 @@ throw_frisbee:
 	jmp @thrown
 
 :	lda #noun_frisbee
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_destroy1
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	jsr print_thrown
 	jsr clear_status_lines
@@ -4677,25 +4679,25 @@ throw_frisbee:
 	jmp game_over
 
 cmd_climb:
-	dec zp0F_action
+	dec a0F
 	bne cmd_drop
 	jmp nonsense ;Climbing only possible during special_climb
 
 cmd_drop:
-	dec zp0F_action
+	dec a0F
 	bne cmd_fill
 
 	jsr swap_saved_vars
 	lda #icmd_which_box
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	cmp #$00
 	beq @vacant_at_feet
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_where
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_begin
 	bcs @vacant_at_feet
 	lda #$82     ;The hallway is too crowded.
@@ -4704,7 +4706,7 @@ cmd_drop:
 
 @vacant_at_feet:
 	jsr swap_saved_vars
-	lda zp0E_draw_param
+	lda a0E
 	cmp #nouns_unique_end
 	bpl @multiples
 	cmp #noun_ring
@@ -4712,22 +4714,22 @@ cmd_drop:
 	jsr lose_ring
 @dropped:
 	lda #icmd_drop
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jmp item_cmd
 
 @multiples:
 	cmp #noun_torch
 	beq @torch_unlit
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	lda a11
+	sta a0E
 	jmp @dropped
 
 @torch_unlit:
 	lda #icmd_which_torch_unlit
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	beq @torch_lit
 	dec gs_torches_unlit
@@ -4735,9 +4737,9 @@ cmd_drop:
 
 @torch_lit:
 	lda #icmd_which_torch_lit
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	sta zp0E_draw_param
+	sta a0E
 	dec gs_torches_lit
 	jsr push_special_mode
 	lda #$00
@@ -4749,10 +4751,10 @@ cmd_drop:
 	jmp @dropped
 
 cmd_fill:
-	dec zp0F_action
+	dec a0F
 	bne cmd_light
 
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_jar
 	beq :+
 	jmp nonsense
@@ -4761,16 +4763,16 @@ cmd_fill:
 	jmp print_to_line2
 
 cmd_light:
-	dec zp0F_action
+	dec a0F
 	bne cmd_play
 
-	sta zp11_loop_count
-	lda zp0E_draw_param
+	sta a11
+	lda a0E
 	cmp #noun_torch
 	beq :+
 	jmp nonsense
 
-:	lda zp1A_endgame_step
+:	lda a1A
 	cmp #carried_active
 	bne cmd_light_impl
 	jmp not_carried
@@ -4781,26 +4783,26 @@ cmd_light_impl:
 	lda #$88     ;You have no fire.
 	jsr print_to_line2
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jmp item_cmd
 
 @have_fire:
 	lda #icmd_which_torch_lit
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	cmp #$00
 	beq @light_torch
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_destroy2
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 @light_torch:
 	lda #icmd_which_torch_unlit
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_set_carried_active
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	jsr clear_status_lines
 	lda #$65     ;The torch is lit and the
@@ -4809,18 +4811,18 @@ cmd_light_impl:
 	jsr print_to_line2
 	dec gs_torches_unlit
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	lda #torch_lifespan
 	sta gs_torch_time
 	rts
 
 cmd_play:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	jmp cmd_strike
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #item_flute
 	beq play_flute
 	cmp #item_ball
@@ -4841,11 +4843,11 @@ print_and_rts:
 
 play_flute:
 	lda #noun_snake
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_where
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp gs_level
 	bne @music
 	lda gs_player_x
@@ -4855,7 +4857,7 @@ play_flute:
 	asl
 	clc
 	adc gs_player_y
-	cmp zp19_level
+	cmp a19
 	beq @charm
 @music:
 	jsr clear_status_lines
@@ -4878,10 +4880,10 @@ play_flute:
 	lda #glyph_L_solid
 	jsr print_char
 	lda #$30
-	sta zp11_loop_count
-:	dec zp10_temp
+	sta a11
+:	dec a10
 	bne :-
-	dec zp11_loop_count
+	dec a11
 	bne :-
 	dec zp_col
 	dec zp_col
@@ -4889,9 +4891,9 @@ play_flute:
 	dec zp_row
 	bpl @draw_snake
 	lda #icmd_set_carried_active
-	sta zp0F_action
+	sta a0F
 	lda #noun_snake
-	sta zp0E_draw_param
+	sta a0E
 	jsr item_cmd
 	jsr push_special_mode
 	lda #special_mode_climb
@@ -4901,10 +4903,10 @@ play_flute:
 	rts
 
 cmd_strike:
-	dec zp0F_action
+	dec a0F
 	bne cmd_wear
 
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_staff
 	beq :+
 	jmp nonsense
@@ -4916,11 +4918,11 @@ cmd_strike:
 	jmp print_to_line2
 
 cmd_wear:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	rts
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #noun_hat
 	beq @hat
 @print:
@@ -4932,18 +4934,18 @@ cmd_wear:
 
 @hat:
 	lda #icmd_set_carried_active
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 	jmp @print
 
 cmd_look:
-	lda zp0F_action
+	lda a0F
 	sec
 	sbc #$0e
-	sta zp0F_action
+	sta a0F
 	bne cmd_rub
 
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_hat
 	bne :+
 	jmp look_hat
@@ -4981,7 +4983,7 @@ print_inspected:
 	bne look_print
 
 cmd_rub:
-	dec zp0F_action
+	dec a0F
 	bne cmd_open
 
 	jsr noun_to_item
@@ -4994,11 +4996,11 @@ cmd_rub:
 	bne look_print
 
 cmd_open:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	jmp cmd_press
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #noun_door
 	bne :+
 	jmp @open_door
@@ -5009,30 +5011,30 @@ cmd_open:
 
 @open_box:
 	lda #icmd_which_box
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	sta zp11_loop_count
+	sta a11
 	beq look_not_here
-	lda zp10_temp
+	lda a10
 	pha
-	lda zp11_loop_count
+	lda a11
 	pha
-	sta zp0E_draw_param
+	sta a0E
 	lda #icmd_where
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_begin
 	bcs :+
 	jmp @check_contents
 
-:	lda zp11_loop_count
-	sta zp0E_draw_param
+:	lda a11
+	sta a0E
 	lda #icmd_set_carried_known
-	sta zp0F_action
+	sta a0F
 	jsr item_cmd
 @check_contents:
-	lda zp11_loop_count
+	lda a11
 	cmp #noun_snake
 	beq @push_mode_snake
 	bmi @print_item_name
@@ -5043,13 +5045,13 @@ cmd_open:
 :	lda #noun_food
 @print_item_name:
 	jsr clear_status_lines
-	sta zp10_temp
+	sta a10
 	clc
 	adc #$04
 	jsr print_to_line2
 	lda #$18     ;Inside the box there is a
 	jsr print_to_line1
-	lda zp10_temp
+	lda a10
 	cmp #noun_calculator
 	bne :+
 	jsr on_reveal_calc
@@ -5058,25 +5060,25 @@ cmd_open:
 	bne :+
 	jsr wait_long
 :	pla
-	sta zp11_loop_count
+	sta a11
 	pla
-	sta zp10_temp
+	sta a10
 	lda a13
 	cmp #noun_torch
 	bne @done
 	lda #icmd_where
-	sta zp0F_action
+	sta a0F
 j2C04=*+$01
-	lda zp11_loop_count
-	sta zp0E_draw_param
+	lda a11
+	sta a0E
 	jsr item_cmd
 	lda #carried_known
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @done
 	inc gs_torches_unlit
 @done:
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jmp item_cmd
 
 @push_mode_snake:
@@ -5098,11 +5100,11 @@ j2C04=*+$01
 
 :	jsr swap_saved_A
 	ldx #noun_key
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_unboxed
 	bmi @no_key
 	jsr swap_saved_A
@@ -5140,52 +5142,52 @@ j2C04=*+$01
 
 which_door:
 	ldx #$e8
-	stx zp0E_draw_param
+	stx a0E
 	ldx #$2c
-	stx zp0F_action
+	stx a0F
 	ldx gs_level
-	stx zp19_level
+	stx a19
 	lda gs_player_x
 	ldx #$04
-	stx zp1A_endgame_step
+	stx a1A
 :	asl
-	asl zp19_level
-	dec zp1A_endgame_step
+	asl a19
+	dec a1A
 	bne :-
 	clc
 	adc gs_player_y
-	sta zp11_loop_count
-	lda zp19_level
+	sta a11
+	lda a19
 	clc
 	adc gs_facing
-	sta zp19_level
+	sta a19
 	ldx #$09
-	stx zp1A_endgame_step
+	stx a1A
 @find:
 	ldy #$00
-	cmp (zp0E_draw_param),y
+	cmp (p0E),y
 	bne @next2
-	lda zp11_loop_count
-	inc zp0E_draw_param
+	lda a11
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	cmp (zp0E_draw_param),y
+	inc a0F
+:	cmp (p0E),y
 	bne @next1
 	lda #$0a
 	sec
-	sbc zp1A_endgame_step
+	sbc a1A
 	rts
 
 @next2:
-	inc zp0E_draw_param
+	inc a0E
 	bne @next1
-	inc zp0F_action
+	inc a0F
 @next1:
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	lda zp19_level
-	dec zp1A_endgame_step
+	inc a0F
+:	lda a19
+	dec a1A
 	bne @find
 	lda #$00
 	rts
@@ -5195,21 +5197,21 @@ which_door:
 	.byte $52,$8a
 
 cmd_press:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	jmp cmd_take
 
-:	lda zp0E_draw_param
+:	lda a0E
 	cmp #noun_zero
 	bpl :+
 	jmp nonsense
 
 :	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	ldx #noun_calculator
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_known
 	beq :+
 	jmp not_carried
@@ -5234,9 +5236,9 @@ cmd_press:
 	sec
 	sbc #noun_zero-1
 	ldx #<teleport_table
-	stx zp0E_draw_param
+	stx a0E
 	ldx #>teleport_table
-	stx zp0F_action
+	stx a0F
 @find_location:
 	sec
 	sbc #$01
@@ -5244,32 +5246,32 @@ cmd_press:
 	clc
 	pha
 	lda #$04
-	adc zp0E_draw_param
-	sta zp0E_draw_param
-	lda zp0F_action
+	adc a0E
+	sta a0E
+	lda a0F
 	adc #$00
-	sta zp0F_action
+	sta a0F
 	pla
 	jmp @find_location
 
 @found:
 	ldy #$00
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	sta gs_facing
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	lda (zp0E_draw_param),y
+	inc a0F
+:	lda (p0E),y
 	sta gs_level
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	lda (zp0E_draw_param),y
+	inc a0F
+:	lda (p0E),y
 	sta gs_player_x
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	lda (zp0E_draw_param),y
+	inc a0F
+:	lda (p0E),y
 	sta gs_player_y
 	ldx #$00
 	stx gs_level_turns_hi
@@ -5289,23 +5291,23 @@ cmd_press:
 	inc gs_torches_unlit
 	dec gs_torches_lit
 	ldx #icmd_which_torch_lit
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	ldx #icmd_set_carried_known
-	stx zp0F_action
-	sta zp0E_draw_param
+	stx a0F
+	sta a0E
 	jsr item_cmd
 @teleported:
 	ldx #noun_calculator
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_destroy2
-	stx zp0F_action
+	stx a0F
 	ldx #special_mode_dark
 	stx gs_special_mode
 	jsr item_cmd
 	jsr clear_maze_window
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$86     ;You have been teleported!
 	jsr print_to_line1
@@ -5333,21 +5335,21 @@ teleport_table:
 	.byte $03,$04,$09,$0a,$03,$03,$07,$0a
 
 cmd_take:
-	dec zp0F_action
+	dec a0F
 	beq :+
 	jmp cmd_attack
 
 :	ldx #icmd_which_box
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	tax
 	bne :+
 	jmp @cannot
 
-:	sta zp11_loop_count
-	sta zp0E_draw_param
+:	sta a11
+	sta a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda gd_parsed_object
 	cmp #noun_box
@@ -5359,33 +5361,33 @@ cmd_take:
 	jmp @multiple
 
 @unique_item:
-	cmp zp11_loop_count
+	cmp a11
 	bne @open_if_carried
-	ldx zp11_loop_count
-	stx zp0E_draw_param
-	lda zp1A_endgame_step
+	ldx a11
+	stx a0E
+	lda a1A
 	cmp #carried_boxed
 	bne @take_if_space ;at feet
-	lda zp11_loop_count
+	lda a11
 @open_if_carried:
-	sta zp0E_draw_param
+	sta a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 j2E72=*+$02
 	jsr item_cmd
 	lda #carried_boxed
-	cmp zp1A_endgame_step
+	cmp a1A
 	beq :+
 	jmp @cannot
 
 :	ldx gd_parsed_object
-	stx zp0E_draw_param
+	stx a0E
 	jmp @take
 
 @ensure_inv_space:
 	jsr swap_saved_vars
 	ldx #icmd_count_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda zp19_count
 	cmp #inventory_max
@@ -5398,11 +5400,11 @@ j2E72=*+$02
 	jsr @ensure_inv_space
 @take:
 	ldx #icmd_set_carried_known
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 @react_taken:
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda gd_parsed_object
 	cmp #noun_calculator
@@ -5432,14 +5434,14 @@ on_reveal_calc:
 	rts
 
 @take_box:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_begin
 	bpl @cannot
 	jsr @ensure_inv_space
-	ldx zp11_loop_count
-	stx zp0E_draw_param
+	ldx a11
+	stx a0E
 	ldx #icmd_set_carried_boxed
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	jmp @react_taken
 
@@ -5447,15 +5449,15 @@ on_reveal_calc:
 	cmp #noun_food
 	beq @food
 
-	lda zp11_loop_count
+	lda a11
 j2EFB:
 	cmp #item_torch_end
 	bpl @find_boxed_torch
 	cmp #item_torch_begin
 	bmi @find_boxed_torch
-	ldx zp11_loop_count
-	stx zp0E_draw_param
-	lda zp1A_endgame_step
+	ldx a11
+	stx a0E
+	lda a1A
 	cmp #carried_boxed
 	beq @take    ;BUG: get box > get torch: does not increment unlit count if it's the only box
 	jsr @ensure_inv_space
@@ -5463,14 +5465,14 @@ j2EFB:
 	jmp @take
 
 @food:
-	lda zp11_loop_count
+	lda a11
 	cmp #item_food_end
 	bpl @find_boxed_food
 	cmp #item_food_begin
 	bmi @find_boxed_food
-	ldx zp11_loop_count
-	stx zp0E_draw_param
-	lda zp1A_endgame_step
+	ldx a11
+	stx a0E
+	lda a1A
 	cmp #carried_boxed
 	bne :+
 	jmp @take
@@ -5484,60 +5486,60 @@ j2EFB:
 
 @inventory_full:
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
+	sta a0F
 	jsr swap_saved_vars
 	lda #$99     ;Carrying the limit.
 	bne @print_rts
 
 @find_boxed_torch:
 	ldx #item_torch_begin - 1
-	stx zp0E_draw_param
+	stx a0E
 	bne @begin_search
 @find_boxed_food:
 	ldx #item_food_begin - 1
-	stx zp0E_draw_param
+	stx a0E
 @begin_search:
-	lda zp0F_action
+	lda a0F
 	pha
-	lda zp0E_draw_param
+	lda a0E
 	pha
 	ldx #items_food
 
 ; .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
-	stx zp11_loop_count ;count
+	stx a11      ;count
 @next:
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
-	inc zp0E_draw_param
+	sta a0F
+	inc a0E
 	bne :+
-	inc zp0F_action
-:	lda zp0F_action
+	inc a0F
+:	lda a0F
 	pha
-	lda zp0E_draw_param
+	lda a0E
 	pha
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #carried_boxed
-	cmp zp1A_endgame_step
+	cmp a1A
 	beq @found
-	dec zp11_loop_count
+	dec a11
 	bne @next
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
+	sta a0F
 	jmp @cannot
 
 @found:
 	pla
-	sta zp0E_draw_param
+	sta a0E
 	pla
-	sta zp0F_action
+	sta a0F
 	lda gd_parsed_object
 	cmp #noun_torch
 	beq :+
@@ -5547,10 +5549,10 @@ j2EFB:
 	jmp @take
 
 cmd_attack:
-	dec zp0F_action
+	dec a0F
 	bne cmd_paint
 
-	lda zp0E_draw_param
+	lda a0E
 	cmp #noun_snake
 	beq @not_here
 	cmp #nouns_item_end
@@ -5572,14 +5574,14 @@ cmd_attack:
 	rts
 
 cmd_paint:
-	dec zp0F_action
+	dec a0F
 	bne cmd_grendel
 	ldx #noun_brush
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_known
 	beq :+
 	jmp not_carried
@@ -5588,48 +5590,48 @@ cmd_paint:
 	bne @print
 
 cmd_grendel:
-	dec zp0F_action
+	dec a0F
 	bne cmd_say
 	jmp nonsense ;GUG: maybe disguise this better
 
 cmd_say:
-	dec zp0F_action
+	dec a0F
 	bne cmd_charge
 
 	lda #$76     ;OK...
 	jsr print_to_line2
 	lda #<text_buffer_line1
-	sta zp0E_draw_param
+	sta a0E
 	lda #>text_buffer_line1
-	sta zp0F_action
+	sta a0F
 	ldy #$00
 	lda #' '
-:	cmp (zp0E_draw_param),y
+:	cmp (p0E),y
 	beq @next_char
-	inc zp0E_draw_param
+	inc a0E
 	bne :-
-	inc zp0F_action
+	inc a0F
 	bne :-
 @echo_word:
 	ldy #$00
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	cmp #' '
 	beq @done
-	sta (zp0A_text_ptr),y
+	sta (p0A),y
 	jsr print_char
 @next_char:
-	inc zp0A_text_ptr
+	inc a0A
 	bne :+
-	inc zp0A_text_ptr+1
-:	inc zp0E_draw_param
+	inc a0B
+:	inc a0E
 	bne @echo_word
-	inc zp0F_action
+	inc a0F
 	bne @echo_word
 @done:
 	rts
 
 cmd_charge:
-	dec zp0F_action
+	dec a0F
 	beq @propel_player
 	jmp cmd_fart
 
@@ -5648,12 +5650,12 @@ cmd_charge:
 	cmp gs_player_y
 	bne @normal
 	ldx #noun_hat
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #carried_active
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne brained
 	jsr update_view
 	jsr wait_short
@@ -5717,23 +5719,23 @@ brained:
 	jmp game_over
 
 cmd_fart:
-	dec zp0F_action
+	dec a0F
 	beq check_fart
 	jmp cmd_save
 
 flash_screen:
 	ldx #<screen_GR1
-	stx zp0E_draw_param
+	stx a0E
 	ldx #>screen_GR1
-	stx zp0F_action
+	stx a0F
 	ldy #$00
 @fill:
 	lda #$dd     ;yellow
-:	sta (zp0E_draw_param),y
-	inc zp0E_draw_param
+:	sta (p0E),y
+	inc a0E
 	bne :-
-	inc zp0F_action
-	lda zp0F_action
+	inc a0F
+	lda a0F
 	cmp #>screen_GR2
 	bne @fill
 	bit hw_PAGE1
@@ -5786,12 +5788,12 @@ check_fart:
 @wall:
 	jsr update_view ;GUG: is this draw necessary?
 	ldx gs_food_time_hi
-	stx zp0F_action
+	stx a0F
 	ldx gs_food_time_lo
-	stx zp0E_draw_param
-	lda zp0F_action
+	stx a0E
+	lda a0F
 	bne @consume_food
-	lda zp0E_draw_param
+	lda a0E
 	cmp #food_fart_minimum
 	bcs :+
 	jmp starved
@@ -5800,18 +5802,18 @@ check_fart:
 	bcc @clamp_minimum
 @consume_food:
 	lda #>food_fart_consume
-	sta zp1A_endgame_step
+	sta a1A
 	lda #<food_fart_consume
-	sta zp19_level
-	lda zp0E_draw_param
+	sta a19
+	lda a0E
 	sec
-	sbc zp19_level
-	sta zp0E_draw_param
-	lda zp0F_action
-	sbc zp1A_endgame_step
-	sta zp0F_action
+	sbc a19
+	sta a0E
+	lda a0F
+	sbc a1A
+	sta a0F
 	sta gs_food_time_hi
-	lda zp0E_draw_param
+	lda a0E
 	sta gs_food_time_lo
 @wham:
 	jsr wait_short
@@ -5830,7 +5832,7 @@ check_fart:
 	bne @wham
 
 cmd_save:
-	dec zp0F_action
+	dec a0F
 	bne cmd_quit
 	lda gs_special_mode
 	beq ask_save_game
@@ -5867,7 +5869,7 @@ save_to_tape:
 	jmp clear_status_lines
 
 cmd_quit:
-	dec zp0F_action
+	dec a0F
 	bne cmd_directions
 	jsr clear_status_lines
 	lda #$9c     ;Are you sure you want to quit?
@@ -5881,7 +5883,7 @@ cmd_quit:
 	jmp play_again
 
 cmd_directions:
-	dec zp0F_action
+	dec a0F
 	bne cmd_hint
 	jsr clear_hgr2
 	lda #$00
@@ -5889,25 +5891,25 @@ cmd_directions:
 	sta zp_row
 	jsr get_rowcol_addr
 	ldx #<(intro_text-1)
-	stx zp0E_draw_param
+	stx a0E
 	ldx #>(intro_text-1)
-	stx zp0F_action
+	stx a0F
 @next_char:
-	inc zp0E_draw_param
+	inc a0E
 	bne :+
-	inc zp0F_action
+	inc a0F
 :	ldy #$00
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	and #$7f
 	jsr char_out
 	ldy #$00
-	lda (zp0E_draw_param),y
+	lda (p0E),y
 	bpl @next_char
 	jsr input_char
 	jsr clear_hgr2
 	jsr update_view
 	lda #icmd_draw_inv
-	sta zp0F_action
+	sta a0F
 	jmp item_cmd
 
 cmd_hint:
@@ -5934,7 +5936,7 @@ cmd_hint:
 draw_doors_opening:
 	jsr update_view
 	lda #$0a
-	sta zp0F_action
+	sta a0F
 	jmp draw_special
 
 swap_saved_A:
@@ -5947,51 +5949,51 @@ swap_saved_A:
 	rts
 
 swap_saved_vars:
-	lda zp0E_draw_param
+	lda a0E
 	tax
 	lda saved_zp0E
-	sta zp0E_draw_param
+	sta a0E
 	txa
 	sta saved_zp0E
-	lda zp0F_action
+	lda a0F
 	tax
 	lda saved_zp0F
-	sta zp0F_action
+	sta a0F
 	txa
 	sta saved_zp0F
-	lda zp10_temp
+	lda a10
 	tax
 	lda saved_zp10
-	sta zp10_temp
+	sta a10
 	txa
 	sta saved_zp10
-	lda zp11_loop_count
+	lda a11
 	tax
 	lda saved_zp11
-	sta zp11_loop_count
+	sta a11
 	txa
 	sta saved_zp11
-	lda zp19_level
+	lda a19
 	tax
 	lda saved_zp19
-	sta zp19_level
+	sta a19
 	txa
 	sta saved_zp19
 	lda saved_zp1A
 	tax
-	lda zp1A_endgame_step
+	lda a1A
 	sta saved_zp1A
 	txa
-	sta zp1A_endgame_step
+	sta a1A
 	rts
 
 dec_item_ptr:
 	pha
-	dec zp0E_draw_param
-	lda zp0E_draw_param
+	dec a0E
+	lda a0E
 	cmp #$ff
 	bne :+
-	dec zp0F_action
+	dec a0F
 :	pla
 	rts
 
@@ -6000,9 +6002,9 @@ text_hat:
 	.byte "CHARGE A WALL NEAR WHERE YOU FOUND IT!", $A0
 look_hat:
 	ldx #>text_hat
-	stx zp_0D
+	stx a0D
 	ldx #<text_hat
-	stx zp0C_col_left
+	stx a0C
 	jsr clear_status_lines
 	lda #$00
 	sta zp_col
@@ -6057,7 +6059,7 @@ special_calc_puzzle:
 	sta zp1A_move_action
 	lda gs_bomb_tick
 	bne @check_repeat_turn
-	ldx zp1A_endgame_step ;Set initial turn direction
+	ldx a1A      ;Set initial turn direction
 	stx gs_bomb_tick
 	inc gs_rotate_count
 	jmp @update_display
@@ -6204,11 +6206,11 @@ j3493:
 @try_action:
 	jsr clear_status_lines
 	ldx #noun_jar
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #carried_active
 	bne @dead
 	lda gd_parsed_object
@@ -6219,24 +6221,24 @@ j3493:
 	lda #$51     ;drinks the blood and dies!
 	jsr print_to_line2
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	ldx #noun_jar
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	ldx #$00
 	stx gs_bat_alive
 pop_special_mode:
 	lda gs_mode_stack1
-	sta zp1A_endgame_step
+	sta a1A
 	sta gs_special_mode
 	ldx gs_mode_stack2
 	stx gs_mode_stack1
 	ldx #$00
 	stx gs_mode_stack2
-	lda zp1A_endgame_step
+	lda a1A
 	beq :+
 	jmp check_special_mode
 
@@ -6297,20 +6299,20 @@ special_dog:
 	cmp #noun_dog
 	bne @dead
 	ldx #noun_dagger
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_endgame_step
+	cmp a1A
 	beq @with_dagger
 	ldx #noun_sword
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @dead
 	jsr clear_status_lines
 	lda #$97     ;and it vanishes!
@@ -6322,33 +6324,33 @@ special_dog:
 
 @with_dagger:
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	ldx #noun_dagger
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
 	jmp @killed
 
 @throw:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #noun_sneaker
 	bne @dead
 	ldx #noun_sneaker
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @dead
 	ldx #noun_sneaker
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	jsr print_thrown
 	lda #$5c     ;and is eaten by
@@ -6469,12 +6471,12 @@ special_mother:
 	dex
 	bne @mother_arrives
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	ldx #noun_horn
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	lda #$07
-	cmp zp1A_endgame_step
+	cmp a1A
 	beq @mother_arrives
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
@@ -6487,19 +6489,19 @@ special_mother:
 	lda #$48     ;It is the monster's mother!
 	jsr print_to_line1
 	ldx #noun_horn
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$07
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @input_near_mother
 	lda #$49     ;She has been seduced!
 	jsr print_to_line2
 @input_near_mother:
-	lda zp1A_endgame_step
+	lda a1A
 	pha
-	lda zp19_level
+	lda a19
 	pha
 	jsr get_player_input
 	jsr clear_status_lines
@@ -6510,11 +6512,11 @@ special_mother:
 	beq @look
 @dead_pop:
 	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
+	sta a1A
 	lda #$07
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @dead
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
@@ -6531,9 +6533,9 @@ special_mother:
 	jsr print_to_line2
 	tax
 	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
+	sta a1A
 	txa
 	jmp @input_near_mother
 
@@ -6541,19 +6543,19 @@ special_mother:
 	cmp #verb_attack
 	bne @dead_pop
 	ldx #noun_sword
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @dead_pop
 	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
+	sta a1A
 	lda #$07
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @dead
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
@@ -6659,35 +6661,35 @@ snake_check_verb:
 	bne dead_by_snake
 @attack:
 	ldx #noun_dagger
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$07
 	bpl @kill_snake
 	ldx #noun_sword
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$07
 	bmi dead_by_snake
 	bpl @killed
 @kill_snake:
 	ldx #noun_dagger
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	ldx #noun_snake
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
@@ -6719,7 +6721,7 @@ special_bomb:
 
 @draw_new_keyhole:
 	lda gs_facing
-	sta zp1A_endgame_step
+	sta a1A
 	lda gs_player_x
 	cmp #$0a
 	bne @tick
@@ -6733,29 +6735,29 @@ special_bomb:
 	dex
 	bne @tick
 	lda #$01
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @tick
 	ldx #drawcmd01_keyhole
 	stx zp0F_action
 	bne @draw_keyhole
 @distance_1:
 	lda #$02
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @tick
 	ldx #$10
-	stx zp0E_draw_param
+	stx a0E
 	ldx #drawcmd09_keyholes
-	stx zp0F_action
+	stx a0F
 	jmp @draw_keyhole
 
 @distance_2:
 	lda #$02
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @tick
 	ldx #$20
-	stx zp0E_draw_param
+	stx a0E
 	lda #drawcmd09_keyholes
-	stx zp0F_action
+	stx a0F
 @draw_keyhole:
 	jsr draw_special
 @tick:
@@ -6882,14 +6884,14 @@ enter_elevator:
 @level2:
 	jsr clear_maze_window
 	ldx #$03
-	stx zp0F_action
+	stx a0F
 	stx gs_walls_left
 	ldx #$23
-	stx zp0E_draw_param
+	stx a0E
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd03_compactor
-	stx zp0F_action
+	stx a0F
 	jsr draw_special
 	jsr wait_short
 	jsr clear_maze_window
@@ -6945,21 +6947,21 @@ special_tripped:
 	lda gs_room_lit
 	beq @dead
 	ldx #noun_dagger
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @dead
 	jsr clear_status_lines
 	ldx #noun_dagger
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_destroy2
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line1
@@ -6984,17 +6986,17 @@ special_tripped:
 	cmp #noun_jar
 	bne @done
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	ldx #noun_jar
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	lda #$08
-	cmp zp1A_endgame_step
+	cmp a1A
 	bne @done
 	ldx #noun_jar
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_set_carried_active
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
@@ -7030,28 +7032,28 @@ special_climb:
 	cmp #noun_snake
 	bne @dead
 	lda gs_player_x
-	sta zp1A_endgame_step
+	sta a1A
 	lda gs_player_y
-	sta zp19_level
+	sta a19
 	lda gs_level
 	cmp #$03
 	beq @on_level_3
 	cmp #$04
 	bne @ceiling
 @on_level_4:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$01
 	bne @ceiling
-	lda zp19_level
+	lda a19
 	cmp #$0a
 	bne @ceiling
 	jmp @to_level_3
 
 @on_level_3:
-	lda zp1A_endgame_step
+	lda a1A
 	cmp #$08
 	bne @ceiling
-	lda zp19_level
+	lda a19
 	cmp #$05
 	beq @to_level_2
 @ceiling:
@@ -7069,21 +7071,21 @@ special_climb:
 
 @to_level_2:
 	ldx #$01
-	stx zp19_level
+	stx a19
 	inx
 	stx gs_facing
 	jmp @up_level
 
 @to_level_3:
 	ldx #$00
-	stx zp19_level
+	stx a19
 	ldx #$03
 	stx gs_facing
 @up_level:
 	dec gs_level
-	lda zp1A_endgame_step
+	lda a1A
 	pha
-	lda zp19_level
+	lda a19
 	pha
 	jsr update_view
 	jsr get_player_input
@@ -7097,11 +7099,11 @@ special_climb:
 	jmp dead_by_snake
 
 :	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
+	sta a1A
 	pha
-	lda zp19_level
+	lda a19
 	pha
 	cmp #$01
 	beq :+
@@ -7118,18 +7120,18 @@ special_climb:
 	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #noun_snake
-	stx zp0E_draw_param
+	stx a0E
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	pla
-	sta zp19_level
+	sta a19
 	pla
-	sta zp1A_endgame_step
-	lda zp19_level
+	sta a1A
+	lda a19
 	cmp #$01
 	bne @in_lair
 	jmp pop_special_mode
@@ -7144,19 +7146,19 @@ special_climb:
 	lda #$77     ;has vanished
 	jsr print_display_string
 	ldx #icmd_destroy1
-	stx zp0F_action
+	stx a0F
 	ldx #noun_wool
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	ldx #$01
 	stx gs_lair_raided
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 :	ldx #$01
 	stx gs_snake_used
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 lair_input_loop:
 	jsr get_player_input
@@ -7177,14 +7179,14 @@ lair_input_loop:
 	cmp #verb_forward
 	beq @forward
 	ldx gs_facing
-	stx zp1A_endgame_step
+	stx a1A
 	jsr move_turn
 @update_view:
 	lda gs_facing
 	ldx #$00
-	stx zp0E_draw_param
+	stx a0E
 	ldx #$04
-	stx zp0F_action
+	stx a0F
 	cmp #$01
 	bne :+
 	lda gs_room_lit
@@ -7225,9 +7227,9 @@ special_endgame:
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd08_doors
-	stx zp0F_action
+	stx a0F
 	ldx #$01
-	stx zp0E_draw_param
+	stx a0E
 	jsr draw_special
 	ldx #$01
 	stx gs_endgame_step
@@ -7236,9 +7238,9 @@ special_endgame:
 	jsr print_to_line1
 	jsr get_player_input
 	lda gs_endgame_step
-	sta zp1A_endgame_step
+	sta a1A
 	lda gd_parsed_action
-	dec zp1A_endgame_step
+	dec a1A
 	bne @step2
 @step1:
 	cmp #$5a
@@ -7256,15 +7258,15 @@ special_endgame:
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd08_doors
-	stx zp0F_action
+	stx a0F
 	ldx #$02
-	stx zp0E_draw_param
+	stx a0E
 	jsr draw_special
 	inc gs_endgame_step
 	jmp @endgame_input_loop
 
 @step2:
-	dec zp1A_endgame_step
+	dec a1A
 	bne @step3
 	cmp #$5a
 	bpl :+
@@ -7284,7 +7286,7 @@ special_endgame:
 	jmp @endgame_input_loop
 
 @step3:
-	dec zp1A_endgame_step
+	dec a1A
 	bne @step4
 	cmp #$5a
 	bpl :+
@@ -7301,13 +7303,13 @@ special_endgame:
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd02_elevator
-	stx zp0F_action
+	stx a0F
 	jsr draw_special
 	inc gs_endgame_step
 	jmp @endgame_input_loop
 
 @step4:
-	dec zp1A_endgame_step
+	dec a1A
 	bne @step5
 	cmp #$5a
 	bmi :+
@@ -7323,13 +7325,13 @@ special_endgame:
 	jmp @nope
 
 :	ldx #drawcmd0A_door_opening
-	stx zp0F_action
+	stx a0F
 	jsr draw_special
 	inc gs_endgame_step
 	jmp @endgame_input_loop
 
 @step5:
-	dec zp1A_endgame_step
+	dec a1A
 	bne @step6
 	cmp #verb_forward
 	bne :+
@@ -7359,9 +7361,9 @@ special_endgame:
 	cmp #noun_ball
 	bne @nope5
 	ldx #icmd_where
-	stx zp0F_action
+	stx a0F
 	ldx #noun_ball
-	stx zp0E_draw_param
+	stx a0E
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_known
@@ -7374,17 +7376,17 @@ special_endgame:
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #icmd_destroy2  ;and #noun_ball
-	stx zp0F_action
-	stx zp0E_draw_param
+	stx a0F
+	stx a0E
 	jsr item_cmd
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	inc gs_endgame_step
 	jmp @endgame_input_loop
 
 @step6:
-	dec zp1A_endgame_step
+	dec a1A
 	bne @step7
 	cmp #$5a
 	bpl :+
@@ -7456,9 +7458,9 @@ special_endgame:
 	lda #char_newline
 	jsr char_out
 	ldx #<@text_congrats
-	stx zp0C_col_left
+	stx a0C
 	ldx #>@text_congrats
-	stx zp_0D
+	stx a0D
 	jsr print_string
 @infinite_loop:
 	jmp @infinite_loop
@@ -7515,17 +7517,17 @@ relocate_data:
 
 ; Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
 	ldx #$00
-	stx zp0E_draw_param
-	stx zp10_temp
+	stx a0E
+	stx a10
 	stx relocated
 	ldx #$40
-	stx zp0F_action
+	stx a0F
 	ldx #$60
-	stx zp11_loop_count
+	stx a11
 	ldx #<p1FFF
-	stx zp19_level
+	stx a19
 	ldx #>p1FFF
-	stx zp1A_endgame_step
+	stx a1A
 	jsr memcpy
 	ldx #opcode_JMP
 	stx DOS_hook_monitor
@@ -9208,9 +9210,9 @@ load_disk_or_tape:
 	stx zp_col
 	stx zp_row
 	ldx #<text_load_device
-	stx zp0C_col_left
+	stx a0C
 	ldx #>text_load_device
-	stx zp_0D
+	stx a0D
 	jsr print_string
 	jsr input_T_or_D
 	cmp #'D'
@@ -9229,9 +9231,9 @@ save_disk_or_tape:
 	stx zp_col
 	stx zp_row
 	ldx #<text_save_device
-	stx zp0C_col_left
+	stx a0C
 	ldx #>text_save_device
-	stx zp_0D
+	stx a0D
 	jsr print_string
 	jsr input_T_or_D
 	cmp #'T'
@@ -9242,7 +9244,7 @@ prepare_tape_save:
 	jsr clear_hgr2
 	jsr update_view
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jsr item_cmd
 	jmp save_to_tape
 
@@ -9294,7 +9296,7 @@ prepare_disk_save:
 	jsr clear_hgr2
 	jsr update_view
 	ldx #icmd_draw_inv
-	stx zp0F_action
+	stx a0F
 	jmp item_cmd
 
 load_from_disk:
@@ -9338,9 +9340,9 @@ prompt_and_call_dos:
 	lda #char_newline
 	jsr char_out
 	ldx #<text_insert_disk
-	stx zp0C_col_left
+	stx a0C
 	ldx #>text_insert_disk
-	stx zp_0D
+	stx a0D
 	jsr print_string
 	lda #$0a     ;char_newline
 	jsr char_out
@@ -9380,11 +9382,11 @@ string_disk_error:
 	.byte "FILE! INPUT REJECTED!", $80
 disk_error_fatal:
 	ldx #$00
-	stx zp10_temp
+	stx a10
 	beq disk_error
 disk_error_retry:
 	ldx #$ff
-	stx zp10_temp
+	stx a10
 disk_error:
 	tay
 	dey
@@ -9404,25 +9406,25 @@ disk_error:
 	bne @print_message
 :	ldy #$68
 @print_message:
-	sty zp19_level
+	sty a19
 	ldx #$00
-	stx zp1A_endgame_step
+	stx a1A
 	ldx #<string_disk_error
-	stx zp0C_col_left
+	stx a0C
 	ldx #>string_disk_error
-	stx zp_0D
+	stx a0D
 	clc
-	lda zp19_level
-	adc zp0C_col_left
-	sta zp0C_col_left
-	lda zp1A_endgame_step
-	adc zp_0D
-	sta zp_0D
+	lda a19
+	adc a0C
+	sta a0C
+	lda a1A
+	adc a0D
+	sta a0D
 	lda #char_newline
 	jsr char_out
 	jsr print_string
 	jsr input_char
-	lda zp10_temp
+	lda a10
 	beq :+
 	jmp prepare_disk_save
 
@@ -9570,7 +9572,7 @@ b7F79:
 	rts
 
 	tya
-	sta zp1A_endgame_step
+	sta a1A
 b7F82:
 	jsr get_rowcol_addr
 	lda #$02
@@ -9578,24 +9580,24 @@ b7F82:
 	dec zp_col
 	dec zp_col
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne b7F82
 	rts
 
 	tya
-	sta zp1A_endgame_step
+	sta a1A
 b7F98:
 	jsr get_rowcol_addr
 	lda #$01
 	jsr char_out
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne b7F98
 	rts
 
 	pha
 	tya
-	sta zp1A_endgame_step
+	sta a1A
 	pla
 b7FAC:
 	pha
@@ -9606,15 +9608,15 @@ b7FAC:
 	pla
 	dec zp_col
 	inc zp_row
-	dec zp1A_endgame_step
+	dec a1A
 	bne b7FAC
 	rts
 
 	ldy #$00
 	lda #<maze_walls
-	sta zp0A_text_ptr
+	sta a0A
 	lda #>maze_walls
-	sta zp0A_text_ptr+1
+	sta a0B
 	ldx gs_level
 	lda #$00
 	clc
@@ -9624,14 +9626,14 @@ b7FAC:
 	jmp :-
 
 b7FD7:
-	adc zp0A_text_ptr
-	sta zp0A_text_ptr
+	adc a0A
+	sta a0A
 	ldx gs_player_x
 	dex
 	beq b7FEA
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
-	inc zp0A_text_ptr
+	inc a0A
+	inc a0A
+	inc a0A
 	jmp :-
 
 b7FEA:
@@ -9640,11 +9642,11 @@ b7FEA:
 	bmi b7FFF
 	cmp #$09
 	bmi b7FFA
-	inc zp0A_text_ptr
+	inc a0A
 	sec
 	sbc #$04
 b7FFA:
-	inc zp0A_text_ptr
+	inc a0A
 	sec
 	sbc #$04
 b7FFF:

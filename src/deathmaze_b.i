@@ -27,26 +27,26 @@
 
 ;'0' - noun_zero = $16
 
-;$zp_string_number = $11
-;$zp_wall_opposite = $19
+;$zp_string_number = a11
+;$zp_wall_opposite = a19
 
-;$zp0C_string_ptr = $0c
-;;$zp0C_string_ptr+1 = $_0
+;$zp0C_string_ptr = a0C
+;;$zp0C_string_ptr+1 = a0D
 
-;$zp0F_action = $0f
+;$zp0F_action = a0F
 
-;$zp10_count_words = $10
+;$zp10_count_words = a10
 
-;$zp11_count_chars = $11
+;$zp11_count_chars = a11
 
 ;$zp13_raw_input = a13
 
-;$zp19_count = $19
+;$zp19_count = a19
 
-;$zp1A_hint_mode = $1a
-;$zp1A_item_place = $1a
-;$zp1A_move_action = $1a
-;$zp1A_object = $1a
+;$zp1A_hint_mode = a1A
+;$zp1A_item_place = a1A
+;$zp1A_move_action = a1A
+;$zp1A_object = a1A
 
 ;<(gs_item_location-2) = $b9
 

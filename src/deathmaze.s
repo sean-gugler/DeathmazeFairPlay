@@ -18,16 +18,13 @@
 .define raster_lo(row,col,line) .lobyte(raster row,col,line)
 
 
-a10 = $10
-a11 = $11
-a13 = $13
-a19 = $19
-a1A = $1a
-
 ; 8-bit variables
 zp0E_wait1 = $0e
 zp0F_wait2 = $0f
 zp10_wait3 = $10
+
+zp11_wait1 = $11
+zp10_wait2 = $10
 
 zp_col = $06
 zp_row = $07
@@ -46,6 +43,7 @@ zp10_count_words = $10
 zp10_which_place = $10
 zp10_noun = $10
 zp10_position = $10
+zp10_retry = $10
 zp11_level_facing = $11
 zp11_temp = $11
 zp11_action = $11
@@ -66,6 +64,7 @@ zp16_counter = $16
 zp19_level_facing = $19
 zp19_col_right = $19
 zp19_regular_climb = $19
+zp19_count_raster = $19
 zp1A_move_action = $1a
 zp1A_hint_mode = $1a
 zp1A_object = $1a
@@ -1338,7 +1337,7 @@ parse_input:
 	lda #char_ClearLine
 	jsr char_out
 	ldy #$00
-	sty a11
+	sty zp11_count_chars
 	lda (zp19_input_ptr),y
 	and #char_mask_upper
 	bne @echo
@@ -1348,8 +1347,8 @@ parse_input:
 	beq @verb_word_end
 @echo:
 	jsr char_out
-	inc a11
-	ldy a11
+	inc zp11_count_chars
+	ldy zp11_count_chars
 	bne @next_verb_letter
 @verb_word_end:
 	lda #$56     ;what?
@@ -1832,7 +1831,7 @@ clear_maze_window:
 	jsr get_rowcol_addr
 	clc
 	lda #$08
-	sta a19
+	sta zp19_count_raster
 @clear_raster:
 	lda #$00
 	ldy #$16
@@ -1842,7 +1841,7 @@ clear_maze_window:
 	lda #$04
 	adc screen_ptr+1
 	sta screen_ptr+1
-	dec a19
+	dec zp19_count_raster
 	bne @clear_raster
 	dec zp_row
 	bpl @clear_row
@@ -2869,10 +2868,10 @@ N_next_wall:
 	jmp N_next_wall
 
 swap_saved_A_2:
-	sta a13
+	sta zp13_temp
 	lda saved_A
 	pha
-	lda a13
+	lda zp13_temp
 	sta saved_A
 	pla
 	rts
@@ -4708,7 +4707,7 @@ player_cmd:
 	cmp #noun_horn
 	bne @having_fun
 	lda gs_level
-	cmp #$05  ;unnecessary. special_mother is sufficient.
+	cmp #$05  ;GUG: unnecessary. special_mother is sufficient.
 	bne :+
 	lda gs_special_mode
 	cmp #special_mode_mother
@@ -4737,19 +4736,19 @@ cmd_break:
 	jsr lose_ring
 :	cmp #nouns_unique_end
 	bmi @broken  ;GUG: bcc preferred
-	sta a13
-	lda a10
+	sta zp13_temp  ;preserve 'object' while protecting $10,$11
+	lda zp10_temp  ;GUG: no need, $10 is neither assigned nor disturbed
 	pha
 	lda zp11_item
 	pha
-	lda a13
+	lda zp13_temp  ;restore 'object'
 	cmp #noun_torch
 	bne :+
 	jsr lose_one_torch
 :	pla
 	sta zp11_item
 	pla
-	sta a10
+	sta zp10_temp
 	lda zp11_item
 	sta zp0E_object
 @broken:
@@ -4868,7 +4867,7 @@ cmd_eat:
 	jmp item_cmd
 
 @torch:
-	lda a10
+	lda zp10_temp  ;GUG: no need, $10,$11 are neither assigned nor disturbed
 	pha
 	lda zp11_item
 	pha
@@ -4876,7 +4875,7 @@ cmd_eat:
 	pla
 	sta zp11_item
 	pla
-	sta a10
+	sta zp10_temp
 	jmp @torch_return
 
 @food:
@@ -4919,7 +4918,7 @@ lose_ring:
 	sta gs_special_mode
 	jsr clear_maze_window
 @done:
-	lda #$0b
+	lda #noun_ring
 	rts
 
 cmd_throw:
@@ -5263,10 +5262,10 @@ play_flute:
 	lda #glyph_L_solid
 	jsr print_char
 	lda #$30
-	sta a11
-:	dec a10
+	sta zp11_wait1
+:	dec zp10_wait2
 	bne :-
-	dec a11
+	dec zp11_wait1
 	bne :-
 	dec zp_col
 	dec zp_col
@@ -5439,7 +5438,7 @@ cmd_open:
 	cmp #noun_calculator
 	bne :+
 	jsr on_reveal_calc
-:	sta a13
+:	sta zp13_temp  ;preserve 'object'
 	cmp #noun_snake
 	bne :+
 	jsr wait_long
@@ -5447,7 +5446,7 @@ cmd_open:
 	sta zp11_item
 	pla
 	sta zp10_noun
-	lda a13
+	lda zp13_temp  ;restore 'object'
 	cmp #noun_torch
 	bne @done
 	lda #icmd_where
@@ -6453,8 +6452,8 @@ special_calc_puzzle:
 	sta zp1A_move_action
 	lda gs_rotate_direction
 	bne @check_repeat_turn
-	ldx a1A      ;Set initial turn direction
-	stx gs_rotate_direction
+	ldx zp1A_move_action
+	stx gs_rotate_direction  ;Set initial turn direction
 	inc gs_rotate_count
 	jmp @update_display
 
@@ -6730,7 +6729,7 @@ special_dog:
 	jmp @killed
 
 @throw:
-	lda a1A
+	lda zp1A_object
 	cmp #noun_sneaker
 	bne @dead
 	ldx #noun_sneaker
@@ -7573,7 +7572,7 @@ lair_input_loop:
 	cmp #verb_forward
 	beq @forward
 	ldx gs_facing
-	stx a1A
+	stx zp1A_facing
 	jsr move_turn
 @update_view:
 	lda gs_facing
@@ -8679,11 +8678,11 @@ string_disk_error:
 
 disk_error_fatal:
 	ldx #$00
-	stx a10
+	stx zp10_retry
 	beq disk_error
 disk_error_retry:
 	ldx #$ff
-	stx a10
+	stx zp10_retry
 disk_error:
 	tay
 	dey
@@ -8721,7 +8720,7 @@ disk_error:
 	jsr char_out
 	jsr print_string
 	jsr input_char
-	lda a10
+	lda zp10_retry
 	beq :+
 	jmp prepare_disk_save
 
