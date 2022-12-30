@@ -18,7 +18,7 @@ def usage(argv):
     p.add_argument('-e', '--end', default='ffff', help="Address range end for adjustment")
     p.add_argument('-x', '--exclude-text', action="store_true",
                    help="Do not adjust DATA ranges or comments for in-line text")
-    p.add_argument('offset', help="Amount to adjust all addresses in range by. Can be negative.")
+    p.add_argument('offset', help="Amount in hex to adjust all addresses in range by. Can be negative.")
     return p.parse_args(argv[1:])
 
 def main(argv):
@@ -40,6 +40,8 @@ def run(fname, begin, end, off, exclude_text):
     disable = False
     def adjust(line):
         global disable
+        if line.startswith('\n'):
+            return line
         if line.startswith(':DATA BYTES'):
             disable = True
             return line

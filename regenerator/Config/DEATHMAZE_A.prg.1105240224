@@ -1,0 +1,2177 @@
+:CODE START
+0805
+:CODE END
+7FFF
+:DATA BYTES
+0C2A-0CCA
+1162-1192
+1A1D-1A34
+1E36-1E5A
+2052-206A
+20C3-20E7
+2246-2262
+2624-2640
+2CF1-2D03
+2E0B-2E33
+3356-3370
+3EFB-3EFC
+3FE9-61F7
+61FC-6200
+6205-6293
+6293-6695
+6820-6829
+7722-7723
+7CB2-7CB4
+7CB6-7CBC
+7CC0-7CC1
+7CC1-7CC4
+7CC4-7CC7
+7E81-7E82
+:WORDS
+7CB4-7CB6
+:POINTERS
+7CBC-7CBE-0
+7CBE-7CC0-0
+:HILOLOOKUP
+:LOHILOOKUP
+:DATA TEXT
+1F13-1F1B
+2262-2272
+32DB-332A
+3E5F-3E72
+3E8E-3EB2
+61F7-61FC
+6200-6205
+6695-6820
+6829-7722
+7723-7C3F
+7CC7-7CEF
+7D8F-7E1D
+:BLANK LINES
+0C02
+0DAA
+0E4D
+0FDC
+127E
+1828
+1A34
+1AFE
+1B25
+1BBB
+1BEC
+1C3B
+1DC7
+1E5A
+1EA4
+1F1B
+206D
+20E7
+20EA
+2640
+2669
+266D
+26AB
+26AF
+26E5
+2763
+2826
+2951
+29D4
+29E6
+2AEC
+2B2D
+2B6D
+2B71
+2B83
+2C2F
+2D03
+2E33
+2F02
+2F4B
+2FA5
+2FE2
+2FF5
+31A8
+382E
+3F00
+7CC7
+7CEF
+:REMOVED BYTES
+:FULL COMMENTS
+099D First check: move through The Perfect Square
+09EB south_4
+0D8A Cancel whatever is currently typed
+0E37 BUG: meant to prevent double-space, but only prevents WORD_L_
+10E9 cruft leftover from earlier build
+1123 cruft leftover from even earlier build
+177F Input: Y=count
+1795 Input: Y=count
+17A7 Input: A=char Y=count
+1A1D junk
+1AB5 print inventory
+1C55 Skip over snake
+1C6D Last, check for carrying boxed snake
+206A Input: $0E = distance (0,1)
+2272 Input: 0E = 1 right, 2 front, 4 left
+2624 junk
+2632 junk
+2F5D .assert items_food = items_torch, error, "Need to edit cmd_take for separate food,torch counts"
+3150 Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
+3EFB junk
+3F05 Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
+7D8F 1-based indexing via 'A'
+7E76 cruft from here to end of file
+:SIDE COMMENTS
+0824 Continue a game?
+082C #'Y'
+0833 Press any key
+0843 #icmd_reset_game
+084A #char_ESC
+0872 #<game_save_begin
+0876 #>game_save_begin
+088B NOTE: never returns, continues with PLA/PLA/JMP
+08DC #char_ClearLine
+0900 $zp_string_number
+091C $zp_string_number
+0923 #' '
+0931 #verb_movement_begin
+094E #verb_forward
+0956 #verb_left
+095A #verb_uturn
+09D9 Splat!
+0A3D #special_mode_calc_puzzle
+0A55 Invisible guillotine
+0A66 #turns_until_dog1
+0A7B #special_mode_dog1
+0A81 #special_mode_dog1
+0AB6 #special_mode_dog2
+0AC9 #turns_until_mother
+0AD5 #mother_flag_roaming
+0ADE #special_mode_mother
+0AFA #special_mode_bat
+0B03 #turns_until_monster
+0B13 #special_mode_monster
+0B4A #special_mode_dark
+0B67 Died of starvation!
+0B7F #food_low
+0B83 Stomach is growling
+0B8D #torch_low
+0B91 Torch is dying
+0B9A #nouns_unique_end
+0B9E #icmd_where
+0BA7 #carried_active
+0BAD Check your inventory!
+0BB3 #noun_food
+0BB7 #noun_torch
+0BBB #icmd_which_box
+0BC7 #icmd_which_food
+0BD3 #icmd_which_torch_unlit
+0BEA #icmd_which_torch_lit
+0BFE You will do no such thing!
+0C61 The ground beneath your feet
+0C66 begins to shake!
+0C7B A disgusting odor permeates
+0C80 the hallway!
+0C92 The monster attacks you and
+0C97 you are his next meal!
+0C9F It is the monster's mother!
+0CA4 She slashes you to bits!
+0CDB #char_mask_upper
+0D29 $zp11_count_chars
+0D2B $zp10_count_words
+0D4D #char_mask_upper
+0D50 $zp11_count_chars
+0D55 #'Z'
+0D5C #'X'
+0D63 #char_left
+0D6A #char_right
+0D71 #' '
+0D75 #char_enter
+0D7C #char_left
+0D83 #char_enter
+0D8A #char_esc
+0DB8 #' '
+0DC8 #' '
+0DD1 #verb_forward
+0DD5 #verb_right
+0DD9 #verb_left
+0DDD #verb_uturn
+0DF0 #' '
+0DFA $zp11_count_chars
+0DFE #' '
+0E02 $zp10_count_words
+0E08 $zp11_count_chars
+0E0D $zp13_raw_input
+0E0F #'A'
+0E13 $zp11_count_chars
+0E17 Check previous character
+0E19 #' '
+0E1D $zp13_raw_input
+0E1F Make lower-case
+0E23 $zp13_raw_input
+0E2A $zp11_count_chars
+0E2C $zp11_count_chars
+0E30 #max_input
+0E37 $zp11_count_chars
+0E39 BUG: remove to fix.
+0E3C #' '
+0E43 $zp10_count_words
+0E47 $zp10_count_words
+0E49 #' '
+0E50 #' '
+0E52 $zp11_count_chars
+0E54 $zp11_count_chars
+0E70 #' '
+0E80 #' '
+0E96 #verbs_end
+0E9A I'm sorry, but I can't
+0EAD #' '
+0EBA #'.'
+0EC2 #verb_intransitive
+0ECB #vocab_end
+0ECF #verbs_end
+0ED4 #verbs_end-1
+0EDA What in tarnation is a
+0F0D #'?'
+0F19 #verb_intransitive
+0F1D #verb_look
+0F34 #char_ClearLine
+0F3F #char_mask_upper
+0F52 what?
+0F5F Look at your monitor.
+0F63 It's awfully dark.
+0F90 #'*'
+0FA2 #char_mask_upper
+0FA8 #char_mask_upper
+0FC7 #vocab_end-1
+1007 #'Y'
+100B #'N'
+102F #icmd_0a
+105A Little sense.
+106B #char_ClearLine
+1075 #char_ClearLine
+108A Oh no! A pit!
+109B AAAAAAHH!
+10B1 WHAM!
+10BF Victim of the maze!
+10C4 Play again?
+10CC #'Y'
+10E9 gs_player_x
+1116 #noun_torch
+1129 #noun_snake
+112D #nouns_item_end
+1134 #noun_zero
+113B #noun_door
+1142 I don't see that here.
+114C #noun_brush
+1150 #icmd_where
+1159 #carried_known
+1192 #char_newline
+1196 #char_ClearLine
+11B7 #<font
+11BD #>font
+11F3 #<row8_table
+11F9 #>row8_table
+1231 #' '
+1260 #char_cursor
+127A #' '
+12AE Top 3 bits = Depth
+12BB #glyph_X
+12D4 #raster_hi 10,10,7
+12F1 #raster_hi 11,9,7
+133F raster 0,0,0
+135F #(1 << 4)
+1371 #glyph_R
+1383 #raster_hi 10,9,7
+1392 #glyph_R
+13AA #glyph_R
+13C8 #(1 << 4)
+13DA #glyph_L
+13EC #raster_hi 10,11,7
+13FD #glyph_L
+1415 #glyph_L
+1433 #(1 << 3)
+1443 #glyph_R
+146A #glyph_R
+1480 #glyph_R
+14A4 #(1 << 3)
+14B6 #glyph_L
+14DF #glyph_L
+14F7 #glyph_L
+151B #(1 << 2)
+152B #glyph_R
+1552 #glyph_R
+158C #(1 << 2)
+159E #glyph_L
+15C7 #glyph_L
+15DF #glyph_L
+1603 #(1 << 1)
+1613 #glyph_R
+163A #glyph_R
+1650 #glyph_R
+1674 #(1 << 1)
+1686 #glyph_L
+16AF #glyph_L
+16C7 #glyph_L
+16F0 #(1 << 0)
+16FA #glyph_R
+1701 #raster 0,-1,0
+171E #(1 << 0)
+172A #glyph_L
+174F #(1 << 0)
+1759 #glyph_R
+1763 #(1 << 0)
+176F #glyph_L
+1785 #glyph_slash_up
+179B #glyph_slash_down
+18C5 $zp_wall_opposite
+1935 $zp_wall_opposite
+1A36 #execs_no_location
+1A42 #<(gs_item_location-2)
+1A48 #>(gs_item_location-2)
+1A4F #icmd_drop
+1A6E #icmd_drop
+1A94 #execs_location_end
+1AAA char_ClearLine
+1AB5 #items_unique + items_food
+1ABB zp_FIXME
+1ACC Inventory:
+1B06 #items_unique + items_food + items_torches
+1B0E #carried_boxed
+1B30 Torches:
+1B40 Lit:
+1B52 #'0'
+1B62 Unlit:
+1B67 #' '
+1B70 #'0'
+1B7B #items_unique
+1B7F #noun_food
+1B81 zp_FIXME
+1BA2 #noun_box
+1BBD zp_FIXME
+1BC3 #items_unique + items_food
+1BEC #gs_size-1
+1C29 #items_unique + items_food + items_torches
+1C43 #noun_snake-1
+1C47 #carried_boxed
+1C5D #items_food + items_torches
+1C98 clamp min 0
+1CA7 #<gs_item_locs
+1CB3 #items_food
+1CB7 #carried_known
+1CBB #icmd_where
+1CBF #item_food_begin
+1CEC #items_torches
+1CF0 #carried_active
+1CFA #items_torches
+1CFE #carried_known
+1D02 #icmd_where
+1D06 #item_torch_begin
+1D88 #items_total
+1DC7 #facing_W
+1DCB #facing_N
+1DCF #facing_E
+1E01 #maze_features_end
+1EAC #glyph_R
+1EBB #glyph_R
+1ECA #glyph_L
+1F31 #' '
+1F42 #glyph_R
+1F58 #' '
+1F62 #' '
+1F83 #' '
+1F8F #' '
+1F9D #' '
+1FAA #glyph_R
+1FC2 #' '
+1FD3 #glyph_L
+1FE9 #' '
+2018 #' '
+203B #glyph_L
+2093 glyph_R, then glyph_L
+2110 #(1 << 3)
+211D #glyph_box
+2125 #(1 << 2)
+2134 #glyph_box_TL
+2139 #glyph_box_T
+213E #glyph_box_TR
+214E #glyph_box_BL
+2153 #glyph_box_B
+2158 #glyph_box_BR
+2160 #(1 << 1)
+216F #glyph_box_TL
+2174 #glyph_box_T
+2179 #glyph_box_T
+217E #glyph_box_T
+2183 #glyph_box_TR
+2193 #glyph_L
+21A1 #glyph_box_R
+21AD #glyph_box_BR
+21B9 #glyph_L
+21CE #(1 << 0)
+21DD #glyph_slash_up
+21EE #glyph_slash_up
+21FB #glyph_R
+220A #glyph_R
+2218 #glyph_slash_up
+2232 #glyph_L
+228F #glyph_solid
+2365 #glyph_slash_up_C
+2370 #glyph_LR
+237A #glyph_slash_down_R
+2384 #glyph_slash_down_C
+2391 #glyph_C
+23A0 #glyph_L
+23B7 #glyph_L
+23C6 #glyph_L
+23D5 #glyph_L
+23EC #glyph_R
+23FB #glyph_R
+2406 also glyph_R
+241C #(1 << 3)
+2429 #(1 << 2)
+2436 #(1 << 1)
+2443 #(1 << 0)
+2451 #(1 << 4)
+245E #(1 << 5)
+246B #(1 << 6)
+2478 #(1 << 7)
+248B #glyph_solid_BR
+2490 #glyph_solid_BL
+249E #glyph_solid
+24A3 #glyph_solid
+24B1 #glyph_solid_TR
+24B6 #glyph_solid_TL
+24C4 #glyph_angle_BR
+24C9 #glyph_angle_BL
+24D7 #glyph_solid
+24DC #glyph_solid
+24E9 #glyph_R_notched
+24EE #glyph_solid
+24F3 #glyph_L_notched
+2503 #glyph_UR_triangle
+2508 #glyph_solid
+250D #glyph_UL_triangle
+251D #glyph_R_solid
+2522 #glyph_solid
+2527 #glyph_L_solid
+2534 #glyph_keyhole_R
+2539 #glyph_keyhole_L
+2546 #glyph_keyhole_C
+2550 also glyph_L
+2561 #glyph_R
+2590 #' '
+259F #' '
+25AE also glyph_L
+25BF #glyph_R
+2612 #' '
+2653 #nouns_item_end
+266D #noun_ring
+2673 #noun_staff
+2679 Having fun?
+267E Staff begins to quake
+268F #noun_ring
+2693 #icmd_set_carried_active
+26A2 The ring is activated and
+26A7 shines light everywhere!
+26B1 #noun_flute
+26B5 #noun_horn
+26C3 #special_mode_mother
+26C7 #noun_horn
+26CB #icmd_set_carried_active
+26D2 A deafening roar envelopes
+26D7 you. Your ears are ringing!
+26DD #noun_play - noun_blow
+26E7 #noun_ring
+26EE #nouns_unique_end
+26FC #noun_torch
+2717 You break the
+2727 and it disappears!
+2737 level 5 is lit by ring, not torches
+2746 #special_mode_dark
+274F #icmd_which_torch_unlit
+2758 #icmd_destroy1
+276A #noun_ring
+2771 #nouns_unique_end
+2775 #noun_torch
+2783 It vanishes in a
+2788 burst of flames!
+278D You have no fire.
+279E #verb_light - verb_burn
+27AB #noun_ring
+27B2 #nouns_unique_end
+27B8 #noun_torch
+27C6 You eat the
+27CB #' '
+27D6 and you get heartburn!
+27DB #icmd_draw_inv
+2805 #<food_amount
+2809 #>food_amount
+2822 Digested
+2837 #special_mode_dark
+284B #noun_ring
+2852 #noun_frisbee
+2859 #noun_wool
+285D #noun_yoyo
+2861 #noun_food
+2867 #noun_torch
+287F and it vanishes!
+2884 and is eaten by
+2889 the monster!
+2898 #turns_until_trippable
+289F #special_mode_tripped
+28A4 #noun_wool
+28A8 #icmd_destroy1
+28B2 and the monster grabs it,
+28B7 gets tangled, and topples over!
+28C5 returns and hits you
+28CA in the eye!
+28D6 #icmd_draw_inv
+28DD Food fight!
+28E2 #icmd_draw_inv
+28E9 The
+28F7 #' '
+290B magically sails
+2910 around a nearby corner
+2925 #noun_frisbee
+2929 #icmd_destroy1
+2936 The monster grabs the frisbee, throws
+293B it back, and it saws your head off!
+294A Climbing only possible during special_climb
+2954 #icmd_which_box
+2961 #icmd_where
+296A #carried_begin
+296E The hallway is too crowded.
+297B #nouns_unique_end
+297F #noun_ring
+2986 #icmd_drop
+298D #icmd_draw_inv
+2994 #noun_torch
+299F #icmd_which_torch_unlit
+29AE #icmd_which_torch_lit
+29C5 #special_mode_dark
+29D6 #noun_jar
+29DD With what? Air?
+29EA #noun_torch
+29F3 #carried_active
+29FF You have no fire.
+2A04 #icmd_draw_inv
+2A0B #icmd_which_torch_lit
+2A18 #icmd_destroy2
+2A1F #icmd_which_torch_unlit
+2A28 #icmd_set_carried_active
+2A32 The torch is lit and the
+2A37 old torch dies and vanishes!
+2A3F #icmd_draw_inv
+2A46 #torch_lifespan
+2A55 #item_flute
+2A59 #item_ball
+2A5D item_horn
+2A64 #cmd_blow
+2A6C With who? The monster?
+2A71 #noun_snake
+2A75 #icmd_where
+2A95 A high shrill note comes
+2A9A from the flute!
+2A9C GUG: saves no bytes, adds time.
+2AAA #glyph_R_solid
+2AAF #glyph_X
+2AB4 #glyph_L_solid
+2ACF #icmd_set_carried_active
+2AD3 #noun_snake
+2ADD #special_mode_climb
+2AEE #noun_staff
+2AF8 Thunderbolts shoot out above you!
+2AFD The staff thunders with uselss energy!
+2B09 #noun_hat
+2B10 OK...if you really want to,
+2B15 you are wearing it.
+2B1A #icmd_set_carried_active
+2B2F #noun_hat
+2B36 #nouns_item_end
+2B3A #noun_zero
+2B41 #noun_door
+2B45 I don't see that here.
+2B59 A close inspection reveals
+2B61 #noun_calculator
+2B65 Nothing of value
+2B69 a smudged display
+2B77 #noun_calculator
+2B7B Ok, it is clean
+2B7F It displays 317.2 !
+2B8C #noun_door
+2B93 #noun_box
+2B9A #icmd_which_box
+2BAD #icmd_where
+2BB6 #carried_begin
+2BC1 #icmd_set_carried_known
+2BCA #noun_snake
+2BD0 #item_food_begin
+2BD4 #noun_torch
+2BD8 #noun_food
+2BE5 Inside the box there is a
+2BEC #noun_calculator
+2BF5 #noun_snake
+2C04 #noun_torch
+2C08 #icmd_where
+2C13 #carried_known
+2C1C #icmd_draw_inv
+2C26 #special_mode_snake
+2C2B #noun_snake
+2C43 #noun_key
+2C47 #icmd_where
+2C50 #carried_unboxed
+2C58 #door_lock_begin - doors_elevators
+2C5A #door_lock_begin + door_correct
+2C64 You unlock the door...
+2C75 But you have no key.
+2C7A #special_mode_bomb
+2C82 You unlock the door...
+2C87 #door_lock_begin + door_correct
+2C8F #special_mode_elevator
+2D0C #noun_zero
+2D13 #icmd_where
+2D17 #noun_calculator
+2D20 #carried_known
+2D33 The calculator displays
+2D38 #' '
+2D41 #'0' - noun_zero
+2D4A #noun_zero-1
+2D9E #noun_two
+2DBC #icmd_which_torch_lit
+2DC3 #icmd_set_carried_known
+2DCC #noun_calculator
+2DD0 #icmd_destroy2
+2DD4 #special_mode_dark
+2DDF #icmd_draw_inv
+2DE6 You have been teleported!
+2DEB The calculator vanishes.
+2DF3 #noun_two
+2E02 A draft blows your torch out.
+2E3A #icmd_which_box
+2E4B #icmd_where
+2E55 #noun_box
+2E5C #nouns_unique_end
+2E6D #carried_boxed
+2E6F at feet
+2E75 #icmd_where
+2E7C #carried_boxed
+2E90 #icmd_count_inv
+2E97 $zp19_count
+2E99 #inventory_max
+2EA6 #icmd_set_carried_known
+2EAD #icmd_draw_inv
+2EB7 #noun_calculator
+2EBE #noun_snake
+2EC5 #special_mode_snake
+2ECE #special_mode_calc_puzzle
+2ED5 #verb_take
+2EDF The calculator displays 317.
+2EE4 #noun_calculator
+2EE9 #carried_begin
+2EF4 #icmd_set_carried_boxed
+2EFE #noun_food
+2F04 #item_torch_end
+2F08 #item_torch_begin
+2F12 #carried_boxed
+2F14 BUG: get box > get torch: does not increment unlit count if it's the only box
+2F21 #item_food_end
+2F25 #item_food_begin
+2F2F #carried_boxed
+2F39 It is currently impossible.
+2F47 Carrying the limit.
+2F4B #item_torch_begin - 1
+2F51 #item_food_begin - 1
+2F5B #items_food
+2F5D count
+2F71 #icmd_where
+2F78 #carried_boxed
+2F94 #noun_torch
+2FA7 #noun_snake
+2FAB #nouns_item_end
+2FB2 #noun_zero
+2FB9 #noun_door
+2FC0 I don't see that here.
+2FCA #noun_brush
+2FCE #icmd_where
+2FD7 #carried_known
+2FDE With what? Toenail polish?
+2FE6 GUG: maybe disguise this better
+2FF5 OK...
+3004 #' '
+3016 #' '
+303C GUG: or just "lda #$01"
+3050 #noun_hat
+3054 #icmd_where
+305B #carried_active
+3096 GUG: no need to use A, just ldx, dex, beq
+30C2 You have rammed your head into a steel
+30C7 wall and bashed your brains out!
+30E0 yellow
+30EC #>screen_GR2
+3111 You will do no such thing!
+3150 GUG: is this draw necessary?
+3163 #food_fart_minimum
+316A #food_fart_minimum + food_fart_consume
+316E #>food_fart_consume
+3172 #<food_fart_consume
+3191 WHAM!
+31A1 #food_fart_minimum
+31B1 It is currently impossible.
+31B9 Save the game?
+31C3 #'Y'
+31CD Prepare cassette
+31D2 Press any key
+31DA #<game_save_begin
+31DE #>game_save_begin
+31F7 Are you sure you want to quit?
+3242 #icmd_draw_inv
+324C #special_mode_calc_puzzle
+3255 Try examining things.
+3260 Type instructions.
+3269 Invert and telephone.
+3343 #noun_ball
+3385 $zp1A_hint_mode
+33A3 #verb_forward
+33A7 $zp1A_move_action
+33AE Set initial turn direction
+33B9 $zp1A_move_action
+33DA $zp1A_move_action
+33F8 $zp1A_move_action
+3411 Splat!
+341F #verb_drop
+3423 #verb_movement_begin
+342A To everything
+342F $zp1A_hint_mode
+3435 Turn turn turn
+343A There is a season
+343F $zp1A_hint_mode
+3445 Turn turn turn
+3450 #puzzle_step1
+3474 $zp1A_hint_mode
+347B $zp1A_hint_mode
+348A A vampire bat attacks you!
+3498 $zp1A_object
+349D #verb_look
+34A1 #verb_throw
+34A5 #verb_break
+34AC The bat drains you!
+34B4 $zp1A_object
+34B6 #noun_bat
+34BA It looks very dangerous!
+34C5 #noun_jar
+34C9 #icmd_where
+34D2 #carried_active
+34D9 #noun_jar
+34DD What a mess! The vampire bat
+34E2 drinks the blood and dies!
+34E7 #icmd_destroy1
+34EB #noun_jar
+34F2 #icmd_draw_inv
+353C A vicious dog attacks you!
+3541 GUG: can this be wait_short?
+354A $zp1A_object
+3553 #verb_throw
+3557 #verb_attack
+355B #verb_look
+3562 He rips your throat out!
+356A $zp1A_object
+356C #noun_dog
+3570 It displays 317.2!  ;BUG: should be $8c
+3575 BUG: should JMP to get_player_input
+3578 $zp1A_object
+357A #noun_dog
+357E #noun_dagger
+3582 #icmd_where
+358F #noun_sword
+3593 #icmd_where
+35A3 and it vanishes!
+35A8 You have killed it.
+35AE #icmd_destroy1
+35B2 #noun_dagger
+35B9 #icmd_draw_inv
+35C0 The dagger disappears!
+35CA #noun_sneaker
+35CE #noun_sneaker
+35D2 #icmd_where
+35DF #noun_sneaker
+35E3 #icmd_destroy1
+35ED and is eaten by
+35F2 the monster!
+35FD The dog chases the sneaker!
+3608 and is eaten by
+360D the monster!
+362B The ground beneath your feet
+3630 begins to shake!
+3642 A disgusting odor permeates
+3647 the hallway!
+3655 The monster attacks you and
+365A you are his next meal!
+3667 Never raid a monster's lair
+36C7 The ground beneath your feet
+36CC begins to shake!
+36DB #icmd_where
+36DF #noun_horn
+36EC A disgusting odor permeates
+36F1 the hallway as it darkens!
+36FC It is the monster's mother!
+3701 #noun_horn
+3705 #icmd_where
+3712 She has been seduced!
+3726 #noun_monster
+372A #noun_mother
+373A She tiptoes up to you!
+373F She slashes you to bits!
+374A #verb_look
+374E It looks very dangerous!
+375E #verb_attack
+3762 #noun_sword
+3766 #icmd_where
+377F She tiptoes up to you!
+3784 You slash her to bits!
+378C The body has vanished!
+37BF GUG: careful, if I revise to allow re-lighting torch
+37E0 The ground beneath your feet
+37E5 begins to shake!
+37FA A disgusting odor permeates
+37FF the hallway!
+3811 The monster attacks you and
+3816 you are his next meal!
+381E It is the monster's mother!
+3823 She slashes you to bits!
+3831 #noun_snake
+3838 Snake bites you!
+383F #verb_look
+3843 #verb_attack
+3847 #noun_dagger
+384B #icmd_where
+3858 #noun_sword
+385C #icmd_where
+386B #noun_dagger
+386F #icmd_destroy1
+3876 #icmd_destroy1
+387A #noun_snake
+3881 #icmd_draw_inv
+3888 The dagger disappears!
+388D You have killed it.
+3895 It looks very dangerous!
+38DE #drawcmd01_keyhole
+38E0 $zp0F_action
+38EE #drawcmd09_keyholes
+38FF #drawcmd09_keyholes
+3906 Tick tick
+391C #verb_open
+3923 #noun_door
+394D The key blows up the whole maze!
+3968 #verb_open
+396F #noun_door
+39A3 #verb_forward
+39BE #verb_movement_begin + 1
+39C8 The elevator is moving!
+39D0 You are deposited at the next level.
+39EE You are trapped in a fake
+39F3 elevator. There is no escape!
+3A0F #drawcmd03_compactor
+3A1C Glitch!
+3A61 #noun_monster
+3A6B #verb_look
+3A72 #verb_attack
+3A7B #noun_dagger
+3A7F #icmd_where
+3A8F #noun_dagger
+3A93 #icmd_destroy2
+3A9A #icmd_draw_inv
+3AA1 The dagger disappears!
+3AA9 The monster is dead and
+3AAE much blood is spilt!
+3ACE #verb_fill
+3AD5 #noun_jar
+3AD9 #icmd_where
+3ADD #noun_jar
+3AEA #noun_jar
+3AEE #icmd_set_carried_active
+3AF5 It is now full of blood.
+3AFD It looks very dangerous!
+3B0B The body has vanished!
+3B26 #verb_climb
+3B2D #noun_snake
+3B64 Wham!
+3B69 Your head smashes into the ceiling!
+3B74 You fall on the snake!
+3BA5 #verb_forward
+3BAC You can't be serious!
+3BD1 The
+3BD6 snake
+3BDB has vanished
+3BE0 #noun_snake
+3BE4 #icmd_destroy1
+3BEB #icmd_draw_inv
+3C06 The
+3C0B wool
+3C10 has vanished
+3C15 #icmd_destroy1
+3C19 #noun_wool
+3C25 #icmd_draw_inv
+3C31 #icmd_draw_inv
+3C42 #verb_press
+3C46 You will do no such thing!
+3C54 #verb_forward
+3C93 Splat!
+3CB7 GUG: depth 4? not 3?
+3CBF #drawcmd08_doors
+3CCF Don't make unnecessary turns.
+3CEA #verb_forward
+3D01 #drawcmd08_doors
+3D1D #verb_forward
+3D45 #verb_right
+3D5C #drawcmd02_elevator
+3D74 #verb_open
+3D7E #noun_door
+3D85 #drawcmd0A_door_opening
+3D96 #verb_forward
+3DA5 You fall through the floor
+3DAA #char_newline
+3DAF onto a bed of spikes!
+3DBE #verb_throw
+3DC8 #noun_ball
+3DCC #icmd_where
+3DD0 #noun_ball
+3DD7 $zp1A_item_place
+3DD9 #carried_known
+3DF0 #icmd_destroy2  ;and #noun_ball
+3DF9 #icmd_draw_inv
+3E11 #verb_forward
+3E32 #verb_forward
+3E44 Before I let you go free
+3E49 what was the name of the monster?
+3E58 #verb_grendel
+3E7F $zp0C_string_ptr
+3E83 $zp0C_string_ptr+1
+3EBB Correct! You have survived!
+3EC0 #char_newline
+3EE1 You have turned into a pillar of salt!
+3EE6 #char_newline
+3EEB Don't say I didn't warn you!
+3EF3 It is currently impossible.
+3F21 #opcode_JMP
+3F30 #'D'
+3F35 #'E'
+3F3A #'A'
+3F3F #'T'
+3F44 #'H'
+7C56 #'D'
+7C60 Prepare your cassette
+7C7D #'T'
+7C8A #icmd_draw_inv
+7CA4 #'T'
+7CA8 #'D'
+7CBE #game_save_begin
+7D05 #icmd_draw_inv
+7D21 #'D'
+7D29 #'E'
+7D31 #'A'
+7D39 #'T'
+7D41 #'H'
+7D4A #error_bad_save
+7D4F #char_newline
+7D5F char_newline
+7D64 Press any key
+7D6C #>dos_iob
+7D6E #<dos_iob
+7D7B #error_write_protect
+7D82 #error_volume_mismatch
+7D89 #error_unknown_cause
+7D8C #error_reading
+7E5F #char_newline
+7E86 #glyph_L
+7EAF #glyph_L
+7EC7 #glyph_L
+7EFA #glyph_R
+7F2A #glyph_L
+7F59 #glyph_R
+7F6F #glyph_L
+:USER LABELS
+0006 zp_col
+0007 zp_row
+0008 screen_ptr
+0009 screen_ptr+1
+0015 line_count
+0016 zp_counter
+0017 clock
+0018 clock+1
+003C tape_addr_start
+003D tape_addr_start+1
+003E tape_addr_end
+003F tape_addr_end+1
+03D9 DOS_call_rwts
+03F8 DOS_hook_monitor
+03F9 DOS_hook_monitor+1
+03FA DOS_hook_monitor+2
+0400 screen_GR1
+0805 cold_start
+080C new_session
+0843 new_game
+084A start_game
+0855 clear_hgr2
+085F @next_page
+0860 -
+0872 load_from_tape
+0892 print_to_line1
+08A4 print_to_line2
+08B4 print_to_line
+08C3 @next_char
+08D0 +
+08D6 +
+08E2 print_display_string
+08E5 print_string
+08EE @next_char
+08F9 +
+0900 get_display_string
+090E @scan
+0912 @next_char
+091C @found_string
+0921 clear_text_buf
+0925 -
+092B main_game_loop
+0938 next_game_loop
+0943 cmd_verbal
+0949 cmd_movement
+0956 move_turn
+095E @turn_right
+0969 @wrap_clockwise
+096E @turned
+0975 @turn_left
+0980 @wrap_counterwise
+0987 @turn_around
+0995 +
+099D move_forward
+09BB @perfect_square_S
+09C3 @perfect_square_N
+09C9 @normal
+09DF @move_player
+09F0 @east_3
+09F5 @north_2
+09FA @west_1
+09FD @check_special
+0A06 +
+0A10 check_special_position
+0A22 +
+0A27 +
+0A36 check_calculator
+0A3C special_return
+0A3D at_calculator
+0A43 check_guillotine
+0A4A beheaded
+0A5D check_level_2
+0A63 check_dog_roaming
+0A6F +
+0A81 +
+0A87 check_guarded_pit
+0AAF at_guard_dog
+0ABB return_dog_monster
+0ABC check_levels_4_5
+0AC6 check_mother
+0AD2 +
+0AE4 +
+0AEA check_bat
+0B00 check_monster
+0B0C +
+0B18 done_timer
+0B19 complete_turn
+0B26 +
+0B2E @consume
+0B4F @dec_food
+0B5C +
+0B64 starved
+0B77 print_timers
+0B88 +
+0B97 noun_to_item
+0BAB pop_not_carried
+0BAD not_carried
+0BAF print_return
+0BB2 rts_bb2
+0BB3 multiples
+0BC7 @food
+0BD3 @torch
+0C02 memcpy
+0C04 @next_byte
+0C0E +
+0C14 +
+0C23 @check_done
+0C29 textbuf_prev_input-1
+0C2A textbuf_prev_input
+0C7A text_buffer_line1
+0CA2 text_buffer_line2
+0CCA get_player_input
+0CCD -
+0CDD +
+0D22 -
+0D39 input_blink_cursor
+0D3C -
+0D4F process_input_char
+0D5C +
+0D63 +
+0D6A +
+0D71 +
+0D7B @check_backspace
+0D83 @check_enter
+0D8A @check_esc
+0DA3 @next_char
+0DB2 @repeat_display
+0DBA +
+0DC8 @check_space
+0DD1 @forward
+0DD5 @right
+0DD9 @left
+0DDD @around
+0DDF @return_move
+0DE5 input_enter
+0DE8 input_backspace
+0E04 +
+0E0D input_letter
+0E23 @no_modification
+0E25 +
+0E37 input_space
+0E43 +
+0E4D parse_input
+0E5E @parse_verb
+0E68 @skip_word
+0E6E +
+0E7A +
+0E84 @verb_only
+0E8B @parse_object
+0E93 @check_verb
+0EA9 @echo_next_char
+0EB9 @echo_period
+0EC2 @known_verb
+0ED9 @done_verb
+0EDA @unknown_object
+0EE9 @find_word_end
+0EF7 @found_word_end
+0EFD @obj_next_letter
+0F0D @obj_word_end
+0F16 @verb_no_object
+0F43 @next_verb_letter
+0F49 @echo
+0F52 @verb_word_end
+0F5A @cmd_look
+0F63 @dark
+0F65 +
+0F6B get_vocab
+0F7D @next_word
+0F7F @find_string
+0F8D @found_start
+0F96 +
+0F9C +
+0FA0 @compare_char
+0FB4 +
+0FBA +
+0FBE @done
+0FC5 @mismatch
+0FD8 @fail
+0FDC wait_short
+0FE0 -
+0FE9 input_char
+0FEC -
+0FF7 input_Y_or_N
+0FFA -
+100F +
+1015 update_view
+102F +
+1044 @done
+1045 wait_long
+1049 @dec16
+104D -
+105A nonsense
+105F clear_status_lines
+107C pit
+10B9 game_over
+10C4 play_again
+10D3 +
+10DC push_special_mode2
+111D +
+1134 +
+113B +
+1142 @not_here
+1148 cruft_cmd_paint
+1160 +
+1162 row8_table
+1164 cruft_cmd
+1192 char_out
+119D +
+11A4 print_char
+11CC @next_line
+11EF get_rowcol_addr
+120C control_newline
+1217 +
+121E clear_to_end_line
+1226 clear_up_to_3F
+1229 clear_N
+1231 -
+1243 blink_cursor
+1249 +
+1253 done_cursor
+1254 show_cursor
+1262 render_cursor
+126E clear_cursor
+127E clear_maze_window
+1286 @clear_row
+128E @clear_raster
+1292 -
+12A6 draw_maze
+12C3 @draw_4_center
+12E0 @draw_3_center
+12FD @draw_2_center
+131E @draw_1_center
+133F @draw_0_center
+135C @draw_4_left
+1363 @draw_4_left_open
+1376 +
+139C @draw_4_left_wall
+13AF +
+13C5 @draw_4_right
+13CC @draw_4_right_open
+13DF +
+1407 @draw_4_right_wall
+141A +
+1430 @draw_3_left
+1437 @draw_3_left_open
+144A +
+1474 @draw_3_left_wall
+1487 +
+14A1 @draw_3_right
+14A8 @draw_3_right_open
+14BD +
+14E9 @draw_3_right_wall
+14FE +
+1518 @draw_2_left
+1532 +
+155C @draw_2_left_wall
+156F +
+1589 @draw_2_right
+1590 @draw_2_right_open
+15A5 +
+15D1 @draw_2_right_wall
+15E6 +
+1600 @draw_1_left
+1607 @draw_1_left_open
+161A +
+1644 @draw_1_left_wall
+1657 +
+1671 @draw_1_right
+1678 @draw_1_right_open
+168D +
+16B9 @draw_1_right_wall
+16CE +
+16E8 @draw_0_left
+16F4 @draw_0_left_open
+171B @draw_0_right
+1722 @draw_0_right_open
+174B @draw_0_done
+174C @draw_0_left_wall
+1760 @draw_0_right_wall
+1777 draw_right
+1779 -
+177F draw_down_left
+1782 -
+1795 draw_down_right
+1798 -
+17A7 draw_down
+17AC @next
+17BF probe_forward
+17CF -
+17D7 @find_x
+17DE -
+17EA @find_y
+17F5 @shift_2_bytes
+17FA @shift_1_byte
+17FF @find_2bits
+1802 -
+180A @check_facing
+181F +
+1825 +
+1828 probe_south
+1845 +
+184C @S_sight_limit
+1853 S_next_wall
+185C +
+1869 +
+188E +
+1897 S_probed_max
+189A S_probe_done
+18A7 probe_east
+18A9 @next_depth
+18BE @E_sight_limit
+18D0 E_next_wall
+18DF +
+18EA +
+18EE @check_opposite
+18F5 +
+18F9 E_probed_max
+1900 E_probe_done
+1910 probe_west
+1912 @next_depth
+1929 +
+193B W_next_wall
+1944 +
+194C +
+1955 +
+195D +
+196F W_probed_max
+197C probe_north
+198B +
+198F @next_depth
+19AC +
+19B3 @sight_limit
+19BE +
+19C4 @save_depth
+19C9 N_next_wall
+19D2 +
+19DF +
+19EF +
+1A07 +
+1A10 swap_saved_A_2
+1A34 item_cmd
+1A5F @destroy_item
+1A69 +
+1A6E icmd06_where_item
+1A7E icmd05_drop_item
+1A93 icmd07_draw_inv
+1A9B @clear_window
+1AA7 -
+1ADC check_item_known
+1AE7 +
+1AEE next_known_item
+1AF4 +
+1AFA +
+1B0A check_item_boxed
+1B15 next_boxed_item
+1B1B +
+1B21 +
+1B76 print_known_item
+1B81 +
+1B9C print_boxed_item
+1BB5 icmd08_count_inv
+1BCD @check_carried
+1BD5 +
+1BE5 @add_one
+1BE7 @done
+1BE8 icmd09_new_game
+1BFE -
+1C06 icmd0A
+1C0D icmd0B_which_box
+1C14 +
+1C31 @check_is_here
+1C35 @not_here
+1C4B @check_is_carried
+1C63 @next_other
+1C7E @check_level
+1C94 @return_item_num
+1C9A +
+1CAF icmd0C_which_food
+1CC3 find_which_multiple
+1CE1 @found
+1CE8 icmd0D_which_torch
+1CF6 icmd0E_which_torch
+1D02 set_action
+1D0D icmd_default
+1D0E icmd0A_probe_boxes
+1D21 +
+1D35 @none
+1D3B @begin_probe
+1D43 @next_pos
+1D55 @shift_remainder
+1D5C -
+1D63 @done
+1D69 any_item_here
+1D8F @next_item
+1D93 @continue
+1D9F @done
+1DA7 @match_position
+1DB8 @match_level
+1DC7 move_pos_facing
+1DD3 @south
+1DD6 @west
+1DD9 @north
+1DDC @east
+1DDF get_maze_feature
+1E09 @next
+1E0E @continue
+1E1C @check_position
+1E27 @match
+1E36 keyhole_0
+1E5A draw_special
+1E5F @draw_1_keyhole
+1E76 @next_row
+1E7A @next_glyph
+1EA0 @done
+1EA1 @draw_2_elevator
+1F04 -
+1F13 @string_elevator
+1F1B @draw_3_compactor
+1F21 +
+1F25 @next_frame_3
+2051 +
+2052 @pit_floor_data
+206A @draw_4_pit_floor
+207F @pit_walls
+20A5 @pit_rim
+20C3 @pit_roof_data
+20E7 @draw_5_pit_roof
+2102 +
+2107 @draw_6_boxes
+210D @draw_box_4
+2122 @draw_box_3
+215D @draw_box_2
+21CB @draw_box_1
+2245 @box_done
+2246 @square_data_left
+2254 @square_data_right
+2262 @string_square
+2272 @draw_7_the_square
+2278 +
+2285 @square_front
+228F @sq_next_col
+22AB @sq_sign
+22E6 @print_square_row
+22F3 +
+22F8 @square_right
+230A @sq_next_row
+231A +
+2327 +
+2332 @square_left
+2347 @draw_8_doors
+234D +
+2356 @door_2_right
+23A8 @door_1_right
+23DD @door_1_left
+2410 @draw_9_keyholes
+2416 +
+241C @keyhole_R_4
+2427 @keyhole_R_3
+2434 @keyhole_R_2
+2441 @keyhole_R_1
+244E @keyhole_R_done
+244F @keyhole_L_1
+245C @keyhole_L_2
+2469 @keyhole_L_3
+2476 @keyhole_L_4
+2483 @keyhole_L_done
+2484 draw_keyhole_1
+24E2 draw_keyhole_2
+252D draw_keyhole_3
+253F draw_keyhole_4
+254C @draw_A_special
+2585 @next_frame_opening
+25E3 print_noun
+25EF @find_string
+25F3 @next_char
+25FB @found_start
+2603 @print_char
+260C +
+2617 wait_brief
+261B -
+2640 player_cmd
+2651 +
+265A +
+2669 cmd_raise
+2679 @having_fun
+267B @print_line2
+267E @staff
+2682 @ring
+26AB @cmd_blow
+26D2 +
+26DD @play
+26E1 cmd_break
+26EE +
+2703 +
+270D @broken
+272C lose_one_torch
+274B @done
+274C @unlit
+275F cmd_burn
+2771 +
+277D @burned
+278A @print
+278D @no_fire
+2791 push_special_mode
+279E make_cmd_light
+27A2 cmd_eat
+27A9 +
+27B2 +
+27BC @torch_return
+27C0 @eaten
+27D8 @print
+27E2 @torch
+27F4 @food
+2826 lose_ring
+283F @done
+2842 cmd_throw
+2849 +
+2852 +
+2859 +
+286E +
+2872 @thrown
+2884 +
+288E @throw_wool
+28C2 @throw_yoyo
+28CF @throw_food
+28E2 print_thrown
+2905 +
+290B +
+291B throw_frisbee
+2925 +
+2946 cmd_climb
+294D cmd_drop
+2976 @vacant_at_feet
+2986 @dropped
+2994 @multiples
+299F @torch_unlit
+29AE @torch_lit
+29D0 cmd_fill
+29DD +
+29E2 cmd_light
+29F1 +
+29FA cmd_light_impl
+2A0B @have_fire
+2A1F @light_torch
+2A4C cmd_play
+2A53 +
+2A64 play_horn
+2A6C play_ball
+2A6E print_and_rts
+2A71 play_flute
+2A92 @music
+2A9F @charm
+2AA7 @draw_snake
+2ABD -
+2AE8 cmd_strike
+2AF5 +
+2B02 cmd_wear
+2B07 +
+2B0D @print
+2B1A @hat
+2B24 cmd_look
+2B36 +
+2B41 +
+2B45 look_not_here
+2B47 look_print
+2B4A look_door
+2B53 look_item
+2B56 print_inspected
+2B69 +
+2B6D cmd_rub
+2B7F +
+2B83 cmd_open
+2B8A +
+2B93 +
+2B9A @open_box
+2BBD +
+2BC8 @check_contents
+2BD8 +
+2BDA @print_item_name
+2BF3 +
+2BFC +
+2C1C @done
+2C23 @push_mode_snake
+2C2F @open_door
+2C39 +
+2C40 +
+2C72 @no_key
+2C7A @correct_lock
+2C8C @push_mode_elevator
+2C97 which_door
+2CAB -
+2CC4 @find
+2CD2 +
+2CDC @next2
+2CE2 @next1
+2CE8 +
+2D03 cmd_press
+2D0A +
+2D13 +
+2D27 +
+2D33 @display
+2D46 @teleport
+2D54 @find_location
+2D6B @found
+2D78 +
+2D83 +
+2D8E +
+2DAE @snuff
+2DCC @teleported
+2E0A @done
+2E0B teleport_table
+2E33 cmd_take
+2E3A +
+2E47 +
+2E5C +
+2E63 @unique_item
+2E73 @open_if_carried
+2E85 +
+2E8D @ensure_inv_space
+2EA0 +
+2EA3 @take_if_space
+2EA6 @take
+2EAD @react_taken
+2EBE +
+2ECA @done
+2ECB on_reveal_calc
+2EDC +
+2EE4 @done
+2EE7 @take_box
+2EFE @multiple
+2F1F @food
+2F36 +
+2F39 @cannot
+2F3B @print_rts
+2F3E @inventory_full
+2F4B @find_boxed_torch
+2F51 @find_boxed_food
+2F55 @begin_search
+2F5F @next
+2F6B +
+2F8B @found
+2F9B +
+2FA1 cmd_attack
+2FB2 +
+2FB9 +
+2FC0 @not_here
+2FC2 @print
+2FC6 cmd_paint
+2FDE +
+2FE2 cmd_grendel
+2FE9 cmd_say
+3006 -
+3012 @echo_word
+301F @next_char
+3025 +
+302D @done
+302E cmd_charge
+3035 @propel_player
+3083 @normal
+3096 propel_next_step
+30A6 @south_4
+30AA @west_1
+30AE @north_2
+30B2 @east_3
+30B6 brained
+30CF cmd_fart
+30D6 flash_screen
+30E0 @fill
+30E2 -
+310C check_fart
+3116 +
+311C @next_propel
+3122 @propel_player
+3141 @normal
+3147 @guillotine
+3150 @wall
+316A +
+316E @consume_food
+318B @wham
+31A1 @clamp_minimum
+31A8 cmd_save
+31B6 ask_save_game
+31CA +
+31CD save_to_tape
+31F0 cmd_quit
+3206 +
+320C cmd_directions
+3224 @next_char
+322A +
+3249 cmd_hint
+3260 +
+3269 @calc_hint
+326E draw_doors_opening
+3278 swap_saved_A
+3285 swap_saved_vars
+32CE dec_item_ptr
+32D9 +
+32DB text_hat
+332A look_hat
+3340 throw_react
+334D +
+3370 check_special_mode
+3376 +
+337D special_calc_puzzle
+338A @puzzle_loop
+3397 @continue_loop
+33A3 @move
+33B9 @check_repeat_turn
+33DA @new_direction
+33F2 +
+33FD @update_display
+3406 @bump_into_wall
+341C @print_hint
+342A +
+343A +
+344A @done
+344B @init_puzzle
+3450 @reset_target
+345E @print_timed_hint
+3472 @print_hint_basic
+3479 @print_hint_extra
+3480 special_bat
+3487 +
+3492 @bat_loop
+34A9 @dead
+34B4 @look
+34C2 @try_action
+34FE pop_special_mode
+3518 +
+3519 special_dog
+3528 @dog2
+352E +
+3539 @confront_dog
+355F @dead
+356A @look
+3578 @attack
+35A8 @killed
+35AE @with_dagger
+35C8 @throw
+3613 special_monster
+3619 +
+3623 +
+363B @monster_smell
+3652 monster_kills_you
+3667 +
+3677 input_near_danger
+3687 +
+3695 wait_if_moved
+36A0 +
+36A8 @wait
+36AF special_mother
+36B5 +
+36BF +
+36D7 @mother_smell
+36FC @mother_arrives
+3717 @input_near_mother
+372E @dead_pop
+373F @dead
+3747 @look
+375E @attack
+37A0 special_dark
+37A6 +
+37B0 +
+37BD @unlit
+37D5 @cancel
+37D8 @check_mother
+37DD @tremble
+37F0 @monster_smell
+3807 @monster_attacks
+381E @mother
+3825 dead_bit
+382B special_snake
+3835 dead_by_snake
+383C snake_check_verb
+3847 @attack
+386B @kill_snake
+388D @killed
+3895 @look
+389D special_bomb
+38A3 +
+38AD +
+38BD @draw_new_keyhole
+38E4 @distance_1
+38F5 @distance_2
+3903 @draw_keyhole
+3906 @tick
+3913 @last_move
+393F @boom
+3955 @regular_move
+3965 +
+398B @continue
+3997 special_elevator
+399D +
+39A7 pop_mode_stack
+39C5 +
+39C8 ride_elevator
+39DE enter_elevator
+39EE @level5
+39FB @level2
+3A2C @level3
+3A36 @level4
+3A3E @clear_turns
+3A49 special_tripped
+3A4F +
+3A59 +
+3A5E @check_input
+3A65 @dead
+3A68 +
+3A72 +
+3A76 @attack
+3AC8 +
+3AFD @look
+3B08 @done
+3B13 special_climb
+3B19 +
+3B23 @dead
+3B26 +
+3B46 @on_level_4
+3B55 @on_level_3
+3B61 @ceiling
+3B7F @to_level_2
+3B8A @to_level_3
+3B93 @up_level
+3BB7 +
+3BCB +
+3BCE @moved_forward
+3C01 @in_lair
+3C2C +
+3C38 lair_input_loop
+3C4E @command_allowed
+3C54 @move
+3C60 @update_view
+3C7E +
+3C81 @forward
+3C9B @into_pit
+3CAF special_endgame
+3CCF @endgame_input_loop
+3CE3 @step1
+3CEA +
+3CF1 +
+3D12 @step2
+3D1D +
+3D24 +
+3D3A @step3
+3D45 +
+3D4C +
+3D69 @step4
+3D74 +
+3D7B +
+3D85 +
+3D92 @step5
+3DB7 +
+3DBE +
+3DC2 @nope5
+3DC5 +
+3E06 @step6
+3E0E @nope6
+3E11 +
+3E15 @dead6
+3E18 +
+3E2E @step7
+3E44 @final_quiz
+3E5F @text_hint
+3E72 @print_hint
+3E8E @text_congrats
+3EB2 @win
+3ED0 @infinite_loop
+3ED3 @dead_salt
+3EF3 @nope
+3F00 relocate_data
+3F30 @write_DEATH
+3F4E vector_reset
+3FFF relocated
+4000 screen_HGR2
+4015 raster 0,21,0
+40AF raster 9,7,0
+40B1 raster 9,9,0
+40B4 raster 9,12,0
+40D8 raster $11,8,0
+40D9 raster 17,9,0
+4131 raster 10,9,0
+4132 raster 10,10,0
+4133 raster 10,11,0
+4134 raster 10,12,0
+4156 raster 18,6,0
+4200 raster 4,0,0
+4204 raster 4,4,0
+4211 raster 4,17,0
+4384 raster 7,4,0
+4387 raster 7,7,0
+438E raster 7,14,0
+5C50 raster 16,0,7
+5C54 raster 16,4,7
+5C61 raster 16,17,7
+5D05 raster 2,5,7
+5DAF raster 11,7,7
+5DB4 raster 11,12,7
+5E4F raster 20,-1,7
+5E50 raster 20,0,7
+5E56 raster 20,6,7
+5E65 raster 20,21,7
+5EAC raster 13,4,7
+5EAF raster 13,7,7
+5EB6 raster 13,14,7
+6000 maze_walls
+60A5 maze_features
+613D data_new_game
+6193 gs_facing
+6194 gs_level
+6195 gs_player_x
+6196 gs_player_y
+6197 gs_torches_lit
+6198 gs_torches_unlit
+6199 gs_walls_left
+619A gs_walls_right_depth
+619B gs_box_visible
+619C gd_parsed_action
+619D gd_parsed_object
+619E gs_room_lit
+619F gs_food_time_hi
+61A0 gs_food_time_lo
+61A1 gs_torch_time
+61A2 gs_teleported_lit
+61A3 gs_level_turns_hi
+61A4 gs_level_turns_lo
+61A5 gs_special_mode
+61A6 gs_mode_stack1
+61A7 gs_mode_stack2
+61A8 gs_endgame_step
+61AB gs_bat_alive
+61AC gs_mother_alive
+61AD gs_monster_alive
+61AE gs_dog1_alive
+61AF gs_dog2_alive
+61B1 gs_next_hint
+61B2 gs_monster_proximity
+61B3 gs_mother_proximity
+61B4 gs_rotate_target
+61B5 gs_rotate_count
+61B6 gs_bomb_tick
+61B7 gs_rotate_total
+61B8 gs_lair_raided
+61B9 gs_snake_used
+61BB gs_item_locs
+61BC (gs_item_locs+1)
+61DB gs_item_snake
+61DD gs_item_food_torch
+61F7 saved_A
+61F8 saved_zp0E
+61F9 saved_zp0F
+61FA saved_zp10
+61FB saved_zp11
+61FC saved_zp19
+61FD saved_zp1A
+6200 signature
+6201 signature+1
+6202 signature+2
+6203 signature+3
+6204 signature+4
+6292 game_save_end
+6294 font
+6694 vocab_table
+6695 verb_table
+6773 noun_table
+6820 junk_string
+6829 display_string_table
+77BF (intro_text-1)
+77C0 intro_text
+7B57 junk_intro
+7C00 text_save_device
+7C1F text_load_device
+7C3F load_disk_or_tape
+7C5D prompt_tape
+7C66 save_disk_or_tape
+7C84 prepare_tape_save
+7C94 input_T_or_D
+7C97 -
+7CAC +
+7CB2 dos_dct
+7CB6 dos_iob
+7CBC iob_dct
+7CBE iob_buffer
+7CC2 iob_cmd
+7CC3 iob_return_code
+7CC4 iob_last_volume
+7CC7 text_insert_disk
+7CEF save_to_disk
+7CFF prepare_disk_save
+7D0C load_from_disk
+7D1C check_signature
+7D4A @fail
+7D4F prompt_and_call_dos
+7D74 dos_code_to_message
+7D7E +
+7D85 +
+7D8C +
+7D8F string_disk_error
+7E1D disk_error_fatal
+7E23 disk_error_retry
+7E27 disk_error
+7E2D +
+7E34 +
+7E3B +
+7E42 +
+7E44 @print_message
+7E71 +
+C000 hw_KEYBOARD
+C010 hw_STROBE
+C050 hw_GRAPHICS
+C051 hw_TEXT
+C052 hw_FULLSCREEN
+C054 hw_PAGE1
+C055 hw_PAGE2
+C056 hw_LORES
+C057 hw_HIRES
+FDED rom_COUT
+FECD rom_WRITE_TAPE
+FEFD rom_READ_TAPE
+FF69 rom_MONITOR
+:DISABLED HILO LABELS
+0892
+08A4
+0A4D
+0A99
+0B69
+0CEE
+0D8E
+0DAA
+0F29
+1045
+1060
+107F
+10A6
+114C
+127E
+13AF
+13F5
+141A
+1487
+1494
+14AE
+14D7
+14EF
+14FE
+150B
+156F
+157C
+1596
+15BF
+15D7
+15E6
+15F3
+1657
+1664
+167E
+16A7
+16BF
+16CE
+16DB
+1722
+1767
+1A9F
+1AC1
+1AD1
+1B25
+1B29
+1B35
+1B57
+1BC3
+1CB3
+1CB7
+1CBB
+1CEC
+1CFA
+1CFE
+1D02
+1EA4
+1EB3
+1EC2
+1EEB
+2129
+2143
+2164
+2188
+21D2
+21F3
+2202
+222A
+22B3
+22C5
+22D7
+2300
+233A
+235A
+2389
+2398
+23A8
+23BE
+23CD
+23DD
+23F3
+2402
+254C
+2559
+257D
+268F
+26C7
+2805
+28A4
+2925
+2A71
+2A9F
+2ACF
+2C43
+2C97
+2D13
+2DCC
+2FCA
+3050
+316E
+3193
+3278
+3335
+3409
+3450
+34C5
+34E7
+357E
+358F
+3593
+35AE
+35CE
+35DF
+3669
+36DB
+3701
+3762
+3847
+3858
+386B
+3876
+38EA
+3908
+3945
+3A1E
+3A7B
+3A8F
+3AD9
+3AEA
+3BE0
+3C15
+3C63
+3C8B
+3CB2
+3CBF
+3CF4
+3D01
+3D27
+3D4F
+3D9D
+3DCC
+3DE3
+3E1B
+3E75
+3ED9
+3F21
+3F30
+3F35
+3F3A
+3F3F
+7E42
+7EA7
+7EBF
+7ECE
+7EDB
+7F22
+7F67
+:USER HILO
+:TAB SIZE
+0008
+:LOAD OFFSET
+0000
+:SYSTEM
+Apple II
