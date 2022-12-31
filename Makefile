@@ -70,7 +70,7 @@ STRINGS = $(STRING_DECL) $(STRING_DEF)
 $(STRINGS): tools/build_strings.py src/strings.txt
 	$^ $(STRING_STEMS)
 
-GENERATED += $(STRINGS)
+# GENERATED += $(STRINGS)
 
 
 src/maze_walls.s: tools/build_maze.py src/maze.txt
@@ -89,10 +89,8 @@ strings: tools/extract_strings.py | $(extras_dir)
 
 FONT = $(output_dir)/FONT.prg
 
-# In-memory address = $4294
-# in-file offset = $4294 - $0805 = $3A8F
-$(FONT): tools/font.py files/original/DEATHMAZE_B\#060805 | $(output_dir)
-	$^ $@ 3A8F
+$(FONT): tools/font.py src/font.bin | $(output_dir)
+	$^ $@ 0
 
 font: $(FONT)
 
@@ -116,7 +114,7 @@ clean_dependencies:
 
 # Final game files.
 
-CODE = \
+RETAIL_CODE = \
 	start \
 	print \
 	main \
@@ -139,7 +137,7 @@ CODE = \
 	relocator \
 	relocator_junk
 
-DATA = \
+RETAIL_DATA = \
 	maze_walls \
 	maze_features \
 	new_game \
@@ -154,14 +152,46 @@ DATA = \
 	save_game \
 	save_game_junk
 
-OBJS = $(patsubst %,src/%.o,$(CODE) $(DATA))
+RETAIL_OBJS = $(patsubst %,src/%.o,$(RETAIL_CODE) $(RETAIL_DATA))
 
-#%.prg: %.o src/loadaddr.o $$(or $$(wildcard $$(@D)/$$(*F).cfg),src/main.cfg)
-
-$(output_dir)/deathmaze.prg: src/loadaddr.o $(OBJS) src/deathmaze.cfg
+$(output_dir)/deathmaze_rev2.prg: src/loadaddr.o $(RETAIL_OBJS) src/deathmaze_retail.cfg
 	$(LD65) -m $*.map -C $(filter %.cfg,$^) -Ln $*.lab \
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
+
+FIXED_CODE = \
+	start \
+	print \
+	main \
+	memcpy \
+	special_positions \
+	text_buffers \
+	input \
+	raster \
+	swap \
+	draw_maze \
+	item_commands \
+	draw_special \
+	player_commands \
+	special_modes \
+	relocator \
+
+FIXED_DATA = \
+	maze_walls \
+	maze_features \
+	new_game \
+	game_state \
+	font \
+	vocab \
+	strings \
+	intro \
+	save_game
+
+FIXED_OBJS = $(patsubst %,src/%.o,$(FIXED_CODE) $(FIXED_DATA))
+
+$(output_dir)/deathmaze_fixed.prg: src/loadaddr.o $(FIXED_OBJS) src/deathmaze_fixed.cfg
+	$(LD65) -m $*.map -C $(filter %.cfg,$^) -Ln $*.lab \
+		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
 
 # Targets that are not explicit files
