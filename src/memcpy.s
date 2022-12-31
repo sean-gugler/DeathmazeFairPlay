@@ -1,5 +1,9 @@
 	.export memcpy
-	
+
+zp0E_src = $0ed
+zp10_dst = $10
+zp19_count = $19
+
 	.segment "MEMCPY"
 
 memcpy:

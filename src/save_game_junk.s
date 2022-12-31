@@ -1,4 +1,31 @@
-	.segment "SAVEGAME"
+; This file contains data completely unused by the game.
+; It's only purpose is to preserve the ability to build
+; a program that exactly matches the retail binary.
+
+REVISION = 2
+
+	.import maze_walls
+	.import print_char
+	.import char_out
+	.import get_rowcol_addr
+	.import relocated
+	.import draw_down_right
+	.import draw_down_left
+	.import draw_right
+	.import draw_down
+
+	.include "apple.i"
+	.include "draw.i"
+	.include "game_state.i"
+
+screen_ptr = $08 ;$09
+zp_col = $06
+zp_row = $07
+
+zp0A_walls_ptr = $0a
+zp1A_count_loop = $1a
+
+	.segment "SAVE_GAME"
 
 ; cruft leftover from earlier build
 .if REVISION = 1
@@ -222,7 +249,6 @@ b7FFA:
 	inc zp0A_walls_ptr
 	sec
 	sbc #$04
-	.assert * = $7fff, error, "Unexpected alignment"
 b7FFF:
 .if REVISION = 1
 	brk

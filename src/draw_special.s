@@ -1,3 +1,39 @@
+	.export draw_special
+
+	.import wait_brief
+	.import draw_down_left
+	.import draw_down_right
+	.import char_out
+	.import draw_right
+	.import draw_down
+	.import print_char
+	.import get_rowcol_addr
+
+	.include "apple.i"
+	.include "char.i"
+	.include "draw.i"
+	.include "game_state.i"
+
+zp_col = $06
+zp_row = $07
+
+screen_ptr = $08 ;$09
+
+zp10_length      = $10;
+zp11_count_loop  = $11;
+zp19_col_right   = $19;
+zp0C_col_left    = $0C;
+zp1A_temp        = $1A;
+zp0E_draw_param  = $0E;
+zp19_count       = $19;
+zp0A_data_ptr    = $0A;
+zp0C_col_animate = $0C;
+zp1A_count_loop  = $1A;
+zp19_count_col   = $19;
+zp0A_text_ptr    = $0A;
+zp1A_count_row   = $1A;
+zp0F_action      = $0F;
+
 	.segment "DATA_KEYHOLE"
 
 	; glyphs for rendering at distance 0
@@ -121,12 +157,12 @@ draw_special:
 	bne :-
 	rts
 
-	.segment "STRING_ELEVATOR"
+;	.segment "STRING_ELEVATOR"
 
 @string_elevator:
 	.byte "ELEVATOR"
 
-	.segment "DRAW_SPECIAL2"
+;	.segment "DRAW_SPECIAL2"
 
 @draw_3_compactor:
 	dey
@@ -368,7 +404,7 @@ draw_special:
 	bne @pit_rim
 	rts
 
-	.segment "DATA_PIT_ROOF"
+;	.segment "DATA_PIT_ROOF"
 
 @pit_roof_data:
 	;--- distance 1
@@ -399,7 +435,7 @@ draw_special:
 	.byte raster_lo $09,9,0
 	.byte $03              ;len
 
-	.segment "DRAW_SPECIAL4"
+;	.segment "DRAW_SPECIAL4"
 
 @draw_5_pit_roof:
 	dey

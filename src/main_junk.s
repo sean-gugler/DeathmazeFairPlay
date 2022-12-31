@@ -1,3 +1,23 @@
+; This file contains data completely unused by the game.
+; It's only purpose is to preserve the ability to build
+; a program that exactly matches the retail binary.
+
+	.import pit
+	.import update_view
+	.import item_cmd
+	.import nonsense
+	.import print_to_line2
+	.import row8_table
+	.import not_carried
+
+	.include "game_state.i"
+	.include "item_commands.i"
+	.include "string_noun_decl.i"
+
+zp0E_object        = $0E;
+zp0F_action        = $0F;
+zp1A_item_place    = $1A;
+
 	.segment "MAIN4"
 
 ; cruft leftover from earlier build
@@ -60,7 +80,7 @@ b110D:
 
 cruft_cmd_paint:
 	dec zp0F_action
-	bne row8_table+2  ;cruft_cmd
+	.byte $d0,$18  ;bne +24 to next command
 	ldx #noun_brush
 	stx zp0E_object
 	ldx #icmd_where

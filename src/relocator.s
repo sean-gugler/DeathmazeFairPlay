@@ -1,6 +1,21 @@
 	.export relocate_data
+	.export relocated
+
+	.import signature
+	.import vector_reset
+	.import memcpy
+
+	.include "apple.i"
+	.include "dos.i"
 
 	.import __MAIN_LAST__
+
+zp_col = $06
+zp_row = $07
+
+zp0E_src   = $0E;
+zp10_dst   = $10;
+zp19_count = $19;
 
 	.segment "RELOCATOR"
 

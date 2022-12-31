@@ -2,6 +2,8 @@
 	.export swap_saved_A
 	.export swap_saved_vars
 
+zp13_temp = $13
+
 	.segment "SWAP_DATA"
 	
 saved_A:

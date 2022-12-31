@@ -1,3 +1,38 @@
+	.export blink_cursor
+	.export char_out
+	.export clear_cursor
+	.export clear_status_lines
+	.export get_rowcol_addr
+	.export print_char
+	.export print_display_string
+	.export print_noun
+	.export print_string
+	.export print_to_line1
+	.export print_to_line2
+
+	.import text_buffer_line1
+	.import text_buffer_line2
+	.import display_string_table
+	.import noun_table
+	.import row8_table
+	.import font
+
+	.include "char.i"
+
+clock = $17 ;$18
+zp_col = $06
+zp_row = $07
+
+screen_ptr = $08 ;$09
+zp0E_ptr = $0e ;$0f
+zp0A_text_ptr     = $0A;
+zp0C_string_ptr   = $0C;
+zp11_count_string = $11;
+zp13_char_input   = $13;
+zp13_font_ptr     = $13;
+zp15_line_count   = $15;
+zp16_counter      = $16;
+
 	.segment "PRINT_LINES"
 
 print_to_line1:

@@ -2,7 +2,11 @@
 	.export verb_table
 	.export noun_table
 
-	.export vocab_end
+	.exportzp vocab_end
+
+	.include "msbstring.i"
+	.include "string_noun_decl.i"
+	.include "string_verb_decl.i"
 
 	.segment "STRINGS"
 

@@ -1,6 +1,6 @@
 	.export font
 
-	segment "FONT"
+	.segment "FONT"
 
 font:
 	.incbin "font.bin"

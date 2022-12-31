@@ -1,14 +1,17 @@
 	.export signature
 
+	.include "string_noun_decl.i"
+
 	.segment "SIGNATURE"
 
 signature:
 	.byte "DEATH"
 
 
-	.include "gamestate.i"
+	.include "game_state.i"
 	.import __GAME_STATE_RUN__
-	.import __GAME_STATE_SIZE__
+;	.import __GAME_STATE_SIZE__
+__GAME_STATE_SIZE__  = $FF
 
 	.segment "GAME_STATE"
 

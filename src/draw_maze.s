@@ -1,3 +1,34 @@
+	.export clear_maze_window
+	.export draw_down
+	.export draw_down_left
+	.export draw_down_right
+	.export draw_maze
+	.export draw_right
+	.export probe_forward
+
+	.import swap_saved_A_2
+	.import maze_walls
+	.import print_char
+	.import char_out
+	.import get_rowcol_addr
+
+	.include "apple.i"
+	.include "char.i"
+	.include "draw.i"
+	.include "game_state.i"
+
+zp_col = $06
+zp_row = $07
+
+screen_ptr = $08 ;$09
+zp19_wall_opposite = $19;
+zp11_count         = $11;
+zp19_sight_depth   = $19;
+zp1A_wall_bit      = $1A;
+zp0A_walls_ptr     = $0A;
+zp1A_count_loop    = $1A;
+zp19_count_raster  = $19;
+
 	.segment "DRAW_MAZE"
 
 clear_maze_window:

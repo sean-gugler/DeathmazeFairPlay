@@ -33,7 +33,7 @@ def main(argv):
     base, ext = os.path.splitext(args.input)
     obj = base + '.o'
 
-    deps = ' '.join(f'src/include/{file}' for file in includes(src))
+    deps = ' '.join(f'src/{file}' for file in includes(src))
 
     with open(args.output, 'wt') as out:
         print(f'{obj}: {deps}', file=out)

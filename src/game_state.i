@@ -47,7 +47,7 @@
 	.global gs_item_snake
 	.global gs_item_food_torch
 
-	.global gs_size
+	.globalzp gs_size
 
 
 	items_unique    = $11
@@ -62,3 +62,18 @@
 
 	item_food_end = item_food_begin + items_food
 	item_torch_end = item_torch_begin + items_torches
+
+
+; First byte in gs_item_locations is either
+; maze level 1-5 or one of these values:
+carried_boxed = $06
+carried_active = $07
+carried_known = $08
+
+; for >= comparisons
+carried_begin = $06
+carried_unboxed = $07
+
+monster_flag_roaming = $02
+mother_flag_roaming = $04
+

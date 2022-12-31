@@ -1,4 +1,79 @@
+	.export flash_screen
 	.export nonsense
+	.export player_cmd
+	.export print_thrown
+	.export save_to_tape
+
+	.import print_string
+	.import draw_special
+	.import clear_hgr2
+	.import play_again
+	.import input_char
+	.import save_disk_or_tape
+	.import input_Y_or_N
+	.import check_special_position
+	.import starved
+	.import beheaded
+	.import complete_turn
+	.import pit
+	.import wait_short
+	.import swap_saved_A
+	.import print_char
+	.import get_rowcol_addr
+	.import not_carried
+	.import swap_saved_vars
+	.import game_over
+	.import wait_long
+	.import print_display_string
+	.import clear_maze_window
+	.import clear_status_lines
+	.import print_noun
+	.import char_out
+	.import print_to_line1
+	.import update_view
+	.import item_cmd
+	.import noun_to_item
+	.import print_to_line2
+	.import text_buffer_line1
+	.import intro_text
+
+	.include "apple.i"
+	.include "char.i"
+	.include "draw_commands.i"
+	.include "game_design.i"
+	.include "game_state.i"
+	.include "item_commands.i"
+	.include "special_modes.i"
+	.include "string_display_decl.i"
+	.include "string_noun_decl.i"
+	.include "string_verb_decl.i"
+
+zp_col = $06
+zp_row = $07
+
+zp0C_string_ptr     = $0C;
+zp0A_text_ptr       = $0A;
+zp11_count          = $11;
+zp19_count          = $19;
+zp11_box_item       = $11;
+zp11_position       = $11;
+zp1A_count_loop     = $1A;
+zp19_level_facing   = $19;
+zp0E_ptr            = $0E;
+zp10_noun           = $10;
+zp10_wait2          = $10;
+zp11_wait1          = $11;
+zp19_item_position  = $19;
+zp11_action         = $11;
+zp0E_item           = $0E;
+zp19_delta16        = $19;
+zp0E_count16        = $0E;
+zp10_temp           = $10;
+zp13_temp           = $13;
+zp1A_item_place     = $1A;
+zp11_item           = $11;
+zp0F_action         = $0F;
+zp0E_object         = $0E;
 
 	.segment "COMMAND1"
 
@@ -594,7 +669,7 @@ cmd_play:
 	jmp nonsense
 
 play_horn:
-	lda #cmd_blow
+	lda #verb_blow
 	sta gd_parsed_action
 	jmp player_cmd
 

@@ -1,8 +1,11 @@
 	.export text_buffer_prev
 	.export text_buffer_line1
 	.export text_buffer_line2
+	.exportzp textbuf_size
 
 	.segment "TEXT_BUFFERS"
+
+textbuf_size = $28 * 2 ;40 columns, 2 lines
 
 ; uninitialized buffers contain
 ; cruft leftover from earlier build

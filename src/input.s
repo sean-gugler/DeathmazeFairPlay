@@ -1,4 +1,46 @@
-	.segment "INPUT"
+	.export get_player_input
+	.export input_Y_or_N
+	.export input_char
+
+	.import vocab_table
+	.import print_display_string
+	.importzp vocab_end
+	.import print_char
+	.import print_to_line2
+	.import clear_cursor
+	.import char_out
+	.import blink_cursor
+	.import get_rowcol_addr
+	.import clear_status_lines
+	.import memcpy
+	.importzp textbuf_size
+	.import text_buffer_prev
+	.import text_buffer_line1
+
+	.include "apple.i"
+	.include "char.i"
+	.include "game_design.i"
+	.include "game_state.i"
+	.include "string_verb_decl.i"
+
+zp_col = $06
+zp_row = $07
+
+zp13_char_input   = $13;
+zp0E_ptr          = $0E;
+zp10_count_vocab  = $10;
+zp13_raw_input    = $13;
+zp0F_index        = $0F;
+zp0E_count        = $0E;
+zp19_input_ptr    = $19;
+zp10_count_words  = $10;
+zp11_count_chars  = $11;
+zp0C_string_ptr   = $0C;
+zp19_count        = $19;
+zp10_dst          = $10;
+zp0E_src          = $0E;
+
+	.segment "INPUT1"
 
 get_player_input:
 	bit hw_STROBE
@@ -467,14 +509,8 @@ get_vocab:
 	inc zp10_count_vocab
 	bne @done
 
-wait_short:
-	ldx #$90
-	stx zp0F_wait2
-:	dec zp0E_wait1
-	bne :-
-	dec zp0F_wait2
-	bne :-
-	rts
+
+	.segment "INPUT1"
 
 input_char:
 	bit hw_STROBE

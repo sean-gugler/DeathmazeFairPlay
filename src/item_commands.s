@@ -1,3 +1,49 @@
+	.export item_cmd
+
+	.import data_new_game
+	.import print_noun
+	.import print_display_string
+	.import char_out
+	.import get_rowcol_addr
+
+	.include "game_state.i"
+	.include "item_commands.i"
+	.include "string_noun_decl.i"
+
+facing_W = $01
+facing_N = $02
+facing_E = $03
+facing_S = $04
+
+zp_col = $06
+zp_row = $07
+
+zp10_temp          = $10;
+zp11_count_loop    = $11;
+zp0E_ptr           = $0E;
+zp0E_box_visible   = $0E;
+zp0F_sight_depth   = $0F;
+zp19_level         = $19;
+zp10_pos_y         = $10;
+zp11_pos_x         = $11;
+zp10_which_place   = $10;
+zp11_count_which   = $11;
+zp13_level         = $13;
+zp11_position      = $11;
+zp10_dst           = $10;
+zp0E_src           = $0E;
+zp19_count         = $19;
+zp1A_cmds_to_check = $1A;
+zp13_temp          = $13;
+zp1A_count_loop    = $1A;
+zp19_item_position = $19;
+zp1A_item_place    = $1A;
+zp0E_item          = $0E;
+zp0E_object        = $0E;
+zp0F_action        = $0F;
+
+	.segment "ITEM_COMMANDS"
+
 ; Perform an internal command upon items.
 ; Input:
 ;   $0E object

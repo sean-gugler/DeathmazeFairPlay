@@ -1,3 +1,65 @@
+	.export cmd_movement
+	.export complete_turn
+	.export game_over
+	.export main_game_loop
+	.export move_turn
+	.export not_carried
+	.export noun_to_item
+	.export play_again
+	.export print_timers
+	.export push_special_mode2
+	.export starved
+	.export update_view
+	.export vector_reset
+	.export wait_brief
+	.export wait_long
+	.export wait_short
+
+	.import get_player_input
+	.import gd_parsed_action
+	.import check_special_mode
+	.import player_cmd
+	.import clear_maze_window
+	.import print_display_string
+	.import check_special_position
+	.import done_timer
+	.import clear_hgr2
+	.import print_to_line1
+	.import print_to_line2
+	.import probe_forward
+	.import draw_maze
+	.import draw_special
+	.import clear_status_lines
+	.import input_Y_or_N
+	.import new_session
+	.import maze_features
+	.importzp maze_features_end
+	.import item_cmd
+
+	.include "apple.i"
+	.include "draw_commands.i"
+	.include "game_design.i"
+	.include "game_state.i"
+	.include "item_commands.i"
+	.include "special_modes.i"
+	.include "string_noun_decl.i"
+
+zp_col = $06
+zp_row = $07
+
+zp0E_ptr           = $0E;
+zp0F_action        = $0F;
+zp1A_facing        = $1A;
+zp1A_item_place    = $1A;
+zp0E_draw_param    = $0E;
+zp11_level_facing  = $11;
+zp10_position      = $10;
+zp19_count         = $19;
+zp11_temp          = $11;
+zp10_wait3         = $10;
+zp0F_wait2         = $0F;
+zp0E_wait1         = $0E;
+
 	.segment "MAIN1"
 
 main_game_loop:
@@ -134,6 +196,13 @@ move_forward:
 
 	.segment "MAIN2"
 
+; Retail had segment MAIN2 right after segment SPECIAL_POSITIONS.
+; Its code organization was very ad hoc; I've moved things around
+; to be more sensible, but that meant breaking this local branch.
+; Hacking the address here so that retail can still be built from
+; this source.
+return = * - 1
+
 complete_turn:
 	lda gs_level_turns_lo
 	cmp #$ff
@@ -166,7 +235,7 @@ complete_turn:
 	dec gs_food_time_hi
 :	lda gs_food_time_hi
 	ora gs_food_time_lo
-	bne done_timer
+	bne return
 starved:
 	jsr clear_hgr2
 	lda #$35     ;Died of starvation!
@@ -271,7 +340,7 @@ update_view:
 	ora zp0E_draw_param
 	beq :+
 	jsr draw_special
-:	ldx #icmd_0A
+:	ldx #icmd_probe_boxes
 	stx zp0F_action
 	jsr item_cmd
 	lda gs_box_visible
@@ -397,6 +466,17 @@ wait_long:
 	bne :-
 	dec zp10_wait3
 	bne @dec16
+	rts
+
+	.segment "WAIT_SHORT"
+
+wait_short:
+	ldx #$90
+	stx zp0F_wait2
+:	dec zp0E_wait1
+	bne :-
+	dec zp0F_wait2
+	bne :-
 	rts
 
 	.segment "WAIT_BRIEF"

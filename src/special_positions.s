@@ -1,3 +1,26 @@
+	.export beheaded
+	.export check_special_position
+	.export pit
+
+	.import wait_long
+	.import wait_short
+	.import get_rowcol_addr
+	.import clear_maze_window
+	.import push_special_mode2
+	.import game_over
+	.import print_display_string
+	.import clear_hgr2
+
+	.include "game_design.i"
+	.include "game_state.i"
+	.include "special_modes.i"
+
+zp_col = $06
+zp_row = $07
+
+zp19_pos_y = $19
+zp1A_pos_x = $1A
+
 	.segment "SPECIAL_POSITIONS"
 
 check_special_position:

@@ -1,4 +1,46 @@
-	.segment "SAVEGAME"
+REVISION = 2
+
+	.export check_signature
+	.export load_disk_or_tape
+	.export save_disk_or_tape
+
+	.import cold_start
+	.import input_char
+	.import print_display_string
+	.import char_out
+	.import start_game
+	.import signature
+	.import game_save_begin
+	.import relocate_data
+	.import clear_cursor
+	.import blink_cursor
+	.import save_to_tape
+	.import item_cmd
+	.import update_view
+	.import print_to_line1
+	.import print_string
+	.import clear_hgr2
+
+	.include "apple.i"
+	.include "char.i"
+	.include "dos.i"
+	.include "item_commands.i"
+
+error_write_protect = $01
+error_volume_mismatch = $02
+error_unknown_cause = $03
+error_reading = $04
+error_bad_save = $05
+
+zp_col = $06
+zp_row = $07
+
+zp19_delta16    = $19;
+zp10_retry      = $10;
+zp0F_action     = $0F;
+zp0C_string_ptr = $0C;
+
+	.segment "SAVE_GAME"
 
 .if REVISION = 1
 
@@ -17,7 +59,7 @@ text_load_device:
 	.byte "GET FROM DISK OR TAPE (T OR D)?", $80
 
 .endif
-	.assert * = $7c3f, error, "Unexpected alignment"
+;	.assert * = $7c3f, error, "Unexpected alignment"
 load_disk_or_tape:
 	jsr clear_hgr2
 	ldx #$00

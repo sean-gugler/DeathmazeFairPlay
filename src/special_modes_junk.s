@@ -1,3 +1,9 @@
+; This file contains data completely unused by the game.
+; It's only purpose is to preserve the ability to build
+; a program that exactly matches the retail binary.
+
+	.include "game_design.i"
+
 	.segment "SPECIAL_MODES"
 
 ; cruft leftover from earlier build

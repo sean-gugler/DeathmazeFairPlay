@@ -1,3 +1,63 @@
+	.export check_special_mode
+
+	.import print_string
+	.import char_out
+	.import pit
+	.import move_turn
+	.import print_noun
+	.import wait_short
+	.import draw_maze
+	.import flash_screen
+	.import draw_special
+	.import text_buffer_line2
+	.import text_buffer_line1
+	.import cmd_movement
+	.import clear_hgr2
+	.import print_thrown
+	.import item_cmd
+	.import game_over
+	.import clear_status_lines
+	.import print_to_line2
+	.import print_to_line1
+	.import wait_long
+	.import print_display_string
+	.import clear_maze_window
+	.import print_timers
+	.import complete_turn
+	.import player_cmd
+	.import get_player_input
+	.import update_view
+
+;	.include "apple.i"
+	.include "char.i"
+	.include "draw_commands.i"
+	.include "game_design.i"
+	.include "game_state.i"
+	.include "item_commands.i"
+;	.include "special_modes.i"
+;	.include "string_display_decl.i"
+	.include "string_noun_decl.i"
+	.include "string_verb_decl.i"
+
+zp_col = $06
+zp_row = $07
+
+zp0C_string_ptr    = $0C;
+zp1A_endgame_step  = $1A;
+zp19_regular_climb = $19;
+zp19_pos_y         = $19;
+zp1A_pos_x         = $1A;
+zp0E_draw_param    = $0E;
+zp1A_facing        = $1A;
+zp19_item_position = $19;
+zp1A_temp          = $1A;
+zp1A_item_place    = $1A;
+zp0F_action        = $0F;
+zp0E_object        = $0E;
+zp1A_object        = $1A;
+zp1A_move_action   = $1A;
+zp1A_hint_mode     = $1A;
+
 	.segment "SPECIAL_MODES"
 
 check_special_mode:

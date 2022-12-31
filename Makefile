@@ -102,7 +102,7 @@ GENERATED += $(FONT)
 
 # Dependencies
 
-DEPS = $(patsubst %.s,%.d,$(wildcard src/*/*.s src/*/*/*.s))
+DEPS = $(patsubst %.s,%.d,$(wildcard src/*.s))
 
 include $(DEPS)
 
@@ -121,12 +121,14 @@ CODE = \
 	print \
 	main \
 	main_junk \
+	memcpy \
 	special_positions \
 	text_buffers \
 	input \
 	raster \
 	swap \
 	draw_maze \
+	item_commands \
 	draw_special \
 	draw_special_junk \
 	player_commands \
@@ -139,8 +141,8 @@ CODE = \
 DATA = \
 	maze_walls \
 	maze_features \
-	newgame \
-	gamestate \
+	new_game \
+	game_state \
 	font \
 	vocab \
 	vocab_junk \
@@ -148,8 +150,8 @@ DATA = \
 	strings_junk \
 	intro \
 	intro_junk \
-	savegame \
-	savegame_junk
+	save_game \
+	save_game_junk
 
 OBJS = $(patsubst %,src/%.o,$(CODE) $(DATA))
 

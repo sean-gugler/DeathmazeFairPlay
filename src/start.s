@@ -1,3 +1,37 @@
+	.export clear_hgr2
+	.export cold_start
+	.export new_session
+	.export start_game
+
+	.import check_signature
+	.import update_view
+;	.import tape_addr_end
+	.import game_save_end
+;	.import tape_addr_start
+	.import game_save_begin
+	.import main_game_loop
+	.import player_cmd
+	.import gd_parsed_action
+	.import item_cmd
+	.import input_char
+	.import print_to_line2
+	.import load_disk_or_tape
+	.import input_Y_or_N
+	.import print_display_string
+	.import get_rowcol_addr
+	.import relocate_data
+
+	.include "apple.i"
+	.include "char.i"
+	.include "item_commands.i"
+
+clock = $17 ;$18
+zp_col = $06
+zp_row = $07
+
+zp0E_ptr = $0e ;$0f
+zp0F_action = $0f
+
 	.segment "START"
 
 cold_start:
