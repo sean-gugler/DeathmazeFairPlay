@@ -8,7 +8,8 @@
 	.include "apple.i"
 	.include "dos.i"
 
-	.import __MAIN_LAST__
+	.import __MAIN_START__
+	.import __MAIN_SIZE__
 
 zp_col = $06
 zp_row = $07
@@ -58,4 +59,7 @@ relocate_data:
 	stx zp_row
 	rts
 
-relocated = __MAIN_LAST__ - 1
+	.segment "RELOCATOR_FLAG"
+
+relocated:
+	.byte $ff
