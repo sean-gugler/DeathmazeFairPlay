@@ -1,6 +1,11 @@
+	.export data_new_game
+
+	.segment "NEW_GAME"
+
 ; Data copied into the Game State
 ; when a new game is started.
 
+data_new_game:
 	.byte $02		;player facing
 	.byte $01		;player level
 	.byte $0a		;player x

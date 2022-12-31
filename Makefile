@@ -61,12 +61,22 @@ $(FOLDERS):
 
 # Game files.
 
-%.test: $$(wildcard $$(@D)/$$(*F).cfg)
-	echo $(@D)/$(*F).cfg $^
+STRING_TABLES = verb noun display intro
+STRING_STEMS = $(patsubst %,src/string_%,$(STRING_TABLES))
+STRING_DECL = $(patsubst %,%_decl.i,$(STRING_STEMS))
+STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
+STRINGS = $(STRING_DECL) $(STRING_DEF)
 
-%.prg: %.o src/loadaddr.o $$(or $$(wildcard $$(@D)/$$(*F).cfg),src/main.cfg)
-	$(LD65) -m $*.map -C $(filter %.cfg,$^) -Ln $*.lab \
-		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
+$(STRINGS): tools/build_strings.py src/strings.txt
+	$^ $(STRING_STEMS)
+
+GENERATED += $(STRINGS)
+
+
+src/maze_walls.s: tools/build_maze.py src/maze.txt
+	$^ $@
+
+GENERATED += src/maze_walls.s
 
 
 # Extras.
@@ -106,14 +116,49 @@ clean_dependencies:
 
 # Final game files.
 
-STRING_TABLES = verb noun display intro
-STRING_STEMS = $(patsubst %,src/string_%,$(STRING_TABLES))
-STRING_DECL = $(patsubst %,%_decl.i,$(STRING_STEMS))
-STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
-STRINGS = $(STRING_DECL) $(STRING_DEF)
+CODE = \
+	start \
+	print \
+	main \
+	main_junk \
+	special_positions \
+	text_buffers \
+	input \
+	raster \
+	swap \
+	draw_maze \
+	draw_special \
+	draw_special_junk \
+	player_commands \
+	player_commands_junk \
+	special_modes \
+	special_modes_junk \
+	relocator \
+	relocator_junk
 
-$(STRINGS): tools/build_strings.py src/strings.txt
-	$^ $(STRING_STEMS)
+DATA = \
+	maze_walls \
+	maze_features \
+	newgame \
+	gamestate \
+	font \
+	vocab \
+	vocab_junk \
+	strings \
+	strings_junk \
+	intro \
+	intro_junk \
+	savegame \
+	savegame_junk
+
+OBJS = $(patsubst %,src/%.o,$(CODE) $(DATA))
+
+#%.prg: %.o src/loadaddr.o $$(or $$(wildcard $$(@D)/$$(*F).cfg),src/main.cfg)
+
+$(output_dir)/deathmaze.prg: src/loadaddr.o $(OBJS) src/deathmaze.cfg
+	$(LD65) -m $*.map -C $(filter %.cfg,$^) -Ln $*.lab \
+		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
+
 
 
 # Targets that are not explicit files

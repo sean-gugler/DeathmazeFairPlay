@@ -26,8 +26,11 @@ def main(argv):
     S = group(bitpairs(src), 4)
 
     asm = [
+        '\t.export maze_walls\n',
+        '\n',
         '\t.segment "MAZE"\n',
         '\n',
+        'maze_walls:\n',
         '\t;Each 3-byte sequence is one column, south to north (max 12 cells)\n',
         '\t;Each pair of bits is whether there is a wall to South and West of each cell.\n',
     ]
