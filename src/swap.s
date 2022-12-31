@@ -5,7 +5,9 @@
 zp13_temp = $13
 
 	.segment "SWAP_DATA"
-	
+
+.res $0E
+
 saved_A:
 	.byte "D"
 saved_zp0E:
@@ -20,6 +22,8 @@ saved_zp19:
 	.byte $07
 saved_zp1A:
 	.byte $00
+
+.res $02
 
 
 	.segment "SWAP_CODE_DUPE"

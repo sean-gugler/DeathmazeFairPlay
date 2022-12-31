@@ -7,6 +7,8 @@
 signature:
 	.byte "DEATH"
 
+	.res $8F
+
 
 	.include "game_state.i"
 	.import __GAME_STATE_RUN__

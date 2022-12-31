@@ -1,6 +1,6 @@
 	.export memcpy
 
-zp0E_src = $0ed
+zp0E_src = $0e
 zp10_dst = $10
 zp19_count = $19
 

@@ -510,7 +510,7 @@ get_vocab:
 	bne @done
 
 
-	.segment "INPUT1"
+	.segment "INPUT2"
 
 input_char:
 	bit hw_STROBE

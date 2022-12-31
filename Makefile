@@ -128,6 +128,7 @@ CODE = \
 	raster \
 	swap \
 	draw_maze \
+	draw_maze_junk \
 	item_commands \
 	draw_special \
 	draw_special_junk \
