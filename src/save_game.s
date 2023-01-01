@@ -50,7 +50,7 @@ text_load_device:
 	msbstring "Get from DISK or TAPE (T or D)?"
 	.byte $80
 
-.elseif REVISION = 2
+.elseif REVISION >= 2
 
 text_save_device:
 	.byte "SAVE TO DISK OR TAPE (T OR D)?", $80
@@ -142,7 +142,7 @@ text_insert_disk:
 	msbstring "Place data diskette in DRIVE 1, SLOT 6."
 	.byte $80
 
-.elseif REVISION = 2
+.elseif REVISION >= 2
 
 text_insert_disk:
 	.byte "PLACE DATA DISKETTE IN DRIVE 1, SLOT 6.", $80

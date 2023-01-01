@@ -203,14 +203,14 @@ cmd_break:
 	jsr item_cmd
 .if REVISION = 1
 	jsr update_view
-.elseif REVISION = 2
+.elseif REVISION >= 2
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
 .endif
 	lda #$4e     ;You break the
 	jsr print_to_line1
-.if REVISION = 2
+.if REVISION >= 2
 	lda #$20
 	jsr char_out
 .endif
@@ -408,8 +408,10 @@ thrown:
 	jsr item_cmd
 	jsr print_thrown
 	jsr throw_react
+.if REVISION < 100 ;RETAIL
 	nop
 	nop
+.endif
 	bne :+
 	lda #$97     ;and it vanishes!
 	jmp print_to_line1
@@ -468,7 +470,7 @@ print_thrown:
 	jsr print_to_line1
 	lda gd_parsed_object
 	jsr print_noun
-	;---------------------
+.if REVISION < 100 ;RETAIL
 	; This section has no effect.
 	; Probably it used to conditionally
 	; print a space, but zp0E points to
@@ -485,7 +487,7 @@ print_thrown:
 :	inc zp0E_item
 	bne :+
 	inc zp0E_item+1
-	;---------------------
+.endif
 :	lda #$5a     ;magically sails
 	jsr print_display_string
 	lda #$5b     ;around a nearby corner
@@ -1318,9 +1320,15 @@ take_multiple:
 	stx zp0E_object
 	lda zp1A_item_place
 	cmp #carried_boxed
-	beq take_and_reveal    ;BUG: get box > get torch: does not increment unlit count if it's the only box
+.if REVISION >= 100
+	bne :+   ;skip "ensure_inv_space" but do both INC and JMP
+.else ;RETAIL
+	beq take_and_reveal
+	; BUG: "get box" then "get torch"
+	; does not increment unlit count if it's the only box
+.endif
 	jsr ensure_inv_space
-	inc gs_torches_unlit
+:	inc gs_torches_unlit
 	jmp take_and_reveal
 
 @food:
@@ -1344,11 +1352,21 @@ take_print_and_return:
 	jmp print_to_line2
 
 inventory_full:
-	;BUG? suspicious. Stack leak?
+.if REVISION >= 100
+	; Pop one call frame, do not return and continue.
+	; (By design of "ensure_inv_space")
+	pla
+	pla
+.else ;RETAIL
+	; Authors got confused with purpose of PLA here.
+	; Harmless, but unnecessary; these zp vars get
+	; immediately wiped by restoring from
+	; 'swap_saved_vars' anyway.
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
+.endif
 	jsr swap_saved_vars
 	lda #$99     ;Carrying the limit.
 	bne take_print_and_return
@@ -1361,17 +1379,20 @@ find_boxed_food:
 	ldx #item_food_begin - 1
 	stx zp0E_object
 find_boxed:
+.if REVISION < 100 ;RETAIL
 	; Leftover 16-bit increment from earlier design.
 	; Pointless but harmless.
 	lda zp0F_action
 	pha
 	lda zp0E_object
 	pha
+.endif
 	ldx #items_food
 	.assert items_food = items_torches, error, "Need to edit cmd_take for separate food,torch counts"
 	stx zp11_count
 @next:
-	; Leftover 16-bit increment from earlier design.
+.if REVISION < 100 ;RETAIL
+	; 16-bit increment, presumably leftover from earlier design.
 	; Pointless now but harmless.
 	pla
 	sta zp0E_object
@@ -1384,6 +1405,7 @@ find_boxed:
 	pha
 	lda zp0E_object
 	pha
+.endif
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
@@ -1392,17 +1414,21 @@ find_boxed:
 	beq @found
 	dec zp11_count
 	bne @next
+.if REVISION < 100 ;RETAIL
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
+.endif
 	jmp cannot_take
 
 @found:
+.if REVISION < 100 ;RETAIL
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
+.endif
 	lda gd_parsed_object
 	cmp #noun_torch
 	beq :+
@@ -1460,7 +1486,7 @@ cmd_grendel:
 cmd_say:
 	dec zp0F_action
 	bne cmd_charge
-.if REVISION = 2
+.if REVISION >= 2
 	lda gd_parsed_object
 	bne :+
 	jmp nonsense
@@ -1811,6 +1837,7 @@ draw_doors_opening:
 
 	.segment "COMMAND5"
 
+.if REVISION < 100 ;RETAIL
 dec_item_ptr:
 	pha
 	dec zp0E_item
@@ -1820,7 +1847,7 @@ dec_item_ptr:
 	dec zp0E_item+1
 :	pla
 	rts
-
+.endif
 
 	.segment "STRING_HAT"
 

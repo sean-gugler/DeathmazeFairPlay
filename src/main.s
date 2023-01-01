@@ -37,6 +37,7 @@
 	.import item_cmd
 
 	.include "apple.i"
+	.include "dos.i"
 	.include "draw_commands.i"
 	.include "game_design.i"
 	.include "game_state.i"
@@ -370,7 +371,12 @@ play_again:
 
 :	bit hw_PAGE1
 	bit hw_TEXT
+.if REVISION >= 100
+	bit hw_STROBE
+	jmp DOS_warm_start
+.else ;RETAIL
 	jmp rom_MONITOR
+.endif
 
 push_special_mode2:
 	lda gs_mode_stack1

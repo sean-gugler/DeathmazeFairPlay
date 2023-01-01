@@ -1,21 +1,3 @@
-REVISION = 2
-
-;	.include "deathmaze_b.i"
-
-	.include "msbstring.i"
-
-	.include "apple.i"
-	.include "dos.i"
-
-	.include "string_verb_decl.i"
-	.include "string_noun_decl.i"
-	.include "string_display_decl.i"
-	.include "string_intro_decl.i"
-
-;	.feature string_escapes
-
-
-
 ; 8-bit variables
 zp0E_wait1 = $0e
 zp0F_wait2 = $0f

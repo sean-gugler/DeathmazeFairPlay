@@ -66,6 +66,7 @@ get_player_input:
 	sta zp19_count
 	jsr memcpy
 	jsr clear_status_lines
+.if REVISION < 100 ;RETAIL
 	nop
 	nop
 	nop
@@ -85,6 +86,7 @@ get_player_input:
 	nop
 	nop
 	nop
+.endif
 	dec zp_row
 	jsr get_rowcol_addr
 	lda #>(text_buffer_line1-1)
@@ -259,10 +261,16 @@ input_letter:
 	beq parse_input
 	jmp input_blink_cursor
 
-; BUG: meant to prevent double-space, but only prevents WORD_L_
 input_space:
 	ldy zp11_count_chars
-	dey          ;BUG: remove to fix.
+	; Prevent double-space.
+.if REVISION >= 100
+	;removed DEY to fix bug
+.else ;RETAIL
+	; This looks back too far by one char. It mistakenly prevents
+	; space after first letter of second word, as in:  WORD_L_
+	dey
+.endif
 	lda (zp19_input_ptr),y
 	cmp #' '
 	bne :+

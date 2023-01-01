@@ -47,7 +47,9 @@ new_session:
 	bit hw_HIRES
 	bit hw_GRAPHICS
 	jsr clear_hgr2
+.if REVISION < 100 ;RETAIL
 	nop
+.endif
 	jsr get_rowcol_addr
 	lda #$94     ;Continue a game?
 	jsr print_display_string
@@ -56,8 +58,10 @@ new_session:
 	bne new_game
 	jsr load_disk_or_tape
 	lda #$96     ;Press any key
+.if REVISION < 100 ;RETAIL
 	nop
 	nop
+.endif
 	jsr print_to_line2
 	jsr input_char
 	jsr load_from_tape
@@ -90,9 +94,11 @@ clear_hgr2:
 	bne @next_page
 	rts
 
+.if REVISION < 100 ;RETAIL
 	nop
 	nop
 	nop
+.endif
 load_from_tape:
 	ldx #<game_save_begin
 	stx tape_addr_start
@@ -106,6 +112,8 @@ load_from_tape:
 	jsr clear_hgr2
 	jsr update_view
 	jsr check_signature  ;NOTE: never returns, continues with PLA/PLA/JMP
+.if REVISION < 100 ;RETAIL
 	nop
+.endif
 	jmp item_cmd
 

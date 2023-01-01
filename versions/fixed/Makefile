@@ -19,7 +19,7 @@ FOLDERS += \
 # Custom settings
 
 PROGRAM = $(output_dir)/deathmaze_fixed.prg
-DEFINES = -DREVISION=2 -DBUGFIX=1
+DEFINES = -DREVISION=100
 
 
 # For .include "file.i" directives,

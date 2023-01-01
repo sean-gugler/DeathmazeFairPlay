@@ -309,6 +309,7 @@ special_dog:
 	lda #$2e     ;A vicious dog attacks you!
 	jsr print_to_line2
 	jsr wait_long ;GUG: can this be wait_short?
+@dog_input:
 	jsr get_player_input
 	lda gd_parsed_object
 	sta zp1A_object
@@ -331,9 +332,17 @@ special_dog:
 	lda zp1A_object
 	cmp #noun_dog
 	bne @dead
-	lda #$28     ;It displays 317.2!  ;BUG: should be $8c
+.if REVISION >= 100
+	lda #$8c     ;It looks very dangerous!
+.else ;RETAIL
+	lda #$28     ;It displays 317.2!  (BUG)
+.endif
 	jsr print_to_line2
-	jmp @confront_dog ;BUG: should JMP to get_player_input
+.if REVISION >= 100
+	jmp @dog_input
+.else ;RETAIL
+	jmp @confront_dog ;BUG: no time to read the response
+.endif
 
 @attack:
 	lda zp1A_object
