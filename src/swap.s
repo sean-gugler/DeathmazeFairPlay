@@ -2,6 +2,8 @@
 	.export swap_saved_A
 	.export swap_saved_vars
 
+	.include "junk_byte.i"
+
 zp13_temp = $13
 
 	.segment "SWAP_DATA"
@@ -9,19 +11,19 @@ zp13_temp = $13
 .res $0E
 
 saved_A:
-	.byte "D"
+	JUNK_BYTE "D"
 saved_zp0E:
-	.byte "E"
+	JUNK_BYTE "E"
 saved_zp0F:
-	.byte "A"
+	JUNK_BYTE "A"
 saved_zp10:
-	.byte "T"
+	JUNK_BYTE "T"
 saved_zp11:
-	.byte "H"
+	JUNK_BYTE "H"
 saved_zp19:
-	.byte $07
+	JUNK_BYTE $07
 saved_zp1A:
-	.byte $00
+	JUNK_BYTE $00
 
 .res $02
 

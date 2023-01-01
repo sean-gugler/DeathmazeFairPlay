@@ -8,7 +8,7 @@ include ../common/Makefile
 base_dir = ../..
 
 src_dir = $(base_dir)/src
-tools_dir = $(base_dir)/tools/
+tools_dir = $(base_dir)/tools
 build_dir = $(base_dir)/build/rev1
 output_dir = $(base_dir)/output
 
