@@ -47,7 +47,8 @@
 	.global gs_item_snake
 	.global gs_item_food_torch
 
-	.globalzp gs_size
+	.global game_state_end
+	gs_size = <game_state_end
 
 
 	items_unique    = $11

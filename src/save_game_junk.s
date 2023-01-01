@@ -2,8 +2,6 @@
 ; It's only purpose is to preserve the ability to build
 ; a program that exactly matches the retail binary.
 
-REVISION = 2
-
 	.import maze_walls
 	.import print_char
 	.import char_out

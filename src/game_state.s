@@ -114,7 +114,7 @@ gs_item_food_torch:
 	.assert item_begin + items_unique = nouns_unique_end, error, "Miscounted unique items"
 
 
-gs_size = * - game_save_begin
-
+game_state_end = * - game_save_begin
+	.assert >game_state_end = 0, error, "Game state data larger than one page"
 
 game_save_end = game_save_begin + __GAME_STATE_SIZE__

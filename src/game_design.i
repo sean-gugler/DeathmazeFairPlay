@@ -1,6 +1,3 @@
-REVISION = 2
-
-
 food_eat_amount = $00aa
 food_fart_consume = $000a
 food_fart_minimum = $05

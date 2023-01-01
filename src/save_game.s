@@ -1,5 +1,3 @@
-REVISION = 2
-
 	.export check_signature
 	.export load_disk_or_tape
 	.export save_disk_or_tape
@@ -25,6 +23,7 @@ REVISION = 2
 	.include "char.i"
 	.include "dos.i"
 	.include "item_commands.i"
+	.include "msbstring.i"
 
 error_write_protect = $01
 error_volume_mismatch = $02
