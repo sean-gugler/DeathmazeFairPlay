@@ -8,8 +8,10 @@
 	.include "apple.i"
 	.include "dos.i"
 
-	.import __MAIN_START__
-	.import __MAIN_SIZE__
+	.import __MAIN_LAST__
+	.import __HIGH_START__
+	.import __HIGH_LAST__
+	.import __HIGH_SIZE__
 
 zp_col = $06
 zp_row = $07
@@ -18,24 +20,36 @@ zp0E_src   = $0E;
 zp10_dst   = $10;
 zp19_count = $19;
 
+.if .defined(BUGFIX)
+	RELOCATE_SIZE = __HIGH_LAST__ - __HIGH_START__
+.else
+	RELOCATE_SIZE = __HIGH_SIZE__
+.endif
+
 	.segment "RELOCATOR"
 
 relocate_data:
 	lda relocated
 	beq @write_DEATH
 
-; Relocate data above HGR2: ($4000-$5FFF) to ($6000-$7FFF)
-	ldx #<screen_HGR2
+; Relocate data that might overlap HGR2 ($4000-$5FFF) to above it ($6000-$7FFF)
+	ldx #<__MAIN_LAST__
 	stx zp0E_src
+.if .defined(BUGFIX)
+	ldx #<__HIGH_START__
+.else
+	; Retail aligned relocatable data to start of HGR2 page, padding MAIN with junk
+	.assert <__HIGH_START__ = <__MAIN_LAST__, error, "Segment MAIN isn't full"
+.endif
 	stx zp10_dst
 	stx relocated
-	ldx #>screen_HGR2
+	ldx #>__MAIN_LAST__
 	stx zp0E_src+1
-	ldx #>(screen_HGR2 + screen_HGR_size)
+	ldx #>__HIGH_START__
 	stx zp10_dst+1
-	ldx #<(screen_HGR_size - 1)
+	ldx #<(RELOCATE_SIZE - 1)
 	stx zp19_count
-	ldx #>(screen_HGR_size - 1)
+	ldx #>(RELOCATE_SIZE - 1)
 	stx zp19_count+1
 	jsr memcpy
 	ldx #opcode_JMP

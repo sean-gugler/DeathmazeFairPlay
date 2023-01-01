@@ -19,7 +19,7 @@ FOLDERS += \
 # Custom settings
 
 PROGRAM = $(output_dir)/deathmaze_fixed.prg
-DEFINES = -DREVISION=2
+DEFINES = -DREVISION=2 -DBUGFIX=1
 
 
 # For .include "file.i" directives,
@@ -69,7 +69,7 @@ OBJS = $(patsubst %,$(build_dir)/%.o,$(CODE) $(DATA))
 $(build_dir)/%.o: $(src_dir)/%.s | $(build_dir)
 	$(AS65) $(AS65FLAGS) $(DEFINES) $< -o $@
 
-$(PROGRAM): $(build_dir)//loadaddr.o $(OBJS) deathmaze_fixed.cfg
+$(PROGRAM): $(build_dir)/loadaddr.o $(OBJS) deathmaze_fixed.cfg
 	$(LD65) -m $(build_dir)/$(@F).map -C $(filter %.cfg,$^) -Ln $(build_dir)/$(@F).lab \
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
