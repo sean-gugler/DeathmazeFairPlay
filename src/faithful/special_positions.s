@@ -33,7 +33,7 @@ check_special_position:
 	bne :+
 	rts
 
-:	bmi :+  ;GUG: bcc preferred
+:	bmi :+
 	jmp check_levels_4_5
 
 :	cmp #$02

@@ -67,7 +67,7 @@ main_game_loop:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #verb_movement_begin
-	bmi cmd_verbal  ;GUG: bcc preferred
+	bmi cmd_verbal
 	jsr cmd_movement
 next_game_loop:
 	lda gs_special_mode
@@ -119,7 +119,7 @@ move_turn:
 @turn_around:
 	lda zp1A_facing
 	cmp #$03
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	dec gs_facing
 	dec gs_facing
 	bpl @turned
@@ -266,13 +266,13 @@ print_timers:
 noun_to_item:
 	lda gd_parsed_object
 	cmp #nouns_unique_end
-	bpl multiples  ;GUG: bcs preferred
+	bpl multiples
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bpl noun_return	 ;GUG: bcc preferred
+	bpl noun_return	
 pop_not_carried:
 	pla
 	pla

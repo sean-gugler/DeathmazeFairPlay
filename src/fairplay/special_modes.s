@@ -82,7 +82,7 @@ special_calc_puzzle:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #$46
-	bpl @move  ;GUG: bcs preferred
+	bpl @move
 	jsr player_cmd
 @continue_loop:
 	jsr complete_turn
@@ -153,7 +153,7 @@ special_calc_puzzle:
 	cmp #verb_drop
 	beq :+
 	cmp #verb_movement_begin
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jsr wait_long
 :	lda #$24     ;To everything
 	jsr print_to_line1
@@ -724,7 +724,7 @@ snake_check_verb:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bpl @kill_snake  ;GUG: bcs preferred
+	bpl @kill_snake
 	ldx #noun_sword
 	stx zp0E_object
 	ldx #icmd_where
@@ -732,8 +732,8 @@ snake_check_verb:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bmi dead_by_snake  ;GUG: bcc preferred
-	bpl @killed  ;GUG: bcs preferred
+	bmi dead_by_snake
+	bpl @killed
 @kill_snake:
 	ldx #noun_dagger
 	stx zp0E_object
@@ -1311,7 +1311,7 @@ special_endgame:
 	bne @step2
 @step1:
 	cmp #$5a
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jmp @nope
 
 :	cmp #verb_forward
@@ -1336,7 +1336,7 @@ special_endgame:
 	dec zp1A_endgame_step
 	bne @step3
 	cmp #$5a
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jmp @nope
 
 :	cmp #verb_forward
@@ -1356,7 +1356,7 @@ special_endgame:
 	dec zp1A_endgame_step
 	bne @step4
 	cmp #$5a
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jmp @nope
 
 :	cmp #verb_right
@@ -1379,7 +1379,7 @@ special_endgame:
 	dec zp1A_endgame_step
 	bne @step5
 	cmp #$5a
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp @dead_salt
 
 :	cmp #verb_open
@@ -1416,7 +1416,7 @@ special_endgame:
 	jmp game_over
 
 :	cmp #$5a
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp @dead_salt
 
 :	cmp #verb_throw
@@ -1457,7 +1457,7 @@ special_endgame:
 	dec zp1A_endgame_step
 	bne @step7
 	cmp #$5a
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 @nope6:
 	jmp @nope
 
@@ -1477,7 +1477,7 @@ special_endgame:
 
 @step7:
 	cmp #$5a
-	bmi @nope6  ;GUG: bcc preferred
+	bmi @nope6
 	cmp #verb_forward
 	bne @dead6
 	jsr clear_maze_window
@@ -1493,7 +1493,7 @@ special_endgame:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #$5a
-	bpl @dead6  ;GUG: bcs preferred
+	bpl @dead6
 	cmp #verb_grendel
 	beq @win
 	jmp @print_hint

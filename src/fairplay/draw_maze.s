@@ -774,9 +774,9 @@ probe_forward:
 @find_y:
 	lda gs_player_y
 	cmp #$05
-	bmi @find_2bits  ;GUG: bcc preferred
+	bmi @find_2bits
 	cmp #$09
-	bmi @shift_1_byte  ;GUG: bcc preferred
+	bmi @shift_1_byte
 @shift_2_bytes:
 	inc zp0A_walls_ptr
 	sec

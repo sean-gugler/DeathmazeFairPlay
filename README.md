@@ -20,3 +20,9 @@ Changes in fan release
 * The "Look Dog" command now displays an appropriate response.
 * Quitting the game cleanly returns you to the BASIC prompt (]) instead of the MONITOR (*).
 * Double-space is properly prevented. Previously it mistakenly prevented a second space only after first letter of second word was started, as in:  WORD_L_
+
+# Production notes
+
+The original authors used 1-based indexing ubiquitously, rather than machine-friendly 0-based indexing. In many cases this means setting up data table pointers to the address one entry earlier than where the table actually starts.
+
+The original authors used BPL and BMI after CMP, rather than the customary BCS and BCC. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at http://www.6502.org/tutorials/compare_beyond.html)

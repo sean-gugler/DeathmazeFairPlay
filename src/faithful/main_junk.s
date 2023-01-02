@@ -62,11 +62,11 @@ b110D:
 	cmp #noun_snake
 	beq @not_here
 	cmp #nouns_item_end
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jmp nonsense
 
 :	cmp #noun_zero
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp nonsense
 
 :	cmp #noun_door

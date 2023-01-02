@@ -61,7 +61,7 @@ zp0F_action        = $0F;
 item_cmd:
 	lda zp0F_action
 	cmp #icmds_location_end
-	bpl icmd07_draw_inv  ;GUG: bcs preferred
+	bpl icmd07_draw_inv
 ; Convert object variable from 1-byte Index to 2-byte Pointer
 	asl zp0E_object
 	pha
@@ -77,7 +77,7 @@ item_cmd:
 	pla
 ; Perform location-related action
 	cmp #icmd_drop
-	bpl icmd06_where_item  ;GUG: bcs preferred
+	bpl icmd06_where_item
 	cmp #$00
 	beq @set_place	;icmd_destroy1
 	sec
@@ -243,7 +243,7 @@ print_known_item:
 	sec
 	sbc zp1A_count_loop
 	cmp #item_food_begin
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	lda #noun_food
 :	sta zp13_temp
 	lda zp_col
@@ -292,7 +292,7 @@ icmd08_count_inv:
 @check_carried:
 	lda (zp0E_item),y
 	cmp #carried_begin
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	inc zp19_count
 :	iny
 	iny

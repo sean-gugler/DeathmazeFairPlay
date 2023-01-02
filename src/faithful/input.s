@@ -49,7 +49,7 @@ get_player_input:
 	lda hw_KEYBOARD
 	and #$7f
 	cmp #$40
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	and #char_mask_upper
 :	pha
 	lda #>text_buffer_line1
@@ -116,7 +116,7 @@ input_blink_cursor:
 	lda hw_KEYBOARD
 	and #$7f
 	cmp #$40
-	bmi process_input_char  ;GUG: bcc preferred
+	bmi process_input_char
 	and #char_mask_upper
 process_input_char:
 	pha
@@ -184,7 +184,7 @@ process_input_char:
 @repeat_display:
 	lda (zp19_input_ptr),y
 	cmp #$80
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	lda #' '
 :	jsr char_out
 	inc zp0F_index

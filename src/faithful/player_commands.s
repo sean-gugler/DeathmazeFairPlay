@@ -89,12 +89,12 @@ player_cmd:
 	lda gd_parsed_action
 	sta zp0F_action
 	cmp #verb_look
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp cmd_look
 
 :	lda zp0E_object
 	cmp #nouns_item_end
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp nonsense
 
 :	jsr noun_to_item
@@ -180,7 +180,7 @@ cmd_break:
 	bne :+
 	jsr lose_ring
 :	cmp #nouns_unique_end
-	bmi @broken  ;GUG: bcc preferred
+	bmi @broken
 	sta zp13_temp  ;preserve 'object' while protecting $10,$11
 	lda zp10_temp  ;GUG: no need, $10 is neither assigned nor disturbed
 	pha
@@ -255,7 +255,7 @@ cmd_burn:
 	bne :+
 	jsr lose_ring
 :	cmp #nouns_unique_end
-	bmi @burned  ;GUG: bcc preferred
+	bmi @burned
 	cmp #noun_torch
 	beq make_cmd_light
 	lda zp11_item
@@ -295,7 +295,7 @@ cmd_eat:
 	bne :+
 	jsr lose_ring
 :	cmp #nouns_unique_end
-	bmi @eaten  ;GUG: bcc preferred
+	bmi @eaten
 	beq @food
 	cmp #noun_torch
 	beq @torch
@@ -394,7 +394,7 @@ cmd_throw:
 	cmp #noun_yoyo
 	beq throw_yoyo
 	cmp #noun_food
-	bmi thrown  ;GUG: bcc preferred
+	bmi thrown
 	beq throw_food
 	cmp #noun_torch
 	bne :+
@@ -545,7 +545,7 @@ cmd_drop:
 	jsr swap_saved_vars
 	lda zp0E_object
 	cmp #nouns_unique_end
-	bpl @multiples  ;GUG: bcs preferred
+	bpl @multiples
 	cmp #noun_ring
 	bne @dropped
 	jsr lose_ring
@@ -790,9 +790,9 @@ cmd_look:
 	jmp look_hat
 
 :	cmp #nouns_item_end
-	bmi look_item  ;GUG: bcc preferred
+	bmi look_item
 	cmp #noun_zero
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp nonsense
 
 :	cmp #noun_door
@@ -877,9 +877,9 @@ cmd_open:
 	cmp #noun_snake
 	beq @push_mode_snake
 ;	cmp #nouns_unique_end - 1   ;same as #noun_snake
-	bmi @print_item_name  ;GUG: bcc preferred
+	bmi @print_item_name
 	cmp #item_torch_begin
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	lda #noun_torch
 	bne @print_item_name
 :	lda #noun_food
@@ -945,7 +945,7 @@ cmd_open:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bmi @no_key  ;GUG: bcc preferred
+	bmi @no_key
 	jsr swap_saved_A
 	clc
 	adc #doormsg_lock_begin - doors_locked_begin
@@ -1055,7 +1055,7 @@ cmd_press:
 
 :	lda zp0E_object
 	cmp #noun_zero
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jmp nonsense
 
 :	ldx #icmd_where
@@ -1219,7 +1219,7 @@ cmd_take:
 	jmp take_box
 
 :	cmp #nouns_unique_end
-	bmi @unique_item  ;GUG: bcc preferred
+	bmi @unique_item
 	jmp take_multiple
 
 @unique_item:
@@ -1297,7 +1297,7 @@ on_reveal_calc:
 take_box:
 	lda zp1A_item_place
 	cmp #carried_begin
-	bpl cannot_take  ;GUG: bcs preferred
+	bpl cannot_take
 	jsr ensure_inv_space
 	ldx zp11_box_item
 	stx zp0E_object
@@ -1313,9 +1313,9 @@ take_multiple:
 ;@torch:
 	lda zp11_box_item
 	cmp #item_torch_end
-	bpl find_boxed_torch  ;GUG: bcs preferred
+	bpl find_boxed_torch
 	cmp #item_torch_begin
-	bmi find_boxed_torch  ;GUG: bcc preferred
+	bmi find_boxed_torch
 	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
@@ -1334,9 +1334,9 @@ take_multiple:
 @food:
 	lda zp11_box_item
 	cmp #item_food_end
-	bpl find_boxed_food  ;GUG: bcs preferred
+	bpl find_boxed_food
 	cmp #item_food_begin
-	bmi find_boxed_food  ;GUG: bcc preferred
+	bmi find_boxed_food
 	ldx zp11_box_item
 	stx zp0E_object
 	lda zp1A_item_place
@@ -1445,11 +1445,11 @@ cmd_attack:
 	cmp #noun_snake
 	beq @not_here
 	cmp #nouns_item_end
-	bpl :+  ;GUG: bcs preferred
+	bpl :+
 	jmp nonsense
 
 :	cmp #noun_zero
-	bmi :+  ;GUG: bcc preferred
+	bmi :+
 	jmp nonsense
 
 :	cmp #noun_door
