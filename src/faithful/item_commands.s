@@ -291,7 +291,7 @@ icmd08_count_inv:
 	ldy #$00
 @check_carried:
 	lda (zp0E_item),y
-	cmp #$06
+	cmp #carried_begin
 	bmi :+  ;GUG: bcc preferred
 	inc zp19_count
 :	iny
