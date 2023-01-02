@@ -81,7 +81,7 @@ gs_dog2_alive:
 	JUNK_BYTE $01
 gs_unused3:
 	JUNK_BYTE $00
-gs_next_hint:
+gs_bomb_tick:
 	JUNK_BYTE $00
 gs_monster_proximity:
 	JUNK_BYTE $0c
@@ -92,7 +92,6 @@ gs_rotate_target:
 gs_rotate_count:
 	JUNK_BYTE $00
 gs_rotate_direction:
-gs_bomb_tick:  ;Deliberate. Two purposes for the same memory location.
 	JUNK_BYTE $00
 gs_rotate_total:
 	JUNK_BYTE $00
