@@ -73,10 +73,34 @@ $(FOLDERS):
 	mkdir -p $@
 
 
+# Disk image
+
+FILES = \
+	files/HELLO.bas \
+	$(output_dir)/deathmaze_fairplay.prg
+
+DOS = files/DOS.bin
+
+DISK = $(output_dir)/deathmaze.dsk
+
+$(DISK): $(FILES) $(DOS) | $(output_dir)
+	@echo "Creating $@"
+	tools/dos33.py --format $@  || (rm -f $@ && exit 1)
+	tools/dos33.py --sector-write --track 0 --sector 0 $@ $(DOS)  || (rm -f $@ && exit 1)
+	tools/dos33.py --write --caps $@ $(FILES) || (rm -f $@ && exit 1)
+
+disk: $(DISK)
+
+CLEAN += clean_disk
+clean_disk:
+	rm -f $(DISK)
+
+
 # Targets that are not explicit files
 
 .PHONY: \
 	all \
+	disk \
 	font \
 	strings \
 	$(VERSIONS) \
