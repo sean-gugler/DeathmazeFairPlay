@@ -49,6 +49,8 @@ STRINGS = $(STRING_DECL) $(STRING_DEF)
 $(STRINGS): $(tools_dir)/build_strings.py $(src_dir)/strings.txt
 	$^ $(STRING_STEMS)
 
+GENERATED += $(STRINGS)
+
 
 $(src_dir)/maze_walls.s: $(tools_dir)/build_maze.py $(src_dir)/maze.txt
 	$^ $@
@@ -95,7 +97,7 @@ $(PROGRAM): $(build_dir)/loadaddr.o $(OBJS) deathmaze_fixed.cfg
 	$(LD65) -m $(build_dir)/$(@F).map -C $(filter %.cfg,$^) -Ln $(build_dir)/$(@F).lab \
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
-deathmaze: $(PROGRAM)
+deathmaze: $(STRINGS) $(PROGRAM)
 
 
 # Generated directories and files
