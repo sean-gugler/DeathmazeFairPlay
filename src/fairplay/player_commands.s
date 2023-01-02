@@ -614,7 +614,9 @@ cmd_play:
 	cmp #noun_flute
 	beq play_flute
 	cmp #noun_ball
-	beq play_ball
+	beq play_with_who
+	cmp #noun_frisbee
+	beq play_with_who
 	cmp #noun_horn
 	beq play_horn
 	jmp nonsense
@@ -624,7 +626,7 @@ play_horn:
 	sta gd_parsed_action
 	jmp player_cmd
 
-play_ball:
+play_with_who:
 	lda #$87     ;With who? The monster?
 	jmp print_to_line2
 
