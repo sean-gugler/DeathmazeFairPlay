@@ -54,7 +54,10 @@ rev2:
 fixed:
 	$(MAKE) -C versions/fixed
 
-VERSIONS = rev1 rev2 fixed
+fairplay:
+	$(MAKE) -C versions/fairplay
+
+VERSIONS = rev1 rev2 fixed fairplay
 
 
 CLEAN += clean_versions
@@ -62,7 +65,7 @@ clean_versions:
 	$(MAKE) clean -C versions/rev1
 	$(MAKE) clean -C versions/rev2
 	$(MAKE) clean -C versions/fixed
-
+	$(MAKE) clean -C versions/fairplay
 
 # Generated directories
 
