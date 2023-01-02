@@ -77,6 +77,9 @@ $(FOLDERS):
 
 FILES = \
 	files/HELLO.bas \
+	$(output_dir)/deathmaze_rev1.prg \
+	$(output_dir)/deathmaze_rev2.prg \
+	$(output_dir)/deathmaze_fixed.prg \
 	$(output_dir)/deathmaze_fairplay.prg
 
 DOS = files/DOS.bin
