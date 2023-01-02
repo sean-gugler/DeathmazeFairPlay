@@ -787,7 +787,7 @@ cmd_rub:
 cmd_open:
 	dec zp0F_action
 	beq :+
-	jmp cmd_press
+	jmp cmd_unlock
 
 :	lda zp0E_object
 	cmp #noun_door
@@ -884,10 +884,29 @@ cmd_open:
 	jmp look_not_here
 
 :	cmp #doors_locked_begin
-	bcs :+
-	jmp @push_mode_elevator
+	bcs locked_door
+	jsr push_special_mode
+	ldx #special_mode_elevator
+	stx gs_special_mode
+	jmp draw_doors_opening
 
-:	pha
+
+cmd_unlock:
+	dec zp0F_action
+	beq :+
+	jmp cmd_press
+
+:	lda zp0E_object
+	cmp #noun_door
+	bne :+
+	jsr which_door
+	cmp #doors_locked_begin
+	bcs locked_door
+:	lda #$9d     ;It's not locked.
+	jmp print_to_line2
+
+locked_door:
+	pha
 	ldx #noun_key
 	stx zp0E_object
 	ldx #icmd_where
@@ -901,12 +920,9 @@ cmd_open:
 	adc #doormsg_lock_begin - doors_locked_begin
 	cmp #doormsg_lock_begin + (door_correct - 1)
 	beq @correct_lock
-	pha
-	jsr clear_status_lines
+	jsr print_to_line2
 	lda #$19     ;You unlock the door...
 	jsr print_to_line1
-	pla
-	jsr print_to_line2
 	jmp game_over
 
 @no_key:
@@ -922,12 +938,6 @@ cmd_open:
 	jsr print_to_line1
 	lda #doormsg_lock_begin + (door_correct - 1)
 	jmp print_to_line2
-
-@push_mode_elevator:
-	jsr push_special_mode
-	ldx #special_mode_elevator
-	stx gs_special_mode
-	jmp draw_doors_opening
 
 which_door:
 	ldx #<door_table
@@ -1361,7 +1371,7 @@ print_line2_ap:
 
 cmd_paint:
 	dec zp0F_action
-	bne cmd_grendel
+	bne cmd_drink
 	ldx #noun_brush
 	stx zp0E_object
 	ldx #icmd_where
@@ -1375,50 +1385,16 @@ cmd_paint:
 :	lda #$6f     ;With what? Toenail polish?
 	bne print_line2_ap
 
+cmd_drink:
+	dec zp0F_action
+	bne cmd_grendel
+	lda #$9a     ;It is currently impossible.
+	jmp print_to_line2
+
 cmd_grendel:
 	dec zp0F_action
-	bne cmd_say
-	jmp nonsense ;GUG: maybe disguise this better
-
-cmd_say:
-	dec zp0F_action
 	bne cmd_charge
-.if REVISION >= 2
-	lda gd_parsed_object
-	bne :+
-	jmp nonsense
-.endif
-:	lda #$76     ;OK...
-	jsr print_to_line2
-	lda #<text_buffer_line1
-	sta zp0E_ptr
-	lda #>text_buffer_line1
-	sta zp0E_ptr+1
-	ldy #$00
-	lda #' '
-:	cmp (zp0E_ptr),y
-	beq @next_char
-	inc zp0E_ptr
-	bne :-
-	inc zp0E_ptr+1
-	bne :-
-@echo_word:
-	ldy #$00
-	lda (zp0E_ptr),y
-	cmp #' '
-	beq @done
-	sta (zp0A_text_ptr),y
-	jsr print_char
-@next_char:
-	inc zp0A_text_ptr
-	bne :+
-	inc zp0A_text_ptr+1
-:	inc zp0E_ptr
-	bne @echo_word
-	inc zp0E_ptr+1
-	bne @echo_word
-@done:
-	rts
+	jmp nonsense ;GUG: maybe disguise this better
 
 cmd_charge:
 	dec zp0F_action
@@ -1667,8 +1643,6 @@ cmd_quit:
 	jmp play_again
 
 cmd_directions:
-	dec zp0F_action
-	bne cmd_hint
 	jsr clear_hgr2
 	lda #$00
 	sta zp_col
@@ -1695,28 +1669,6 @@ cmd_directions:
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jmp item_cmd
-
-cmd_hint:
-	lda gs_special_mode
-	cmp #special_mode_calc_puzzle
-	beq @calc_hint
-	lda gs_next_hint
-	beq :+
-	lda #$9d     ;Try examining things.
-	jsr print_to_line2
-	ldx #$00
-	stx gs_next_hint
-	rts
-
-:	lda #$9e     ;Type instructions.
-	jsr print_to_line2
-	inc gs_next_hint
-	rts
-
-@calc_hint:
-	lda #$9f     ;Invert and telephone.
-	jmp print_to_line2
-
 
 
 draw_doors_opening:

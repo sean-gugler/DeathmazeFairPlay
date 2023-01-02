@@ -72,6 +72,10 @@ check_special_mode:
 
 
 
+;	lda #$9e     ;A cruel laugh booms out
+;	lda #$9f     ;Invert and telephone.
+;	jmp print_to_line2
+
 special_calc_puzzle:
 	jsr update_view
 	jsr @init_puzzle

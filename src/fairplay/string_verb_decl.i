@@ -14,20 +14,20 @@
 	verb_look = $0e
 	verb_rub = $0f
 	verb_open = $10
-	verb_press = $11
-	verb_take = $12
-	verb_attack = $13
-	verb_paint = $14
+	verb_unlock = $11
+	verb_press = $12
+	verb_take = $13
+	verb_attack = $14
+	verb_paint = $15
+	verb_drink = $16
 
-	verb_intransitive = $14
+	verb_intransitive = $16
 
-	verb_grendel = $15
-	verb_scream = $16
-	verb_charge = $17
-	verb_fart = $18
-	verb_save = $19
-	verb_quit = $1a
-	verb_directions = $1b
-	verb_hint = $1c
+	verb_grendel = $17
+	verb_charge = $18
+	verb_fart = $19
+	verb_save = $1a
+	verb_quit = $1b
+	verb_directions = $1c
 
 	verbs_end = $1d

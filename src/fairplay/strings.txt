@@ -6,7 +6,7 @@ burn
 chew eat
 roll chuck heave throw
 climb
-drop leave put
+leave put drop
 fill
 light
 play
@@ -14,21 +14,21 @@ strike
 wear
 examine look
 wipe clean polish rub
-open unlock
+open
+unlock
 press
 get grab hold take
-stab kill slas attack hack
+stab kill slash hack attack
 paint
+drink
 
 [Verbs Intransitive]
 grendel
-say yell scream
 charge
 fart
 save
 quit
-instructions directions
-help hint
+help hint instructions directions
 
 [Nouns]
 Ball
@@ -53,19 +53,19 @@ Torch
 Box 
 Bat 
 Dog 
-Door Elev
+Door Elevator
 Monster
 Mother
-Zero
-One 
-Two 
-Three
-Four
-Five
-Six 
-Seven
-Eight
-Nine
+0 Zero
+1 One 
+2 Two 
+3 Three
+4 Four
+5 Five
+6 Six 
+7 Seven
+8 Eight
+9 Nine
 
 [Messages]
 Inventory:
@@ -224,8 +224,8 @@ You are carrying the limit.
 It is currently impossible.
 The bat drains you of your vital fluids!
 Are you sure you want to quit (Y or N)?
-Try examining things.
-Type instructions.
+It's not locked.
+A cruel laugh booms out, not quite!
 Invert and telephone.
 Don't make unnecessary turns.
 You have turned into a pillar of salt!
