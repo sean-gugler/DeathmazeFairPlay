@@ -7,7 +7,7 @@ include ../common/Makefile
 
 base_dir = ../..
 
-src_dir = $(base_dir)/src
+src_dir = $(base_dir)/src/faithful
 tools_dir = $(base_dir)/tools
 build_dir = $(base_dir)/build/fixed
 output_dir = $(base_dir)/output
@@ -32,6 +32,28 @@ $(build_dir)/%.d: $(tools_dir)/make_dep.py $(src_dir)/%.s | $(build_dir)
 	$^ $@
 
 include $(DEPS)
+
+
+# Generated files.
+
+# TODO: figure out how to annotate the extra symbols
+# I hand-edited and commited to git, so they can be
+# generated from the strings.txt file
+
+STRING_TABLES = verb noun display intro
+STRING_STEMS = $(patsubst %,$(src_dir)/string_%,$(STRING_TABLES))
+STRING_DECL = $(patsubst %,%_decl.i,$(STRING_STEMS))
+STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
+STRINGS = $(STRING_DECL) $(STRING_DEF)
+
+$(STRINGS): $(tools_dir)/build_strings.py $(src_dir)/strings.txt
+	$^ $(STRING_STEMS)
+
+
+$(src_dir)/maze_walls.s: $(tools_dir)/build_maze.py $(src_dir)/maze.txt
+	$^ $@
+
+GENERATED += $(src_dir)/maze_walls.s
 
 
 # Game files.

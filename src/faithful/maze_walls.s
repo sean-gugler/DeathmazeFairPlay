@@ -1,4 +1,14 @@
-	;Each 3-byte sequence is one column, south to north (max 12 cells)
+;;; THIS FILE IS AUTO-GENERATED
+;;; BY  ../../tools/build_maze.py
+;;; FROM  ../../src/faithful/maze.txt
+
+	.export maze_walls
+
+	.segment "MAZE"
+
+maze_walls:
+	;Each 3-byte sequence is one column, south to north (max 12 cells).
+	;Columns are sequenced west to east.
 	;Each pair of bits is whether there is a wall to South and West of each cell.
 	; Level 1
 	.byte %11010101,%01111101,%01010111 ; $d5,$7d,$57

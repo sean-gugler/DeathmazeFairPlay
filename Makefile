@@ -25,28 +25,6 @@ FOLDERS += \
 	$(extras_dir)
 
 
-# Generated game files.
-
-# TODO: figure out how to annotate the extra symbols
-# I hand-edited and commited to git, so they can be
-# generated from the strings.txt file
-
-STRING_TABLES = verb noun display intro
-STRING_STEMS = $(patsubst %,src/string_%,$(STRING_TABLES))
-STRING_DECL = $(patsubst %,%_decl.i,$(STRING_STEMS))
-STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
-STRINGS = $(STRING_DECL) $(STRING_DEF)
-
-$(STRINGS): tools/build_strings.py src/strings.txt
-	$^ $(STRING_STEMS)
-
-
-src/maze_walls.s: tools/build_maze.py src/maze.txt
-	$^ $@
-
-GENERATED += src/maze_walls.s
-
-
 # Extra files, not part of the game.
 
 GENERATED += $(extras_dir)
@@ -57,7 +35,7 @@ strings: tools/extract_strings.py | $(extras_dir)
 
 FONT = $(output_dir)/FONT.prg
 
-$(FONT): tools/font.py src/font.bin | $(output_dir)
+$(FONT): tools/font.py src/faithful/font.bin | $(output_dir)
 	$^ $@ 0
 
 font: $(FONT)
@@ -107,4 +85,4 @@ clean: $(CLEAN)
 
 distclean: $(DISTCLEAN)
 
-all: $(GENERATED) $(VERSIONS)
+all: $(VERSIONS)
