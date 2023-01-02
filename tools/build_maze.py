@@ -26,12 +26,17 @@ def main(argv):
     S = group(bitpairs(src), 4)
 
     asm = [
+        ';;; THIS FILE IS AUTO-GENERATED\n'
+        f';;; BY  {sys.argv[0]}\n'
+        f';;; FROM  {args.input}\n'
+        '\n',
         '\t.export maze_walls\n',
         '\n',
         '\t.segment "MAZE"\n',
         '\n',
         'maze_walls:\n',
-        '\t;Each 3-byte sequence is one column, south to north (max 12 cells)\n',
+        '\t;Each 3-byte sequence is one column, south to north (max 12 cells).\n',
+        '\t;Columns are sequenced west to east.\n',
         '\t;Each pair of bits is whether there is a wall to South and West of each cell.\n',
     ]
     for level in range(5):
@@ -66,8 +71,8 @@ def bitpairs(L):
         W = []
         S = []
         for row in range(12):
-            W.append(to_bits('|', next(L), 0))
-            S.append(to_bits('-', next(L), 1))
+            W.append(to_bits('|', next(L), 3))
+            S.append(to_bits('-', next(L), 4))
         W = zip(*W)
         S = zip(*S)
 
@@ -75,6 +80,7 @@ def bitpairs(L):
             # print(s,w)
             yield from zip(reversed(s),reversed(w))
 
+        next(L) #skip X-axis labels
         next(L) #skip blank line
 
 if __name__ == '__main__':

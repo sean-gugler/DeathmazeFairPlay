@@ -28,8 +28,8 @@ def main(argv):
     M = []
     for level in range(5):
         M.append(f'# Level {level+1}')
-        W = [''] * 12
-        S = [''] * 12
+        W = [f'{i+1:2d} ' for i in range(12)]
+        S = ['   '] * 12
         for col in range(11):
             for row in range(12):
                 if row % 4 == 0:
@@ -44,6 +44,9 @@ def main(argv):
         for w,s in reversed(list(zip(W,S))):
             M.append(w)
             M.append(s)
+
+        Xaxis = '    ' + ''.join(f'{i+1:2d}  ' for i in range(11))
+        M.append(Xaxis)
         M.append('')
 
     with open(args.output, 'wt') as out:
