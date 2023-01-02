@@ -156,9 +156,13 @@ player_cmd:
 	beq @play
 	cmp #noun_horn
 	bne @having_fun
+.if REVISION >= 100
+	;unnecessary. special_mode_mother check is sufficient.
+.else ;RETAIL
 	lda gs_level
-	cmp #$05  ;GUG: unnecessary. special_mother is sufficient.
+	cmp #$05
 	bne :+
+.endif
 	lda gs_special_mode
 	cmp #special_mode_mother
 	bne :+
@@ -186,19 +190,27 @@ cmd_break:
 	jsr lose_ring
 :	cmp #nouns_unique_end
 	bmi @broken
+.if REVISION >= 100
+	; no need for all this, $10 and $11
+	; are not disturbed by lose_one_torch
+.else ;RETAIL
 	sta zp13_temp  ;preserve 'object' while protecting $10,$11
-	lda zp10_temp  ;GUG: no need, $10 is neither assigned nor disturbed
+	lda zp10_temp
 	pha
 	lda zp11_item
 	pha
 	lda zp13_temp  ;restore 'object'
+.endif
 	cmp #noun_torch
-	bne :+
+	bne @food
 	jsr lose_one_torch
-:	pla
+@food:
+.if REVISION < 100
+	pla
 	sta zp11_item
 	pla
 	sta zp10_temp
+.endif
 	lda zp11_item
 	sta zp0E_object
 @broken:
@@ -303,7 +315,12 @@ cmd_eat:
 	bmi @eaten
 	beq @food
 	cmp #noun_torch
+.if REVISION >= 100
+	bne @torch_return
+	jsr lose_one_torch
+.else ;RETAIL
 	beq @torch
+.endif
 @torch_return:
 	lda zp11_item
 	sta zp0E_object
@@ -326,8 +343,12 @@ cmd_eat:
 	sta zp0F_action
 	jmp item_cmd
 
+.if REVISION >= 100
+	; no need for all this, $10 and $11
+	; are not disturbed by lose_one_torch
+.else ;RETAIL
 @torch:
-	lda zp10_temp  ;GUG: no need, $10,$11 are neither assigned nor disturbed
+	lda zp10_temp
 	pha
 	lda zp11_item
 	pha
@@ -337,6 +358,7 @@ cmd_eat:
 	pla
 	sta zp10_temp
 	jmp @torch_return
+.endif
 
 @food:
 	lda zp11_item
@@ -608,9 +630,13 @@ cmd_light:
 	dec zp0F_action
 	bne cmd_play
 
-	sta zp11_action ;GUG: no effect.
-		; Maybe earlier revision of cmd_light_impl used zp11
-		; to distinguish "light torch" from "raise ring"?
+.if REVISION >= 100
+	; This has no effect.
+	; Maybe an earlier revision of cmd_light_impl used zp11
+	; to distinguish "light torch" from "raise ring"?
+.else ;RETAIL
+	sta zp11_action
+.endif
 	lda zp0E_object
 	cmp #noun_torch
 	beq :+
@@ -1209,7 +1235,11 @@ cmd_take:
 :	ldx #icmd_which_box
 	stx zp0F_action
 	jsr item_cmd
-	tax  ;GUG: no effect
+.if REVISION >= 100
+	; no effect
+.else ;RETAIL
+	tax
+.endif
 	bne :+
 	jmp cannot_take
 
@@ -1537,9 +1567,13 @@ cmd_charge:
 	lda #$02
 	cmp gs_facing
 	bne @normal
-	tax          ;GUG: or just "lda #$01"
+.if REVISION >= 100
+	lda #$01
+.else ;RETAIL
+	tax
 	dex
 	txa
+.endif
 	cmp gs_level
 	bne @normal
 	cmp gs_player_x
@@ -1578,7 +1612,7 @@ cmd_charge:
 	jmp @propel_player
 
 propel_next_step:
-	lda gs_facing ;GUG: no need to use A, just ldx, dex, beq
+	lda gs_facing
 	tax
 	dex
 	txa

@@ -150,9 +150,6 @@ player_cmd:
 	beq @play
 	cmp #noun_horn
 	bne @having_fun
-	lda gs_level
-	cmp #$05  ;GUG: unnecessary. special_mother is sufficient.
-	bne :+
 	lda gs_special_mode
 	cmp #special_mode_mother
 	bne :+
@@ -180,19 +177,10 @@ cmd_break:
 	jsr lose_ring
 :	cmp #nouns_unique_end
 	bmi @broken
-	sta zp13_temp  ;preserve 'object' while protecting $10,$11
-	lda zp10_temp  ;GUG: no need, $10 is neither assigned nor disturbed
-	pha
-	lda zp11_item
-	pha
-	lda zp13_temp  ;restore 'object'
 	cmp #noun_torch
-	bne :+
+	bne @food
 	jsr lose_one_torch
-:	pla
-	sta zp11_item
-	pla
-	sta zp10_temp
+@food:
 	lda zp11_item
 	sta zp0E_object
 @broken:
@@ -200,19 +188,13 @@ cmd_break:
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
-.if REVISION = 1
-	jsr update_view
-.elseif REVISION >= 2
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-.endif
 	lda #$4e     ;You break the
 	jsr print_to_line1
-.if REVISION >= 2
 	lda #$20
 	jsr char_out
-.endif
 	lda gd_parsed_object
 	jsr print_noun
 	lda #$4f     ;and it disappears!
@@ -297,7 +279,8 @@ cmd_eat:
 	bmi @eaten
 	beq @food
 	cmp #noun_torch
-	beq @torch
+	bne @torch_return
+	jsr lose_one_torch
 @torch_return:
 	lda zp11_item
 	sta zp0E_object
@@ -319,18 +302,6 @@ cmd_eat:
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jmp item_cmd
-
-@torch:
-	lda zp10_temp  ;GUG: no need, $10,$11 are neither assigned nor disturbed
-	pha
-	lda zp11_item
-	pha
-	jsr lose_one_torch
-	pla
-	sta zp11_item
-	pla
-	sta zp10_temp
-	jmp @torch_return
 
 @food:
 	lda zp11_item
@@ -469,25 +440,7 @@ print_thrown:
 	jsr print_to_line1
 	lda gd_parsed_object
 	jsr print_noun
-.if REVISION < 100 ;RETAIL
-	; This section has no effect.
-	; Probably it used to conditionally
-	; print a space, but zp0E points to
-	; end of item list after icmd_draw_inv,
-	; not text buffer.
-	jsr dec_item_ptr
-	lda #' '
-	ldy #$00
-	cmp (zp0E_item),y
-	beq :+
-	inc zp0E_item
-	bne :+
-	inc zp0E_item+1
-:	inc zp0E_item
-	bne :+
-	inc zp0E_item+1
-.endif
-:	lda #$5a     ;magically sails
+	lda #$5a     ;magically sails
 	jsr print_display_string
 	lda #$5b     ;around a nearby corner
 	jsr print_to_line2
@@ -602,9 +555,6 @@ cmd_light:
 	dec zp0F_action
 	bne cmd_play
 
-	sta zp11_action ;GUG: no effect.
-		; Maybe earlier revision of cmd_light_impl used zp11
-		; to distinguish "light torch" from "raise ring"?
 	lda zp0E_object
 	cmp #noun_torch
 	beq :+
@@ -676,7 +626,6 @@ play_horn:
 
 play_ball:
 	lda #$87     ;With who? The monster?
-print_and_rts:
 	jmp print_to_line2
 
 play_flute:
@@ -702,7 +651,7 @@ play_flute:
 	lda #$83     ;A high shrill note comes
 	jsr print_to_line1
 	lda #$84     ;from the flute!
-	jmp print_and_rts ;GUG: saves no bytes, adds time.
+	jmp print_to_line2
 
 @charm:
 	lda #$0a
@@ -1203,7 +1152,6 @@ cmd_take:
 :	ldx #icmd_which_box
 	stx zp0F_action
 	jsr item_cmd
-	tax  ;GUG: no effect
 	bne :+
 	jmp cannot_take
 
@@ -1319,13 +1267,7 @@ take_multiple:
 	stx zp0E_object
 	lda zp1A_item_place
 	cmp #carried_boxed
-.if REVISION >= 100
-	bne :+   ;skip "ensure_inv_space" but do both INC and JMP
-.else ;RETAIL
-	beq take_and_reveal
-	; BUG: "get box" then "get torch"
-	; does not increment unlit count if it's the only box
-.endif
+	bne :+
 	jsr ensure_inv_space
 :	inc gs_torches_unlit
 	jmp take_and_reveal
@@ -1351,21 +1293,10 @@ take_print_and_return:
 	jmp print_to_line2
 
 inventory_full:
-.if REVISION >= 100
 	; Pop one call frame, do not return and continue.
 	; (By design of "ensure_inv_space")
 	pla
 	pla
-.else ;RETAIL
-	; Authors got confused with purpose of PLA here.
-	; Harmless, but unnecessary; these zp vars get
-	; immediately wiped by restoring from
-	; 'swap_saved_vars' anyway.
-	pla
-	sta zp0E_object
-	pla
-	sta zp0F_action
-.endif
 	jsr swap_saved_vars
 	lda #$99     ;Carrying the limit.
 	bne take_print_and_return
@@ -1378,33 +1309,10 @@ find_boxed_food:
 	ldx #item_food_begin - 1
 	stx zp0E_object
 find_boxed:
-.if REVISION < 100 ;RETAIL
-	; Leftover 16-bit increment from earlier design.
-	; Pointless but harmless.
-	lda zp0F_action
-	pha
-	lda zp0E_object
-	pha
-.endif
 	ldx #items_food
 	.assert items_food = items_torches, error, "Need to edit cmd_take for separate food,torch counts"
 	stx zp11_count
 @next:
-.if REVISION < 100 ;RETAIL
-	; 16-bit increment, presumably leftover from earlier design.
-	; Pointless now but harmless.
-	pla
-	sta zp0E_object
-	pla
-	sta zp0F_action
-	inc zp0E_object
-	bne :+
-	inc zp0F_action
-:	lda zp0F_action
-	pha
-	lda zp0E_object
-	pha
-.endif
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
@@ -1413,21 +1321,9 @@ find_boxed:
 	beq @found
 	dec zp11_count
 	bne @next
-.if REVISION < 100 ;RETAIL
-	pla
-	sta zp0E_object
-	pla
-	sta zp0F_action
-.endif
 	jmp cannot_take
 
 @found:
-.if REVISION < 100 ;RETAIL
-	pla
-	sta zp0E_object
-	pla
-	sta zp0F_action
-.endif
 	lda gd_parsed_object
 	cmp #noun_torch
 	beq :+
@@ -1531,9 +1427,7 @@ cmd_charge:
 	lda #$02
 	cmp gs_facing
 	bne @normal
-	tax          ;GUG: or just "lda #$01"
-	dex
-	txa
+	lda #$01
 	cmp gs_level
 	bne @normal
 	cmp gs_player_x
@@ -1572,16 +1466,12 @@ cmd_charge:
 	jmp @propel_player
 
 propel_next_step:
-	lda gs_facing ;GUG: no need to use A, just ldx, dex, beq
-	tax
+	ldx gs_facing
 	dex
-	txa
 	beq @west_1
 	dex
-	txa
 	beq @north_2
 	dex
-	txa
 	beq @east_3
 @south_4:
 	dec gs_player_y
