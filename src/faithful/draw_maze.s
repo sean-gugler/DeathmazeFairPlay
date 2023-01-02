@@ -6,7 +6,7 @@
 	.export draw_right
 	.export probe_forward
 
-	.import swap_saved_A_2
+	.import swap_saved_A
 	.import maze_walls
 	.import print_char
 	.import char_out
@@ -834,7 +834,7 @@ probe_south:
 
 @S_sight_limit:
 	lda zp19_sight_depth
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	lsr zp1A_wall_bit
 S_next_wall:
 	lda (zp0A_walls_ptr),y
@@ -847,10 +847,10 @@ S_next_wall:
 	and zp1A_wall_bit
 	beq :+
 	inc gs_walls_left
-:	jsr swap_saved_A_2
+:	jsr swap_saved_A
 	cmp zp11_count
 	beq S_probe_done
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	lda #$04
 	cmp zp11_count
 	beq S_probed_max
@@ -870,7 +870,7 @@ S_next_wall:
 	jmp S_next_wall
 
 S_probed_max:
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 S_probe_done:
 	asl
 	asl
@@ -898,7 +898,7 @@ probe_east:
 	bne @next_depth
 @E_sight_limit:
 	lda zp19_sight_depth
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	lda zp1A_wall_bit
 	sta zp19_wall_opposite
 	asl zp1A_wall_bit
@@ -931,11 +931,11 @@ E_next_wall:
 	cmp #$04
 E_probed_max:
 	beq S_probed_max
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	cmp zp11_count
 E_probe_done:
 	beq S_probe_done
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	inc zp11_count
 	asl gs_walls_left
 	asl gs_walls_right_depth
@@ -957,7 +957,7 @@ probe_west:
 	jmp @next_depth
 
 :	lda zp19_sight_depth
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	lda zp1A_wall_bit
 	sta zp19_wall_opposite
 	asl zp1A_wall_bit
@@ -984,10 +984,10 @@ W_next_wall:
 	inc zp0A_walls_ptr
 :	inc zp0A_walls_ptr
 	inc zp0A_walls_ptr
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	cmp zp11_count
 	beq E_probe_done
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	lda #$04
 	cmp zp11_count
 W_probed_max:
@@ -1040,7 +1040,7 @@ probe_north:
 	sta zp1A_wall_bit
 @save_depth:
 	lda zp19_sight_depth
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 N_next_wall:
 	lda (zp0A_walls_ptr),y
 	and zp1A_wall_bit
@@ -1055,12 +1055,12 @@ N_next_wall:
 :	lda #$04
 	cmp zp11_count
 	beq W_probed_max
-	jsr swap_saved_A_2
+	jsr swap_saved_A
 	cmp zp11_count
 	bne :+
 	jmp S_probe_done
 
-:	jsr swap_saved_A_2
+:	jsr swap_saved_A
 	asl gs_walls_left
 	inc zp11_count
 	asl gs_walls_right_depth

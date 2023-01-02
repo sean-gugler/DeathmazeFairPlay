@@ -17,7 +17,6 @@
 	.import complete_turn
 	.import pit
 	.import wait_short
-	.import swap_saved_A
 	.import print_char
 	.import get_rowcol_addr
 	.import not_carried
@@ -937,7 +936,7 @@ cmd_open:
 	bcs :+
 	jmp @push_mode_elevator
 
-:	jsr swap_saved_A
+:	pha
 	ldx #noun_key
 	stx zp0E_object
 	ldx #icmd_where
@@ -946,21 +945,21 @@ cmd_open:
 	lda zp1A_item_place
 	cmp #carried_unboxed
 	bmi @no_key
-	jsr swap_saved_A
+	pla
 	clc
 	adc #doormsg_lock_begin - doors_locked_begin
 	cmp #doormsg_lock_begin + (door_correct - 1)
 	beq @correct_lock
-	jsr swap_saved_A
+	pha
 	jsr clear_status_lines
 	lda #$19     ;You unlock the door...
 	jsr print_to_line1
-	jsr swap_saved_A
+	pla
 	jsr print_to_line2
 	jmp game_over
 
 @no_key:
-	jsr swap_saved_A
+	pla
 	lda #$92     ;But you have no key.
 	jmp print_to_line2
 

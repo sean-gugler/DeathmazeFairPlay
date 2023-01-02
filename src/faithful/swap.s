@@ -1,4 +1,6 @@
+.if REVISION < 100
 	.export swap_saved_A_2
+.endif
 	.export swap_saved_A
 	.export swap_saved_vars
 
@@ -28,9 +30,9 @@ saved_zp1A:
 .res $02
 
 
-	.segment "SWAP_CODE_DUPE"
+	.segment "SWAP_CODE_A"
 
-swap_saved_A_2:
+swap_saved_A:
 	sta zp13_temp
 	lda saved_A
 	pha
@@ -41,7 +43,8 @@ swap_saved_A_2:
 
 	.segment "SWAP_CODE"
 
-swap_saved_A:
+.if REVISION < 100
+swap_saved_A_2:
 	sta zp13_temp
 	lda saved_A
 	pha
@@ -49,6 +52,7 @@ swap_saved_A:
 	sta saved_A
 	pla
 	rts
+.endif
 
 swap_saved_vars:
 	lda $0E

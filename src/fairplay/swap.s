@@ -1,4 +1,3 @@
-	.export swap_saved_A_2
 	.export swap_saved_A
 	.export swap_saved_vars
 
@@ -27,17 +26,6 @@ saved_zp1A:
 
 .res $02
 
-
-	.segment "SWAP_CODE_DUPE"
-
-swap_saved_A_2:
-	sta zp13_temp
-	lda saved_A
-	pha
-	lda zp13_temp
-	sta saved_A
-	pla
-	rts
 
 	.segment "SWAP_CODE"
 
