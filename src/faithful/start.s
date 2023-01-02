@@ -24,6 +24,7 @@
 	.include "apple.i"
 	.include "char.i"
 	.include "item_commands.i"
+	.include "string_verb_decl.i"
 
 clock = $17 ;$18
 zp_col = $06
@@ -72,7 +73,7 @@ new_game:
 	stx zp0F_action
 	jsr item_cmd
 start_game:
-	ldx #char_ESC
+	ldx #verb_directions
 	stx gd_parsed_action
 	jsr player_cmd
 	jmp main_game_loop

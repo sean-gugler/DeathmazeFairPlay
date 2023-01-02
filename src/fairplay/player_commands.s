@@ -88,7 +88,7 @@ player_cmd:
 	sta zp0E_object
 	lda gd_parsed_action
 	sta zp0F_action
-	cmp #$0e
+	cmp #verb_look
 	bmi :+  ;GUG: bcc preferred
 	jmp cmd_look
 
@@ -666,7 +666,7 @@ cmd_play:
 	beq play_flute
 	cmp #noun_ball
 	beq play_ball
-	cmp #$08     ;item_horn
+	cmp #noun_horn
 	beq play_horn
 	jmp nonsense
 
