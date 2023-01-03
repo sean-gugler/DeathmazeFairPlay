@@ -21,6 +21,10 @@ Changes in fan release
 * Quitting the game cleanly returns you to the BASIC prompt (]) instead of the MONITOR (*).
 * Double-space is properly prevented. Previously it mistakenly prevented a second space only after first letter of second word was started, as in:  WORD_L_
 
+Changes in the Fair Play release
+* see SPOILERS.md
+
+
 # Production notes
 
 The original authors used 1-based indexing ubiquitously, rather than machine-friendly 0-based indexing. In many cases this means setting up data table pointers to the address one entry earlier than where the table actually starts.
