@@ -19,6 +19,15 @@
 
 	.include "char.i"
 
+.if REVISION >= 100
+	.define ADDR(value) value
+.else ;RETAIL
+	; For some reason, these zero-page addresses
+	; were compiled with absolute addressing mode,
+	; using 3 bytes per instruction instead of 2.
+	.define ADDR(value) a:value
+.endif
+
 clock = $17 ;$18
 zp_col = $06
 zp_row = $07
@@ -67,9 +76,9 @@ print_to_line:
 @next_char:
 	sta (zp0A_text_ptr),y
 	jsr print_char
-	inc a:zp0C_string_ptr
+	inc ADDR zp0C_string_ptr
 	bne :+
-	inc a:zp0C_string_ptr+1
+	inc ADDR zp0C_string_ptr+1
 :	inc zp0A_text_ptr
 	bne :+
 	inc zp0A_text_ptr+1
@@ -91,9 +100,9 @@ print_string:
 	and #$7f
 @next_char:
 	jsr print_char
-	inc a:zp0C_string_ptr
+	inc ADDR zp0C_string_ptr
 	bne :+
-	inc a:zp0C_string_ptr+1
+	inc ADDR zp0C_string_ptr+1
 :	ldy #$00
 	lda (zp0C_string_ptr),y
 	bpl @next_char
@@ -102,17 +111,17 @@ print_string:
 get_display_string:
 	sta zp11_count_string
 	ldx #<display_string_table
-	stx a:zp0C_string_ptr
+	stx ADDR zp0C_string_ptr
 	ldx #>display_string_table
-	stx a:zp0C_string_ptr+1
+	stx ADDR zp0C_string_ptr+1
 	ldy #$00
 @scan:
 	lda (zp0C_string_ptr),y
 	bmi @found_string
 @next_char:
-	inc a:zp0C_string_ptr
+	inc ADDR zp0C_string_ptr
 	bne @scan
-	inc a:zp0C_string_ptr+1
+	inc ADDR zp0C_string_ptr+1
 	bne @scan
 @found_string:
 	dec zp11_count_string

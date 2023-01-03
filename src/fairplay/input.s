@@ -90,9 +90,9 @@ get_player_input:
 	dec zp_row
 	jsr get_rowcol_addr
 	lda #>(text_buffer_line1-1)
-	sta a:zp0C_string_ptr+1
+	sta zp0C_string_ptr+1
 	lda #<(text_buffer_line1-1)
-	sta a:zp0C_string_ptr
+	sta zp0C_string_ptr
 	lda #$80
 	ldy #textbuf_size
 :	sta (zp0C_string_ptr),y

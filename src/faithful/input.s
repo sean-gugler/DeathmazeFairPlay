@@ -23,6 +23,15 @@
 	.include "game_state.i"
 	.include "string_verb_decl.i"
 
+.if REVISION >= 100
+	.define ADDR(value) value
+.else ;RETAIL
+	; For some reason, these zero-page addresses
+	; were compiled with absolute addressing mode,
+	; using 3 bytes per instruction instead of 2.
+	.define ADDR(value) a:value
+.endif
+
 zp_col = $06
 zp_row = $07
 
@@ -90,9 +99,9 @@ get_player_input:
 	dec zp_row
 	jsr get_rowcol_addr
 	lda #>(text_buffer_line1-1)
-	sta a:zp0C_string_ptr+1
+	sta ADDR zp0C_string_ptr+1
 	lda #<(text_buffer_line1-1)
-	sta a:zp0C_string_ptr
+	sta ADDR zp0C_string_ptr
 	lda #$80
 	ldy #textbuf_size
 :	sta (zp0C_string_ptr),y
