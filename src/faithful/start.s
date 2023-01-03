@@ -19,6 +19,7 @@
 	.import input_Y_or_N
 	.import print_display_string
 	.import get_rowcol_addr
+	.import clear_text_buffer
 	.import relocate_data
 
 	.include "apple.i"
@@ -48,7 +49,11 @@ new_session:
 	bit hw_HIRES
 	bit hw_GRAPHICS
 	jsr clear_hgr2
-.if REVISION < 100 ;RETAIL
+.if REVISION >= 100
+	; Fix bug if ESC is pressed first thing
+	; when game starts, displays garbage.
+	jsr clear_text_buffer
+.else ;RETAIL
 	nop
 .endif
 	jsr get_rowcol_addr

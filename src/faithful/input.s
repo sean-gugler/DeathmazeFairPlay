@@ -1,4 +1,5 @@
 	.export get_player_input
+	.export clear_text_buffer
 	.export input_Y_or_N
 	.export input_char
 
@@ -61,6 +62,9 @@ get_player_input:
 	bmi :+
 	and #char_mask_upper
 :	pha
+
+	; Preserve current status lines so that ESC can be used
+	; mid-typing to cancel and re-display what was there before.
 	lda #>text_buffer_line1
 	sta zp0E_src+1
 	lda #<text_buffer_line1
@@ -96,8 +100,17 @@ get_player_input:
 	nop
 	nop
 .endif
+	; Move cursor back to beginning of first status line
+	; after clearing them.
 	dec zp_row
 	jsr get_rowcol_addr
+
+.if REVISION >= 100
+	jsr clear_text_buffer
+	beq continue_player_input
+	; Split into a subroutine to fix a bug in start.s
+.endif
+clear_text_buffer:
 	lda #>(text_buffer_line1-1)
 	sta ADDR zp0C_string_ptr+1
 	lda #<(text_buffer_line1-1)
@@ -107,6 +120,10 @@ get_player_input:
 :	sta (zp0C_string_ptr),y
 	dey
 	bne :-
+.if REVISION >= 100
+	rts
+continue_player_input:
+.endif
 	lda #$00
 	sta zp11_count_chars
 	sta zp10_count_words

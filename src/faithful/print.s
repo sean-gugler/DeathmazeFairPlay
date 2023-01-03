@@ -194,7 +194,9 @@ clear_status_lines:
 
 
 	.segment "PRINT_CHAR"
-	
+
+; Input: A = char, zp_col, zp_row
+; 'screen_ptr' must already be set up, manually or with 'get_rowcol_addr'
 char_out:
 	cmp #char_newline
 	beq control_newline

@@ -1,4 +1,5 @@
 	.export get_player_input
+	.export clear_text_buffer
 	.export input_Y_or_N
 	.export input_char
 
@@ -52,6 +53,9 @@ get_player_input:
 	bmi :+
 	and #char_mask_upper
 :	pha
+
+	; Preserve current status lines so that ESC can be used
+	; mid-typing to cancel and re-display what was there before.
 	lda #>text_buffer_line1
 	sta zp0E_src+1
 	lda #<text_buffer_line1
@@ -65,39 +69,14 @@ get_player_input:
 	lda #textbuf_size
 	sta zp19_count
 	jsr memcpy
+
+	; Clear them, and move cursor back
+	; to beginning of first status line.
+	jsr clear_text_buffer
 	jsr clear_status_lines
-.if REVISION < 100 ;RETAIL
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-.endif
 	dec zp_row
 	jsr get_rowcol_addr
-	lda #>(text_buffer_line1-1)
-	sta zp0C_string_ptr+1
-	lda #<(text_buffer_line1-1)
-	sta zp0C_string_ptr
-	lda #$80
-	ldy #textbuf_size
-:	sta (zp0C_string_ptr),y
-	dey
-	bne :-
+
 	lda #$00
 	sta zp11_count_chars
 	sta zp10_count_words
@@ -107,6 +86,18 @@ get_player_input:
 	sta zp19_input_ptr
 	pla
 	jmp process_input_char
+
+clear_text_buffer:
+	lda #>(text_buffer_line1-1)
+	sta zp0C_string_ptr+1
+	lda #<(text_buffer_line1-1)
+	sta zp0C_string_ptr
+	lda #$80
+	ldy #textbuf_size
+:	sta (zp0C_string_ptr),y
+	dey
+	bne :-
+	rts
 
 input_blink_cursor:
 	bit hw_STROBE
