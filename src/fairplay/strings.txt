@@ -85,7 +85,7 @@ golden key.
 diamond ring.
 rotted mutilated sneaker.
 magic staff.
-90 pound two-handed sword.
+7 pound two-handed sword.
 ball of blue wool.
 yoyo.
 snake !!!
@@ -106,8 +106,8 @@ you are wearing it.
 To everything
 There is a season
 , TURN,TURN,TURN
-The calculator displays 317.
-It displays 317.2 !
+the calculator displays 317.
+The diamond glows red hot!
 The invisible guillotine beheads you!
 You have rammed your head into a steel
 wall and bashed your brains out!
@@ -155,7 +155,7 @@ You can't be serious!
 You are making little sense.
  what?                   
 all form into darts!
-The food is being digested.
+It is delicious but gives you gas.
 The 
 magically sails
 around a nearby corner
@@ -171,9 +171,9 @@ The dagger disappears!
 The torch is lit and the
 old torch dies and vanishes!
 A close inspection reveals
-absolutely nothing of value!
-a smudged display!
-A can of spinach?
+nothing of interest.
+it is dusty.
+it sparkles with violent energy!
 returns and hits you
 in the eye!
 You are trapped in a fake
@@ -206,7 +206,7 @@ With who? The monster?
 You have no fire.
 With what? Air?
 It's awfully dark.
-Look at your monitor.
+Look at what?
 It looks very dangerous!
 I'm sorry, but I can't 
 You are confusing me.
@@ -247,7 +247,7 @@ Oh no! A pit!
 "as CHARGE may be helpful in movement.   "
 " At any time, one and two word commands "
 "may be entered. Some useful commands are"
-"OPEN BOX, GET BOX, DROP and HELP. Many  "
+"OPEN BOX, GET BOX, DROP and LOOK. Many  "
 "more exist. To manipulate an object, you"
 "must be on top of it, or be carrying it."
 " To save a game in progress, enter SAVE."
@@ -258,6 +258,6 @@ Oh no! A pit!
 "Connections are not always obvious.     "
 "             Good Luck!                 "
 "                                        "
-"Copyright 1980 by Med Systems Software  "
-"All rights reserved.                  "
+"1980 design by Med Systems Software     "
+"Revised for Fair Play edition v0.1    "
 

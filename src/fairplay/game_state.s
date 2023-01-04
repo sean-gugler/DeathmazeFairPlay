@@ -65,7 +65,7 @@ gs_mode_stack2:
 	JUNK_BYTE $00
 gs_endgame_step:
 	JUNK_BYTE $00
-gs_unused1:
+gs_ring_glow:
 	JUNK_BYTE $00
 gs_unused2:
 	JUNK_BYTE $00

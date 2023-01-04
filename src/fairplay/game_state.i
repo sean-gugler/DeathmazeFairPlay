@@ -23,7 +23,7 @@
 	.global gs_mode_stack1
 	.global gs_mode_stack2
 	.global gs_endgame_step
-;	.global gs_UNUSED
+	.global gs_ring_glow
 ;	.global gs_UNUSED
 	.global gs_bat_alive
 	.global gs_mother_alive

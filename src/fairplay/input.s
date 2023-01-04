@@ -429,7 +429,7 @@ parse_input:
 @cmd_look:
 	lda gs_room_lit
 	beq @dark
-	lda #$8b     ;Look at your monitor.
+	lda #$8b     ;Look at what?
 	bne :+
 @dark:
 	lda #$8a     ;It's awfully dark.

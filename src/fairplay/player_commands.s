@@ -175,6 +175,9 @@ cmd_break:
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
+:	cmp #noun_ball
+	bne :+
+	jmp throw_react
 :	cmp #nouns_unique_end
 	bmi @broken
 	cmp #noun_torch
@@ -235,6 +238,9 @@ cmd_burn:
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
+:	cmp #noun_ball
+	bne :+
+	jsr throw_react
 :	cmp #nouns_unique_end
 	bmi @burned
 	cmp #noun_torch
@@ -275,6 +281,9 @@ cmd_eat:
 	cmp #noun_ring
 	bne :+
 	jsr lose_ring
+:	cmp #noun_ball
+	bne :+
+	jmp throw_react
 :	cmp #nouns_unique_end
 	bmi @eaten
 	beq @food
@@ -328,7 +337,7 @@ cmd_eat:
 	sta gs_food_time_hi
 	lda zp0E_count16
 	sta gs_food_time_lo
-	lda #$58     ;Digested
+	lda #$58     ;Delicious
 	bne @print
 
 lose_ring:
@@ -568,6 +577,8 @@ cmd_light:
 cmd_light_impl:
 	lda gs_room_lit
 	bne @have_fire
+	lda gs_ring_glow
+	bne @have_fire
 	lda #$88     ;You have no fire.
 	jsr print_to_line2
 	lda #icmd_draw_inv
@@ -761,14 +772,22 @@ look_item:
 	jsr noun_to_item
 print_inspected:
 	jsr clear_status_lines
-	lda #$67     ;A close inspection reveals
+	lda #$67     ;On close inspection you find
 	jsr print_to_line1
 	lda gd_parsed_object
-	cmp #noun_calculator
-	beq :+
-	lda #$68     ;Nothing of value
+	cmp #noun_ball
+	bne :+
+	lda #$6a     ;sparkles with energy
 	bne look_print
-:	lda #$69     ;a smudged display
+:	cmp #noun_ring
+	bne :+
+	lda #$69     ;it is dusty
+	bne look_print
+:	cmp #noun_calculator
+	bne :+
+	lda #$27     ;The calculator displays 317.
+	bne look_print
+:	lda #$68     ;Nothing of interest
 	bne look_print
 
 cmd_rub:
@@ -777,11 +796,13 @@ cmd_rub:
 
 	jsr noun_to_item
 	lda gd_parsed_object
-	cmp #noun_calculator
+	cmp #noun_ring
 	beq :+
 	lda #$7a     ;Ok, it is clean
 	bne look_print
-:	lda #$28     ;It displays 317.2 !
+:	lda $02
+	sta gs_ring_glow
+	lda #$28     ;Glows hot
 	bne look_print
 
 cmd_open:
@@ -842,10 +863,7 @@ cmd_open:
 	lda #$18     ;Inside the box there is a
 	jsr print_to_line1
 	lda zp10_noun
-	cmp #noun_calculator
-	bne :+
-	jsr on_reveal_calc
-:	sta zp13_temp  ;preserve 'object'
+	sta zp13_temp  ;preserve 'object'
 	cmp #noun_snake
 	bne :+
 	jsr wait_long
@@ -1227,30 +1245,12 @@ react_taken:
 	stx zp0F_action
 	jsr item_cmd
 	lda gd_parsed_object
-	cmp #noun_calculator
-	bne :+
-	jsr on_reveal_calc
-:	cmp #noun_snake
+	cmp #noun_snake
 	bne @done
 	jsr push_special_mode
 	ldx #special_mode_snake
 	stx gs_special_mode
 @done:
-	rts
-
-on_reveal_calc:
-	lda gs_special_mode
-	cmp #special_mode_calc_puzzle
-	bne @done
-	lda gd_parsed_action
-	cmp #verb_take
-	beq :+
-	jsr wait_long
-:	jsr clear_status_lines
-	lda #$27     ;The calculator displays 317.
-	jsr print_to_line2
-@done:
-	lda #noun_calculator
 	rts
 
 take_box:
@@ -1695,7 +1695,7 @@ dec_item_ptr:
 	.segment "STRING_HAT"
 
 text_hat:
-	.byte "AN INSCRIPTION READS: WEAR THIS HAT AND "
+	.byte "A sewn label reads: WEAR THIS HAT AND   "
 	.byte "CHARGE A WALL NEAR WHERE YOU FOUND IT!", $A0
 
 	.segment "COMMAND6"

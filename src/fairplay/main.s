@@ -215,9 +215,7 @@ complete_turn:
 	stx gs_level_turns_lo
 	inc gs_level_turns_hi
 @consume:
-	lda gs_level
-	cmp #$05
-	beq @dec_food
+	lsr gs_ring_glow
 	lda gs_torch_time
 	beq @dec_food
 	dec gs_torch_time
