@@ -197,22 +197,9 @@ move_forward:
 
 	.segment "MAIN2"
 
-; Retail had segment MAIN2 right after segment SPECIAL_POSITIONS.
-; Its code organization was very ad hoc; I've moved things around
-; to be more sensible, but that meant breaking this local branch.
-; Hacking the address here so that retail can still be built from
-; this source.
-return = * - 1
-
 complete_turn:
-	lda gs_level_turns_lo
-	cmp #$ff
-	beq :+
 	inc gs_level_turns_lo
-	jmp @consume
-
-:	ldx #$00
-	stx gs_level_turns_lo
+	bne @consume
 	inc gs_level_turns_hi
 @consume:
 	lsr gs_ring_glow
@@ -259,6 +246,7 @@ print_timers:
 	bcs noun_return
 	lda #$33     ;Torch is dying
 	jsr print_to_line2
+return:
 	rts
 
 noun_to_item:
