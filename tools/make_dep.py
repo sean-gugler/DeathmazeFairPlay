@@ -8,7 +8,7 @@ by Sean Gugler
 
 import sys
 import argparse
-import os.path
+from pathlib import Path
 import re
 
 def usage(argv):
@@ -27,13 +27,14 @@ def includes(src):
 def main(argv):
     args = usage(argv)
 
+    srcPath = Path(args.input)
+    obj     = Path(args.output).with_suffix('.o')
+
     with open(args.input, 'rt') as f:
         src = f.readlines()
 
-    base, ext = os.path.splitext(args.input)
-    obj = base + '.o'
-
-    deps = ' '.join(f'src/{file}' for file in includes(src))
+    deps = (srcPath.with_name(file) for file in includes(src))
+    deps = ' '.join(map(str, deps))
 
     with open(args.output, 'wt') as out:
         print(f'{obj}: {deps}', file=out)
