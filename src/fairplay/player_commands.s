@@ -252,6 +252,9 @@ cmd_burn:
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
+	lda #icmd_draw_inv
+	sta zp0F_action
+	jsr item_cmd
 	jsr clear_status_lines
 	lda #$52     ;It vanishes in a
 	jsr print_to_line1
