@@ -1171,12 +1171,12 @@ cmd_press:
 	lda gs_room_lit
 	bne @snuff
 	ldx #$01
-	stx gs_teleported_lit
+	stx gs_teleported_dark
 	bne @teleported
 @snuff:
 	dec gs_room_lit
 	ldx #$00
-	stx gs_teleported_lit
+	stx gs_teleported_dark
 	inc gs_torches_unlit
 	dec gs_torches_lit
 	ldx #icmd_which_torch_lit
@@ -1205,7 +1205,7 @@ cmd_press:
 	lda gd_parsed_object
 	cmp #noun_two
 	bne @done
-	lda gs_teleported_lit
+	lda gs_teleported_dark
 	bne @done
 	jsr wait_long
 	jsr clear_status_lines

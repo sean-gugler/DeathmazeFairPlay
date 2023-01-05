@@ -16,7 +16,7 @@
 	.global gs_food_time_hi
 	.global gs_food_time_lo
 	.global gs_torch_time
-	.global gs_teleported_lit
+	.global gs_teleported_dark
 	.global gs_level_turns_hi
 	.global gs_level_turns_lo
 	.global gs_special_mode

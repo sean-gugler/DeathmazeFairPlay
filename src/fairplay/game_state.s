@@ -51,7 +51,7 @@ gs_food_time_lo:
 	JUNK_BYTE $80
 gs_torch_time:
 	JUNK_BYTE $80
-gs_teleported_lit:
+gs_teleported_dark:
 	JUNK_BYTE $00
 gs_level_turns_hi:
 	JUNK_BYTE $00
