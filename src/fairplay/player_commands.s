@@ -109,9 +109,6 @@ player_cmd:
 	dec zp0F_action
 	bne @cmd_blow
 
-	lda #noun_ring
-	cmp zp0E_object
-	beq @ring
 	lda #noun_staff
 	cmp zp0E_object
 	beq @staff
@@ -122,25 +119,6 @@ player_cmd:
 
 @staff:
 	lda #$73     ;Staff begins to quake
-	bne @print_line2
-@ring:
-	lda gs_level
-	cmp #$05
-	bne @having_fun
-	lda #carried_active
-	cmp zp1A_item_place
-	beq @having_fun
-	lda #noun_ring
-	sta zp0E_object
-	lda #icmd_set_carried_active
-	sta zp0F_action
-	jsr item_cmd
-	lda #$01
-	sta gs_room_lit
-	jsr update_view
-	lda #$71     ;The ring is activated and
-	jsr print_to_line1
-	lda #$72     ;shines light everywhere!
 	bne @print_line2
 
 @cmd_blow:
@@ -238,10 +216,16 @@ destroy_one_torch:
 cmd_burn:
 	dec zp0F_action
 	bne cmd_eat
-	lda gs_torches_lit
-	beq @no_fire
+
 	lda zp0E_object
+	ldx gs_torches_lit
+	bne :+
+	ldx gs_ring_glow
+	beq @no_fire
 	cmp #noun_ring
+	bne :+
+	jmp nonsense  ;ring can't burn itself
+:	cmp #noun_ring
 	bne :+
 	jsr lose_ring
 :	cmp #noun_ball
@@ -267,10 +251,10 @@ cmd_burn:
 	lda #$53     ;burst of flames!
 @print:
 	jmp print_to_line2
-
 @no_fire:
 	lda #$88     ;You have no fire.
 	bne @print
+
 push_special_mode:
 	lda gs_mode_stack1
 	sta gs_mode_stack2
@@ -569,15 +553,27 @@ cmd_light:
 	jmp not_carried  ;only have an already-lit torch
 
 @check_igniter:
-	lda gs_room_lit
+	lda zp11_item  ;the unlit torch found by noun_to_item
+	ldx gs_room_lit
 	bne @have_fire
-	lda gs_ring_glow
-	bne @have_fire
+	ldx gs_ring_glow
+	bne @have_ring
 	lda #$88     ;You have no fire.
 	jmp print_to_line2
 
+@have_ring:
+	sta zp0E_object
+	lda #icmd_set_carried_active
+	sta zp0F_action
+	jsr item_cmd
+	lda #$71     ;The ring ignites it
+	jsr print_to_line1
+	inc gs_torches_lit
+	inc gs_room_lit
+	jsr update_view
+	bne @finish
+
 @have_fire:
-	lda zp11_item  ;the unlit torch found by noun_to_item
 	pha
 	lda #icmd_which_torch_lit
 	sta zp0F_action
@@ -591,11 +587,12 @@ cmd_light:
 	lda #icmd_set_carried_active
 	sta zp0F_action
 	jsr item_cmd
-	jsr clear_status_lines
+;	jsr clear_status_lines
 	lda #$65     ;The torch is lit and the
 	jsr print_to_line1
 	lda #$66     ;old torch dies and vanishes!
 	jsr print_to_line2
+@finish:
 	dec gs_torches_unlit
 	lda #icmd_draw_inv
 	sta zp0F_action
@@ -788,7 +785,7 @@ cmd_rub:
 	beq :+
 	lda #$7a     ;Ok, it is clean
 	bne look_print
-:	lda $02
+:	lda #$02
 	sta gs_ring_glow
 	lda #$28     ;Glows hot
 	bne look_print

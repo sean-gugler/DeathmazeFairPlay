@@ -269,6 +269,7 @@ destroy_one_torch:
 cmd_burn:
 	dec zp0F_action
 	bne cmd_eat
+
 	lda gs_torches_lit
 	beq @no_fire
 	lda zp0E_object
@@ -290,17 +291,18 @@ cmd_burn:
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
-.endif
+.else ;RETAIL
 	jsr clear_status_lines
+.endif
 	lda #$52     ;It vanishes in a
 	jsr print_to_line1
 	lda #$53     ;burst of flames!
 @print:
 	jmp print_to_line2
-
 @no_fire:
 	lda #$88     ;You have no fire.
 	bne @print
+
 push_special_mode:
 	lda gs_mode_stack1
 	sta gs_mode_stack2
@@ -683,7 +685,9 @@ cmd_light:
 	lda #icmd_set_carried_active
 	sta zp0F_action
 	jsr item_cmd
+.if REVISION < 100 ;RETAIL
 	jsr clear_status_lines
+.endif
 	lda #$65     ;The torch is lit and the
 	jsr print_to_line1
 	lda #$66     ;old torch dies and vanishes!
