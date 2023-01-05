@@ -286,9 +286,8 @@ icmd08_count_inv:
 	sta zp0E_item
 	lda #items_unique + items_food
 	sta zp1A_count_loop
-	lda #$00
-	sta zp19_count
 	ldy #$00
+	sty zp19_count
 @check_carried:
 	lda (zp0E_item),y
 	cmp #carried_begin

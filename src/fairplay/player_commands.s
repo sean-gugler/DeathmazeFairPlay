@@ -574,10 +574,7 @@ cmd_light:
 	lda gs_ring_glow
 	bne @have_fire
 	lda #$88     ;You have no fire.
-	jsr print_to_line2
-	lda #icmd_draw_inv
-	sta zp0F_action
-	jmp item_cmd
+	jmp print_to_line2
 
 @have_fire:
 	lda zp11_item  ;the unlit torch found by noun_to_item

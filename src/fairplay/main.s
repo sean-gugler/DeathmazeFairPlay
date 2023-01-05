@@ -241,9 +241,9 @@ print_timers:
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
 :	lda gs_torch_time
-	beq noun_return
+	beq return
 	cmp #torch_low
-	bcs noun_return
+	bcs return
 	lda #$33     ;Torch is dying
 	jsr print_to_line2
 return:
