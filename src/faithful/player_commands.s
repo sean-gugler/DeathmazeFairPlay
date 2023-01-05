@@ -204,7 +204,7 @@ cmd_break:
 .endif
 	cmp #noun_torch
 	bne @food
-	jsr lose_one_torch
+	jsr destroy_one_torch
 @food:
 .if REVISION < 100
 	pla
@@ -237,9 +237,12 @@ cmd_break:
 	lda #$4f     ;and it disappears!
 	jmp print_to_line2
 
-lose_one_torch:
+; Find a carried, unlit torch if possible, else the lit one.
+; Decrement the relevant torch count.
+destroy_one_torch:
 	lda gs_torches_unlit
 	bne @unlit
+;@lit:
 	dec gs_torches_lit
 	lda gs_level
 	cmp #$05     ;level 5 is lit by ring, not torches
@@ -323,7 +326,7 @@ cmd_eat:
 	cmp #noun_torch
 .if REVISION >= 100
 	bne @torch_return
-	jsr lose_one_torch
+	jsr destroy_one_torch
 .else ;RETAIL
 	beq @torch
 .endif
@@ -358,7 +361,7 @@ cmd_eat:
 	pha
 	lda zp11_item
 	pha
-	jsr lose_one_torch
+	jsr destroy_one_torch
 	pla
 	sta zp11_item
 	pla
@@ -431,7 +434,7 @@ cmd_throw:
 	beq throw_food
 	cmp #noun_torch
 	bne :+
-	jsr lose_one_torch
+	jsr destroy_one_torch
 :	lda zp11_item
 	sta zp0E_object
 thrown:
@@ -650,10 +653,10 @@ cmd_light:
 
 :	lda zp1A_item_place ;still known from noun_to_item
 	cmp #carried_active
-	bne cmd_light_impl
+	bne @check_igniter
 	jmp not_carried  ;only have an already-lit torch
 
-cmd_light_impl:
+@check_igniter:
 	lda gs_room_lit
 	bne @have_fire
 	lda #$88     ;You have no fire.
@@ -950,8 +953,8 @@ cmd_open:
 	jsr item_cmd
 	lda #carried_known
 	cmp zp1A_item_place
-	bne @done
-	inc gs_torches_unlit
+	bne @done  ;opened box on floor
+	inc gs_torches_unlit  ;opened box being carried
 @done:
 	lda #icmd_draw_inv
 	sta zp0F_action
@@ -1169,11 +1172,11 @@ cmd_press:
 	cmp #noun_two
 	bne @teleported
 	lda gs_room_lit
-	bne @snuff
+	bne @douse
 	ldx #$01
 	stx gs_teleported_dark
 	bne @teleported
-@snuff:
+@douse:
 	dec gs_room_lit
 	ldx #$00
 	stx gs_teleported_dark
@@ -1362,14 +1365,15 @@ take_multiple:
 	lda zp1A_item_place
 	cmp #carried_boxed
 .if REVISION >= 100
-	bne :+   ;skip "ensure_inv_space" but do both INC and JMP
+	bne @taken   ;skip "ensure_inv_space" but do both INC and JMP
 .else ;RETAIL
 	beq take_and_reveal
 	; BUG: "get box" then "get torch"
 	; does not increment unlit count if it's the only box
 .endif
 	jsr ensure_inv_space
-:	inc gs_torches_unlit
+@taken:
+	inc gs_torches_unlit
 	jmp take_and_reveal
 
 @food:

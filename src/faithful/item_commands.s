@@ -388,6 +388,8 @@ icmd0B_which_box:
 	sta zp0E_item
 	lda #items_food + items_torches
 	sta zp1A_count_loop
+;	lda #carried_boxed
+	.assert carried_boxed = items_food + items_torches, error, "Need to revert register optimization in which_box"
 	ldy #$00
 @next_other:
 	cmp (zp0E_item),y

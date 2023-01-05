@@ -65,6 +65,8 @@ data_new_game:
 	.byte $02,$26	;food
 	.byte $03,$56	;food
 	.byte $04,$72	;food
+	.byte $05,$1b	;food  ;placement TBD
+	.byte $07,$00	;torch
 	.byte $02,$82	;torch
 	.byte $03,$26	;torch
 	.byte $04,$96	;torch

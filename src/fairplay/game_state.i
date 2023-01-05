@@ -52,8 +52,8 @@
 
 
 	items_unique    = $11
-	items_food      = $03
-	items_torches   = $03
+	items_food      = $04
+	items_torches   = $04
 
 	items_total = items_unique + items_food + items_torches
 

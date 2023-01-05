@@ -294,6 +294,7 @@ multiples:
 	beq @food
 	cmp #noun_torch
 	beq @torch
+;@box:
 	ldx #icmd_which_box
 	stx zp0F_action
 	jsr item_cmd

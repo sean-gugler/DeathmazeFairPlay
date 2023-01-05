@@ -112,10 +112,10 @@ gs_item_snake:
 	.assert * - gs_item_locs = items_unique * 2, error, "Miscount between data and definition"
 
 gs_item_food_torch:
-	JUNK_BYTE {$00,$00,$00,$00,$00,$00}
+	JUNK_BYTE {$00,$00,$00,$00,$00,$00,$00,$00}
 	.assert * - gs_item_locs = (item_food_end - item_begin) * 2, error, "Miscount between data and definition"
 
-	JUNK_BYTE {$00,$00,$00,$00,$08,$00}
+	JUNK_BYTE {$00,$00,$00,$00,$08,$00,$00,$00}
 	.assert * - gs_item_locs = (item_torch_end - item_begin) * 2, error, "Miscount between data and definition"
 
 

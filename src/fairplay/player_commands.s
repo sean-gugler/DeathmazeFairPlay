@@ -1,3 +1,4 @@
+	.export destroy_one_torch
 	.export flash_screen
 	.export nonsense
 	.export player_cmd
@@ -183,7 +184,7 @@ cmd_break:
 	bmi @broken
 	cmp #noun_torch
 	bne @food
-	jsr lose_one_torch
+	jsr destroy_one_torch
 @food:
 	lda zp11_item
 	sta zp0E_object
@@ -204,27 +205,31 @@ cmd_break:
 	lda #$4f     ;and it disappears!
 	jmp print_to_line2
 
+; Find a carried, unlit torch if possible, else the lit one.
+; Decrement the relevant torch count.
+; Output: A = zp0E = which torch item
 lose_one_torch:
 	lda gs_torches_unlit
 	bne @unlit
+;@lit:
 	dec gs_torches_lit
-	lda gs_level
-	cmp #$05     ;level 5 is lit by ring, not torches
-	beq @done
 	lda #$00
 	sta gs_torch_time
 	sta gs_room_lit
 	jsr push_special_mode
 	lda #special_mode_dark
 	sta gs_special_mode
-@done:
-	rts
-
+	lda #icmd_which_torch_lit
+	bne @query_item
 @unlit:
 	dec gs_torches_unlit
 	lda #icmd_which_torch_unlit
+@query_item:
 	sta zp0F_action
-	jsr item_cmd
+	jmp item_cmd
+
+destroy_one_torch:
+	jsr lose_one_torch
 	sta zp0E_object
 	lda #icmd_destroy1
 	sta zp0F_action
@@ -292,10 +297,9 @@ cmd_eat:
 	bmi @eaten
 	beq @food
 	cmp #noun_torch
-	bne @torch_return
-	jsr lose_one_torch
-@torch_return:
-	lda zp11_item
+	bne :+
+	jsr destroy_one_torch
+:	lda zp11_item
 	sta zp0E_object
 @eaten:
 ; implicit, already 0
@@ -381,7 +385,7 @@ cmd_throw:
 	beq throw_food
 	cmp #noun_torch
 	bne :+
-	jsr lose_one_torch
+	jsr destroy_one_torch
 :	lda zp11_item
 	sta zp0E_object
 thrown:
@@ -524,31 +528,17 @@ cmd_drop:
 
 @multiples:
 	cmp #noun_torch
-	beq @torch_unlit
+	beq @torch
 	lda zp11_item
 	sta zp0E_object
 	jmp @dropped
 
-@torch_unlit:
-	lda #icmd_which_torch_unlit
-	sta zp0F_action
-	jsr item_cmd
-	beq @torch_lit
-	dec gs_torches_unlit
-	jmp @dropped
-
-@torch_lit:
-	lda #icmd_which_torch_lit
-	sta zp0F_action
-	jsr item_cmd
-	sta zp0E_object
-	dec gs_torches_lit
-	jsr push_special_mode
-	lda #$00
-	sta gs_room_lit
-	sta gs_torches_lit
-	lda #special_mode_dark
-	sta gs_special_mode
+@torch:
+	jsr lose_one_torch
+	lda gs_torches_lit
+	bne @dropped
+	lda #$8a     ;Awfully dark
+	jsr print_to_line2
 	jsr clear_maze_window
 	jmp @dropped
 
@@ -575,10 +565,10 @@ cmd_light:
 
 :	lda zp1A_item_place ;still known from noun_to_item
 	cmp #carried_active
-	bne cmd_light_impl
+	bne @check_igniter
 	jmp not_carried  ;only have an already-lit torch
 
-cmd_light_impl:
+@check_igniter:
 	lda gs_room_lit
 	bne @have_fire
 	lda gs_ring_glow
@@ -590,19 +580,16 @@ cmd_light_impl:
 	jmp item_cmd
 
 @have_fire:
+	lda zp11_item  ;the unlit torch found by noun_to_item
+	pha
 	lda #icmd_which_torch_lit
 	sta zp0F_action
 	jsr item_cmd
-	cmp #$00
-	beq @light_torch
 	sta zp0E_object
 	lda #icmd_destroy2
 	sta zp0F_action
 	jsr item_cmd
-@light_torch:
-	lda #icmd_which_torch_unlit
-	sta zp0F_action
-	jsr item_cmd
+	pla
 	sta zp0E_object
 	lda #icmd_set_carried_active
 	sta zp0F_action
@@ -885,8 +872,8 @@ cmd_open:
 	jsr item_cmd
 	lda #carried_known
 	cmp zp1A_item_place
-	bne @done
-	inc gs_torches_unlit
+	bne @done  ;opened box on floor
+	inc gs_torches_unlit  ;opened box being carried
 @done:
 	lda #icmd_draw_inv
 	sta zp0F_action
@@ -1114,11 +1101,11 @@ cmd_press:
 	cmp #noun_two
 	bne @teleported
 	lda gs_room_lit
-	bne @snuff
+	bne @douse
 	ldx #$01
 	stx gs_teleported_dark
 	bne @teleported
-@snuff:
+@douse:
 	dec gs_room_lit
 	ldx #$00
 	stx gs_teleported_dark
@@ -1342,11 +1329,9 @@ find_boxed:
 @found:
 	lda gd_parsed_object
 	cmp #noun_torch
-	beq :+
-	jmp take_and_reveal
-
-:	inc gs_torches_unlit
-	jmp take_and_reveal
+	bne :+
+	inc gs_torches_unlit
+:	jmp take_and_reveal
 
 cmd_attack:
 	dec zp0F_action

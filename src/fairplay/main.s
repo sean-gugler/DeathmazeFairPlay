@@ -35,6 +35,7 @@
 	.importzp maze_features_end
 	.import item_cmd
 	.import push_special_mode
+	.import destroy_one_torch
 
 	.include "apple.i"
 	.include "dos.i"
@@ -207,15 +208,11 @@ complete_turn:
 	beq @dec_food
 	dec gs_torch_time
 	bne @dec_food
-	dec gs_torches_lit
+;@douse_torch
+	jsr destroy_one_torch
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
-	ldx #$00
-	stx gs_room_lit
-	jsr push_special_mode
-	ldx #special_mode_dark
-	stx gs_special_mode
 @dec_food:
 	dec gs_food_time_lo
 	lda gs_food_time_lo
@@ -277,6 +274,7 @@ multiples:
 	beq @food
 	cmp #noun_torch
 	beq @torch
+;@box:
 	ldx #icmd_which_box
 	stx zp0F_action
 	jsr item_cmd
@@ -297,24 +295,14 @@ multiples:
 	stx zp0F_action
 	jsr item_cmd
 	cmp #$00
-	bne noun_return
-	lda gs_level
-	cmp #$05
-	beq pop_not_carried
-	lda gs_room_lit
-	beq pop_not_carried
+	bne :+
+
 	ldx #icmd_which_torch_lit
 	stx zp0F_action
 	jsr item_cmd
 	cmp #$00
-	bne noun_return
-	lda gs_torches_lit
-	cmp #$01
-	bne pop_not_carried
-	pla
-	pla
-	lda #$98     ;You will do no such thing!
-	bne print_return
+	beq pop_not_carried
+:	rts
 
 
 	.segment "MAIN3"
