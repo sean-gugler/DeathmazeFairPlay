@@ -25,6 +25,7 @@ This project builds four versions of the game:
 * Save and Load prompts are now all-caps.
 
 ## Bugs fixed in fan releases
+* Lit torch count is decremented when it goes out.
 * The "Look Dog" command now displays an appropriate response.
 * Pressing ESC first thing on game start no longer displays garbage.
 * Double-space is properly prevented. Previously it mistakenly prevented a second space only after first letter of second word was started, as in:  WORD_L_

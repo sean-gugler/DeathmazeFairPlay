@@ -208,6 +208,9 @@ complete_turn:
 	dec gs_torch_time
 	bne @dec_food
 	dec gs_torches_lit
+	lda #icmd_draw_inv
+	sta zp0F_action
+	jsr item_cmd
 	ldx #$00
 	stx gs_room_lit
 	jsr push_special_mode2
