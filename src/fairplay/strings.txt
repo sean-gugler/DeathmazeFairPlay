@@ -123,13 +123,13 @@ You are another victim of the maze!
 You have died of starvation!
 The monster attacks you and
 you are his next meal!
-the magic word works! you have escaped!
+*the magic word works! you have escaped!
 Do you want to play again (Y or N)?
 You fall through the floor
 onto a bed of spikes!
-Before I let you go free
-what was the name of the monster?
-it says "the magic word is camelot".
+*Before I let you go free
+*what was the name of the monster?
+*it says "the magic word is camelot".
 The monster grabs the frisbee, throws 
 it back, and it saws your head off!
 TICK! TICK!
@@ -144,7 +144,7 @@ She has been seduced!
 She tiptoes up to you!
 She slashes you to bits!
 You slash her to bits!
-Correct! You have survived!
+*Correct! You have survived!
 You break the
 and it disappears!
 What a mess! The vampire bat
@@ -154,7 +154,7 @@ burst of flames!
 You can't be serious!
 You are making little sense.
  what?                   
-all form into darts!
+*all form into darts!
 It is delicious but gives you gas.
 The 
 magically sails
@@ -180,8 +180,8 @@ You are trapped in a fake
 elevator. There is no escape!
 With what? Toenail polish?
 A draft blows your torch out!
-The ring is activated and
-shines light everywhere!
+*The ring is activated and
+*shines light everywhere!
 The staff begins to quake!
 The calculator vanishes.
 NEVER, EVER raid a monster's lair.
