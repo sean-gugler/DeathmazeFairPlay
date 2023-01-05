@@ -7,7 +7,6 @@
 	.export noun_to_item
 	.export play_again
 	.export print_timers
-	.export push_special_mode2
 	.export starved
 	.export update_view
 	.export vector_reset
@@ -35,6 +34,7 @@
 	.import maze_features
 	.importzp maze_features_end
 	.import item_cmd
+	.import push_special_mode
 
 	.include "apple.i"
 	.include "dos.i"
@@ -213,7 +213,7 @@ complete_turn:
 	jsr item_cmd
 	ldx #$00
 	stx gs_room_lit
-	jsr push_special_mode2
+	jsr push_special_mode
 	ldx #special_mode_dark
 	stx gs_special_mode
 @dec_food:
@@ -366,13 +366,6 @@ play_again:
 .else ;RETAIL
 	jmp rom_MONITOR
 .endif
-
-push_special_mode2:
-	lda gs_mode_stack1
-	sta gs_mode_stack2
-	lda gs_special_mode
-	sta gs_mode_stack1
-	rts
 
 
 	.segment "RESET"

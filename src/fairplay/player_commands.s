@@ -2,6 +2,7 @@
 	.export nonsense
 	.export player_cmd
 	.export print_thrown
+	.export push_special_mode
 	.export save_to_tape
 
 	.import print_string

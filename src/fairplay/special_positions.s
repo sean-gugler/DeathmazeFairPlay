@@ -6,7 +6,7 @@
 	.import wait_short
 	.import get_rowcol_addr
 	.import clear_maze_window
-	.import push_special_mode2
+	.import push_special_mode
 	.import game_over
 	.import print_display_string
 	.import clear_hgr2
@@ -156,7 +156,7 @@ check_bat:
 	lda gs_bat_alive
 	and #$02
 	beq check_mother
-	jsr push_special_mode2
+	jsr push_special_mode
 	ldx #special_mode_bat
 	stx gs_special_mode
 	rts

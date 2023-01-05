@@ -35,6 +35,7 @@
 	.import maze_features
 	.importzp maze_features_end
 	.import item_cmd
+	.import push_special_mode
 
 	.include "apple.i"
 	.include "dos.i"
@@ -383,12 +384,16 @@ play_again:
 	jmp rom_MONITOR
 .endif
 
+.if REVISION >= 100
+	push_special_mode2 = push_special_mode
+.else ;RETAIL
 push_special_mode2:
 	lda gs_mode_stack1
 	sta gs_mode_stack2
 	lda gs_special_mode
 	sta gs_mode_stack1
 	rts
+.endif
 
 
 	.segment "RESET"
