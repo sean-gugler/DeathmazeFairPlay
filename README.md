@@ -32,7 +32,7 @@ This project builds four versions of the game:
 * Torch count now increments if you "get box" then "get torch" and it's the only box you're carrying. Previously it would be off by one. (For fun, try "drop torch"! Repeat all three commands for endless entertainment walking backwards through the font.)
 
 ## Other changes in fan releases
-* Smaller file size, trimmed hundreds of unused bytes.
+* Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.
 * Quitting the game cleanly returns you to the BASIC prompt (]) instead of the MONITOR (*).
 
 ## Changes in the Fair Play release

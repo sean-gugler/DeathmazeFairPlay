@@ -348,6 +348,8 @@ icmd0B_which_box:
 	clc
 	adc gs_player_y
 	sta zp11_position
+
+; Check at feet
 	lda #>(gs_item_locs+1)
 	sta zp0E_item+1
 	lda #<(gs_item_locs+1)
@@ -365,58 +367,85 @@ icmd0B_which_box:
 	dec zp1A_count_loop
 	bne @check_is_here
 
+; Check carried, skipping snake
+.if REVISION >= 100  ;same effect but simpler
+	dec zp0E_item
+.else ;RETAIL
 	lda #>gs_item_locs
 	sta zp0E_item+1
 	lda #<gs_item_locs
 	sta zp0E_item
+.endif
+.if REVISION >= 100  ;single loop, skipping the snake
+	lda #items_total
+.else ;RETAIL used 2 blocks to loop below snake and above snake
 	lda #noun_snake-1
+.endif
 	sta zp1A_count_loop
 	lda #carried_boxed
 	ldy #$00
 @check_is_carried:
+.if REVISION >= 100
+	cpy #(noun_snake - 1) * 2
+	beq @next
+.endif
 	cmp (zp0E_item),y
 	beq @return_item_num
+@next:
 	iny
 	iny
 	dec zp1A_count_loop
 	bne @check_is_carried
 
-; Skip over snake
-	lda #>gs_item_food_torch
+.if REVISION < 100  ;RETAIL used 2 blocks to loop below snake and above snake
+; Check carried above snake
+	lda #>(gs_item_locs + noun_snake * 2)
 	sta zp0E_item+1
-	lda #<gs_item_food_torch
+	lda #<(gs_item_locs + noun_snake * 2)
 	sta zp0E_item
-	lda #items_food + items_torches
+	lda #items_total - noun_snake
 	sta zp1A_count_loop
 ;	lda #carried_boxed
-	.assert carried_boxed = items_food + items_torches, error, "Need to revert register optimization in which_box"
+	.assert carried_boxed = items_total - noun_snake, error, "Need to revert register optimization in which_box"
 	ldy #$00
-@next_other:
+@check_mult_carried:
 	cmp (zp0E_item),y
 	beq @return_item_num
 	iny
 	iny
 	dec zp1A_count_loop
-	bne @next_other
+	bne @check_mult_carried
+.endif
 
 ; Last, check for carrying boxed snake
+.if REVISION >= 100  ;same effect but simpler
+	ldy #(noun_snake - 1) * 2
+.else ;RETAIL
 	ldx #>gs_item_snake
 	stx zp0E_item+1
 	ldx #<gs_item_snake
 	stx zp0E_item
 	ldy #$00
+.endif
 	cmp (zp0E_item),y
 	beq @return_item_num
+
+; Box not found
 	lda #$00
 	rts
 
 @check_level:
+.if REVISION >= 100
+	dey
+	lda (zp0E_item),y
+.else ;RETAIL
 	dec zp0E_item
 	lda (zp0E_item),y
 	sta zp13_level
 	inc zp0E_item
 	dey
 	lda zp13_level
+.endif
 	cmp gs_level
 	beq @return_item_num
 	iny
@@ -424,6 +453,13 @@ icmd0B_which_box:
 	jmp @not_here
 
 @return_item_num:
+.if REVISION >= 100
+	iny
+	iny
+	iny
+	tya
+	lsr
+.else ;RETAIL
 	clc
 	tya
 	bpl :+
@@ -440,6 +476,7 @@ icmd0B_which_box:
 	ror
 	clc
 	adc #$01
+.endif
 	rts
 
 icmd0C_which_food:

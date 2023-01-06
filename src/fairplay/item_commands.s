@@ -347,6 +347,8 @@ icmd0B_which_box:
 	clc
 	adc gs_player_y
 	sta zp11_position
+
+; Check at feet
 	lda #>(gs_item_locs+1)
 	sta zp0E_item+1
 	lda #<(gs_item_locs+1)
@@ -364,80 +366,45 @@ icmd0B_which_box:
 	dec zp1A_count_loop
 	bne @check_is_here
 
-	lda #>gs_item_locs
-	sta zp0E_item+1
-	lda #<gs_item_locs
-	sta zp0E_item
-	lda #noun_snake-1
+; Check carried, skipping snake
+	dec zp0E_item
+	lda #items_total
 	sta zp1A_count_loop
 	lda #carried_boxed
 	ldy #$00
 @check_is_carried:
+	cpy #(noun_snake - 1) * 2
+	beq :+
 	cmp (zp0E_item),y
 	beq @return_item_num
-	iny
+:	iny
 	iny
 	dec zp1A_count_loop
 	bne @check_is_carried
 
-; Skip over snake
-	lda #>gs_item_food_torch
-	sta zp0E_item+1
-	lda #<gs_item_food_torch
-	sta zp0E_item
-	lda #items_food + items_torches
-	sta zp1A_count_loop
-	lda #carried_boxed
-	ldy #$00
-@next_other:
-	cmp (zp0E_item),y
-	beq @return_item_num
-	iny
-	iny
-	dec zp1A_count_loop
-	bne @next_other
-
 ; Last, check for carrying boxed snake
-	ldx #>gs_item_snake
-	stx zp0E_item+1
-	ldx #<gs_item_snake
-	stx zp0E_item
-	ldy #$00
+	ldy #(noun_snake - 1) * 2
 	cmp (zp0E_item),y
 	beq @return_item_num
+
+; Box not found
 	lda #$00
 	rts
 
 @check_level:
-	dec zp0E_item
-	lda (zp0E_item),y
-	sta zp13_level
-	inc zp0E_item
 	dey
-	lda zp13_level
+	lda (zp0E_item),y
+	iny
 	cmp gs_level
 	beq @return_item_num
-	iny
 	lda zp11_position
 	jmp @not_here
 
 @return_item_num:
-	clc
+	iny
+	iny
 	tya
-	bpl :+
-	lda #$00     ;clamp min 0
-:	adc zp0E_item
-	sta zp0E_item
-	lda #$00
-	adc zp0E_item+1
-	sta zp0E_item+1
-	sec
-	lda zp0E_item
-	sbc #<gs_item_locs
-	clc
-	ror
-	clc
-	adc #$01
+	lsr
 	rts
 
 icmd0C_which_food:
