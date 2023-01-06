@@ -6,7 +6,7 @@ burn
 chew eat
 roll chuck heave throw
 climb
-leave put drop
+drop leave put
 fill
 light
 play
@@ -18,7 +18,7 @@ open
 unlock
 press
 get grab hold take
-stab kill slash hack attack
+stab kill slash attack hack
 paint
 drink
 
@@ -30,7 +30,7 @@ save
 quit
 help hint instructions directions
 
-[Nouns]
+[Nouns Unique]
 Ball
 Brush
 Calculator
@@ -48,9 +48,13 @@ Sword
 Wool
 Yoyo
 Snake
+
+[Nouns Multiple]
 Food
 Torch
 Box 
+
+[Nouns Non-Item]
 Bat 
 Dog 
 Door Elevator

@@ -60,9 +60,9 @@ def define_vocab(fit, T):
 
 def declare_vocab(prefix, T):
     for i,text in enumerate(T, 1):
-        T = text.split()
-        last = T[-1].lower()
-        yield i, f'\t{prefix}_{last} = ${i:02x}\n'
+        W = map(str.lower, text.split())
+        for word in W:
+            yield i, f'\t{prefix}_{word} = ${i:02x}\n'
     i += 1
     yield i, f'\n\t{prefix}s_end = ${i:02x}\n'
 
@@ -103,12 +103,18 @@ def main(argv):
         for line in define_vocab(fit4, VT + VI):
             out.write(line)
 
-    N = S['Nouns']
+    NU = S['Nouns Unique']
+    NM = S['Nouns Multiple']
+    NN = S['Nouns Non-Item']
     with open(args.nouns + DECL, 'wt') as out:
-        for i,line in declare_vocab('noun', N):
+        for i,line in declare_vocab('noun', NU + NM + NN):
             out.write(line)
+            if i == len(NU):
+                out.write(f'\n\tnouns_unique_end = ${i+1:02x}\n\n')
+            elif i == len(NU) + len(NM):
+                out.write(f'\n\tnouns_item_end = ${i+1:02x}\n\n')
     with open(args.nouns + DEF, 'wt') as out:
-        for line in define_vocab(min4, N):
+        for line in define_vocab(min4, NU + NM + NN):
             out.write(line)
 
     M = S['Messages']

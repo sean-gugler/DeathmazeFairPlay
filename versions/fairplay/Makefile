@@ -36,10 +36,6 @@ include $(DEPS)
 
 # Generated files.
 
-# TODO: figure out how to annotate the extra symbols
-# I hand-edited and commited to git, so they can be
-# generated from the strings.txt file
-
 STRING_TABLES = verb noun display intro
 STRING_STEMS = $(patsubst %,$(src_dir)/string_%,$(STRING_TABLES))
 STRING_DECL = $(patsubst %,%_decl.i,$(STRING_STEMS))

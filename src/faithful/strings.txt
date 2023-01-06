@@ -17,7 +17,7 @@ wipe clean polish rub
 open unlock
 press
 get grab hold take
-stab kill slas attack hack
+stab kill slash attack hack
 paint
 
 [Verbs Intransitive]
@@ -30,7 +30,7 @@ quit
 instructions directions
 help hint
 
-[Nouns]
+[Nouns Unique]
 Ball
 Brush
 Calculator
@@ -48,9 +48,13 @@ Sword
 Wool
 Yoyo
 Snake
+
+[Nouns Multiple]
 Food
 Torch
 Box 
+
+[Nouns Non-Item]
 Bat 
 Dog 
 Door Elev

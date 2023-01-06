@@ -14,23 +14,20 @@
 	noun_sword = $0e
 	noun_wool = $0f
 	noun_yoyo = $10
-
-	;WARN: some iterators assume snake is the last unique
 	noun_snake = $11
 
 	nouns_unique_end = $12
 
-	;WARN: cmd_eat assumes food is first
 	noun_food = $12
 	noun_torch = $13
 	noun_box = $14
 
 	nouns_item_end = $15
 
-
 	noun_bat = $15
 	noun_dog = $16
 	noun_door = $17
+	noun_elev = $17
 	noun_monster = $18
 	noun_mother = $19
 	noun_zero = $1a

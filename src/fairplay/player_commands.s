@@ -76,6 +76,15 @@ zp11_item           = $11;
 zp0F_action         = $0F;
 zp0E_object         = $0E;
 
+
+doormsg_lock_begin = text_You_unlock_the_door___ +1
+doormsg_lock_end   = text_Having_fun_
+
+doors_locked = doormsg_lock_end - doormsg_lock_begin
+
+door_correct = $02  ;1-based
+
+
 	.segment "COMMAND1"
 
 nonsense:
@@ -279,6 +288,8 @@ cmd_eat:
 	jmp throw_react
 :	cmp #nouns_unique_end
 	bmi @eaten
+	.assert nouns_unique_end = noun_food, error, "Eat logic needs to change."
+;	cmp #noun_food   ;optimized based on assertion
 	beq @food
 	cmp #noun_torch
 	bne :+
@@ -832,7 +843,8 @@ cmd_open:
 	lda zp11_item
 	cmp #noun_snake
 	beq @push_mode_snake
-;	cmp #nouns_unique_end - 1   ;same as #noun_snake
+	.assert nouns_unique_end - 1 = noun_snake, error, "Snake is not last unique. Open Box logic needs to change."
+;	cmp #nouns_unique_end - 1   ;optimized based on assertion
 	bmi @print_item_name
 	cmp #item_torch_begin
 	bmi :+
