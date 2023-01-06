@@ -5,15 +5,15 @@ food_hungry = $0a
 
 inventory_max = $08
 
+moves_until_trippable = $29
+moves_until_mother = $32
+moves_until_dog1 = $3c
+moves_until_monster = $50
+
 puzzle_step1 = $05
 
 torch_low = $0a
 torch_lifespan = $96
-
-turns_until_trippable = $29
-turns_until_mother = $32
-turns_until_dog1 = $3c
-turns_until_monster = $50
 
 ; Pseudo-verbs for navigation actions
 verb_movement_begin = $5a

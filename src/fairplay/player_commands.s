@@ -397,7 +397,7 @@ throw_wool:
 	cmp #$04
 	bne thrown
 	lda gs_level_moves_lo
-	cmp #turns_until_trippable
+	cmp #moves_until_trippable
 	bcc thrown
 	jsr push_special_mode
 	lda #special_mode_tripped

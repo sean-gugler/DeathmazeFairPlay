@@ -434,7 +434,7 @@ special_monster:
 	cmp #$50
 	bcc :+
 	jsr update_view
-:	lda gs_monster_proximity
+:	ldx gs_monster_proximity
 	bne @monster_smell
 	jsr wait_if_moved
 	lda #$43     ;The ground beneath your feet
@@ -445,8 +445,7 @@ special_monster:
 	jmp input_near_danger
 
 @monster_smell:
-	lda gs_monster_proximity
-	cmp #$01
+	dex
 	bne monster_kills_you
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
@@ -462,16 +461,14 @@ monster_kills_you:
 	lda #$37     ;you are his next meal!
 	jsr print_to_line2
 	lda gs_lair_raided
-	bne :+
-	jmp game_over
-
-:	lda #$75     ;Never raid a monster's lair
+	beq :+
+	lda #$75     ;Never raid a monster's lair
 	ldx #$00
 	stx zp_col
 	ldx #$15
 	stx zp_row
 	jsr print_display_string
-	jmp game_over
+:	jmp game_over
 
 input_near_danger:
 	jsr get_player_input

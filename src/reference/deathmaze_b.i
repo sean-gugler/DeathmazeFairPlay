@@ -264,10 +264,10 @@ special_mode_climb = $0f
 torch_low = $0a
 torch_lifespan = $96
 
-turns_until_trippable = $29
-turns_until_mother = $32
-turns_until_dog1 = $3c
-turns_until_monster = $50
+moves_until_trippable = $29
+moves_until_mother = $32
+moves_until_dog1 = $3c
+moves_until_monster = $50
 
 verb_break = $03
 ;verb_light - verb_burn = $06

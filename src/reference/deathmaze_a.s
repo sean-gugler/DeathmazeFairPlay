@@ -443,7 +443,7 @@ check_level_2:
 	beq check_guarded_pit
 check_dog_roaming:
 	lda gs_level_moves_lo
-	cmp #turns_until_dog1
+	cmp #moves_until_dog1
 	bcs :+
 	lda gs_level_moves_hi
 	beq special_return
@@ -496,7 +496,7 @@ check_levels_4_5:
 	beq check_bat
 check_mother:
 	lda gs_level_moves_lo
-	cmp #turns_until_mother
+	cmp #moves_until_mother
 	bcs :+
 	lda gs_level_moves_hi
 	beq return_dog_monster
@@ -527,7 +527,7 @@ check_bat:
 
 check_monster:
 	lda gs_level_moves_lo
-	cmp #turns_until_monster
+	cmp #moves_until_monster
 	bcs :+
 	lda gs_level_moves_hi
 	beq return_dog_monster
@@ -4592,7 +4592,7 @@ cmd_throw:
 	cmp #$04
 	bne @thrown
 	lda gs_level_moves_lo
-	cmp #turns_until_trippable
+	cmp #moves_until_trippable
 	bcc @thrown
 	jsr push_special_mode
 	lda #special_mode_tripped
