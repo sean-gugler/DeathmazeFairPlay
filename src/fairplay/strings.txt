@@ -131,9 +131,9 @@ you are his next meal!
 Do you want to play again (Y or N)?
 You fall through the floor
 onto a bed of spikes!
-*Before I let you go free
-*what was the name of the monster?
-*it says "the magic word is camelot".
+They do not reach the lightning rod.
+They blast the lighting rod above!
+The gold pieces fall, fused together!
 The monster grabs the frisbee, throws 
 it back, and it saws your head off!
 TICK! TICK!
@@ -148,7 +148,7 @@ She has been seduced!
 She tiptoes up to you!
 She slashes you to bits!
 You slash her to bits!
-*Correct! You have survived!
+Sparks shoot out above you!
 You break the
 and it disappears!
 What a mess! The vampire bat

@@ -67,7 +67,7 @@ gs_endgame_step:
 	JUNK_BYTE $00
 gs_ring_glow:
 	JUNK_BYTE $00
-gs_unused2:
+gs_staff_charged:
 	JUNK_BYTE $00
 gs_bat_alive:
 	JUNK_BYTE $00

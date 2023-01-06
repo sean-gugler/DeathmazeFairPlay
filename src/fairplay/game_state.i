@@ -24,7 +24,7 @@
 	.global gs_mode_stack2
 	.global gs_endgame_step
 	.global gs_ring_glow
-;	.global gs_UNUSED
+	.global gs_staff_charged
 	.global gs_bat_alive
 	.global gs_mother_alive
 	.global gs_monster_alive

@@ -204,7 +204,6 @@ count_as_move:
 	bne @consume
 	inc gs_level_moves_hi
 @consume:
-	lsr gs_ring_glow
 	lda gs_torch_time
 	beq @dec_food
 	dec gs_torch_time

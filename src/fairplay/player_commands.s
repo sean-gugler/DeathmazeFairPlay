@@ -127,6 +127,8 @@ player_cmd:
 	jmp print_to_line2
 
 @staff:
+	lda #$02
+	sta gs_staff_charged
 	lda #$73     ;Staff begins to quake
 	bne @print_line2
 
@@ -708,10 +710,19 @@ cmd_strike:
 	jmp nonsense
 
 :	jsr clear_status_lines
-	lda #$21     ;Thunderbolts shoot out above you!
-	jsr print_to_line1
-	lda #$22     ;The staff thunders with uselss energy!
+	lda gs_staff_charged
+	bne :+
+	lda #$4d     ;Sparks shoot out above you!
 	jmp print_to_line2
+
+:	lda #$21     ;Thunderbolts shoot out above you!
+	jsr print_to_line1
+	lda #$22     ;The staff thunders with useless energy!
+	jmp print_to_line2
+
+;	lda #$3c     ;They do not reach the lighting rod
+;	lda #$3d     ;They blast the lighting rod above!
+;	lda #$3e     ;The gold pieces fall, fused together!
 
 cmd_wear:
 	dec zp0F_action

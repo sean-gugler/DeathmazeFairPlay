@@ -57,9 +57,9 @@
 	text_Do_you_want_to_play_again__Y_or_N__ = $39
 	text_You_fall_through_the_floor = $3a
 	text_onto_a_bed_of_spikes_ = $3b
-	text__Before_I_let_you_go_free = $3c
-	text__what_was_the_name_of_the_monster_ = $3d
-	text__it_says__the_magic_word_is_camelot__ = $3e
+	text_They_do_not_reach_the_lightning_rod_ = $3c
+	text_They_blast_the_lighting_rod_above_ = $3d
+	text_The_gold_pieces_fall__fused_together_ = $3e
 	text_The_monster_grabs_the_frisbee__throws_ = $3f
 	text_it_back__and_it_saws_your_head_off_ = $40
 	text_TICK__TICK_ = $41
@@ -74,7 +74,7 @@
 	text_She_tiptoes_up_to_you_ = $4a
 	text_She_slashes_you_to_bits_ = $4b
 	text_You_slash_her_to_bits_ = $4c
-	text__Correct__You_have_survived_ = $4d
+	text_Sparks_shoot_out_above_you_ = $4d
 	text_You_break_the = $4e
 	text_and_it_disappears_ = $4f
 	text_What_a_mess__The_vampire_bat = $50

@@ -26,8 +26,8 @@ data_new_game:
 	.byte $00		;mode stack 1
 	.byte $00		;mode stack 2
 	.byte $00		;endgame step number
-	.byte $00		;UNUSED
-	.byte $00		;UNUSED
+	.byte $00		;ring is glowing (lasts 1 turn)
+	.byte $00		;staff is charged (lasts 1 turn)
 	.byte $02		;bat alive (flag $02)
 	.byte $04		;mother alive (flag $04)
 	.byte $02		;monster alive (flag $02)

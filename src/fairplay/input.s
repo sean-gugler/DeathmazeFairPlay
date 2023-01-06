@@ -44,6 +44,11 @@ zp0E_src          = $0E;
 	.segment "INPUT1"
 
 get_player_input:
+	; Updates performed for EVERY player action, not just for "moves"
+	lsr gs_ring_glow
+	lsr gs_staff_charged
+
+get_keyboard_input:
 	bit hw_STROBE
 :	bit hw_KEYBOARD
 	bpl :-
@@ -184,7 +189,7 @@ process_input_char:
 	bne @repeat_display
 
 ; Start over with fresh input buffer from scratch
-	jmp get_player_input
+	jmp get_keyboard_input
 
 @check_space:
 	cmp #' '
@@ -336,7 +341,7 @@ parse_input:
 	pla
 	lda #'.'
 	jsr print_char
-	jmp get_player_input
+	jmp get_keyboard_input
 
 @known_verb:
 	cmp #verb_intransitive
@@ -388,7 +393,7 @@ parse_input:
 	lda #'?'
 	jsr char_out
 	pla
-	jmp get_player_input
+	jmp get_keyboard_input
 
 @verb_no_object:
 	lda gd_parsed_action
@@ -424,7 +429,7 @@ parse_input:
 @verb_word_end:
 	lda #$56     ;what?
 	jsr print_display_string
-	jmp get_player_input
+	jmp get_keyboard_input
 
 @cmd_look:
 	lda gs_room_lit
