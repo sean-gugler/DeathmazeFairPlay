@@ -17,6 +17,7 @@
 	.importzp textbuf_size
 	.import text_buffer_prev
 	.import text_buffer_line1
+	.import text_buffer_line2
 
 	.include "apple.i"
 	.include "char.i"
@@ -86,6 +87,7 @@ get_player_input:
 	;   command, clear_status_lines would account for about
 	;   1/3 total CPU time!)
 	lda text_buffer_line1
+	and text_buffer_line2
 	cmp #$80
 	beq continue_player_input
 	jsr clear_status_lines
