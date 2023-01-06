@@ -16,7 +16,7 @@
 	.import check_special_position
 	.import starved
 	.import beheaded
-	.import complete_turn
+	.import count_as_move
 	.import pit
 	.import wait_short
 	.import print_char
@@ -396,7 +396,7 @@ throw_wool:
 	lda gs_level
 	cmp #$04
 	bne thrown
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_trippable
 	bcc thrown
 	jsr push_special_mode
@@ -1089,8 +1089,8 @@ cmd_press:
 :	lda (zp0E_ptr),y
 	sta gs_player_y
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	lda gd_parsed_object
 	cmp #noun_two
 	bne @teleported
@@ -1413,8 +1413,8 @@ cmd_charge:
 	stx gs_player_y
 	stx gs_player_x
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jmp update_view
 
 @normal:
@@ -1519,7 +1519,7 @@ check_fart:
 	cmp #$0a
 	beq @guillotine
 @normal:
-	jsr complete_turn
+	jsr count_as_move
 	jmp @next_propel
 
 @guillotine:

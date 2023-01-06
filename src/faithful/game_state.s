@@ -53,9 +53,9 @@ gs_torch_time:
 	JUNK_BYTE $80
 gs_teleported_dark:
 	JUNK_BYTE $00
-gs_level_turns_hi:
+gs_level_moves_hi:
 	JUNK_BYTE $00
-gs_level_turns_lo:
+gs_level_moves_lo:
 	JUNK_BYTE $29
 gs_special_mode:
 	JUNK_BYTE $00

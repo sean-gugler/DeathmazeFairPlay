@@ -17,8 +17,8 @@
 	.global gs_food_time_lo
 	.global gs_torch_time
 	.global gs_teleported_dark
-	.global gs_level_turns_hi
-	.global gs_level_turns_lo
+	.global gs_level_moves_hi
+	.global gs_level_moves_lo
 	.global gs_special_mode
 	.global gs_mode_stack1
 	.global gs_mode_stack2

@@ -23,7 +23,7 @@
 	.import print_display_string
 	.import clear_maze_window
 	.import print_timers
-	.import complete_turn
+	.import count_as_move
 	.import player_cmd
 	.import get_player_input
 	.import update_view
@@ -89,7 +89,7 @@ special_calc_puzzle:
 	bpl @move
 	jsr player_cmd
 @continue_loop:
-	jsr complete_turn
+	jsr count_as_move
 	jsr print_timers
 	jsr @print_timed_hint
 	jmp @puzzle_loop
@@ -647,7 +647,7 @@ special_dark:
 
 @unlit:
 	ldx #$00
-	stx gs_level_turns_lo ;GUG: careful, if I revise to allow re-lighting torch
+	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
 	lda gs_mother_proximity
 	bne @monster_smell
 	lda gs_level
@@ -888,7 +888,7 @@ special_bomb:
 	jmp special_endgame
 
 @continue:
-	jsr complete_turn
+	jsr count_as_move
 	jsr player_cmd
 	jsr print_timers
 	jmp check_special_mode
@@ -979,8 +979,8 @@ enter_elevator:
 	stx gs_player_x
 @clear_turns:
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jmp ride_elevator
 
 

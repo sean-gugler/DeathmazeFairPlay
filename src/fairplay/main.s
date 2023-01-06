@@ -1,5 +1,5 @@
 	.export cmd_movement
-	.export complete_turn
+	.export count_as_move
 	.export game_over
 	.export main_game_loop
 	.export move_turn
@@ -117,6 +117,7 @@ move_turn:
 	ldx #$04
 	stx gs_facing
 	bne @turned
+
 @turn_around:
 	lda zp1A_facing
 	cmp #$03
@@ -190,7 +191,7 @@ move_forward:
 	beq :+
 	rts
 
-:	jsr complete_turn
+:	jsr count_as_move
 	jsr update_view
 	jsr print_timers
 	rts
@@ -198,10 +199,10 @@ move_forward:
 
 	.segment "MAIN2"
 
-complete_turn:
-	inc gs_level_turns_lo
+count_as_move:
+	inc gs_level_moves_lo
 	bne @consume
-	inc gs_level_turns_hi
+	inc gs_level_moves_hi
 @consume:
 	lsr gs_ring_glow
 	lda gs_torch_time

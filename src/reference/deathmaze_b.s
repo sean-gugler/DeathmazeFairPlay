@@ -389,7 +389,7 @@ move_forward:
 	beq :+
 	rts
 
-:	jsr complete_turn
+:	jsr count_as_move
 	jsr update_view
 	jsr print_timers
 	rts
@@ -449,10 +449,10 @@ check_level_2:
 	cmp #$05
 	beq check_guarded_pit
 check_dog_roaming:
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_dog1
 	bcs :+
-	lda gs_level_turns_hi
+	lda gs_level_moves_hi
 	beq special_return
 :	lda gs_dog1_alive
 	and #$01
@@ -481,8 +481,8 @@ check_guarded_pit:
 	ldx #$05
 	stx gs_player_y
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jsr pit
 	rts
 
@@ -502,10 +502,10 @@ check_levels_4_5:
 	cmp #$04
 	beq check_bat
 check_mother:
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_mother
 	bcs :+
-	lda gs_level_turns_hi
+	lda gs_level_moves_hi
 	beq return_dog_monster
 :	lda gs_mother_alive
 	and #mother_flag_roaming
@@ -533,10 +533,10 @@ check_bat:
 	rts
 
 check_monster:
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_monster
 	bcs :+
-	lda gs_level_turns_hi
+	lda gs_level_moves_hi
 	beq return_dog_monster
 :	lda gs_monster_alive
 	and #$02
@@ -546,16 +546,16 @@ check_monster:
 done_timer:
 	rts
 
-complete_turn:
-	lda gs_level_turns_lo
+count_as_move:
+	lda gs_level_moves_lo
 	cmp #$ff
 	beq :+
-	inc gs_level_turns_lo
+	inc gs_level_moves_lo
 	jmp @consume
 
 :	ldx #$00
-	stx gs_level_turns_lo
-	inc gs_level_turns_hi
+	stx gs_level_moves_lo
+	inc gs_level_moves_hi
 @consume:
 	lda gs_level
 	cmp #$05
@@ -4595,7 +4595,7 @@ cmd_throw:
 	lda gs_level
 	cmp #$04
 	bne @thrown
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_trippable
 	bcc @thrown
 	jsr push_special_mode
@@ -5274,8 +5274,8 @@ cmd_press:
 :	lda (p0E),y
 	sta gs_player_y
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	lda gd_parsed_object
 	cmp #noun_two
 	bne @teleported
@@ -5666,8 +5666,8 @@ cmd_charge:
 	stx gs_player_y
 	stx gs_player_x
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jmp update_view
 
 @normal:
@@ -5776,7 +5776,7 @@ check_fart:
 	cmp #$0a
 	beq @guillotine
 @normal:
-	jsr complete_turn
+	jsr count_as_move
 	jmp @next_propel
 
 @guillotine:
@@ -6048,7 +6048,7 @@ special_calc_puzzle:
 	bpl @move
 	jsr player_cmd
 @continue_loop:
-	jsr complete_turn
+	jsr count_as_move
 	jsr print_timers
 	jsr @print_timed_hint
 	jmp @puzzle_loop
@@ -6588,7 +6588,7 @@ special_dark:
 
 @unlit:
 	ldx #$00
-	stx gs_level_turns_lo ;GUG: careful, if I revise to allow re-lighting torch
+	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
 	lda gs_mother_proximity
 	bne @monster_smell
 	lda gs_level
@@ -6825,7 +6825,7 @@ special_bomb:
 	jmp special_endgame
 
 @continue:
-	jsr complete_turn
+	jsr count_as_move
 	jsr player_cmd
 	jsr print_timers
 	jmp check_special_mode
@@ -6914,8 +6914,8 @@ enter_elevator:
 	stx gs_player_x
 @clear_turns:
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jmp ride_elevator
 
 special_tripped:
@@ -8827,9 +8827,9 @@ gs_torch_time:
 	.byte $80
 gs_teleported_lit:
 	.byte $00
-gs_level_turns_hi:
+gs_level_moves_hi:
 	.byte $00
-gs_level_turns_lo:
+gs_level_moves_lo:
 	.byte $29
 gs_special_mode:
 	.byte $00

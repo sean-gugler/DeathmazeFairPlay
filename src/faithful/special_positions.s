@@ -78,10 +78,10 @@ check_level_2:
 	cmp #$05
 	beq check_guarded_pit
 check_dog_roaming:
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_dog1
 	bcs :+
-	lda gs_level_turns_hi
+	lda gs_level_moves_hi
 	beq special_return
 :	lda gs_dog1_alive
 	and #$01
@@ -110,8 +110,8 @@ check_guarded_pit:
 	ldx #$05
 	stx gs_player_y
 	ldx #$00
-	stx gs_level_turns_hi
-	stx gs_level_turns_lo
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jsr pit
 	rts
 
@@ -131,10 +131,10 @@ check_levels_4_5:
 	cmp #$04
 	beq check_bat
 check_mother:
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_mother
 	bcs :+
-	lda gs_level_turns_hi
+	lda gs_level_moves_hi
 	beq return_dog_monster
 :	lda gs_mother_alive
 	and #mother_flag_roaming
@@ -162,10 +162,10 @@ check_bat:
 	rts
 
 check_monster:
-	lda gs_level_turns_lo
+	lda gs_level_moves_lo
 	cmp #turns_until_monster
 	bcs :+
-	lda gs_level_turns_hi
+	lda gs_level_moves_hi
 	beq return_dog_monster
 :	lda gs_monster_alive
 	and #monster_flag_roaming

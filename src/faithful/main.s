@@ -1,5 +1,5 @@
 	.export cmd_movement
-	.export complete_turn
+	.export count_as_move
 	.export game_over
 	.export main_game_loop
 	.export move_turn
@@ -190,7 +190,7 @@ move_forward:
 	beq :+
 	rts
 
-:	jsr complete_turn
+:	jsr count_as_move
 	jsr update_view
 	jsr print_timers
 	rts
@@ -205,16 +205,16 @@ move_forward:
 ; this source.
 return = * - 1
 
-complete_turn:
-	lda gs_level_turns_lo
+count_as_move:
+	lda gs_level_moves_lo
 	cmp #$ff
 	beq :+
-	inc gs_level_turns_lo
+	inc gs_level_moves_lo
 	jmp @consume
 
 :	ldx #$00
-	stx gs_level_turns_lo
-	inc gs_level_turns_hi
+	stx gs_level_moves_lo
+	inc gs_level_moves_hi
 @consume:
 	lda gs_level
 	cmp #$05
