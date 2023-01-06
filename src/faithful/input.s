@@ -78,38 +78,45 @@ get_player_input:
 	lda #textbuf_size
 	sta zp19_count
 	jsr memcpy
-	jsr clear_status_lines
-.if REVISION < 100 ;RETAIL
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-.endif
-	; Move cursor back to beginning of first status line
-	; after clearing them.
-	dec zp_row
-	jsr get_rowcol_addr
 
+	; Clear them, and move cursor back
+	; to beginning of first status line.
 .if REVISION >= 100
+	;   (But only when necessary - for a simple movement
+	;   command, clear_status_lines would account for about
+	;   1/3 total CPU time!)
+	lda text_buffer_line1
+	cmp #$80
+	beq continue_player_input
+	jsr clear_status_lines
 	jsr clear_text_buffer
 	beq continue_player_input
-	; Split into a subroutine to fix a bug in start.s
+.else ;RETAIL
+	jsr clear_status_lines
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	dec zp_row
+	jsr get_rowcol_addr
 .endif
+
+; Extracted into a subroutine to fix a bug in start.s
 clear_text_buffer:
 	lda #>(text_buffer_line1-1)
 	sta ADDR zp0C_string_ptr+1
@@ -123,6 +130,7 @@ clear_text_buffer:
 .if REVISION >= 100
 	rts
 continue_player_input:
+	jsr home_cursor
 .endif
 	lda #$00
 	sta zp11_count_chars
@@ -133,6 +141,15 @@ continue_player_input:
 	sta zp19_input_ptr
 	pla
 	jmp process_input_char
+
+.if REVISION >= 100
+home_cursor:
+	lda #$00
+	sta zp_col
+	lda #$16
+	sta zp_row
+	jmp get_rowcol_addr
+.endif
 
 input_blink_cursor:
 	bit hw_STROBE
@@ -186,11 +203,15 @@ process_input_char:
 	cmp #char_esc
 	bne @check_space
 ; Replace current buffer with previous
+.if REVISION >= 100
+	jsr home_cursor
+.else ;RETAIL
 	lda #$00
 	sta zp_col
 	lda #$16
 	sta zp_row
 	jsr get_rowcol_addr
+.endif
 	lda #>(text_buffer_prev-1)
 	sta zp0E_src+1
 	lda #<(text_buffer_prev-1)

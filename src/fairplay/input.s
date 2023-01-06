@@ -77,10 +77,16 @@ get_keyboard_input:
 
 	; Clear them, and move cursor back
 	; to beginning of first status line.
-	jsr clear_text_buffer
+	;   (But only when necessary - for a simple movement
+	;   command, clear_status_lines would account for about
+	;   1/3 total CPU time!)
+	lda text_buffer_line1
+	cmp #$80
+	beq continue_player_input
 	jsr clear_status_lines
-	dec zp_row
-	jsr get_rowcol_addr
+	jsr clear_text_buffer
+continue_player_input:
+	jsr home_cursor
 
 	lda #$00
 	sta zp11_count_chars
@@ -104,6 +110,13 @@ clear_text_buffer:
 	bne :-
 	rts
 
+home_cursor:
+	lda #$00
+	sta zp_col
+	lda #$16
+	sta zp_row
+	jmp get_rowcol_addr
+
 input_blink_cursor:
 	bit hw_STROBE
 :	jsr blink_cursor
@@ -115,10 +128,8 @@ input_blink_cursor:
 	bmi process_input_char
 	and #char_mask_upper
 process_input_char:
-	pha
-	lda zp11_count_chars
+	ldy zp11_count_chars
 	bne @check_backspace
-	pla
 	cmp #'Z'
 	bne :+
 	jmp @forward
@@ -139,9 +150,9 @@ process_input_char:
 	beq input_blink_cursor
 	cmp #char_enter
 	beq input_blink_cursor
-	bne @check_enter
+	bne @check_esc
+
 @check_backspace:
-	pla
 	cmp #char_left
 	bne @check_enter
 	jmp input_backspace
@@ -156,11 +167,7 @@ process_input_char:
 	cmp #char_esc
 	bne @check_space
 ; Replace current buffer with previous
-	lda #$00
-	sta zp_col
-	lda #$16
-	sta zp_row
-	jsr get_rowcol_addr
+	jsr home_cursor
 	lda #>(text_buffer_prev-1)
 	sta zp0E_src+1
 	lda #<(text_buffer_prev-1)
