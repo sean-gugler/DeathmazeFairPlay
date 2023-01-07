@@ -1,5 +1,7 @@
 	.export destroy_one_torch
 	.export flash_screen
+	.export lose_lit_torch
+	.export lose_unlit_torch
 	.export nonsense
 	.export player_cmd
 	.export print_thrown
@@ -199,8 +201,8 @@ cmd_break:
 ; Output: A = zp0E = which torch item
 lose_one_torch:
 	lda gs_torches_unlit
-	bne @unlit
-;@lit:
+	bne lose_unlit_torch
+lose_lit_torch:
 	dec gs_torches_lit
 	lda #$00
 	sta gs_torch_time
@@ -209,11 +211,11 @@ lose_one_torch:
 	lda #special_mode_dark
 	sta gs_special_mode
 	lda #icmd_which_torch_lit
-	bne @query_item
-@unlit:
+	bne query_item
+lose_unlit_torch:
 	dec gs_torches_unlit
 	lda #icmd_which_torch_unlit
-@query_item:
+query_item:
 	sta zp0F_action
 	jmp item_cmd
 

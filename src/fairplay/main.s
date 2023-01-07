@@ -35,7 +35,7 @@
 	.importzp maze_features_end
 	.import item_cmd
 	.import push_special_mode
-	.import destroy_one_torch
+	.import lose_lit_torch
 
 	.include "apple.i"
 	.include "dos.i"
@@ -50,6 +50,7 @@ zp_col = $06
 zp_row = $07
 
 zp0E_ptr           = $0E;
+zp0E_object        = $0E;
 zp0F_action        = $0F;
 zp1A_facing        = $1A;
 zp1A_item_place    = $1A;
@@ -209,7 +210,11 @@ count_as_move:
 	dec gs_torch_time
 	bne @dec_food
 ;@douse_torch
-	jsr destroy_one_torch
+	jsr lose_lit_torch
+	sta zp0E_object
+	lda #icmd_destroy1
+	sta zp0F_action
+	jsr item_cmd
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd

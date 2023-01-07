@@ -117,6 +117,7 @@ move_turn:
 	ldx #$04
 	stx gs_facing
 	bne @turned
+
 @turn_around:
 	lda zp1A_facing
 	cmp #$03
