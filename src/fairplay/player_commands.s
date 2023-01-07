@@ -174,10 +174,9 @@ cmd_break:
 :	cmp #nouns_unique_end
 	bmi @broken
 	cmp #noun_torch
-	bne @food
+	bne :+
 	jsr destroy_one_torch
-@food:
-	lda zp11_item
+:	lda zp11_item
 	sta zp0E_object
 @broken:
 ; implicit, already 0

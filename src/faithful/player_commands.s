@@ -202,7 +202,7 @@ cmd_break:
 	bmi @broken
 .if REVISION >= 100
 	; no need for all this, $10 and $11
-	; are not disturbed by lose_one_torch
+	; are not disturbed by destroy_one_torch
 .else ;RETAIL
 	sta zp13_temp  ;preserve 'object' while protecting $10,$11
 	lda zp10_temp
