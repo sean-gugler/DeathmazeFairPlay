@@ -583,9 +583,9 @@ cmd_light:
 	jsr item_cmd
 	lda #$71     ;The ring ignites it
 	jsr print_to_line1
-	inc gs_torches_lit
 	inc gs_room_lit
 	jsr update_view
+	inc gs_torches_lit
 	bne @finish
 
 @have_fire:
