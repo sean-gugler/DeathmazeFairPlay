@@ -50,6 +50,7 @@ zp0C_string_ptr   = $0C;
 zp19_count        = $19;
 zp10_dst          = $10;
 zp0E_src          = $0E;
+zp0A_text_ptr     = $0A;
 
 	.segment "INPUT1"
 
@@ -385,6 +386,9 @@ parse_input:
 	lda (zp19_input_ptr),y
 	cmp #' '
 	beq @echo_period
+.if REVISION >= 100
+	sta (zp0A_text_ptr),y
+.endif
 	jsr char_out
 	pla
 	tay
@@ -393,6 +397,9 @@ parse_input:
 @echo_period:
 	pla
 	lda #'.'
+.if REVISION >= 100
+	sta (zp0A_text_ptr),y
+.endif
 	jsr print_char
 	jmp get_player_input
 
@@ -421,7 +428,7 @@ parse_input:
 	ldy #$00
 @find_word_end:
 	lda (zp19_input_ptr),y
-	cmp #$20
+	cmp #' '
 	beq @found_word_end
 	inc zp19_input_ptr
 	bne @find_word_end
@@ -435,8 +442,11 @@ parse_input:
 	tya
 	pha
 	lda (zp19_input_ptr),y
-	cmp #$20
+	cmp #' '
 	beq @obj_word_end
+.if REVISION >= 100
+	sta (zp0A_text_ptr),y
+.endif
 	jsr char_out
 	pla
 	tay
@@ -444,6 +454,9 @@ parse_input:
 	bne @obj_next_letter
 @obj_word_end:
 	lda #'?'
+.if REVISION >= 100
+	sta (zp0A_text_ptr),y
+.endif
 	jsr char_out
 	pla
 	jmp get_player_input

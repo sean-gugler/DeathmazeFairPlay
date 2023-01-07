@@ -28,6 +28,7 @@ This project builds four versions of the game:
 * Lit torch count is decremented when it goes out.
 * The "Look Dog" command now displays an appropriate response.
 * Pressing ESC first thing on game start no longer displays garbage.
+* After entering a command with an unknown verb or noun, subsequently pressing ESC no longer omits the unknown word when re-displaying the response.
 * Double-space is properly prevented. Previously it mistakenly prevented a second space only after first letter of second word was started, as in:  WORD_L_
 * Torch count now increments if you "get box" then "get torch" and it's the only box you're carrying. Previously it would be off by one. (For fun, try "drop torch"! Repeat all three commands for endless entertainment walking backwards through the font.)
 

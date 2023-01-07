@@ -41,6 +41,7 @@ zp0C_string_ptr   = $0C;
 zp19_count        = $19;
 zp10_dst          = $10;
 zp0E_src          = $0E;
+zp0A_text_ptr     = $0A;
 
 	.segment "INPUT1"
 
@@ -335,20 +336,9 @@ parse_input:
 	lda #>text_buffer_line1
 	sta zp19_input_ptr+1
 	ldy #$00
-@echo_next_char:
-	tya
-	pha
-	lda (zp19_input_ptr),y
-	cmp #' '
-	beq @echo_period
-	jsr char_out
-	pla
-	tay
-	iny
-	bne @echo_next_char
-@echo_period:
-	pla
+	jsr @echo_word
 	lda #'.'
+	sta (zp0A_text_ptr),y
 	jsr print_char
 	jmp get_keyboard_input
 
@@ -377,7 +367,7 @@ parse_input:
 	ldy #$00
 @find_word_end:
 	lda (zp19_input_ptr),y
-	cmp #$20
+	cmp #' '
 	beq @found_word_end
 	inc zp19_input_ptr
 	bne @find_word_end
@@ -385,24 +375,28 @@ parse_input:
 	bne @find_word_end
 @found_word_end:
 	inc zp19_input_ptr
-	bne @obj_next_letter
+	bne :+
 	inc zp19_input_ptr+1
-@obj_next_letter:
-	tya
-	pha
-	lda (zp19_input_ptr),y
-	cmp #$20
-	beq @obj_word_end
+:	jsr @echo_word
+	lda #'?'
+	sta (zp0A_text_ptr),y
+	jsr char_out
+	jmp get_keyboard_input
+
+@echo_loop:
+	sta (zp0A_text_ptr),y
 	jsr char_out
 	pla
 	tay
 	iny
-	bne @obj_next_letter
-@obj_word_end:
-	lda #'?'
-	jsr char_out
+@echo_word:
+	tya
+	pha
+	lda (zp19_input_ptr),y
+	cmp #' '
+	bne @echo_loop
 	pla
-	jmp get_keyboard_input
+	rts
 
 @verb_no_object:
 	lda gd_parsed_action
