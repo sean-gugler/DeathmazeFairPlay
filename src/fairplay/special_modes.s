@@ -436,7 +436,7 @@ special_monster:
 	jsr update_view
 :	ldx gs_monster_proximity
 	bne @monster_smell
-	jsr wait_if_moved
+	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
@@ -481,14 +481,14 @@ input_near_danger:
 :	jsr player_cmd
 	ldx #$0c
 	stx gs_monster_proximity
-	jsr wait_if_moved
+	jsr wait_if_prior_text
 	jmp check_special_mode
 
-wait_if_moved:
+wait_if_prior_text:
 	lda text_buffer_line1
 	cmp #$80
 	beq :+
-	cmp #$20
+	cmp #' '
 	bne @wait
 :	lda text_buffer_line2
 	cmp #$80
@@ -512,7 +512,7 @@ special_mother:
 	jsr update_view
 :	lda gs_mother_proximity
 	bne @mother_smell
-	jsr wait_if_moved
+	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
@@ -660,7 +660,7 @@ special_dark:
 	lda gs_mother_alive
 	beq @cancel
 @tremble:
-	jsr wait_if_moved
+	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
@@ -671,7 +671,7 @@ special_dark:
 @monster_smell:
 	cmp #$01
 	bne @monster_attacks
-	jsr wait_if_moved
+	jsr wait_if_prior_text
 	inc gs_mother_proximity
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
@@ -680,7 +680,7 @@ special_dark:
 	jmp input_near_danger
 
 @monster_attacks:
-	jsr wait_if_moved
+	jsr wait_if_prior_text
 	lda gs_level
 	cmp #$05
 	beq @mother
