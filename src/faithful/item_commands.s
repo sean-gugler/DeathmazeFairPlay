@@ -386,7 +386,7 @@ icmd0B_which_box:
 	ldy #$00
 @check_is_carried:
 .if REVISION >= 100
-	cpy #(noun_snake - 1) * 2
+	cpy #<(gs_item_snake - gs_item_locs)
 	beq @next
 .endif
 	cmp (zp0E_item),y
@@ -419,7 +419,7 @@ icmd0B_which_box:
 
 ; Last, check for carrying boxed snake
 .if REVISION >= 100  ;same effect but simpler
-	ldy #(noun_snake - 1) * 2
+	ldy #<(gs_item_snake - gs_item_locs)
 .else ;RETAIL
 	ldx #>gs_item_snake
 	stx zp0E_item+1

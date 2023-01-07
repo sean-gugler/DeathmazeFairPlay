@@ -204,7 +204,7 @@ lose_one_torch:
 lose_lit_torch:
 	dec gs_torches_lit
 	lda #$00
-	sta gs_torch_time
+;	sta gs_active_torch
 	sta gs_room_lit
 	jsr push_special_mode
 	lda #special_mode_dark
@@ -576,10 +576,7 @@ cmd_light:
 	jmp print_to_line2
 
 @have_ring:
-	sta zp0E_object
-	lda #icmd_set_carried_active
-	sta zp0F_action
-	jsr item_cmd
+	pha
 	lda #$71     ;The ring ignites it
 	jsr print_to_line1
 	inc gs_room_lit
@@ -596,23 +593,23 @@ cmd_light:
 	lda #icmd_destroy2
 	sta zp0F_action
 	jsr item_cmd
-	pla
-	sta zp0E_object
-	lda #icmd_set_carried_active
-	sta zp0F_action
-	jsr item_cmd
-;	jsr clear_status_lines
 	lda #$65     ;The torch is lit and the
 	jsr print_to_line1
 	lda #$66     ;old torch dies and vanishes!
 	jsr print_to_line2
 @finish:
 	dec gs_torches_unlit
+	pla
+	sta zp0E_object
+	sec
+	sbc #item_torch_begin
+	sta gs_active_torch
+	lda #icmd_set_carried_active
+	sta zp0F_action
+	jsr item_cmd
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
-	lda #torch_lifespan
-	sta gs_torch_time
 	rts
 
 cmd_play:

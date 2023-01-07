@@ -1,5 +1,7 @@
 	.export data_new_game
 
+	.include "game_design.i"
+
 	.segment "NEW_GAME"
 
 ; Data copied into the Game State
@@ -19,7 +21,7 @@ data_new_game:
 	.byte $00		;parsed object
 	.byte $01		;room lit
 	.byte $00,$a0	;food time (high,low)
-	.byte $c8		;torch time
+	.byte $00		;active torch (0-based)
 	.byte $00		;teleported with lit torch
 	.byte $00,$00	;level turns (high,low)
 	.byte $00		;special input mode
@@ -70,3 +72,8 @@ data_new_game:
 	.byte $02,$82	;torch
 	.byte $03,$26	;torch
 	.byte $04,$96	;torch
+; torch lifespans - first is longer per original game design
+	.byte $c8
+	.byte torch_lifespan
+	.byte torch_lifespan
+	.byte torch_lifespan

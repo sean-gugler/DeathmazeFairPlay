@@ -15,7 +15,7 @@
 	.global gs_room_lit
 	.global gs_food_time_hi
 	.global gs_food_time_lo
-	.global gs_torch_time
+	.global gs_active_torch
 	.global gs_teleported_dark
 	.global gs_level_moves_hi
 	.global gs_level_moves_lo
@@ -45,7 +45,9 @@
 
 	.global gs_item_locs
 	.global gs_item_snake
-	.global gs_item_food_torch
+	.global gs_item_food
+	.global gs_item_torch
+	.global gs_torch_life
 
 	.global game_state_end
 	gs_size = <game_state_end
@@ -61,7 +63,7 @@
 	item_food_begin   = item_begin + items_unique
 	item_torch_begin  = item_food_begin + items_food
 
-	item_food_end = item_food_begin + items_food
+	item_food_end  = item_food_begin  + items_food
 	item_torch_end = item_torch_begin + items_torches
 
 

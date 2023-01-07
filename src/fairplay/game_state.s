@@ -49,7 +49,7 @@ gs_food_time_hi:
 	JUNK_BYTE $00
 gs_food_time_lo:
 	JUNK_BYTE $80
-gs_torch_time:
+gs_active_torch:
 	JUNK_BYTE $80
 gs_teleported_dark:
 	JUNK_BYTE $00
@@ -107,23 +107,29 @@ gs_item_locs:
 	JUNK_BYTE {$08,$00,$01,$64,$02,$33,$08,$00}
 	JUNK_BYTE {$00,$00,$05,$72,$07,$00,$00,$00}
 	JUNK_BYTE {$02,$86,$08,$00,$04,$a8,$04,$57}
-gs_item_snake:
 	JUNK_BYTE {$00,$00}
 	.assert * - gs_item_locs = items_unique * 2, error, "Miscount between data and definition"
 
-gs_item_food_torch:
+gs_item_food:
 	JUNK_BYTE {$00,$00,$00,$00,$00,$00,$00,$00}
-	.assert * - gs_item_locs = (item_food_end - item_begin) * 2, error, "Miscount between data and definition"
+	.assert * - gs_item_food = items_food * 2, error, "Miscount between data and definition"
 
+gs_item_torch:
 	JUNK_BYTE {$00,$00,$00,$00,$08,$00,$00,$00}
-	.assert * - gs_item_locs = (item_torch_end - item_begin) * 2, error, "Miscount between data and definition"
+	.assert * - gs_item_torch = items_torches * 2, error, "Miscount between data and definition"
 
+gs_torch_life:
+	JUNK_BYTE {$00,$00,$00,$00}
+	.assert * - gs_torch_life = items_torches, error, "Miscount between data and definition"
 
-	; Relate items to noun vocabulary
-	.assert item_begin + items_unique = nouns_unique_end, error, "Miscounted unique items"
+; Relate items to noun vocabulary
+	.assert nouns_unique_end = item_begin + items_unique, error, "Miscounted unique items"
+
+gs_item_snake = gs_item_locs + (noun_snake - 1) * 2
 
 
 game_state_end = * - game_save_begin
 	.assert >game_state_end = 0, error, "Game state data larger than one page"
 
 game_save_end = game_save_begin + __GAME_STATE_SIZE__
+	.assert game_save_end >= game_state_end, error, "Game state data overflowed save file"

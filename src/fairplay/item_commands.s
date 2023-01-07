@@ -297,9 +297,8 @@ icmd08_count_inv:
 	iny
 	dec zp1A_count_loop
 	bne @check_carried
-	lda gs_torch_time
-	bne @add_one
-	lda gs_torches_unlit
+	lda gs_torches_lit
+	ora gs_torches_unlit
 	beq @done
 @add_one:
 	inc zp19_count
@@ -373,7 +372,7 @@ icmd0B_which_box:
 	lda #carried_boxed
 	ldy #$00
 @check_is_carried:
-	cpy #(noun_snake - 1) * 2
+	cpy #<(gs_item_snake - gs_item_locs)
 	beq :+
 	cmp (zp0E_item),y
 	beq @return_item_num
@@ -383,7 +382,7 @@ icmd0B_which_box:
 	bne @check_is_carried
 
 ; Last, check for carrying boxed snake
-	ldy #(noun_snake - 1) * 2
+	ldy #<(gs_item_snake - gs_item_locs)
 	cmp (zp0E_item),y
 	beq @return_item_num
 

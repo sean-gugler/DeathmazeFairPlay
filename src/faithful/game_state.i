@@ -45,7 +45,8 @@
 
 	.global gs_item_locs
 	.global gs_item_snake
-	.global gs_item_food_torch
+	.global gs_item_food
+	.global gs_item_torch
 
 	.global game_state_end
 	gs_size = <game_state_end
@@ -61,7 +62,7 @@
 	item_food_begin   = item_begin + items_unique
 	item_torch_begin  = item_food_begin + items_food
 
-	item_food_end = item_food_begin + items_food
+	item_food_end  = item_food_begin  + items_food
 	item_torch_end = item_torch_begin + items_torches
 
 

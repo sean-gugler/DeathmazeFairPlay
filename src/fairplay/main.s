@@ -205,9 +205,10 @@ count_as_move:
 	bne @consume
 	inc gs_level_moves_hi
 @consume:
-	lda gs_torch_time
+	lda gs_room_lit
 	beq @dec_food
-	dec gs_torch_time
+	ldx gs_active_torch
+	dec gs_torch_life,x
 	bne @dec_food
 ;@douse_torch
 	jsr lose_lit_torch
@@ -245,7 +246,8 @@ print_timers:
 	bcs :+
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
-:	lda gs_torch_time
+:	ldx gs_active_torch
+	lda gs_torch_life,x
 	beq return
 	cmp #torch_low
 	bcs return
