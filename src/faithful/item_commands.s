@@ -435,17 +435,12 @@ icmd0B_which_box:
 	rts
 
 @check_level:
-.if REVISION >= 100
-	dey
-	lda (zp0E_item),y
-.else ;RETAIL
 	dec zp0E_item
 	lda (zp0E_item),y
 	sta zp13_level
 	inc zp0E_item
 	dey
 	lda zp13_level
-.endif
 	cmp gs_level
 	beq @return_item_num
 	iny

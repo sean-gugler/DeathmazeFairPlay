@@ -348,13 +348,13 @@ icmd0B_which_box:
 	sta zp11_position
 
 ; Check at feet
-	lda #>(gs_item_locs+1)
+	lda #>(gs_item_locs)
 	sta zp0E_item+1
-	lda #<(gs_item_locs+1)
+	lda #<(gs_item_locs)
 	sta zp0E_item
 	lda #items_total
 	sta zp1A_count_loop
-	ldy #$00
+	ldy #$01
 	lda zp11_position
 @check_is_here:
 	cmp (zp0E_item),y
@@ -366,7 +366,6 @@ icmd0B_which_box:
 	bne @check_is_here
 
 ; Check carried, skipping snake
-	dec zp0E_item
 	lda #items_total
 	sta zp1A_count_loop
 	lda #carried_boxed
