@@ -29,6 +29,7 @@
 	noun_door = $17
 	noun_elevator = $17
 	noun_monster = $18
+	noun_grendel = $18
 	noun_mother = $19
 	noun_0 = $1a
 	noun_zero = $1a

@@ -343,7 +343,7 @@ cmd_eat:
 	sta gs_food_time_hi
 	lda zp0E_count16
 	sta gs_food_time_lo
-	lda #$58     ;Delicious
+	lda #$58     ;Food eaten
 	bne @print
 
 lose_ring:
@@ -407,28 +407,31 @@ thrown:
 	jmp print_to_line2
 
 throw_wool:
-	lda gs_level
-	cmp #$04
-	bne thrown
-	lda gs_level_moves_lo
-	cmp #moves_until_trippable
-	bcc thrown
-	jsr push_special_mode
-	lda #special_mode_tripped
-	sta gs_special_mode
-	lda #noun_wool
-	sta zp0E_object
-	lda #icmd_destroy1
+; implicit, already 0
+;	lda #icmd_destroy1
+;	sta zp0F_action
+	jsr item_cmd
+	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
-	jsr print_thrown
-	lda #$5e     ;and the monster grabs it,
+	; Trip the monster ONLY if it is about to attack
+	; (disgusting odor) - whether it's dark or not.
+	; Any other time, it is wasted.
+	lda gs_monster_proximity
+	cmp #$02
+	beq @tripped
+	lda #$a8     ;The peel slides on the floor
 	jsr print_to_line1
-	lda #$5f     ;gets tangled, and topples over!
-	jsr print_to_line2
-	lda #$00
-	sta gs_monster_proximity
-	rts
+	lda #$a9     ;and gets stuck in a corner.
+	jmp print_to_line2
+@tripped:
+;	jsr push_special_mode  ;DON'T push, just replace special_mode_monster
+	lda #special_mode_tripped
+	sta gs_special_mode
+	lda #$5e     ;The monster rounds the corner, slips on
+	jsr print_to_line1
+	lda #$5f     ;the peel, and loses its balance!
+	jmp print_to_line2
 
 throw_yoyo:
 	jsr print_thrown
@@ -773,16 +776,17 @@ look_door:
 	cmp #$00
 	beq look_not_here
 	bne print_inspected
+
 look_item:
 	jsr noun_to_item
 print_inspected:
 	jsr clear_status_lines
-	lda #$67     ;On close inspection you find
+	lda #$67     ;A close inspection reveals
 	jsr print_to_line1
 	lda gd_parsed_object
 	cmp #noun_ball
 	bne :+
-	lda #$6a     ;sparkles with energy
+	lda #$6a     ;it sparkles with energy
 	bne look_print
 :	cmp #noun_ring
 	bne :+
@@ -791,6 +795,10 @@ print_inspected:
 :	cmp #noun_calculator
 	bne :+
 	lda #$27     ;The calculator displays 317.
+	bne look_print
+:	cmp #noun_dagger
+	bne :+
+	lda #$72     ;The handle seems flimsy.
 	bne look_print
 :	lda #$68     ;Nothing of interest
 	bne look_print
@@ -1391,14 +1399,9 @@ cmd_paint:
 
 cmd_drink:
 	dec zp0F_action
-	bne cmd_grendel
+	bne cmd_charge
 	lda #$9a     ;It is currently impossible.
 	jmp print_to_line2
-
-cmd_grendel:
-	dec zp0F_action
-	bne cmd_charge
-	jmp nonsense ;GUG: maybe disguise this better
 
 cmd_charge:
 	dec zp0F_action

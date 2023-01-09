@@ -23,7 +23,6 @@ paint
 drink
 
 [Verbs Intransitive]
-grendel
 charge
 fart
 save
@@ -58,7 +57,7 @@ Box
 Bat 
 Dog 
 Door Elevator
-Monster
+Monster Grendel
 Mother
 0 Zero
 1 One 
@@ -79,7 +78,7 @@ Unlit:
 crystal ball.
 paintbrush used by Van Gogh.
 calculator with 10 buttons.
-jeweled handled dagger.
+razor sharp dagger.
 flute.
 precision crafted frisbee.
 hat with two ram's horns.
@@ -158,20 +157,20 @@ burst of flames!
 You can't be serious!
 You are making little sense.
  what?                   
-*all form into darts!
+It's too dark. You miss.
 It is delicious but gives you gas.
 The 
 magically sails
 around a nearby corner
 and is eaten by
 the monster !!!!
-and the monster grabs it,
-gets tangled, and topples over!
+The monster rounds the corner, slips on
+the peel, and loses its balance!
 It is now full of blood.
-The monster is dead and
-much blood is spilt!
+It saws the monster's head off!
+Much blood is spilt!
 You have killed it.
-The dagger disappears!
+The dagger breaks and the pieces vanish!
 The torch is lit and the
 old torch dies and vanishes!
 A close inspection reveals
@@ -185,7 +184,7 @@ elevator. There is no escape!
 With what? Toenail polish?
 A draft blows your torch out!
 The ring ignites the torch!
-*shines light everywhere!
+it isn't very sturdy.
 The staff begins to quake!
 The calculator vanishes.
 NEVER, EVER raid a monster's lair.
@@ -229,7 +228,7 @@ It is currently impossible.
 The bat drains you of your vital fluids!
 Are you sure you want to quit (Y or N)?
 It's not locked.
-A cruel laugh booms out, not quite!
+A cruel laugh booms out: not quite!
 Invert and telephone.
 Don't make unnecessary turns.
 You have turned into a pillar of salt!
@@ -239,6 +238,10 @@ You are deposited at the next level.
 Your head smashes into the ceiling!
 You fall on the snake!
 Oh no! A pit!
+The peel slides on the floor
+and gets stuck in a corner.
+The monster roars and chokes
+on blood as it dies!
 
 [Intro]
 "           Deathmaze 5000               "

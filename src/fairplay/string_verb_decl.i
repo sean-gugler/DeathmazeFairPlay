@@ -40,14 +40,13 @@
 
 	verb_intransitive = $16
 
-	verb_grendel = $17
-	verb_charge = $18
-	verb_fart = $19
-	verb_save = $1a
-	verb_quit = $1b
-	verb_help = $1c
-	verb_hint = $1c
-	verb_instructions = $1c
-	verb_directions = $1c
+	verb_charge = $17
+	verb_fart = $18
+	verb_save = $19
+	verb_quit = $1a
+	verb_help = $1b
+	verb_hint = $1b
+	verb_instructions = $1b
+	verb_directions = $1b
 
-	verbs_end = $1d
+	verbs_end = $1c

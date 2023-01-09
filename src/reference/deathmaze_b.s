@@ -6077,7 +6077,7 @@ special_calc_puzzle:
 	stx gs_facing
 	jsr update_view
 	jsr @init_puzzle
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @new_direction:
 	ldx zp1A_move_action
@@ -6230,7 +6230,7 @@ j3493:
 	jsr item_cmd
 	ldx #$00
 	stx gs_bat_alive
-pop_special_mode:
+pop_mode_continue:
 	lda gs_mode_stack1
 	sta a1A
 	sta gs_special_mode
@@ -6251,7 +6251,7 @@ special_dog:
 	jsr @confront_dog
 	ldx #$00
 	stx gs_dog1_alive
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @dog2:
 	dex
@@ -6261,7 +6261,7 @@ special_dog:
 :	jsr @confront_dog
 	ldx #$00
 	stx gs_dog2_alive
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @confront_dog:
 	jsr update_view
@@ -6584,7 +6584,7 @@ special_dark:
 	beq @unlit
 	ldx #$00
 	stx gs_mother_proximity
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @unlit:
 	ldx #$00
@@ -6598,7 +6598,7 @@ special_dark:
 	and #$02
 	bne @tremble
 @cancel:
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @check_mother:
 	lda gs_mother_alive
@@ -6696,7 +6696,7 @@ snake_check_verb:
 @killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -6839,7 +6839,7 @@ special_elevator:
 	lda gd_parsed_action
 	cmp #verb_forward
 	beq enter_elevator
-pop_mode_stack:
+pop_mode_do_cmd:
 	lda gs_mode_stack1
 	sta gs_special_mode
 	lda gs_mode_stack2
@@ -6862,7 +6862,7 @@ ride_elevator:
 	jsr print_to_line2
 	jsr wait_long
 	jsr update_view
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 enter_elevator:
 	jsr clear_maze_window
@@ -7000,7 +7000,7 @@ special_tripped:
 	jsr item_cmd
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -7012,7 +7012,7 @@ special_tripped:
 	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
 	jsr print_to_line1
-	jmp pop_mode_stack
+	jmp pop_mode_do_cmd
 
 special_climb:
 	dex
@@ -7134,7 +7134,7 @@ special_climb:
 	lda a19
 	cmp #$01
 	bne @in_lair
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @in_lair:
 	lda gs_monster_alive
@@ -7217,7 +7217,7 @@ lair_input_loop:
 	dec gs_player_x
 	jsr pit
 	jsr update_view
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 special_endgame:
 	jsr clear_maze_window

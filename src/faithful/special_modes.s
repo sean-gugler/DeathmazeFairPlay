@@ -115,7 +115,7 @@ special_calc_puzzle:
 	stx gs_facing
 	jsr update_view
 	jsr @init_puzzle
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @new_direction:
 	ldx zp1A_move_action
@@ -269,7 +269,7 @@ special_bat:
 	jsr item_cmd
 	ldx #$00
 	stx gs_bat_alive
-pop_special_mode:
+pop_mode_continue:
 	lda gs_mode_stack1
 	sta zp1A_temp
 	sta gs_special_mode
@@ -292,7 +292,7 @@ special_dog:
 	jsr @confront_dog
 	ldx #$00
 	stx gs_dog1_alive
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @dog2:
 	dex
@@ -302,7 +302,7 @@ special_dog:
 :	jsr @confront_dog
 	ldx #$00
 	stx gs_dog2_alive
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @confront_dog:
 	jsr update_view
@@ -639,7 +639,7 @@ special_dark:
 	beq @unlit
 	ldx #$00
 	stx gs_mother_proximity
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @unlit:
 	ldx #$00
@@ -653,7 +653,7 @@ special_dark:
 	and #monster_flag_roaming
 	bne @tremble
 @cancel:
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @check_mother:
 	lda gs_mother_alive
@@ -753,7 +753,7 @@ snake_check_verb:
 @killed:
 	lda #$63     ;You have killed it.
 	jsr print_to_line1
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @look:
 	lda #$8c     ;It looks very dangerous!
@@ -900,7 +900,7 @@ special_elevator:
 	lda gd_parsed_action
 	cmp #verb_forward
 	beq enter_elevator
-pop_mode_stack:
+pop_mode_do_cmd:
 	lda gs_mode_stack1
 	sta gs_special_mode
 	lda gs_mode_stack2
@@ -923,7 +923,7 @@ ride_elevator:
 	jsr print_to_line2
 	jsr wait_long
 	jsr update_view
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 enter_elevator:
 	jsr clear_maze_window
@@ -995,20 +995,23 @@ special_tripped:
 @check_input:
 	lda gd_parsed_object
 	cmp #noun_monster
-	beq :+
+	beq @look
 @dead:
 	jmp monster_kills_you
 
-:	lda gd_parsed_action
+@look:
+	lda gd_parsed_action
 	cmp #verb_look
-	bne :+
-	jmp @look
+	bne @attack
+	jmp @dangerous
 
-:	cmp #verb_attack
-	bne @dead
 @attack:
+	cmp #verb_attack
+	bne @dead
 	lda gs_room_lit
 	beq @dead
+
+;With dagger, else dead
 	ldx #noun_dagger
 	stx zp0E_object
 	ldx #icmd_where
@@ -1017,15 +1020,18 @@ special_tripped:
 	lda #carried_known
 	cmp zp1A_item_place
 	bne @dead
+
 	jsr clear_status_lines
 	ldx #noun_dagger
 	stx zp0E_object
 	ldx #icmd_destroy2
 	stx zp0F_action
 	jsr item_cmd
+
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
+
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line1
 	jsr wait_long
@@ -1035,13 +1041,17 @@ special_tripped:
 	jsr print_to_line2
 	ldx #$00
 	stx gs_monster_alive
+
+	; Do not return to monster mode, it's dead
 	lda gs_mode_stack1
 	cmp #$08
 	bne :+
 	lda gs_mode_stack2
 	sta gs_mode_stack1
 	stx gs_mode_stack2
-:	jsr get_player_input
+
+;Fill jar, else done
+	jsr get_player_input
 	lda gd_parsed_action
 	cmp #verb_fill
 	bne @done
@@ -1056,16 +1066,18 @@ special_tripped:
 	lda #carried_known
 	cmp zp1A_item_place
 	bne @done
+
 	ldx #noun_jar
 	stx zp0E_object
 	ldx #icmd_set_carried_active
 	stx zp0F_action
 	jsr item_cmd
+
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
-@look:
+@dangerous:
 	lda #$8c     ;It looks very dangerous!
 	jsr print_to_line1
 	jsr get_player_input
@@ -1075,7 +1087,7 @@ special_tripped:
 	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
 	jsr print_to_line1
-	jmp pop_mode_stack
+	jmp pop_mode_do_cmd
 
 
 
@@ -1199,7 +1211,7 @@ special_climb:
 	lda zp19_regular_climb
 	cmp #$01
 	bne @in_lair
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 @in_lair:
 	lda gs_monster_alive
@@ -1282,7 +1294,7 @@ lair_input_loop:
 	dec gs_player_x
 	jsr pit
 	jsr update_view
-	jmp pop_special_mode
+	jmp pop_mode_continue
 
 
 

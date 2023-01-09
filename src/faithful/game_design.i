@@ -5,10 +5,14 @@ food_hungry = $0a
 
 inventory_max = $08
 
-moves_until_trippable = $29
 moves_until_mother = $32
 moves_until_dog1 = $3c
 moves_until_monster = $50
+.if REVISION >= 100
+moves_until_trippable = moves_until_monster
+.else ;RETAIL - if you throw wool between these two times, instant death.
+moves_until_trippable = $29
+.endif
 
 puzzle_step1 = $05
 
