@@ -1051,7 +1051,7 @@ special_tripped:
 	stx gs_mode_stack2
 
 ;Fill jar, else done
-	jsr get_player_input
+:	jsr get_player_input
 	lda gd_parsed_action
 	cmp #verb_fill
 	bne @done
