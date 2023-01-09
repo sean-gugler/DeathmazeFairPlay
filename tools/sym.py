@@ -20,6 +20,7 @@ pat = re.compile(r'al 00(....) .(.*)\n')
 
 def parse(line):
     k,v = pat.match(line).groups()
+    v = v.replace('@','.')
     return k,v
 
 def main(argv):
