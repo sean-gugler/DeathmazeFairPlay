@@ -387,8 +387,7 @@ special_dog:
 	lda zp1A_object
 	cmp #noun_sneaker
 	bne @dead
-	ldx #noun_sneaker
-	stx zp0E_object
+	sta zp0E_object
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
@@ -436,7 +435,8 @@ special_monster:
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
 	inc gs_monster_step
-	jmp input_near_danger
+	rts
+;	jmp input_near_danger
 
 @monster_smell:
 	dex
@@ -447,7 +447,8 @@ special_monster:
 	lda #$46     ;the hallway!
 	jsr print_to_line2
 	inc gs_monster_step
-	jmp input_near_danger
+	rts
+;	jmp input_near_danger
 
 @monster_here:
 	jsr wait_if_prior_text
@@ -632,6 +633,7 @@ special_dark:
 	jsr update_view
 :	lda gs_room_lit
 	beq @unlit
+@cancel:
 	ldx #$00
 	stx gs_mother_step
 	jmp pop_mode_continue
@@ -639,21 +641,19 @@ special_dark:
 @unlit:
 	ldx #$00
 	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
-	lda gs_mother_proximity
-	bne @monster_smell
+
+	ldx gs_monster_alive
 	lda gs_level
 	cmp #$05
-	beq @check_mother
-	lda gs_monster_alive
+	bne :+
+	ldx gs_mother_alive
+:	txa
 	and #monster_flag_roaming
-	bne @tremble
-@cancel:
-	jmp pop_mode_continue
-
-@check_mother:
-	lda gs_mother_alive
 	beq @cancel
-@tremble:
+
+;@tremble:
+	ldx gs_mother_step
+	bne @monster_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
@@ -663,7 +663,7 @@ special_dark:
 	jmp input_near_danger
 
 @monster_smell:
-	cmp #$01
+	dex
 	bne @monster_attacks
 	jsr wait_if_prior_text
 	inc gs_mother_step
@@ -681,9 +681,7 @@ special_dark:
 	lda #$36     ;The monster attacks you and
 	jsr print_to_line1
 	lda #$37     ;you are his next meal!
-	jsr print_to_line2
-	jmp game_over
-
+	bne dead_bit
 @mother:
 	lda #$48     ;It is the monster's mother!
 	jsr print_to_line1
@@ -895,6 +893,7 @@ special_elevator:
 	lda gd_parsed_action
 	cmp #verb_forward
 	beq enter_elevator
+	jsr update_view
 pop_mode_do_cmd:
 	lda gs_mode_stack1
 	sta gs_special_mode
@@ -902,11 +901,11 @@ pop_mode_do_cmd:
 	ldx #$00
 	stx gs_mode_stack2
 	sta gs_mode_stack1
-	jsr update_view
 	lda gd_parsed_action
 	cmp #verb_movement_begin + 1
 	bcc :+
-	jmp cmd_movement
+	jsr cmd_movement
+	jmp update_view
 
 :	jmp cmd_verbal
 
@@ -981,6 +980,12 @@ special_tripped:
 	beq @check_input
 	jmp special_climb
 
+;LOOK MONSTER: dangerous!  <--loop
+;anything else: Dead
+;KILL MONSTER
+;dark: miss -> Dead
+;blep
+
 @check_input:
 	jsr get_player_input
 	lda gd_parsed_object
@@ -1016,7 +1021,7 @@ special_tripped:
 	cmp zp1A_item_place
 	bne @dead
 
-	jsr clear_status_lines
+;	jsr clear_status_lines
 	ldx #noun_dagger
 	stx zp0E_object
 	ldx #icmd_destroy2
@@ -1030,12 +1035,11 @@ special_tripped:
 	lda #$64     ;The dagger disappears!
 	jsr print_to_line1
 	jsr wait_long
-	lda #$aa     ;The monster roars and coughs
+	lda #$aa     ;The monster roars and chokes
 	jsr print_to_line1
-	lda #$ab     ;up blood as it dies!
+	lda #$ab     ;on blood as it dies!
 	jsr print_to_line2
-	ldx #$00
-	stx gs_monster_alive
+	lsr gs_monster_alive
 
 ;Throw frisbee, else done
 	jsr get_player_input
@@ -1092,17 +1096,47 @@ special_tripped:
 	jsr print_to_line1
 	lda #$78     ;The body has vanished!
 	jsr print_to_line2
+	lsr gs_monster_alive
 	jmp pop_mode_continue
 
+;THROW FRISBEE -> cut head
+;FILL JAR -> get blood, -wait-, body
+;move: clear status, update_view, body
+;ANY ACTION: parse cmd, -wait-, body
+;torch burn out: can't, no moves count during special mode
+
 @done:
+	; Perform action before displaying "body" text.
+	; Works fine even if it's OPEN DOOR
+	; or PRESS button on calculator.
+	jsr pop_mode_do_cmd
+	jsr wait_if_prior_text
+	lsr gs_monster_alive
 	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
-	jsr print_to_line1
-	lda gd_parsed_action
-	cmp #verb_movement_begin
-	bcs :+
-	jsr wait_long
-:	jmp pop_mode_do_cmd
+	jmp print_to_line1
+
+
+;	pop cmd
+;	action ?
+;		cmd_movement
+;		update_view
+;	:
+;		cmd_verbal
+;			OPEN DOOR - ok
+;			PRESS BUTTON
+;	wait_if_prior_text
+;	lsr gs_monster_alive
+;	clear, body, rts
+;
+;	jsr clear_status_lines
+;	lda #$78     ;The body has vanished!
+;	jsr print_to_line1
+;	lda gd_parsed_action
+;	cmp #verb_movement_begin
+;	bcs :+
+;	jsr wait_long
+;:	jmp pop_mode_do_cmd
 
 
 

@@ -118,11 +118,10 @@ check_guarded_pit:
 at_guard_dog:
 	lda gs_dog2_alive
 	and #$01
-	beq return_dog_monster
+	beq :+
 	ldx #special_mode_dog2
 	stx gs_special_mode
-return_dog_monster:
-	rts
+:	rts
 
 check_levels_4_5:
 	cmp #$04
@@ -135,18 +134,17 @@ check_mother:
 	cmp #moves_until_mother
 	bcs :+
 	lda gs_level_moves_hi
-	beq return_dog_monster
+	beq @done
 :	lda gs_mother_alive
 	and #mother_flag_roaming
-	beq return_dog_monster
+	beq @done
 	lda gs_special_mode
-	bne :+
+	cmp #special_mode_mother
+	beq @done
+	jsr push_special_mode
 	ldx #special_mode_mother
 	stx gs_special_mode
-	rts
-
-:	ldx #special_mode_mother
-	stx gs_mode_stack1
+@done:
 	rts
 
 check_bat:
@@ -166,18 +164,25 @@ check_monster:
 	cmp #moves_until_monster
 	bcs :+
 	lda gs_level_moves_hi
-	beq return_dog_monster
+	beq @done
 :	lda gs_monster_alive
 	and #monster_flag_roaming
-	beq done_timer
+	beq @done
+	lda gs_special_mode
+	cmp #special_mode_monster
+	beq @done
+	jsr push_special_mode
 	ldx #special_mode_monster
 	stx gs_special_mode
-done_timer:
+@done:
 	rts
 
 	.segment "PIT"
 
 pit:
+	lda #action_level
+	ora gs_action_flag
+	sta gs_action_flag
 	jsr clear_maze_window
 	ldx #$05
 	stx zp_col

@@ -3,6 +3,7 @@
 	.export game_over
 	.export main_game_loop
 	.export move_turn
+	.export normal_input_handler
 	.export not_carried
 	.export noun_to_item
 	.export play_again
@@ -67,19 +68,30 @@ zp0E_wait1         = $0E;
 
 main_game_loop:
 	jsr get_player_input
-	lda gd_parsed_action
-	cmp #verb_movement_begin
-	bmi verbal
-	jsr cmd_movement
-next_game_loop:
-	lda gs_special_mode
-	beq main_game_loop
+	jsr normal_input_handler
+;@count_move:
+	lda gs_action_flag
+	and #action_forward
+	beq @update
+	jsr count_as_move
+@update:
+	lda gs_action_flag
+	and #(action_forward | action_turn)
+	beq @special
+	jsr update_view
+	jsr print_timers
+@special:
 	jsr check_special_mode
 	jmp main_game_loop
 
-verbal:
-	jsr cmd_verbal
-	jmp next_game_loop
+normal_input_handler:
+	lda #$00
+	sta gs_action_flag
+	lda gd_parsed_action
+	cmp #verb_movement_begin
+	bmi :+
+	jmp cmd_movement
+:	jmp cmd_verbal
 
 cmd_movement:
 	ldx gs_facing
@@ -104,8 +116,9 @@ move_turn:
 	ldx #$01
 	stx gs_facing
 @turned:
-	jsr update_view
-	jsr print_timers
+	lda #action_turn
+	ora gs_action_flag
+	sta gs_action_flag
 	rts
 
 @turn_left:
@@ -187,14 +200,10 @@ move_forward:
 @west_1:
 	dec gs_player_x
 @check_special:
+	lda #action_forward
+	ora gs_action_flag
+	sta gs_action_flag
 	jsr check_special_position
-	lda gs_special_mode
-	beq :+
-	rts
-
-:	jsr count_as_move
-	jsr update_view
-	jsr print_timers
 	rts
 
 
@@ -370,7 +379,7 @@ vector_reset:
 	bit hw_FULLSCREEN
 	bit hw_HIRES
 	bit hw_GRAPHICS
-	jmp next_game_loop
+	jmp main_game_loop
 
 
 	.segment "FEATURES"

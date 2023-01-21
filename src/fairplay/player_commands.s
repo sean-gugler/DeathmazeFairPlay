@@ -203,6 +203,9 @@ lose_one_torch:
 	bne lose_unlit_torch
 lose_lit_torch:
 	dec gs_torches_lit
+	lda #$8a     ;Awfully dark
+	jsr print_to_line2
+	jsr clear_maze_window
 	lda #$00
 ;	sta gs_active_torch
 	sta gs_room_lit
@@ -304,7 +307,7 @@ cmd_eat:
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
-	jsr update_view
+;	jsr update_view
 	lda #$7d     ;You eat the
 	jsr print_to_line1
 	lda #' '
@@ -428,6 +431,7 @@ throw_wool:
 ;	jsr push_special_mode  ;DON'T push, just replace special_mode_monster
 	lda #special_mode_tripped
 	sta gs_special_mode
+;	dec gs_monster_step
 	lda #$5e     ;The monster rounds the corner, slips on
 	jsr print_to_line1
 	lda #$5f     ;the peel, and loses its balance!
@@ -536,11 +540,6 @@ cmd_drop:
 
 @torch:
 	jsr lose_one_torch
-	lda gs_torches_lit
-	bne @dropped
-	lda #$8a     ;Awfully dark
-	jsr print_to_line2
-	jsr clear_maze_window
 	jmp @dropped
 
 cmd_fill:
@@ -1063,10 +1062,12 @@ cmd_press:
 :	lda gs_monster_alive
 	and #monster_flag_roaming
 	bne @display
+
 	lda gs_special_mode
 	beq @teleport
+
 @display:
-	lda #$85     ;The calculator displays
+	lda #$85     ;Nothing happens.
 	jsr print_to_line2
 	lda #' '
 	jsr char_out
