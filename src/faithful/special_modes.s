@@ -389,8 +389,12 @@ special_dog:
 	lda zp1A_object
 	cmp #noun_sneaker
 	bne @dead
+.if REVISION >= 100
+	sta zp0E_object
+.else ;RETAIL
 	ldx #noun_sneaker
 	stx zp0E_object
+.endif
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
