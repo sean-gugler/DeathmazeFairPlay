@@ -1,6 +1,6 @@
+	.export cmd_verbal
 	.export flash_screen
 	.export nonsense
-	.export player_cmd
 	.export print_thrown
 	.export push_special_mode
 	.export save_to_tape
@@ -98,7 +98,7 @@ nonsense:
 
 	.segment "COMMAND2"
 
-player_cmd:
+cmd_verbal:
 	lda gd_parsed_object
 	sta zp0E_object
 	lda gd_parsed_action
@@ -367,7 +367,7 @@ cmd_eat:
 
 .if REVISION >= 100
 	; no need for all this, $10 and $11
-	; are not disturbed by lose_one_torch
+	; are not disturbed by destroy_one_torch
 .else ;RETAIL
 @torch:
 	lda zp10_temp
@@ -491,7 +491,7 @@ throw_wool:
 	lda #$5f     ;gets tangled, and topples over!
 	jsr print_to_line2
 	lda #$00
-	sta gs_monster_proximity
+	sta gs_monster_step
 	rts
 
 throw_yoyo:
@@ -728,7 +728,7 @@ cmd_play:
 play_horn:
 	lda #verb_blow
 	sta gd_parsed_action
-	jmp player_cmd
+	jmp cmd_verbal
 
 play_ball:
 	lda #$87     ;With who? The monster?

@@ -1,9 +1,9 @@
+	.export cmd_verbal
 	.export destroy_one_torch
 	.export flash_screen
 	.export lose_lit_torch
 	.export lose_unlit_torch
 	.export nonsense
-	.export player_cmd
 	.export print_thrown
 	.export push_special_mode
 	.export save_to_tape
@@ -95,7 +95,7 @@ nonsense:
 
 	.segment "COMMAND2"
 
-player_cmd:
+cmd_verbal:
 	lda gd_parsed_object
 	sta zp0E_object
 	lda gd_parsed_action
@@ -417,7 +417,7 @@ throw_wool:
 	; Trip the monster ONLY if it is about to attack
 	; (disgusting odor) - whether it's dark or not.
 	; Any other time, it is wasted.
-	lda gs_monster_proximity
+	lda gs_monster_step
 	cmp #$02
 	beq @tripped
 	lda #$a8     ;The peel slides on the floor
@@ -634,7 +634,7 @@ cmd_play:
 play_horn:
 	lda #verb_blow
 	sta gd_parsed_action
-	jmp player_cmd
+	jmp cmd_verbal
 
 play_with_who:
 	lda #$87     ;With who? The monster?

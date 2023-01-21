@@ -137,7 +137,7 @@ new_game:
 start_game:
 	ldx #char_ESC
 	stx gd_parsed_action
-	jsr player_cmd
+	jsr cmd_verbal
 	jmp main_game_loop
 
 clear_hgr2:
@@ -276,7 +276,7 @@ next_game_loop:
 	jmp main_game_loop
 
 cmd_verbal:
-	jsr player_cmd
+	jsr cmd_verbal
 	jmp next_game_loop
 
 cmd_movement:
@@ -4279,7 +4279,7 @@ wait_brief:
 	.byte $9d,$00,$01,$9d,$01,$01,$85,$df
 	.byte $85,$e0,$20,$6e
 
-player_cmd:
+cmd_verbal:
 	lda gd_parsed_object
 	sta a0E
 	lda gd_parsed_action
@@ -4612,7 +4612,7 @@ cmd_throw:
 	lda #$5f     ;gets tangled, and topples over!
 	jsr print_to_line2
 	lda #$00
-	sta gs_monster_proximity
+	sta gs_monster_step
 	rts
 
 @throw_yoyo:
@@ -4834,7 +4834,7 @@ cmd_play:
 play_horn:
 	lda #cmd_blow
 	sta gd_parsed_action
-	jmp player_cmd
+	jmp cmd_verbal
 
 play_ball:
 	lda #$87     ;With who? The monster?
@@ -6046,7 +6046,7 @@ special_calc_puzzle:
 	lda gd_parsed_action
 	cmp #$46
 	bpl @move
-	jsr player_cmd
+	jsr cmd_verbal
 @continue_loop:
 	jsr count_as_move
 	jsr print_timers
@@ -6378,25 +6378,25 @@ special_monster:
 	cmp #$50
 	bcc :+
 	jsr update_view
-:	lda gs_monster_proximity
+:	lda gs_monster_step
 	bne @monster_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_monster_proximity
+	inc gs_monster_step
 	jmp input_near_danger
 
 @monster_smell:
-	lda gs_monster_proximity
+	lda gs_monster_step
 	cmp #$01
 	bne monster_kills_you
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$46     ;the hallway!
 	jsr print_to_line2
-	inc gs_monster_proximity
+	inc gs_monster_step
 	jmp input_near_danger
 
 monster_kills_you:
@@ -6425,9 +6425,9 @@ input_near_danger:
 	jsr cmd_movement
 	jmp check_special_mode
 
-:	jsr player_cmd
+:	jsr cmd_verbal
 	ldx #$0c
-	stx gs_monster_proximity
+	stx gs_monster_step
 	jsr wait_if_prior_text
 	jmp check_special_mode
 
@@ -6456,14 +6456,14 @@ special_mother:
 	cmp #$50
 	bcc :+
 	jsr update_view
-:	lda gs_mother_proximity
+:	lda gs_mother_step
 	bne @mother_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_mother_proximity
+	inc gs_mother_step
 	jmp input_near_danger
 
 @mother_smell:
@@ -6482,7 +6482,7 @@ special_mother:
 	jsr print_to_line1
 	lda #$46     ;the hallway as it darkens!
 	jsr print_to_line2
-	inc gs_mother_proximity
+	inc gs_mother_step
 	jmp input_near_danger
 
 @mother_arrives:
@@ -6565,7 +6565,7 @@ special_mother:
 	lda #$78     ;The body has vanished!
 	jsr print_to_line2
 	ldx #$00
-	stx gs_mother_proximity
+	stx gs_mother_step
 	stx gs_mother_alive
 	stx gs_special_mode
 	stx gs_mode_stack1
@@ -6583,13 +6583,13 @@ special_dark:
 :	lda gs_room_lit
 	beq @unlit
 	ldx #$00
-	stx gs_mother_proximity
+	stx gs_mother_step
 	jmp pop_mode_continue
 
 @unlit:
 	ldx #$00
 	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
-	lda gs_mother_proximity
+	lda gs_mother_step
 	bne @monster_smell
 	lda gs_level
 	cmp #$05
@@ -6609,14 +6609,14 @@ special_dark:
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_mother_proximity
+	inc gs_mother_step
 	jmp input_near_danger
 
 @monster_smell:
 	cmp #$01
 	bne @monster_attacks
 	jsr wait_if_prior_text
-	inc gs_mother_proximity
+	inc gs_mother_step
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$47     ;the hallway!
@@ -6826,7 +6826,7 @@ special_bomb:
 
 @continue:
 	jsr count_as_move
-	jsr player_cmd
+	jsr cmd_verbal
 	jsr print_timers
 	jmp check_special_mode
 
@@ -6852,7 +6852,7 @@ pop_mode_do_cmd:
 	bcc :+
 	jmp cmd_movement
 
-:	jmp player_cmd
+:	jmp cmd_verbal
 
 ride_elevator:
 	lda #$a3     ;The elevator is moving!
@@ -6923,12 +6923,12 @@ special_tripped:
 	beq :+
 	jmp special_climb
 
-:	lda gs_monster_proximity
+:	lda gs_monster_step
 	cmp #$0c
 	bne :+
 	jsr get_player_input
 :	ldx #$00
-	stx gs_monster_proximity
+	stx gs_monster_step
 @check_input:
 	lda gd_parsed_object
 	cmp #noun_monster
@@ -7172,7 +7172,7 @@ lair_input_loop:
 	jmp lair_input_loop
 
 @command_allowed:
-	jsr player_cmd
+	jsr cmd_verbal
 	jmp @update_view
 
 @move:
@@ -8851,9 +8851,9 @@ gs_dog2_alive:
 	.byte $01,$00
 gs_next_hint:
 	.byte $00
-gs_monster_proximity:
+gs_monster_step:
 	.byte $0c
-gs_mother_proximity:
+gs_mother_step:
 	.byte $00
 gs_rotate_target:
 	.byte $05

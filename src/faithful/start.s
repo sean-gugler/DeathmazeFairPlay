@@ -10,7 +10,7 @@
 ;	.import tape_addr_start
 	.import game_save_begin
 	.import main_game_loop
-	.import player_cmd
+	.import cmd_verbal
 	.import gd_parsed_action
 	.import item_cmd
 	.import input_char
@@ -80,7 +80,7 @@ new_game:
 start_game:
 	ldx #verb_directions
 	stx gd_parsed_action
-	jsr player_cmd
+	jsr cmd_verbal
 	jmp main_game_loop
 
 clear_hgr2:

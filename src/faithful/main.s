@@ -18,7 +18,7 @@
 	.import get_player_input
 	.import gd_parsed_action
 	.import check_special_mode
-	.import player_cmd
+	.import cmd_verbal
 	.import clear_maze_window
 	.import print_display_string
 	.import check_special_position
@@ -68,7 +68,7 @@ main_game_loop:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #verb_movement_begin
-	bmi cmd_verbal
+	bmi verbal
 	jsr cmd_movement
 next_game_loop:
 	lda gs_special_mode
@@ -76,8 +76,8 @@ next_game_loop:
 	jsr check_special_mode
 	jmp main_game_loop
 
-cmd_verbal:
-	jsr player_cmd
+verbal:
+	jsr cmd_verbal
 	jmp next_game_loop
 
 cmd_movement:

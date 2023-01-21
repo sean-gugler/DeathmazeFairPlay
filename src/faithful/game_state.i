@@ -32,8 +32,8 @@
 	.global gs_dog2_alive
 ;	.global gs_UNUSED
 	.global gs_next_hint
-	.global gs_monster_proximity
-	.global gs_mother_proximity
+	.global gs_monster_step
+	.global gs_mother_step
 	.global gs_rotate_target
 	.global gs_rotate_count
 	.global gs_rotate_direction

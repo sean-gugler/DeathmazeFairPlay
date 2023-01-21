@@ -25,7 +25,7 @@
 ;	lda gd_parsed_action
 ;	cmp #$46
 ;	bpl +15  ;to $337A
-;	jsr player_cmd
+;	jsr cmd_verbal
 ;	jsr $??19
 .endif
 

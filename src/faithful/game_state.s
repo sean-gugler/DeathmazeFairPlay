@@ -83,9 +83,9 @@ gs_unused3:
 	JUNK_BYTE $00
 gs_next_hint:
 	JUNK_BYTE $00
-gs_monster_proximity:
+gs_monster_step:
 	JUNK_BYTE $0c
-gs_mother_proximity:
+gs_mother_step:
 	JUNK_BYTE $00
 gs_rotate_target:
 	JUNK_BYTE $05

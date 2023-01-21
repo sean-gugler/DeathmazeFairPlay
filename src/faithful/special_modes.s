@@ -24,7 +24,7 @@
 	.import clear_maze_window
 	.import print_timers
 	.import count_as_move
-	.import player_cmd
+	.import cmd_verbal
 	.import get_player_input
 	.import update_view
 
@@ -83,7 +83,7 @@ special_calc_puzzle:
 	lda gd_parsed_action
 	cmp #$46
 	bpl @move
-	jsr player_cmd
+	jsr cmd_verbal
 @continue_loop:
 	jsr count_as_move
 	jsr print_timers
@@ -110,7 +110,7 @@ special_calc_puzzle:
 	bne @update_display
 	cmp gs_rotate_count
 	bne @update_display
-;@success
+;@solved
 	ldx #$04
 	stx gs_facing
 	jsr update_view
@@ -430,25 +430,25 @@ special_monster:
 	cmp #$50
 	bcc :+
 	jsr update_view
-:	lda gs_monster_proximity
+:	lda gs_monster_step
 	bne @monster_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_monster_proximity
+	inc gs_monster_step
 	jmp input_near_danger
 
 @monster_smell:
-	lda gs_monster_proximity
+	lda gs_monster_step
 	cmp #$01
 	bne monster_kills_you
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$46     ;the hallway!
 	jsr print_to_line2
-	inc gs_monster_proximity
+	inc gs_monster_step
 	jmp input_near_danger
 
 monster_kills_you:
@@ -477,9 +477,9 @@ input_near_danger:
 	jsr cmd_movement
 	jmp check_special_mode
 
-:	jsr player_cmd
+:	jsr cmd_verbal
 	ldx #$0c
-	stx gs_monster_proximity
+	stx gs_monster_step
 	jsr wait_if_prior_text
 	jmp check_special_mode
 
@@ -509,14 +509,14 @@ special_mother:
 	cmp #$50
 	bcc :+
 	jsr update_view
-:	lda gs_mother_proximity
+:	lda gs_mother_step
 	bne @mother_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_mother_proximity
+	inc gs_mother_step
 	jmp input_near_danger
 
 @mother_smell:
@@ -535,7 +535,7 @@ special_mother:
 	jsr print_to_line1
 	lda #$46     ;the hallway as it darkens!
 	jsr print_to_line2
-	inc gs_mother_proximity
+	inc gs_mother_step
 	jmp input_near_danger
 
 @mother_arrives:
@@ -618,7 +618,7 @@ special_mother:
 	lda #$78     ;The body has vanished!
 	jsr print_to_line2
 	ldx #$00
-	stx gs_mother_proximity
+	stx gs_mother_step
 	stx gs_mother_alive
 	stx gs_special_mode
 	stx gs_mode_stack1
@@ -638,13 +638,13 @@ special_dark:
 :	lda gs_room_lit
 	beq @unlit
 	ldx #$00
-	stx gs_mother_proximity
+	stx gs_mother_step
 	jmp pop_mode_continue
 
 @unlit:
 	ldx #$00
 	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
-	lda gs_mother_proximity
+	lda gs_mother_step
 	bne @monster_smell
 	lda gs_level
 	cmp #$05
@@ -664,14 +664,14 @@ special_dark:
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_mother_proximity
+	inc gs_mother_step
 	jmp input_near_danger
 
 @monster_smell:
 	cmp #$01
 	bne @monster_attacks
 	jsr wait_if_prior_text
-	inc gs_mother_proximity
+	inc gs_mother_step
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$47     ;the hallway!
@@ -885,7 +885,7 @@ special_bomb:
 
 @continue:
 	jsr count_as_move
-	jsr player_cmd
+	jsr cmd_verbal
 	jsr print_timers
 	jmp check_special_mode
 
@@ -913,7 +913,7 @@ pop_mode_do_cmd:
 	bcc :+
 	jmp cmd_movement
 
-:	jmp player_cmd
+:	jmp cmd_verbal
 
 ride_elevator:
 	lda #$a3     ;The elevator is moving!
@@ -986,12 +986,12 @@ special_tripped:
 	beq :+
 	jmp special_climb
 
-:	lda gs_monster_proximity
+:	lda gs_monster_step
 	cmp #$0c
 	bne :+
 	jsr get_player_input
 :	ldx #$00
-	stx gs_monster_proximity
+	stx gs_monster_step
 @check_input:
 	lda gd_parsed_object
 	cmp #noun_monster
@@ -1044,7 +1044,7 @@ special_tripped:
 
 	; Do not return to monster mode, it's dead
 	lda gs_mode_stack1
-	cmp #$08
+	cmp #special_mode_monster
 	bne :+
 	lda gs_mode_stack2
 	sta gs_mode_stack1
@@ -1249,8 +1249,8 @@ lair_input_loop:
 	jmp lair_input_loop
 
 @command_allowed:
-	jsr player_cmd
-	jmp @update_view
+	jsr cmd_verbal
+	jmp @draw_pit
 
 @move:
 	cmp #verb_forward
@@ -1258,7 +1258,7 @@ lair_input_loop:
 	ldx gs_facing
 	stx zp1A_facing
 	jsr move_turn
-@update_view:
+@draw_pit:
 	lda gs_facing
 	ldx #$00 ;distance
 	stx zp0E_draw_param
@@ -1319,9 +1319,10 @@ special_endgame:
 	lda gs_endgame_step
 	sta zp1A_endgame_step
 	lda gd_parsed_action
+
+@step1:
 	dec zp1A_endgame_step
 	bne @step2
-@step1:
 	cmp #$5a
 	bpl :+
 	jmp @nope

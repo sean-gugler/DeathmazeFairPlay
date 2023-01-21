@@ -857,7 +857,7 @@ draw_special:
 @draw_9_keyholes:
 	dey
 	beq :+
-	jmp draw_A_special
+	jmp draw_A_door_opening
 
 :	lda zp0E_draw_param
 	and #$0f
@@ -1017,7 +1017,7 @@ draw_keyhole_4:
 	jsr char_out
 	rts
 
-draw_A_special:
+draw_A_door_opening:
 	lda #$0a
 	sta zp_col
 	lda #$03
