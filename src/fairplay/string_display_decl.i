@@ -124,7 +124,7 @@
 	text_SPLAT_ = $7c
 	text_You_eat_the = $7d
 	text_and_you_get_heartburn_ = $7e
-	text_A_deafening_roar_envelopes = $7f
+	text_A_deafening_roar_envelops = $7f
 	text_you__Your_ears_are_ringing_ = $80
 	text_FOOD_FIGHT___FOOD_FIGHT__ = $81
 	text_The_hallway_is_too_crowded_ = $82

@@ -125,7 +125,7 @@
 	msbstring "SPLAT!"
 	msbstring "You eat the"
 	msbstring "and you get heartburn!"
-	msbstring "A deafening roar envelopes"
+	msbstring "A deafening roar envelops"
 	msbstring "you. Your ears are ringing!"
 	msbstring "FOOD FIGHT!! FOOD FIGHT!!"
 	msbstring "The hallway is too crowded."

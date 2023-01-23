@@ -151,7 +151,7 @@ cmd_verbal:
 	lda #icmd_set_carried_active
 	sta zp0F_action
 	jsr item_cmd
-:	lda #$7f     ;A deafening roar envelopes
+:	lda #$7f     ;A deafening roar envelops
 	jsr print_to_line1
 	lda #$80     ;you. Your ears are ringing!
 	jsr print_to_line2
