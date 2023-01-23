@@ -221,8 +221,7 @@ special_bat:
 	beq :+
 	jmp special_dog
 
-:	jsr update_view
-	lda #$31     ;A vampire bat attacks you!
+:	lda #$31     ;A vampire bat attacks you!
 	jsr print_to_line2
 	jsr wait_long
 @bat_loop:
@@ -307,10 +306,9 @@ special_dog:
 	jmp pop_mode_continue
 
 @confront_dog:
-	jsr update_view
 	lda #$2e     ;A vicious dog attacks you!
 	jsr print_to_line2
-	jsr wait_long ;GUG: can this be wait_short?
+	jsr wait_long
 @dog_input:
 	jsr get_player_input
 	lda gd_parsed_object
@@ -424,6 +422,8 @@ special_monster:
 	and #action_ignited
 	beq @check_level_change
 @cancel:
+	lda #$00
+	sta gs_monster_step
 	jmp pop_mode_continue
 @check_level_change:
 	and #action_level
@@ -529,6 +529,8 @@ special_mother:
 	and #action_ignited
 	beq @check_level_change
 @cancel:
+	lda #$00
+	sta gs_monster_step
 	jmp pop_mode_continue
 @check_level_change:
 	and #action_level
@@ -540,7 +542,7 @@ special_mother:
 	sta gs_monster_step
 
 @mother_shake:
-	ldx gs_monster_step
+	lda gs_monster_step
 	bne @mother_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
@@ -581,6 +583,7 @@ special_mother:
 	lda #$ad     ;She screeches deafeningly!
 	jsr print_to_line2
 	jsr wait_long
+	jsr clear_status_lines
 	jmp @dead
 
 @seduced:
@@ -589,7 +592,6 @@ special_mother:
 
 @input_seduced:
 	jsr get_player_input
-	jsr clear_status_lines
 	lda gd_parsed_object
 	ldx gd_parsed_action
 	cpx #verb_throw
@@ -630,9 +632,10 @@ special_mother:
 	cmp #noun_mother
 	beq @look
 @dead_seduced:
+	jsr clear_status_lines
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
-	jsr wait_short
+	jsr wait_long
 @dead:
 	lda #$4b     ;She slashes you to bits!
 	jsr print_to_line2
@@ -672,12 +675,13 @@ special_mother:
 	cpx #mother_flag_blinded
 	beq @win
 	lda #$b0     ;She sees you coming.
+	jsr print_to_line1
 	jsr wait_short
 	jmp @dead
 @win:
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
-	jsr wait_short
+	jsr wait_long
 	lda #$4c     ;You slash her to bits!
 	jsr print_to_line2
 	jsr wait_long
@@ -695,12 +699,9 @@ special_dark:
 	beq :+
 	jmp special_snake
 
-:	jsr wait_if_prior_text
-	lda #$00
+:	lda #$00
 	sta gs_room_lit
 	jsr clear_maze_window
-	lda #$8a     ;It's awfully dark.
-	jsr print_to_line2
 
 	ldy #special_mode_monster
 	lda gs_monster_alive
@@ -709,6 +710,7 @@ special_dark:
 	bne :+
 	ldy #special_mode_mother
 	lda gs_mother_alive
+
 :	and #monster_flag_roaming
 	beq @cancel
 	cpy gs_mode_stack1
@@ -1032,6 +1034,8 @@ special_tripped:
 	jsr wait_if_text_line1
 	lda #$78     ;The body has vanished!
 	jsr print_to_line1
+	lda #$00
+	sta gs_monster_step
 	lsr gs_monster_alive
 	jmp pop_mode_continue
 

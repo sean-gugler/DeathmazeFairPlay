@@ -466,6 +466,7 @@ throw_frisbee:
 	and #monster_flag_dying
 	beq :+
 	jsr item_cmd
+	inc gs_monster_step
 	lda #$61     ;It saws the monster's head off!
 	jsr print_to_line1
 	lda #$62     ;Much blood is spilt!
@@ -1145,7 +1146,7 @@ cmd_press:
 ;@with_monster:
 	jsr wait_long
 	lda #$74     ;The monster teleports with you and
-	jsr print_to_line2
+	jsr print_to_line1
 	lda #$37     ;you are his next meal!
 	jsr print_to_line2
 	jmp game_over
@@ -1184,10 +1185,9 @@ cmd_press:
 	sta zp0E_object
 	jsr item_cmd
 	lda #icmd_draw_inv
-	stx zp0F_action
+	sta zp0F_action
 	jsr item_cmd
 	jsr wait_short
-	jsr clear_status_lines
 	lda #$70     ;A draft blows your torch out.
 	jsr print_to_line2
 	jsr push_special_mode
