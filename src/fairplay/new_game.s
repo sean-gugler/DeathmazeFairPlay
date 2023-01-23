@@ -31,14 +31,14 @@ data_new_game:
 	.byte $00		;ring is glowing (lasts 1 turn)
 	.byte $00		;staff is charged (lasts 1 turn)
 	.byte $02		;bat alive (flag $02)
-	.byte $04		;mother alive (flag $04)
+	.byte $02		;mother alive (flag $02)
 	.byte $02		;monster alive (flag $02)
 	.byte $01		;dog 1 alive
 	.byte $01		;dog 2 alive
 	.byte $00		;UNUSED
 	.byte $00		;next hint
-	.byte $00		;monster proximity
-	.byte $00		;mother proximity
+	.byte $00		;monster step
+	.byte $00		;action flags
 	.byte $00		;rotate puzzle: target count
 	.byte $00		;rotate puzzle: current count
 	.byte $00		;rotate puzzle: last direction - ALSO bomb timer, later in the game

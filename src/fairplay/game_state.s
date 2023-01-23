@@ -85,7 +85,7 @@ gs_bomb_tick:
 	JUNK_BYTE $00
 gs_monster_step:
 	JUNK_BYTE $0c
-gs_mother_step:
+gs_action_flags:
 	JUNK_BYTE $00
 gs_rotate_target:
 	JUNK_BYTE $05

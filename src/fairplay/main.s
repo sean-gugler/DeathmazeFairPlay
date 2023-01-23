@@ -70,12 +70,12 @@ main_game_loop:
 	jsr get_player_input
 	jsr normal_input_handler
 ;@count_move:
-	lda gs_action_flag
+	lda gs_action_flags
 	and #action_forward
 	beq @update
 	jsr count_as_move
 @update:
-	lda gs_action_flag
+	lda gs_action_flags
 	and #(action_forward | action_turn)
 	beq @special
 	jsr update_view
@@ -86,7 +86,7 @@ main_game_loop:
 
 normal_input_handler:
 	lda #$00
-	sta gs_action_flag
+	sta gs_action_flags
 	lda gd_parsed_action
 	cmp #verb_movement_begin
 	bmi :+
@@ -98,8 +98,6 @@ cmd_movement:
 	stx zp1A_facing
 	cmp #verb_forward
 	beq move_forward
-	jsr move_turn
-	rts
 
 move_turn:
 	cmp #verb_left
@@ -117,8 +115,8 @@ move_turn:
 	stx gs_facing
 @turned:
 	lda #action_turn
-	ora gs_action_flag
-	sta gs_action_flag
+	ora gs_action_flags
+	sta gs_action_flags
 	rts
 
 @turn_left:
@@ -201,8 +199,8 @@ move_forward:
 	dec gs_player_x
 @check_special:
 	lda #action_forward
-	ora gs_action_flag
-	sta gs_action_flag
+	ora gs_action_flags
+	sta gs_action_flags
 	jsr check_special_position
 	rts
 

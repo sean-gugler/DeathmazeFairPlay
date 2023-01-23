@@ -181,8 +181,8 @@ check_monster:
 
 pit:
 	lda #action_level
-	ora gs_action_flag
-	sta gs_action_flag
+	ora gs_action_flags
+	sta gs_action_flags
 	jsr clear_maze_window
 	ldx #$05
 	stx zp_col

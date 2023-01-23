@@ -82,7 +82,7 @@ razor sharp dagger.
 flute.
 precision crafted frisbee.
 hat with two ram's horns.
-carefully polished horn.
+carefully polished ram's horn.
 glass jar complete with lid.
 golden key.
 diamond ring.
@@ -186,7 +186,7 @@ A draft blows your torch out!
 The ring ignites the torch!
 it isn't very sturdy.
 The staff begins to quake!
-The calculator vanishes.
+The monster teleports with you and
 NEVER, EVER raid a monster's lair.
 OK...
 has vanished.
@@ -203,7 +203,7 @@ FOOD FIGHT!! FOOD FIGHT!!
 The hallway is too crowded.
 A high shrill note comes
 from the flute!
-The calculator displays
+Nothing happens.
 You have been teleported!
 With who? The monster?
 You have no fire.
@@ -242,6 +242,12 @@ The peel slides on the floor
 and gets stuck in a corner.
 The monster roars and chokes
 on blood as it dies!
+It's already full.
+She screeches deafeningly!
+It hits her in the eye!
+She is blinded!
+She sees you coming.
+the rim is serrated and sharp!
 
 [Intro]
 "           Deathmaze 5000               "

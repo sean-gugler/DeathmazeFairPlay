@@ -165,23 +165,24 @@ cmd_break:
 	bne cmd_burn
 
 	lda zp0E_object
-	cmp #noun_ring
-	bne :+
-	jsr lose_ring
-:	cmp #noun_ball
+	cmp #noun_ball
 	bne :+
 	jmp throw_react
 :	cmp #nouns_unique_end
-	bmi @broken
+	bmi @broken  ;zp0F_action already 0 (icmd_destroy1)
+
+	ldx zp11_item
 	cmp #noun_torch
-	bne :+
-	jsr destroy_one_torch
-:	lda zp11_item
-	sta zp0E_object
+	bne @set_object
+@torch:
+	jsr lose_one_torch
+	tax
+	lda #icmd_destroy1
+	sta zp0F_action  ;was mutated by lose_one_torch
+@set_object:
+	stx zp0E_object
+
 @broken:
-; implicit, already 0
-;	lda #icmd_destroy1
-;	sta zp0F_action
 	jsr item_cmd
 	ldx #icmd_draw_inv
 	stx zp0F_action
@@ -240,9 +241,6 @@ cmd_burn:
 	cmp #noun_ring
 	bne :+
 	jmp nonsense  ;ring can't burn itself
-:	cmp #noun_ring
-	bne :+
-	jsr lose_ring
 :	cmp #noun_ball
 	bne :+
 	jsr throw_react
@@ -286,26 +284,27 @@ cmd_eat:
 	jmp cmd_throw
 
 :	lda zp0E_object
-	cmp #noun_ring
-	bne :+
-	jsr lose_ring
-:	cmp #noun_ball
+	cmp #noun_ball
 	bne :+
 	jmp throw_react
 :	cmp #nouns_unique_end
-	bmi @eaten
+	bmi @eaten  ;zp0F_action already 0 (icmd_destroy1)
+
 	.assert nouns_unique_end = noun_food, error, "Eat logic needs to change."
 ;	cmp #noun_food   ;optimized based on assertion
 	beq @food
+	ldx zp11_item
 	cmp #noun_torch
-	bne :+
-	jsr destroy_one_torch
-:	lda zp11_item
-	sta zp0E_object
+	bne @set_object
+@torch:
+	jsr lose_one_torch
+	tax
+	lda #icmd_destroy1
+	sta zp0F_action  ;was mutated by lose_one_torch
+@set_object:
+	stx zp0E_object
+
 @eaten:
-; implicit, already 0
-;	lda #icmd_destroy1
-;	sta zp0F_action
 	jsr item_cmd
 ;	jsr update_view
 	lda #$7d     ;You eat the
@@ -349,31 +348,13 @@ cmd_eat:
 	lda #$58     ;Food eaten
 	bne @print
 
-lose_ring:
-	lda gs_level
-	cmp #$05
-	bne @done
-	lda #$00
-	sta gs_room_lit
-	lda gs_mother_alive
-	beq @done
-	lda #special_mode_dark
-	sta gs_special_mode
-	jsr clear_maze_window
-@done:
-	lda #noun_ring
-	rts
-
 cmd_throw:
 	dec zp0F_action
 	beq :+
 	jmp cmd_climb
 
 :	lda zp0E_object
-	cmp #noun_ring
-	bne :+
-	jsr lose_ring
-:	cmp #noun_frisbee
+	cmp #noun_frisbee
 	bne :+
 	jmp throw_frisbee
 
@@ -381,18 +362,24 @@ cmd_throw:
 	beq throw_wool
 	cmp #noun_yoyo
 	beq throw_yoyo
-	cmp #noun_food
-	bmi thrown
+	cmp #nouns_unique_end
+	bmi thrown  ;zp0F_action already 0 (icmd_destroy1)
+
+	.assert nouns_unique_end = noun_food, error, "Throw logic needs to change."
+;	cmp #noun_food   ;optimized based on assertion
 	beq throw_food
+	ldx zp11_item
 	cmp #noun_torch
-	bne :+
-	jsr destroy_one_torch
-:	lda zp11_item
-	sta zp0E_object
+	bne @set_object
+@torch:
+	jsr lose_one_torch
+	tax
+	lda #icmd_destroy1
+	sta zp0F_action  ;was mutated by lose_one_torch
+@set_object:
+	stx zp0E_object
+
 thrown:
-; implicit, already 0
-;	lda #icmd_destroy1
-;	sta zp0F_action
 	jsr item_cmd
 	jsr print_thrown
 	jsr throw_react
@@ -410,7 +397,9 @@ thrown:
 	jmp print_to_line2
 
 throw_wool:
-; implicit, already 0
+; These zp variables are already set to these values upon entry.
+;	lda #noun_wool
+;	sta zp0E_object
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
 	jsr item_cmd
@@ -428,10 +417,7 @@ throw_wool:
 	lda #$a9     ;and gets stuck in a corner.
 	jmp print_to_line2
 @tripped:
-;	jsr push_special_mode  ;DON'T push, just replace special_mode_monster
-	lda #special_mode_tripped
-	sta gs_special_mode
-;	dec gs_monster_step
+	inc gs_monster_step
 	lda #$5e     ;The monster rounds the corner, slips on
 	jsr print_to_line1
 	lda #$5f     ;the peel, and loses its balance!
@@ -470,18 +456,29 @@ print_thrown:
 	jmp clear_status_lines
 
 throw_frisbee:
+; These zp variables are already set to these values upon entry.
+;	lda #noun_frisbee
+;	sta zp0E_object
+;	lda #icmd_destroy1
+;	sta zp0F_action
+
 	lda gs_monster_alive
+	and #monster_flag_dying
+	beq :+
+	jsr item_cmd
+	lda #$61     ;It saws the monster's head off!
+	jsr print_to_line1
+	lda #$62     ;Much blood is spilt!
+	jmp print_to_line2
+
+:	lda gs_monster_alive
 	and #monster_flag_roaming
 	bne :+
 	jmp thrown
 
-:	lda #noun_frisbee
-	sta zp0E_object
-	lda #icmd_destroy1
-	sta zp0F_action
-	jsr item_cmd
+:	jsr item_cmd
 	jsr print_thrown
-	jsr clear_status_lines
+;	jsr clear_status_lines
 	lda #$3f     ;The monster grabs the frisbee, throws
 	jsr print_to_line1
 	lda #$40     ;it back, and it saws your head off!
@@ -520,9 +517,6 @@ cmd_drop:
 	lda zp0E_object
 	cmp #nouns_unique_end
 	bpl @multiples
-	cmp #noun_ring
-	bne @dropped
-	jsr lose_ring
 @dropped:
 	lda #icmd_drop
 	sta zp0F_action
@@ -550,6 +544,24 @@ cmd_fill:
 	cmp #noun_jar
 	beq :+
 	jmp nonsense
+
+	lda #icmd_where
+	sta zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_active
+	bne :+
+	lda #$ac     ;It's already full.
+	jmp print_to_line2
+
+:	lda gs_monster_step
+	cmp #$06
+	bne :+
+	lda #icmd_set_carried_active
+	sta zp0F_action
+	jsr item_cmd
+	lda #$60     ;It is now full of blood.
+	jmp print_to_line2
 
 :	lda #$89     ;With what? Air?
 	jmp print_to_line2
@@ -584,6 +596,9 @@ cmd_light:
 	inc gs_room_lit
 	jsr update_view
 	inc gs_torches_lit
+	lda #action_ignited
+	ora gs_action_flags
+	sta gs_action_flags
 	bne @finish
 
 @have_fire:
@@ -764,13 +779,7 @@ cmd_look:
 	jmp nonsense
 
 :	cmp #noun_door
-	beq look_door
-look_not_here:
-	lda #$90     ;I don't see that here.
-look_print:
-	jmp print_to_line2
-
-look_door:
+	bne look_not_here
 	jsr which_door
 	cmp #$00
 	beq look_not_here
@@ -797,10 +806,19 @@ print_inspected:
 	bne look_print
 :	cmp #noun_dagger
 	bne :+
-	lda #$72     ;The handle seems flimsy.
+	lda #$72     ;the handle seems flimsy.
 	bne look_print
-:	lda #$68     ;Nothing of interest
+:	cmp #noun_frisbee
+	bne :+
+	lda #$b1     ;the rim is serrated and sharp!
 	bne look_print
+:	lda #$68     ;nothing of interest.
+	bne look_print
+
+look_not_here:
+	lda #$90     ;I don't see that here.
+look_print:
+	jmp print_to_line2
 
 cmd_rub:
 	dec zp0F_action
@@ -933,6 +951,7 @@ cmd_unlock:
 	jsr which_door
 	cmp #doors_locked_begin
 	bcs locked_door
+	;GUG: jsr noun_to_item ?
 :	lda #$9d     ;It's not locked.
 	jmp print_to_line2
 
@@ -1041,96 +1060,118 @@ doors_locked_begin = 1 + (doors - doors_locked)  ;one-based indexing
 
 cmd_press:
 	dec zp0F_action
-	beq :+
+	beq @check_pressed_number
 	jmp cmd_take
 
-:	lda zp0E_object
+@check_pressed_number:
+	lda zp0E_object
 	cmp #noun_zero
-	bpl :+
+	bpl @check_have_calculator
 	jmp nonsense
 
-:	ldx #icmd_where
+@check_have_calculator:
+	ldx #icmd_where
 	stx zp0F_action
 	ldx #noun_calculator
 	stx zp0E_object
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_known
-	beq :+
+	beq @check_teleport_allowed
 	jmp not_carried
 
-:	lda gs_monster_alive
-	and #monster_flag_roaming
-	bne @display
-
+@check_teleport_allowed:
 	lda gs_special_mode
-	beq @teleport
+	cmp #special_mode_endgame
+	beq @no_effect
 
-@display:
-	lda #$85     ;Nothing happens.
-	jsr print_to_line2
-	lda #' '
-	jsr char_out
-	lda gd_parsed_object
-	clc
-	adc #'0' - noun_zero
-	jmp char_out
-
-@teleport:
+;@lookup_location:
 	lda gd_parsed_object
 	sec
-	sbc #noun_zero-1
-	ldx #<teleport_table
-	stx zp0E_ptr
+	sbc #noun_zero
+	asl
+	asl
+	clc
+	adc #<teleport_table
+	sta zp0E_ptr
 	ldx #>teleport_table
 	stx zp0E_ptr+1
-@find_location:
-	sec
-	sbc #$01
-	beq @found
-	clc
-	pha
-	lda #$04
-	adc zp0E_ptr
-	sta zp0E_ptr
-	lda zp0E_ptr+1
-	adc #$00
-	sta zp0E_ptr+1
-	pla
-	jmp @find_location
 
-@found:
+;@check_already_there:
+	ldy #$01
+	lda (zp0E_ptr),y
+	cmp gs_level
+	bne @teleport
+	iny
+	lda (zp0E_ptr),y
+	cmp gs_player_x
+	bne @teleport
+	iny
+	lda (zp0E_ptr),y
+	cmp gs_player_y
+	bne @teleport
+@no_effect:
+	lda #$85     ;Nothing happens.
+	jmp print_to_line2
+
+@teleport:
 	ldy #$00
 	lda (zp0E_ptr),y
 	sta gs_facing
-	inc zp0E_ptr
-	bne :+
-	inc zp0E_ptr+1
-:	lda (zp0E_ptr),y
+	iny
+	lda (zp0E_ptr),y
 	sta gs_level
-	inc zp0E_ptr
-	bne :+
-	inc zp0E_ptr+1
-:	lda (zp0E_ptr),y
+	iny
+	lda (zp0E_ptr),y
 	sta gs_player_x
-	inc zp0E_ptr
-	bne :+
-	inc zp0E_ptr+1
-:	lda (zp0E_ptr),y
+	iny
+	lda (zp0E_ptr),y
 	sta gs_player_y
+
 	ldx #$00
 	stx gs_level_moves_hi
 	stx gs_level_moves_lo
-	lda gd_parsed_object
-	cmp #noun_two
-	bne @teleported
+	lda #action_level
+	ora gs_action_flags
+	sta gs_action_flags
+
+	jsr clear_maze_window
+	lda #$86     ;You have been teleported!
+	jsr print_to_line1
+	lda gs_monster_alive
+	and #monster_flag_roaming
+	beq @no_monster
+
+;@with_monster:
+	jsr wait_long
+	lda #$74     ;The monster teleports with you and
+	jsr print_to_line2
+	lda #$37     ;you are his next meal!
+	jsr print_to_line2
+	jmp game_over
+
+@no_monster:
+	lda gs_level
+	cmp #05
+	beq @dark
+	jsr wait_long
+	jmp update_view
+
+@dark:
 	lda gs_room_lit
 	bne @douse
-	ldx #$01
-	stx gs_teleported_dark
-	bne @teleported
+	lda gs_mother_alive
+	bne @done
+	lda #special_mode_mother
+	cmp gs_special_mode
+	beq @done
+	jsr push_special_mode
+	ldx #special_mode_dark
+	stx gs_special_mode
+@done:
+	rts
+
 @douse:
-	dec gs_room_lit
 	ldx #$00
 	stx gs_teleported_dark
 	inc gs_torches_unlit
@@ -1142,35 +1183,18 @@ cmd_press:
 	stx zp0F_action
 	sta zp0E_object
 	jsr item_cmd
-@teleported:
-	ldx #noun_calculator
-	stx zp0E_object
-	ldx #icmd_destroy2
-	stx zp0F_action
-	ldx #special_mode_dark
-	stx gs_special_mode
-	jsr item_cmd
-	jsr clear_maze_window
-	ldx #icmd_draw_inv
+	lda #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-	lda #$86     ;You have been teleported!
-	jsr print_to_line1
-	lda #$74     ;The calculator vanishes.
-	jsr print_to_line2
-	lda gd_parsed_object
-	cmp #noun_two
-	bne @done
-	lda gs_teleported_dark
-	bne @done
-	jsr wait_long
+	jsr wait_short
 	jsr clear_status_lines
 	lda #$70     ;A draft blows your torch out.
 	jsr print_to_line2
-	jmp wait_short
-
-@done:
+	jsr push_special_mode
+	ldx #special_mode_dark
+	stx gs_special_mode
 	rts
+
 
 	.segment "DATA_TELEPORT"
 
@@ -1186,6 +1210,7 @@ teleport_table:
 	.byte $01,$01,$07,$0a ;button 7
 	.byte $03,$04,$09,$0a ;button 8
 	.byte $03,$03,$07,$0a ;button 9
+.assert >* = >teleport_table, error, "Teleport table must fit in one page"
 
 	.segment "COMMAND4"
 
@@ -1479,7 +1504,6 @@ brained:
 	jsr update_view
 	jsr wait_short
 	jsr flash_screen
-	jsr clear_status_lines
 	lda #$2a     ;You have rammed your head into a steel
 	jsr print_to_line1
 	lda #$2b     ;wall and bashed your brains out!

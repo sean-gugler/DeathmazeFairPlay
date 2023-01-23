@@ -442,8 +442,11 @@ cmd_throw:
 	beq throw_wool
 	cmp #noun_yoyo
 	beq throw_yoyo
-	cmp #noun_food
-	bmi thrown
+	cmp #nouns_unique_end
+	bmi thrown  ;zp0F_action already 0 (icmd_destroy1)
+
+	.assert nouns_unique_end = noun_food, error, "Throw logic needs to change."
+;	cmp #noun_food   ;optimized based on assertion
 	beq throw_food
 	cmp #noun_torch
 	bne :+
@@ -1107,25 +1110,28 @@ doors_locked_begin = 1 + (doors - doors_locked)  ;one-based indexing
 
 cmd_press:
 	dec zp0F_action
-	beq :+
+	beq @check_pressed_number
 	jmp cmd_take
 
-:	lda zp0E_object
+@check_pressed_number:
+	lda zp0E_object
 	cmp #noun_zero
-	bpl :+
+	bpl @check_have_calculator
 	jmp nonsense
 
-:	ldx #icmd_where
+@check_have_calculator:
+	ldx #icmd_where
 	stx zp0F_action
 	ldx #noun_calculator
 	stx zp0E_object
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_known
-	beq :+
+	beq @check_teleport_allowed
 	jmp not_carried
 
-:	lda gs_monster_alive
+@check_teleport_allowed:
+	lda gs_monster_alive
 	and #monster_flag_roaming
 	bne @display
 	lda gs_special_mode

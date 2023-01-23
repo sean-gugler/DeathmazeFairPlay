@@ -9,7 +9,7 @@
 	text_flute_ = $09
 	text_precision_crafted_frisbee_ = $0a
 	text_hat_with_two_ram_s_horns_ = $0b
-	text_carefully_polished_horn_ = $0c
+	text_carefully_polished_ram_s_horn_ = $0c
 	text_glass_jar_complete_with_lid_ = $0d
 	text_golden_key_ = $0e
 	text_diamond_ring_ = $0f
@@ -113,7 +113,7 @@
 	text_The_ring_ignites_the_torch_ = $71
 	text_it_isn_t_very_sturdy_ = $72
 	text_The_staff_begins_to_quake_ = $73
-	text_The_calculator_vanishes_ = $74
+	text_The_monster_teleports_with_you_and = $74
 	text_NEVER__EVER_raid_a_monster_s_lair_ = $75
 	text_OK___ = $76
 	text_has_vanished_ = $77
@@ -130,7 +130,7 @@
 	text_The_hallway_is_too_crowded_ = $82
 	text_A_high_shrill_note_comes = $83
 	text_from_the_flute_ = $84
-	text_The_calculator_displays = $85
+	text_Nothing_happens_ = $85
 	text_You_have_been_teleported_ = $86
 	text_With_who__The_monster_ = $87
 	text_You_have_no_fire_ = $88
@@ -169,3 +169,9 @@
 	text_and_gets_stuck_in_a_corner_ = $a9
 	text_The_monster_roars_and_chokes = $aa
 	text_on_blood_as_it_dies_ = $ab
+	text_It_s_already_full_ = $ac
+	text_She_screeches_deafeningly_ = $ad
+	text_It_hits_her_in_the_eye_ = $ae
+	text_She_is_blinded_ = $af
+	text_She_sees_you_coming_ = $b0
+	text_the_rim_is_serrated_and_sharp_ = $b1

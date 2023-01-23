@@ -33,7 +33,7 @@
 ;	.global gs_UNUSED
 	.global gs_next_hint
 	.global gs_monster_step
-	.global gs_mother_step
+	.global gs_action_flags
 	.global gs_rotate_target
 	.global gs_rotate_count
 	.global gs_rotate_direction
@@ -67,6 +67,11 @@
 	item_torch_end = item_torch_begin + items_torches
 
 
+action_turn    = 1 << 0
+action_forward = 1 << 1
+action_level   = 1 << 2
+action_ignited = 1 << 3
+
 ; First byte in gs_item_locations is either
 ; maze level 1-5 or one of these values:
 carried_boxed = $06
@@ -77,6 +82,7 @@ carried_known = $08
 carried_begin = $06
 carried_unboxed = $07
 
+monster_flag_dying = $01
 monster_flag_roaming = $02
-mother_flag_roaming = $04
-
+mother_flag_blinded = $01
+mother_flag_roaming = $02

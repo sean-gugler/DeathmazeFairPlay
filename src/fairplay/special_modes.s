@@ -27,6 +27,7 @@
 	.import cmd_verbal
 	.import get_player_input
 	.import update_view
+	.import normal_input_handler
 
 ;	.include "apple.i"
 	.include "char.i"
@@ -84,8 +85,11 @@ special_calc_puzzle:
 	jsr @print_hint
 @puzzle_loop:
 	jsr get_player_input
+;GUG: TODO needed?
+;	lda #$00
+;	sta gs_action_flag
 	lda gd_parsed_action
-	cmp #$46
+	cmp #verb_movement_begin
 	bpl @move
 	jsr cmd_verbal
 @continue_loop:
@@ -248,16 +252,15 @@ special_bat:
 
 @try_action:
 	jsr clear_status_lines
-	ldx #noun_jar
-	stx zp0E_object
+	lda gd_parsed_object
+	cmp #noun_jar
+	bne @dead
+	sta zp0E_object
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_active
-	bne @dead
-	lda gd_parsed_object
-	cmp #noun_jar
 	bne @dead
 	lda #$50     ;What a mess! The vampire bat
 	jsr print_to_line1
@@ -281,6 +284,7 @@ pop_mode_continue:
 	ldx #$00
 	stx gs_mode_stack2
 	jmp check_special_mode
+
 
 
 special_dog:
@@ -330,17 +334,9 @@ special_dog:
 	lda zp1A_object
 	cmp #noun_dog
 	bne @dead
-.if REVISION >= 100
 	lda #$8c     ;It looks very dangerous!
-.else ;RETAIL
-	lda #$28     ;It displays 317.2!  (BUG)
-.endif
 	jsr print_to_line2
-.if REVISION >= 100
 	jmp @dog_input
-.else ;RETAIL
-	jmp @confront_dog ;BUG: no time to read the response
-.endif
 
 @attack:
 	lda zp1A_object
@@ -420,23 +416,32 @@ special_dog:
 
 special_monster:
 	dex
-	beq :+
+	beq @check_ignited
 	jmp special_mother
 
-:	lda gd_parsed_action
-	cmp #$50
-	bcc :+
-	jsr update_view
-:	ldx gs_monster_step
+@check_ignited:
+	lda gs_action_flags
+	and #action_ignited
+	beq @check_level_change
+@cancel:
+	jmp pop_mode_continue
+@check_level_change:
+	and #action_level
+	beq @monster_shake
+	lda gs_room_lit
+	bne @cancel
+	lda #$00
+	sta gs_monster_step
+
+@monster_shake:
+	ldx gs_monster_step
 	bne @monster_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_monster_step
-	rts
-;	jmp input_near_danger
+	jmp input_during_encounter
 
 @monster_smell:
 	dex
@@ -446,13 +451,14 @@ special_monster:
 	jsr print_to_line1
 	lda #$46     ;the hallway!
 	jsr print_to_line2
-	inc gs_monster_step
-	rts
-;	jmp input_near_danger
+	jmp input_during_encounter
 
 @monster_here:
-	jsr wait_if_prior_text
+	dex
+	beq monster_kills_you
+	jmp special_tripped
 monster_kills_you:
+	jsr wait_if_prior_text
 	jsr clear_hgr2
 	lda #$36     ;The monster attacks you and
 	jsr print_to_line1
@@ -468,129 +474,185 @@ monster_kills_you:
 	jsr print_display_string
 :	jmp game_over
 
-input_near_danger:
+input_during_encounter:
+	inc gs_monster_step
 	jsr get_player_input
-	lda gd_parsed_action
-	cmp #$50
-	bcc :+
-	jsr cmd_movement
+	jsr normal_input_handler
+
+	lda gs_action_flags
+	and #(action_forward | action_turn)
+	beq @check_elevator
+	jsr update_view
+	jsr print_timers
+
+; Hack to make sure "body vanishes" and "elevator is moving"
+; are printed in that order.
+@check_elevator:
+	lda gs_monster_step
+	cmp #$04
+	bcc @continue
+	lda gs_special_mode
+	cmp #special_mode_elevator
+	bne @continue
+	; Swap stack so "monster" is on top of "elevator"
+	ldx gs_mode_stack1
+	stx gs_special_mode
+	sta gs_mode_stack1
+@continue:
 	jmp check_special_mode
 
-:	jsr cmd_verbal
-	jmp check_special_mode
 
 wait_if_prior_text:
+	lda text_buffer_line2
+	cmp #$80
+	bne wait_text
+wait_if_text_line1:
 	lda text_buffer_line1
 	cmp #$80
-	beq :+
+	beq wait_done
 	cmp #' '
-	bne @wait
-:	lda text_buffer_line2
-	cmp #$80
-	bne @wait
-	rts
-
-@wait:
+	beq wait_done
+wait_text:
 	jsr wait_long
 	jsr clear_status_lines
+wait_done:
 	rts
 
 
 special_mother:
 	dex
-	beq :+
+	beq @check_ignited
 	jmp special_dark
 
-:	lda gd_parsed_action
-	cmp #$50
-	bcc :+
-	jsr update_view
-:	lda gs_mother_step
+@check_ignited:
+	lda gs_action_flags
+	and #action_ignited
+	beq @check_level_change
+@cancel:
+	jmp pop_mode_continue
+@check_level_change:
+	and #action_level
+	beq @mother_shake
+	lda gs_level
+	cmp #$05
+	bne @cancel
+	lda #$00
+	sta gs_monster_step
+
+@mother_shake:
+	ldx gs_monster_step
 	bne @mother_smell
 	jsr wait_if_prior_text
 	lda #$43     ;The ground beneath your feet
 	jsr print_to_line1
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
-	inc gs_mother_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @mother_smell:
-	tax
-	dex
-	bne @mother_arrives
+	pha
 	ldx #icmd_where
 	stx zp0F_action
 	ldx #noun_horn
 	stx zp0E_object
 	jsr item_cmd
-	lda #carried_active
-	cmp zp1A_item_place
+	pla
+	ldx #carried_active
+	cpx zp1A_item_place
+	php
 	beq @mother_arrives
+	cmp #$02
+	bcs @mother_arrives
+
+	plp
+	jsr wait_if_prior_text
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
 	lda #$46     ;the hallway as it darkens!
 	jsr print_to_line2
-	inc gs_mother_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @mother_arrives:
+	jsr wait_if_prior_text
 	lda #$48     ;It is the monster's mother!
 	jsr print_to_line1
-	ldx #noun_horn
-	stx zp0E_object
-	ldx #icmd_where
-	stx zp0F_action
-	jsr item_cmd
-	lda #carried_active
-	cmp zp1A_item_place
-	bne @input_near_mother
+	plp
+	beq @seduced
+	lda #$ad     ;She screeches deafeningly!
+	jsr print_to_line2
+	jsr wait_long
+	jmp @dead
+
+@seduced:
 	lda #$49     ;She has been seduced!
 	jsr print_to_line2
-@input_near_mother:
-	lda zp1A_item_place
-	pha
-	lda zp19_item_position
-	pha
+
+@input_seduced:
 	jsr get_player_input
 	jsr clear_status_lines
 	lda gd_parsed_object
+	ldx gd_parsed_action
+	cpx #verb_throw
+	bne @last_chance
+	cmp #noun_yoyo
+	bne @dead_seduced
+
+;	jsr noun_to_item
+	sta zp0E_object
+	ldx #icmd_where
+	stx zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_unboxed
+	bcs @yoyo_hit
+	lda #$7b     ;Check your inventory!
+	bne @print_input_again
+@yoyo_hit:
+	lda #noun_yoyo
+	sta zp0E_object
+	lda #icmd_destroy1
+	sta zp0F_action
+	jsr item_cmd
+	lda #icmd_draw_inv
+	sta zp0F_action
+	jsr item_cmd
+	lsr gs_mother_alive
+	lda #$ae     ;It hits her in the eye!
+	jsr print_to_line1
+	lda #$af     ;She is blinded!
+@print_input_again:
+	jsr print_to_line2
+	jmp @input_seduced
+
+@last_chance:
 	cmp #noun_monster
 	beq @look
 	cmp #noun_mother
 	beq @look
-@dead_pop:
-	pla
-	sta zp19_item_position
-	pla
-	sta zp1A_item_place
-	lda #carried_active
-	cmp zp1A_item_place
-	bne @dead
+@dead_seduced:
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
+	jsr wait_short
 @dead:
 	lda #$4b     ;She slashes you to bits!
 	jsr print_to_line2
+	jsr clear_maze_window
 	jmp game_over
 
 @look:
-	lda gd_parsed_action
-	cmp #verb_look
+	cpx #verb_look
 	bne @attack
 	lda #$8c     ;It looks very dangerous!
-	jsr print_to_line2
-	tax
-	pla
-	sta zp19_item_position
-	pla
-	sta zp1A_item_place
-	txa
-	jmp @input_near_mother
+	ldx gs_mother_alive
+	cpx #mother_flag_blinded
+	bne :+
+	lda #$af     ;She is blinded!
+:	jsr print_to_line2
+	jmp @input_seduced
 
 @attack:
-	cmp #verb_attack
-	bne @dead_pop
+	cpx #verb_attack
+	bne @dead_seduced
 	ldx #noun_sword
 	stx zp0E_object
 	ldx #icmd_where
@@ -598,27 +660,33 @@ special_mother:
 	jsr item_cmd
 	lda #carried_known
 	cmp zp1A_item_place
-	bne @dead_pop
-	pla
-	sta zp19_item_position
-	pla
-	sta zp1A_item_place
-	lda #carried_active
-	cmp zp1A_item_place
-	bne @dead
+	bne @dead_seduced
+	lda gs_room_lit
+	bne @lit
+	lda #$57     ;It's too dark. You miss.
+	jsr print_to_line2
+	jsr wait_long
+	jmp @dead_seduced
+@lit:
+	ldx gs_mother_alive
+	cpx #mother_flag_blinded
+	beq @win
+	lda #$b0     ;She sees you coming.
+	jsr wait_short
+	jmp @dead
+@win:
 	lda #$4a     ;She tiptoes up to you!
 	jsr print_to_line1
+	jsr wait_short
 	lda #$4c     ;You slash her to bits!
 	jsr print_to_line2
 	jsr wait_long
 	lda #$78     ;The body has vanished!
 	jsr print_to_line2
 	ldx #$00
-	stx gs_mother_step
+	stx gs_monster_step
 	stx gs_mother_alive
-	stx gs_special_mode
-	stx gs_mode_stack1
-	rts
+	jmp pop_mode_continue
 
 
 
@@ -627,68 +695,28 @@ special_dark:
 	beq :+
 	jmp special_snake
 
-:	lda gd_parsed_action
-	cmp #$50
-	bcc :+
-	jsr update_view
-:	lda gs_room_lit
-	beq @unlit
-@cancel:
-	ldx #$00
-	stx gs_mother_step
-	jmp pop_mode_continue
+:	jsr wait_if_prior_text
+	lda #$00
+	sta gs_room_lit
+	jsr clear_maze_window
+	lda #$8a     ;It's awfully dark.
+	jsr print_to_line2
 
-@unlit:
-	ldx #$00
-	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
-
-	ldx gs_monster_alive
-	lda gs_level
-	cmp #$05
+	ldy #special_mode_monster
+	lda gs_monster_alive
+	ldx gs_level
+	cpx #$05
 	bne :+
-	ldx gs_mother_alive
-:	txa
-	and #monster_flag_roaming
+	ldy #special_mode_mother
+	lda gs_mother_alive
+:	and #monster_flag_roaming
 	beq @cancel
-
-;@tremble:
-	ldx gs_mother_step
-	bne @monster_smell
-	jsr wait_if_prior_text
-	lda #$43     ;The ground beneath your feet
-	jsr print_to_line1
-	lda #$44     ;begins to shake!
-	jsr print_to_line2
-	inc gs_mother_step
-	jmp input_near_danger
-
-@monster_smell:
-	dex
-	bne @monster_attacks
-	jsr wait_if_prior_text
-	inc gs_mother_step
-	lda #$45     ;A disgusting odor permeates
-	jsr print_to_line1
-	lda #$47     ;the hallway!
-	jsr print_to_line2
-	jmp input_near_danger
-
-@monster_attacks:
-	jsr wait_if_prior_text
-	lda gs_level
-	cmp #$05
-	beq @mother
-	lda #$36     ;The monster attacks you and
-	jsr print_to_line1
-	lda #$37     ;you are his next meal!
-	bne dead_bit
-@mother:
-	lda #$48     ;It is the monster's mother!
-	jsr print_to_line1
-	lda #$4b     ;She slashes you to bits!
-dead_bit:
-	jsr print_to_line2
-	jmp game_over
+	cpy gs_mode_stack1
+	beq @cancel
+	sty gs_special_mode
+	jmp check_special_mode
+@cancel:
+	jmp pop_mode_continue
 
 
 
@@ -696,62 +724,11 @@ special_snake:
 	dex
 	bne special_bomb
 
-	lda gd_parsed_object
-	cmp #noun_snake
-	beq snake_check_verb
 dead_by_snake:
 	jsr clear_status_lines
 	lda #$20     ;Snake bites you!
-	bne dead_bit
-snake_check_verb:
-	lda gd_parsed_action
-	cmp #verb_look
-	beq @look
-	cmp #verb_attack
-	bne dead_by_snake
-@attack:
-	ldx #noun_dagger
-	stx zp0E_object
-	ldx #icmd_where
-	stx zp0F_action
-	jsr item_cmd
-	lda zp1A_item_place
-	cmp #carried_unboxed
-	bpl @kill_snake
-	ldx #noun_sword
-	stx zp0E_object
-	ldx #icmd_where
-	stx zp0F_action
-	jsr item_cmd
-	lda zp1A_item_place
-	cmp #carried_unboxed
-	bmi dead_by_snake
-	bpl @killed
-@kill_snake:
-	ldx #noun_dagger
-	stx zp0E_object
-	ldx #icmd_destroy1
-	stx zp0F_action
-	jsr item_cmd
-	ldx #icmd_destroy1
-	stx zp0F_action
-	ldx #noun_snake
-	stx zp0E_object
-	jsr item_cmd
-	ldx #icmd_draw_inv
-	stx zp0F_action
-	jsr item_cmd
-	lda #$64     ;The dagger disappears!
 	jsr print_to_line2
-@killed:
-	lda #$63     ;You have killed it.
-	jsr print_to_line1
-	jmp pop_mode_continue
-
-@look:
-	lda #$8c     ;It looks very dangerous!
-	jsr print_to_line2
-	jmp input_near_danger
+	jmp game_over
 
 
 
@@ -887,7 +864,8 @@ special_bomb:
 special_elevator:
 	dex
 	beq :+
-	jmp special_tripped
+	dex
+	jmp special_climb
 
 :	jsr get_player_input
 	lda gd_parsed_action
@@ -910,6 +888,9 @@ pop_mode_do_cmd:
 :	jmp cmd_verbal
 
 ride_elevator:
+	lda #action_level
+	ora gs_action_flags
+	sta gs_action_flags
 	lda #$a3     ;The elevator is moving!
 	jsr print_to_line1
 	jsr wait_long
@@ -977,14 +958,7 @@ enter_elevator:
 
 special_tripped:
 	dex
-	beq @check_input
-	jmp special_climb
-
-;LOOK MONSTER: dangerous!  <--loop
-;anything else: Dead
-;KILL MONSTER
-;dark: miss -> Dead
-;blep
+	bne @lying_dead
 
 @check_input:
 	jsr get_player_input
@@ -1040,103 +1014,26 @@ special_tripped:
 	lda #$ab     ;on blood as it dies!
 	jsr print_to_line2
 	lsr gs_monster_alive
+	jmp input_during_encounter
 
-;Throw frisbee, else done
-	jsr get_player_input
-	lda gd_parsed_action
-	cmp #verb_throw
-	bne @done
-	lda gd_parsed_object
-	cmp #noun_frisbee
-	bne @done
+@lying_dead:
+	dex
+	; throw frisbee will inc past this step
+	; anything else forfeits opportunity
+	beq @body_vanishes
 
-	sta zp0E_object
-	ldx #icmd_where
-	stx zp0F_action
-	jsr item_cmd
-	lda #carried_known
-	cmp zp1A_item_place
-	bne @done
+;@blood_everywhere:
+	dex
+	bne @body_vanishes
+	; opportunity to fill jar
+	jmp input_during_encounter
 
-	ldx #noun_frisbee
-	stx zp0E_object
-	ldx #icmd_destroy1
-	stx zp0F_action
-	jsr item_cmd
-
-	lda #$61     ;It saws the monster's head off!
-	jsr print_to_line1
-	lda #$62     ;much blood is spilt!
-	jsr print_to_line2
-
-;Fill jar, else done
-	jsr get_player_input
-	lda gd_parsed_action
-	cmp #verb_fill
-	bne @done
-	lda gd_parsed_object
-	cmp #noun_jar
-	bne @done
-
-	sta zp0E_object
-	ldx #icmd_where
-	stx zp0F_action
-	jsr item_cmd
-	lda #carried_known
-	cmp zp1A_item_place
-	bne @done
-
-	ldx #noun_jar
-	stx zp0E_object
-	ldx #icmd_set_carried_active
-	stx zp0F_action
-	jsr item_cmd
-
-	lda #$60     ;It is now full of blood.
-	jsr print_to_line1
+@body_vanishes:
+	jsr wait_if_text_line1
 	lda #$78     ;The body has vanished!
-	jsr print_to_line2
+	jsr print_to_line1
 	lsr gs_monster_alive
 	jmp pop_mode_continue
-
-;THROW FRISBEE -> cut head
-;FILL JAR -> get blood, -wait-, body
-;move: clear status, update_view, body
-;ANY ACTION: parse cmd, -wait-, body
-;torch burn out: can't, no moves count during special mode
-
-@done:
-	; Perform action before displaying "body" text.
-	; Works fine even if it's OPEN DOOR
-	; or PRESS button on calculator.
-	jsr pop_mode_do_cmd
-	jsr wait_if_prior_text
-	lsr gs_monster_alive
-	jsr clear_status_lines
-	lda #$78     ;The body has vanished!
-	jmp print_to_line1
-
-
-;	pop cmd
-;	action ?
-;		cmd_movement
-;		update_view
-;	:
-;		cmd_verbal
-;			OPEN DOOR - ok
-;			PRESS BUTTON
-;	wait_if_prior_text
-;	lsr gs_monster_alive
-;	clear, body, rts
-;
-;	jsr clear_status_lines
-;	lda #$78     ;The body has vanished!
-;	jsr print_to_line1
-;	lda gd_parsed_action
-;	cmp #verb_movement_begin
-;	bcs :+
-;	jsr wait_long
-;:	jmp pop_mode_do_cmd
 
 
 
