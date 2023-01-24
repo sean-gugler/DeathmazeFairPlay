@@ -71,7 +71,7 @@
 	text_the_hallway_ = $47
 	text_It_is_the_monster_s_mother_ = $48
 	text_She_has_been_seduced_ = $49
-	text_She_tiptoes_up_to_you_ = $4a
+	text_She_tiptoes_up_to_you____ = $4a
 	text_She_slashes_you_to_bits_ = $4b
 	text_You_slash_her_to_bits_ = $4c
 	text_Sparks_shoot_out_above_you_ = $4d

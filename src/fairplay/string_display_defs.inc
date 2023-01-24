@@ -72,7 +72,7 @@
 	msbstring "the hallway!"
 	msbstring "It is the monster's mother!"
 	msbstring "She has been seduced!"
-	msbstring "She tiptoes up to you!"
+	msbstring "She tiptoes up to you ..."
 	msbstring "She slashes you to bits!"
 	msbstring "You slash her to bits!"
 	msbstring "Sparks shoot out above you!"

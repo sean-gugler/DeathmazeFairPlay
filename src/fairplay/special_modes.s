@@ -426,8 +426,12 @@ special_monster:
 	sta gs_monster_step
 	jmp pop_mode_continue
 @check_level_change:
+	lda gs_action_flags
 	and #action_level
 	beq @monster_shake
+	lda gs_monster_alive
+	and #monster_flag_dying
+	bne @monster_shake
 	lda gs_room_lit
 	bne @cancel
 	lda #$00
@@ -533,6 +537,7 @@ special_mother:
 	sta gs_monster_step
 	jmp pop_mode_continue
 @check_level_change:
+	lda gs_action_flags
 	and #action_level
 	beq @mother_shake
 	lda gs_level
@@ -583,7 +588,7 @@ special_mother:
 	lda #$ad     ;She screeches deafeningly!
 	jsr print_to_line2
 	jsr wait_long
-	jsr clear_status_lines
+	jsr clear_hgr2
 	jmp @dead
 
 @seduced:
@@ -685,6 +690,7 @@ special_mother:
 	lda #$4c     ;You slash her to bits!
 	jsr print_to_line2
 	jsr wait_long
+	jsr clear_status_lines
 	lda #$78     ;The body has vanished!
 	jsr print_to_line2
 	ldx #$00
@@ -968,6 +974,7 @@ special_tripped:
 	cmp #noun_monster
 	beq @look
 @dead:
+	jsr clear_status_lines
 	jmp monster_kills_you
 
 @look:

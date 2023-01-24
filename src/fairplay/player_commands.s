@@ -466,6 +466,9 @@ throw_frisbee:
 	and #monster_flag_dying
 	beq :+
 	jsr item_cmd
+	lda #icmd_draw_inv
+	sta zp0F_action
+	jsr item_cmd
 	inc gs_monster_step
 	lda #$61     ;It saws the monster's head off!
 	jsr print_to_line1
@@ -1162,7 +1165,7 @@ cmd_press:
 	lda gs_room_lit
 	bne @douse
 	lda gs_mother_alive
-	bne @done
+	beq @done
 	lda #special_mode_mother
 	cmp gs_special_mode
 	beq @done
