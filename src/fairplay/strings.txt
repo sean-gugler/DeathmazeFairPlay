@@ -272,5 +272,5 @@ the rim is serrated and sharp!
 "             Good Luck!                 "
 "                                        "
 "1980 design by Med Systems Software     "
-"Revised for Fair Play edition v0.1    "
+"Fair Play edition 2023.01 by S.Gugler "
 

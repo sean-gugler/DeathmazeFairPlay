@@ -20,4 +20,4 @@
 	.byte "             Good Luck!                 "
 	.byte "                                        "
 	.byte "1980 design by Med Systems Software     "
-	.byte "Revised for Fair Play edition v0.1    "
+	.byte "Fair Play edition 2023.01 by S.Gugler "
