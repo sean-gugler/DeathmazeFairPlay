@@ -238,7 +238,7 @@ cmd_break:
 	lda #$4e     ;You break the
 	jsr print_to_line1
 .if REVISION >= 2
-	lda #$20
+	lda #' '
 	jsr char_out
 .endif
 	lda gd_parsed_object

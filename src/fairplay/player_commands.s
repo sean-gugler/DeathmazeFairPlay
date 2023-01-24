@@ -189,7 +189,7 @@ cmd_break:
 	jsr item_cmd
 	lda #$4e     ;You break the
 	jsr print_to_line1
-	lda #$20
+	lda #' '
 	jsr char_out
 	lda gd_parsed_object
 	jsr print_noun
