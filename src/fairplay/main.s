@@ -37,6 +37,8 @@
 	.import item_cmd
 	.import push_special_mode
 	.import lose_lit_torch
+	.import get_rowcol_addr
+	.import char_out
 
 	.include "apple.i"
 	.include "dos.i"
@@ -447,6 +449,21 @@ get_maze_feature:
 wait_long:
 	ldx #$05
 	stx zp10_wait3
+	lda #$22
+	sta zp_col
+	lda #$15
+	sta zp_row
+@print_dot:
+	jsr get_rowcol_addr
+	lda #'.'
+	jsr char_out
+	dec zp10_wait3
+	bne @print_dot
+	lda #$22
+	sta zp_col
+	jsr get_rowcol_addr
+	ldx #$05
+	stx zp10_wait3
 @dec16:
 	ldx #$00
 	stx zp0F_wait2
@@ -454,6 +471,8 @@ wait_long:
 	bne :-
 	dec zp0F_wait2
 	bne :-
+	lda #' '
+	jsr char_out
 	dec zp10_wait3
 	bne @dec16
 	rts
