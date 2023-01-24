@@ -447,16 +447,14 @@ get_maze_feature:
 	.segment "WAIT_LONG"
 
 wait_long:
-	lda #$27
-	sta zp_col
-	lda #$17
-	sta zp_row
-	jsr get_rowcol_addr
-	lda #$18  ;hourglass
-	jsr char_out
 	ldx #$05
 	stx zp10_wait3
 @dec16:
+	lda zp10_wait3
+	and #$01
+	clc
+	adc #$01
+	jsr @print
 	ldx #$00
 	stx zp0F_wait2
 :	dec zp0E_wait1
@@ -465,14 +463,16 @@ wait_long:
 	bne :-
 	dec zp10_wait3
 	bne @dec16
-	lda #$27
-	sta zp_col
-	lda #$17
-	sta zp_row
-	jsr get_rowcol_addr
 	lda #' '
-	jsr char_out
-	rts
+@print:
+	ldx #$27
+	stx zp_col
+	ldx #$17
+	stx zp_row
+	pha
+	jsr get_rowcol_addr
+	pla
+	jmp char_out
 
 	.segment "WAIT_SHORT"
 
