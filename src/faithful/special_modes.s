@@ -34,7 +34,7 @@
 	.include "game_design.i"
 	.include "game_state.i"
 	.include "item_commands.i"
-;	.include "special_modes.i"
+	.include "special_modes.i"
 ;	.include "string_display_decl.i"
 	.include "string_noun_decl.i"
 	.include "string_verb_decl.i"
