@@ -33,6 +33,7 @@ This project builds four versions of the game:
 * Torch count now increments if you "get box" then "get torch" and it's the only box you're carrying. Previously it would be off by one. (For fun, try "drop torch"! Repeat all three commands for endless entertainment walking backwards through the font.)
 * Move forward into wall during monster encounter, "splat" remains and doesn't flicker.
 * Always time to read fate about "the body". Message would briefly flicker if you did an action with a text result, such as "open box".
+* Open a door, then immediately open it again. Moving forward would print "splat". It now correctly moves forward.
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.

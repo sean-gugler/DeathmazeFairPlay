@@ -915,9 +915,15 @@ pop_mode_do_cmd:
 	lda gd_parsed_action
 	cmp #verb_movement_begin + 1
 	bcc :+
+.if REVISION >= 100
+	jsr cmd_movement
+	jmp check_special_mode
+:	jsr cmd_verbal
+	jmp check_special_mode
+.else ;RETAIL
 	jmp cmd_movement
-
 :	jmp cmd_verbal
+.endif
 
 ride_elevator:
 	lda #$a3     ;The elevator is moving!

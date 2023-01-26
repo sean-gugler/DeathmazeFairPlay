@@ -880,20 +880,15 @@ special_elevator:
 	cmp #verb_forward
 	beq enter_elevator
 	jsr update_view
-pop_mode_do_cmd:
+;pop_mode_do_cmd:
 	lda gs_mode_stack1
 	sta gs_special_mode
 	lda gs_mode_stack2
 	ldx #$00
 	stx gs_mode_stack2
 	sta gs_mode_stack1
-	lda gd_parsed_action
-	cmp #verb_movement_begin + 1
-	bcc :+
-	jsr cmd_movement
-	jmp update_view
-
-:	jmp cmd_verbal
+	jsr normal_input_handler
+	jmp check_special_mode
 
 ride_elevator:
 	lda #action_level
