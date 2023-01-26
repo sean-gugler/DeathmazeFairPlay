@@ -7,8 +7,6 @@
 signature:
 	JUNK_BYTE "DEATH"
 
-	.res $8F
-
 
 	.include "game_state.i"
 	.include "string_noun_decl.i"
