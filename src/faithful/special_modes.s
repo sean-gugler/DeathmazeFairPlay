@@ -308,7 +308,7 @@ special_dog:
 	jsr update_view
 	lda #$2e     ;A vicious dog attacks you!
 	jsr print_to_line2
-	jsr wait_long ;GUG: can this be wait_short?
+	jsr wait_long
 @dog_input:
 	jsr get_player_input
 	lda gd_parsed_object

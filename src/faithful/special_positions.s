@@ -86,6 +86,11 @@ check_dog_roaming:
 :	lda gs_dog1_alive
 	and #$01
 	beq special_return
+.if REVISION >= 100
+	jsr push_special_mode2
+	ldx #special_mode_dog1
+	stx gs_special_mode
+.else ;RETAIL
 	lda gs_special_mode
 	bne :+
 	ldx #special_mode_dog1
@@ -94,6 +99,7 @@ check_dog_roaming:
 
 :	ldx #special_mode_dog1
 	stx gs_mode_stack1
+.endif
 	rts
 
 check_guarded_pit:
@@ -119,6 +125,9 @@ at_guard_dog:
 	lda gs_dog2_alive
 	and #$01
 	beq return_dog_monster
+.if REVISION >= 100
+	jsr push_special_mode2
+.endif
 	ldx #special_mode_dog2
 	stx gs_special_mode
 return_dog_monster:

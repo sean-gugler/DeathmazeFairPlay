@@ -49,7 +49,6 @@ check_calculator:
 	lda zp19_pos_y
 	cmp #$03
 	beq at_calculator
-special_return:
 	rts
 
 at_calculator:
@@ -82,18 +81,14 @@ check_dog_roaming:
 	cmp #moves_until_dog1
 	bcs :+
 	lda gs_level_moves_hi
-	beq special_return
+	beq @done
 :	lda gs_dog1_alive
 	and #$01
-	beq special_return
-	lda gs_special_mode
-	bne :+
+	beq @done
+	jsr push_special_mode
 	ldx #special_mode_dog1
 	stx gs_special_mode
-	rts
-
-:	ldx #special_mode_dog1
-	stx gs_mode_stack1
+@done:
 	rts
 
 check_guarded_pit:
@@ -119,6 +114,7 @@ at_guard_dog:
 	lda gs_dog2_alive
 	and #$01
 	beq :+
+	jsr push_special_mode
 	ldx #special_mode_dog2
 	stx gs_special_mode
 :	rts
