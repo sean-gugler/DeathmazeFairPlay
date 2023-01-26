@@ -170,7 +170,7 @@ It is now full of blood.
 It saws the monster's head off!
 Much blood is spilt!
 You have killed it.
-The dagger breaks and the pieces vanish!
+The dagger breaks! The pieces vanish!
 The torch is lit and the
 old torch dies and vanishes!
 A close inspection reveals

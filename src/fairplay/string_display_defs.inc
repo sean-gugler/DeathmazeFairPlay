@@ -98,7 +98,7 @@
 	msbstring "It saws the monster's head off!"
 	msbstring "Much blood is spilt!"
 	msbstring "You have killed it."
-	msbstring "The dagger breaks and the pieces vanish!"
+	msbstring "The dagger breaks! The pieces vanish!"
 	msbstring "The torch is lit and the"
 	msbstring "old torch dies and vanishes!"
 	msbstring "A close inspection reveals"

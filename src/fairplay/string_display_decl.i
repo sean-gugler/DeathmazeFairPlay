@@ -97,7 +97,7 @@
 	text_It_saws_the_monster_s_head_off_ = $61
 	text_Much_blood_is_spilt_ = $62
 	text_You_have_killed_it_ = $63
-	text_The_dagger_breaks_and_the_pieces_vanish_ = $64
+	text_The_dagger_breaks__The_pieces_vanish_ = $64
 	text_The_torch_is_lit_and_the = $65
 	text_old_torch_dies_and_vanishes_ = $66
 	text_A_close_inspection_reveals = $67
