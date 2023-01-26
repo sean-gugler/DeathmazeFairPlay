@@ -255,7 +255,9 @@ print_timers:
 	bcs :+
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
-:	ldx gs_active_torch
+:	lda gs_room_lit
+	beq return
+	ldx gs_active_torch
 	lda gs_torch_life,x
 	beq return
 	cmp #torch_low

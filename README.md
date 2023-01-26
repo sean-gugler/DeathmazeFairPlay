@@ -35,6 +35,7 @@ This project builds four versions of the game:
 * Always time to read fate about "the body". Message would briefly flicker if you did an action with a text result, such as "open box".
 * Open a door, then immediately open it again. Moving forward would print "splat". It now correctly moves forward.
 * If you drop the lit torch, no escaping the monster by killing a dog.
+* If you drop the lit torch while it was dying, the "torch dying" message stops appearing.
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.

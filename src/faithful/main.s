@@ -220,6 +220,10 @@ count_as_move:
 	lda gs_level
 	cmp #$05
 	beq @dec_food
+.if REVISION >= 100
+	lda gs_room_lit
+	beq @dec_food
+.endif
 	lda gs_torch_time
 	beq @dec_food
 	dec gs_torch_time
@@ -262,10 +266,15 @@ print_timers:
 	bcs :+
 	lda #$32     ;Stomach is growling
 	jsr print_to_line1
+
 :	lda gs_torch_time
 	beq noun_return
 	cmp #torch_low
 	bcs noun_return
+.if REVISION >= 100
+	lda gs_room_lit
+	beq noun_return
+.endif
 	lda #$33     ;Torch is dying
 	jsr print_to_line2
 	rts
