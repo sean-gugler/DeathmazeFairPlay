@@ -7,6 +7,7 @@
 	.export print_thrown
 	.export push_special_mode
 	.export save_to_tape
+	.export thrown
 
 	.import print_string
 	.import draw_special

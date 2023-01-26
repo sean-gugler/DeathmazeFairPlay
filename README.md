@@ -36,6 +36,7 @@ This project builds four versions of the game:
 * Open a door, then immediately open it again. Moving forward would print "splat". It now correctly moves forward.
 * If you drop the lit torch, no escaping the monster by killing a dog.
 * If you drop the lit torch while it was dying, the "torch dying" message stops appearing.
+* Rare possibility of getting illogical text when defeating the dog.
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.

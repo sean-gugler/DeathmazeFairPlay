@@ -69,3 +69,8 @@ There is a situation where this verb is a perfectly reasonable thing to try. So 
 
 90 pounds is absurd. The heaviest swords weigh about 7, so I reduced it to that. The weight is purely cosmetic, it doesn't affect game play at all. May as well retain player immersion better by demanding less suspension of disbelief. https://swordscorner.com/how-much-do-swords-weigh-full-analysis-table-lbs-kgs/
 
+* DOG vs MONSTER
+
+It is possible to avoid the dog entirely on Level 2, then return with the calculator after killing the monster. Throwing the sneaker had a scripted response that always mentioned getting eaten by the monster ... which should be impossible since it's already dead. I've fixed it so the dog will still chase the sneaker, even though it vanishes. This is not a win because the dog reappears immediately next turn.
+
+This scenario is also possible in the retail version so I incorporated my change into the fan-fixed version. The README is vague about the details to avoid spoilers.

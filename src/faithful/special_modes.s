@@ -14,6 +14,7 @@
 	.import cmd_movement
 	.import clear_hgr2
 	.import print_thrown
+	.import thrown
 	.import item_cmd
 	.import game_over
 	.import clear_status_lines
@@ -405,16 +406,29 @@ special_dog:
 	stx zp0E_object
 	ldx #icmd_destroy1
 	stx zp0F_action
+.if REVISION >= 100
+	jsr thrown
+.else ;RETAIL
 	jsr item_cmd
 	jsr print_thrown
 	lda #$5c     ;and is eaten by
 	jsr print_to_line1
 	lda #$5d     ;the monster!
 	jsr print_to_line2
+.endif
 	jsr wait_long
 	jsr clear_status_lines
 	lda #$30     ;The dog chases the sneaker!
 	jsr print_to_line1
+.if REVISION >= 100
+	lda gs_monster_alive
+	and #monster_flag_roaming
+	bne @dog_eaten
+	pla
+	pla
+	rts
+@dog_eaten:
+.endif
 	jsr wait_long
 	jsr clear_status_lines
 	lda #$5c     ;and is eaten by
