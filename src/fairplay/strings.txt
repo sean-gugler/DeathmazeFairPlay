@@ -279,5 +279,5 @@ the banana peel is slippery.
 "             Good Luck!                 "
 "                                        "
 "1980 design by Med Systems Software     "
-"Fair Play edition 2023.01 by S.Gugler "
+"2023.01 Fair Play edition by S.Gugler "
 
