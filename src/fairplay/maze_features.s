@@ -11,6 +11,7 @@ maze_features:
 	.byte $22,$83,$04,$01 ;pit floor
 	.byte $22,$84,$04,$00 ;pit floor
 	.byte $42,$86,$04,$00 ;pit floor
+	.byte $13,$2a,$04,$00 ;pit floor
 	.byte $22,$75,$08,$01 ;elevator on right
 	.byte $22,$76,$08,$02 ;elevator on right
 	.byte $32,$77,$02,$00 ;elevator face-on
@@ -43,6 +44,6 @@ maze_features:
 	.byte $25,$6a,$01,$00 ;keyhole face-on
 	.byte $25,$7a,$01,$00 ;keyhole face-on
 	.byte $25,$8a,$01,$00 ;keyhole face-on
-maze_features_end = $26
+maze_features_end = $27
 	.assert (* - maze_features) / 4 = maze_features_end, error, "Miscount maze features"
 

@@ -1462,13 +1462,9 @@ cmd_charge:
 	jsr wait_short
 	jsr flash_screen
 	jsr pit
-	inc gs_level
 	ldx #$03
 	stx gs_player_y
 	stx gs_player_x
-	ldx #$00
-	stx gs_level_moves_hi
-	stx gs_level_moves_lo
 	jmp update_view
 
 @normal:

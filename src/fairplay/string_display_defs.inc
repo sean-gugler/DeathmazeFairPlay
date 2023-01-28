@@ -176,3 +176,7 @@
 	msbstring "She is blinded!"
 	msbstring "She sees you coming."
 	msbstring "the rim is serrated and sharp!"
+	msbstring "The snake is eating it!!! "
+	msbstring "The snake eats the "
+	msbstring "The snake falls"
+	msbstring "and slithers away."

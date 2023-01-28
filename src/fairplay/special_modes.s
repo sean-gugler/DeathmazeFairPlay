@@ -29,6 +29,7 @@
 	.import get_player_input
 	.import update_view
 	.import normal_input_handler
+	.import check_special_position
 
 ;	.include "apple.i"
 	.include "char.i"
@@ -88,7 +89,7 @@ special_calc_puzzle:
 	jsr get_player_input
 ;GUG: TODO needed?
 ;	lda #$00
-;	sta gs_action_flag
+;	sta gs_action_flags
 	lda gd_parsed_action
 	cmp #verb_movement_begin
 	bpl @move
@@ -1077,12 +1078,12 @@ special_climb:
 
 :	jsr get_player_input
 	lda gd_parsed_action
-	cmp #$5a
-	bcc :+
+	cmp #verb_movement_begin
+	bcc @climb_snake
 @dead:
 	jmp dead_by_snake
-
-:	cmp #verb_climb
+@climb_snake:
+	cmp #verb_climb
 	bne @dead
 	lda gd_parsed_object
 	cmp #noun_snake
@@ -1103,7 +1104,7 @@ special_climb:
 	lda zp19_pos_y
 	cmp #$0a
 	bne @ceiling
-	jmp @to_level_3
+	jmp @up_level
 
 @on_level_3:
 	lda zp1A_pos_x
@@ -1111,7 +1112,7 @@ special_climb:
 	bne @ceiling
 	lda zp19_pos_y
 	cmp #$05
-	beq @to_level_2
+	beq @up_level
 @ceiling:
 	jsr flash_screen
 	lda #$2d     ;Wham!
@@ -1125,155 +1126,89 @@ special_climb:
 	jsr wait_long
 	jmp dead_by_snake
 
-@to_level_2:
-	ldx #$01
-	stx zp19_regular_climb
-	inx
-	stx gs_facing
-	jmp @up_level
-
-@to_level_3:
-	ldx #$00
-	stx zp19_regular_climb
-	ldx #$03
-	stx gs_facing
 @up_level:
 	dec gs_level
-	lda zp1A_pos_x
-	pha
-	lda zp19_regular_climb
-	pha
 	jsr update_view
 	jsr get_player_input
 	lda gd_parsed_action
-	cmp #verb_forward
-	beq :+
+	cmp #verb_movement_begin
+	bcs :+
 	jsr clear_status_lines
 	lda #$54     ;You can't be serious!
 	jsr print_to_line1
 	jsr wait_long
 	jmp dead_by_snake
 
-:	pla
-	sta zp19_regular_climb
-	pla
-	sta zp1A_pos_x
-	pha
-	lda zp19_regular_climb
-	pha
-	cmp #$01
+:	jsr normal_input_handler
+	lda gs_action_flags
+	and #(action_forward | action_turn)
 	beq :+
-	inc gs_player_x
-	jmp @moved_forward
-
-:	inc gs_player_y
-@moved_forward:
 	jsr update_view
-	lda #$59     ;The
+
+:	ldx #noun_snake
+	stx zp0E_object
+	ldx #icmd_destroy1
+	stx zp0F_action
+	jsr item_cmd
+
+	lda #noun_wool  ;noun_banana
+	sta zp0E_object
+	pha
+	ldx #icmd_where
+	stx zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_begin
+	bcs @snake_eats
+
+	pla
+	lda #noun_wool  ;noun_peel
+	sta zp0E_object
+	pha
+	ldx #icmd_where
+	stx zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_begin
+	bcs @snake_eats
+
+;@snake_fall:
+	lda #$b4     ;The snake falls
 	jsr print_to_line1
-	lda #$11     ;snake
-	jsr print_noun
-	lda #$77     ;has vanished
-	jsr print_display_string
-	ldx #noun_snake
-	stx zp0E_object
+	pla
+	bne @slither_away
+
+@snake_eats:
+	pla
+	sta zp0E_object
+	pha
 	ldx #icmd_destroy1
 	stx zp0F_action
 	jsr item_cmd
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
+	lda #$b3     ;The snake eats the 
+	jsr print_to_line1
 	pla
-	sta zp19_regular_climb
-	pla
-	sta zp1A_pos_x
-	lda zp19_regular_climb
-	cmp #$01
-	bne @in_lair
-	jmp pop_mode_continue
-
-@in_lair:
-	lda gs_monster_alive
-	beq :+
-	lda #$59     ;The
-	jsr print_to_line2
-	lda #$0f     ;wool
 	jsr print_noun
-	lda #$77     ;has vanished
-	jsr print_display_string
-	ldx #icmd_destroy1
-	stx zp0F_action
-	ldx #noun_wool
-	stx zp0E_object
-	jsr item_cmd
-	ldx #$01
-	stx gs_lair_raided
-	ldx #icmd_draw_inv
-	stx zp0F_action
-	jsr item_cmd
-:	ldx #$01
-	stx gs_snake_used
-	ldx #icmd_draw_inv
-	stx zp0F_action
-	jsr item_cmd
-lair_input_loop:
-	jsr get_player_input
-	lda gd_parsed_action
-	cmp #$5a
-	bcs @move
-	cmp #verb_press
-	bne @command_allowed
-	lda #$98     ;You will do no such thing!
+
+@slither_away:
+	lda #$b5     ;and slithers away.
 	jsr print_to_line2
-	jmp lair_input_loop
 
-@command_allowed:
-	jsr cmd_verbal
-	jmp @draw_pit
-
-@move:
-	cmp #verb_forward
-	beq @forward
-	ldx gs_facing
-	stx zp1A_facing
-	jsr move_turn
-@draw_pit:
-	lda gs_facing
-	ldx #$00 ;distance
-	stx zp0E_draw_param
-	ldx #drawcmd04_pit_floor
-	stx zp0F_action
-	cmp #$01
+	lda gs_action_flags
+	and #action_forward
 	bne :+
-	lda gs_room_lit
-	beq :+
-	lda gs_walls_right_depth
-	and #%11100000
-	beq :+
-	jsr draw_special
-:	jmp lair_input_loop
+	jsr wait_long
 
-@forward:
-	lda gs_facing
-	cmp #$01
-	beq @into_pit
-	jsr clear_maze_window
-	ldx #$09
-	stx zp_col
-	ldx #$0a
-	stx zp_row
-	lda #$7c     ;Splat!
-	jsr print_display_string
-	jmp lair_input_loop
-
-@into_pit:
-	inc gs_level
-	ldx #$03
-	stx gs_facing
-	dec gs_player_x
-	jsr pit
+:	jsr check_special_position
+	lda gs_action_flags
+	and #action_level
+	beq :+
 	jsr update_view
-	jmp pop_mode_continue
+
+:	jmp pop_mode_continue
 
 
 

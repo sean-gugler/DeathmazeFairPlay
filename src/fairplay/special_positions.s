@@ -30,14 +30,13 @@ check_special_position:
 	sta zp1A_pos_x
 	lda gs_level
 	cmp #$03
-	bne :+
-	rts
-
-:	bmi :+
+	beq check_level_3
+	bmi :+
 	jmp check_levels_4_5
-
 :	cmp #$02
 	beq check_level_2
+
+;check_level_1:
 	lda zp1A_pos_x
 	cmp #$03
 	beq check_calculator
@@ -72,6 +71,16 @@ beheaded:
 	jsr print_display_string
 	jmp game_over
 
+check_level_3:
+	lda zp19_pos_y
+	cmp #$0a
+	bne :+
+	lda zp1A_pos_x
+	cmp #$01
+	bne :+
+	jsr pit
+:	rts
+
 check_level_2:
 	lda zp19_pos_y
 	cmp #$05
@@ -97,16 +106,10 @@ check_guarded_pit:
 	beq at_guard_dog
 	cmp #$08
 	bne check_dog_roaming
-	ldx #$03
-	stx gs_facing
-	stx gs_level
 	ldx #$08
 	stx gs_player_x
 	ldx #$05
 	stx gs_player_y
-	ldx #$00
-	stx gs_level_moves_hi
-	stx gs_level_moves_lo
 	jsr pit
 	rts
 
@@ -179,6 +182,10 @@ pit:
 	lda #action_level
 	ora gs_action_flags
 	sta gs_action_flags
+	inc gs_level
+	ldx #$00
+	stx gs_level_moves_hi
+	stx gs_level_moves_lo
 	jsr clear_maze_window
 	ldx #$05
 	stx zp_col
