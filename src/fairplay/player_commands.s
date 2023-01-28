@@ -1607,13 +1607,11 @@ check_fart:
 	jmp @next_propel
 
 @guillotine:
-	jsr update_view
 	jsr wait_short
 	jmp beheaded
 
 ; Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
 @wall:
-	jsr update_view ;GUG: is this draw necessary?
 	ldx gs_food_time_hi
 	stx zp0E_count16+1
 	ldx gs_food_time_lo
@@ -1651,7 +1649,12 @@ check_fart:
 	ldx #$0a
 	stx zp_row
 	jsr print_display_string
-	jmp check_special_position
+	jsr check_special_position
+	lda gs_action_flags
+	and #action_level
+	beq :+
+	jsr update_view
+:	rts
 
 @clamp_minimum:
 	ldx #food_fart_minimum

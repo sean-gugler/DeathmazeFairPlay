@@ -1746,13 +1746,17 @@ check_fart:
 	jmp @next_propel
 
 @guillotine:
+.if REVISION < 100 ;RETAIL
 	jsr update_view
+.endif
 	jsr wait_short
 	jmp beheaded
 
 ; Deduct food amount (10). If already <=15, set to 5. If <=5, starve.
 @wall:
-	jsr update_view ;GUG: is this draw necessary?
+.if REVISION < 100 ;RETAIL
+	jsr update_view
+.endif
 	ldx gs_food_time_hi
 	stx zp0E_count16+1
 	ldx gs_food_time_lo
