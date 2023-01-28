@@ -762,7 +762,12 @@ special_snake:
 
 dead_by_snake:
 	jsr clear_status_lines
-	lda #$20     ;Snake bites you!
+	lda gs_snake_freed
+	cmp #$02
+	bne :+
+	lda #$b2     ;A snake is eating it!!!
+	jsr print_to_line1
+:	lda #$20     ;Snake bites you!
 	jsr print_to_line2
 	jmp game_over
 

@@ -582,7 +582,7 @@ cmd_fill:
 
 cmd_light:
 	dec zp0F_action
-	bne cmd_peel
+	bne cmd_play
 
 	lda zp0E_object
 	cmp #noun_torch
@@ -642,19 +642,6 @@ cmd_light:
 	sta zp0F_action
 	jsr item_cmd
 	rts
-
-
-cmd_peel:
-	dec zp0F_action
-	bne cmd_play
-
-	lda zp0E_object
-	cmp #noun_banana
-	beq :+
-	jmp nonsense
-:	lda #verb_eat
-	sta gd_parsed_action
-	jmp cmd_verbal
 
 
 cmd_play:
@@ -739,8 +726,7 @@ play_flute:
 	jsr push_special_mode
 	lda #special_mode_climb
 	sta gs_special_mode
-	lda #$00
-	sta gs_snake_used
+	inc gs_snake_freed
 	rts
 
 cmd_strike:
@@ -840,6 +826,10 @@ print_inspected:
 	bne :+
 	lda #$b1     ;the rim is serrated and sharp!
 	bne look_print
+:	cmp #noun_peel
+	bne :+
+	lda #$b7     ;the banana peel is slippery.
+	bne look_print
 :	lda #$68     ;nothing of interest.
 	bne look_print
 
@@ -903,6 +893,17 @@ cmd_open:
 	jsr item_cmd
 @check_contents:
 	lda zp11_item
+
+	cmp #noun_banana
+	beq :+
+	cmp #noun_peel
+	bne @check_snake
+:	ldx gs_snake_freed
+	beq @print_item_name
+	inc gs_snake_freed
+	bne @push_mode_snake
+
+@check_snake:
 	cmp #noun_snake
 	beq @push_mode_snake
 	.assert nouns_unique_end - 1 = noun_snake, error, "Snake is not last unique. Open Box logic needs to change."
@@ -923,7 +924,8 @@ cmd_open:
 	jsr print_to_line1
 	lda zp10_noun
 	sta zp13_temp  ;preserve 'object'
-	cmp #noun_snake
+	lda gs_special_mode
+	cmp #special_mode_snake
 	bne :+
 	jsr wait_long
 :	pla
@@ -951,7 +953,7 @@ cmd_open:
 	jsr push_special_mode
 	ldx #special_mode_snake
 	stx gs_special_mode
-	lda #noun_snake
+	lda zp11_item
 	bne @print_item_name
 
 @open_door:
@@ -1315,7 +1317,15 @@ react_taken:
 	jsr item_cmd
 	lda gd_parsed_object
 	cmp #noun_snake
+	beq @snake
+	cmp #noun_banana
+	beq :+
+	cmp #noun_peel
 	bne @done
+:	ldx gs_snake_freed
+	beq @done
+	inc gs_snake_freed
+@snake:
 	jsr push_special_mode
 	ldx #special_mode_snake
 	stx gs_special_mode

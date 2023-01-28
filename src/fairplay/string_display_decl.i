@@ -175,8 +175,9 @@
 	text_She_is_blinded_ = $af
 	text_She_sees_you_coming_ = $b0
 	text_the_rim_is_serrated_and_sharp_ = $b1
-	text_The_snake_is_eating_it____ = $b2
+	text_A_snake_is_eating_it___ = $b2
 	text_The_snake_eats_the_ = $b3
 	text_The_snake_falls = $b4
 	text_and_slithers_away_ = $b5
-	text_The_banana_is_delicious_ = $b6
+	text_You_peel_and_eat_the_banana__Delicious_ = $b6
+	text_the_banana_peel_is_slippery_ = $b7

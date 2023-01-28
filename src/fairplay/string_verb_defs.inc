@@ -14,7 +14,6 @@
 	msbstring "put "
 	msbstring "fill"
 	msbstring "ligh"
-	msbstring "peel"
 	msbstring "play"
 	msbstring "stri"
 	msbstring "wear"

@@ -9,7 +9,6 @@ climb
 drop leave put
 fill
 light
-peel
 play
 strike
 wear
@@ -250,11 +249,12 @@ It hits her in the eye!
 She is blinded!
 She sees you coming.
 the rim is serrated and sharp!
-The snake is eating it!!! 
+A snake is eating it!!!
 The snake eats the 
 The snake falls
 and slithers away.
-The banana is delicious!
+You peel and eat the banana. Delicious!
+the banana peel is slippery.
 
 [Intro]
 "           Deathmaze 5000               "

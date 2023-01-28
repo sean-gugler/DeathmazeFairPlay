@@ -40,7 +40,7 @@
 	.global gs_bomb_tick
 	.global gs_rotate_total
 	.global gs_lair_raided
-	.global gs_snake_used
+	.global gs_snake_freed
 ;	.global gs_UNUSED
 
 	.global gs_item_locs
