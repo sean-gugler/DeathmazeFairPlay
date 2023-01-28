@@ -80,12 +80,9 @@ zp0F_action         = $0F;
 zp0E_object         = $0E;
 
 
-doormsg_lock_begin = text_You_unlock_the_door___ +1
-doormsg_lock_end   = text_Having_fun_
+doormsg_lock_begin = text_You_unlock_the_door___ + 1
 
-doors_locked = doormsg_lock_end - doormsg_lock_begin
-
-door_correct = $02  ;1-based
+door_correct = text_and_the_key_begins_to_tick_ - doormsg_lock_begin
 
 
 	.segment "COMMAND1"
@@ -125,7 +122,7 @@ cmd_verbal:
 	cmp zp0E_object
 	beq @staff
 @having_fun:
-	lda #$1f     ;Having fun?
+	lda #$8e     ;Having fun?
 @print_line2:
 	jmp print_to_line2
 
@@ -288,6 +285,18 @@ cmd_eat:
 	cmp #noun_ball
 	bne :+
 	jmp throw_react
+
+:	cmp #noun_banana
+	bne :+
+	jsr item_cmd ;zp0F_action already 0 (icmd_destroy1)
+	lda #noun_peel
+	sta zp0E_object
+	lda #icmd_set_carried_known
+	sta zp0F_action
+	jsr item_cmd
+	lda #$b6     ;The banana is delicious!
+	bne @print
+
 :	cmp #nouns_unique_end
 	bmi @eaten  ;zp0F_action already 0 (icmd_destroy1)
 
@@ -359,8 +368,8 @@ cmd_throw:
 	bne :+
 	jmp throw_frisbee
 
-:	cmp #noun_wool
-	beq throw_wool
+:	cmp #noun_peel
+	beq throw_peel
 	cmp #noun_yoyo
 	beq throw_yoyo
 	cmp #nouns_unique_end
@@ -397,9 +406,9 @@ thrown:
 	lda #$5d     ;the monster!
 	jmp print_to_line2
 
-throw_wool:
+throw_peel:
 ; These zp variables are already set to these values upon entry.
-;	lda #noun_wool
+;	lda #noun_peel
 ;	sta zp0E_object
 ;	lda #icmd_destroy1
 ;	sta zp0F_action
@@ -573,7 +582,7 @@ cmd_fill:
 
 cmd_light:
 	dec zp0F_action
-	bne cmd_play
+	bne cmd_peel
 
 	lda zp0E_object
 	cmp #noun_torch
@@ -633,6 +642,20 @@ cmd_light:
 	sta zp0F_action
 	jsr item_cmd
 	rts
+
+
+cmd_peel:
+	dec zp0F_action
+	bne cmd_play
+
+	lda zp0E_object
+	cmp #noun_banana
+	beq :+
+	jmp nonsense
+:	lda #verb_eat
+	sta gd_parsed_action
+	jmp cmd_verbal
+
 
 cmd_play:
 	dec zp0F_action
@@ -768,7 +791,7 @@ cmd_wear:
 cmd_look:
 	lda zp0F_action
 	sec
-	sbc #$0e
+	sbc #verb_look
 	sta zp0F_action
 	bne cmd_rub
 
@@ -896,7 +919,7 @@ cmd_open:
 	clc
 	adc #$04
 	jsr print_to_line2
-	lda #$18     ;Inside the box there is a
+	lda #($03 + nouns_item_end)     ;Inside the box there is a
 	jsr print_to_line1
 	lda zp10_noun
 	sta zp13_temp  ;preserve 'object'
@@ -973,10 +996,10 @@ locked_door:
 	pla
 	clc
 	adc #doormsg_lock_begin - doors_locked_begin
-	cmp #doormsg_lock_begin + (door_correct - 1)
+	cmp #doormsg_lock_begin + door_correct
 	beq @correct_lock
 	jsr print_to_line2
-	lda #$19     ;You unlock the door...
+	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
 	jmp game_over
 
@@ -989,9 +1012,9 @@ locked_door:
 	ldx #special_mode_bomb
 	stx gs_special_mode
 	jsr clear_status_lines
-	lda #$19     ;You unlock the door...
+	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
-	lda #doormsg_lock_begin + (door_correct - 1)
+	lda #doormsg_lock_begin + door_correct
 	jmp print_to_line2
 
 which_door:
@@ -1053,12 +1076,14 @@ door_table:
 	.byte $31,$44
 	.byte $42,$14
 	.byte $52,$35
+door_locked_begin:
 	.byte $52,$4a
 	.byte $52,$5a
 	.byte $52,$6a
 	.byte $52,$7a
 	.byte $52,$8a
 doors = (* - door_table) / 2
+doors_locked = (* - door_locked_begin) / 2
 doors_locked_begin = 1 + (doors - doors_locked)  ;one-based indexing
 
 	.segment "COMMAND3"

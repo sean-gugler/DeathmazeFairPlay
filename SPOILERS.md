@@ -45,6 +45,30 @@ There is now a reason for the frisbee to exist, apart from being a death trap.
 
 There is now a reason for the yoyo to exist.
 
+* WOOL replaced with BANANA
+
+It never made sense that the wool disappears when you climb the snake into the monster's lair. There's no logical reason for this. Doubly strange if you weren't even carrying the wool, or hadn't discovered it yet. Like, what wool? And how would I know it had vanished if it's not even here?
+
+The intended purpose for the wool is also not intuitive. Wool is used for keeping things warm, or spinning into yarn, or protecting fragile items against breakage. Maybe even soaking and squeezing the dye out of it - why else is it specifically "blue"? Throwing wool at a monster to entangle and trip it is not a well-known trope. If it's a reference to something, I'm not aware of it. There's no tie-in to the Grendel story, which would have at least been fair if obscure. This solution felt discoverable only by trying everything possible, by exhausting the verb/noun combinations. That's an unfortunately common but unpleasant trait of games from this era.
+
+So what item can trip up a monster and would be stolen by a freed snake? How about a banana? True, real snakes won't eat bananas, but you can't climb a real snake charmed by a flute either. At least slipping on a banana peel is a much more well-known trope than getting tangled in wool. 
+
+I didn't want to just remove the wool because I admire the solid logic chain of the core puzzle:
+
+1. The player cannot reach the exit until the monster is dead.
+2. The monster's mother guards the exit.
+3. The sword is needed to defeat the monster's mother.
+4. The snake is needed to reach the sword.
+5. The roaming dog will be encountered on the way to fetching the snake.
+
+If the dagger is used to defeat the dog, and the sword to defeat both the monster and its mother, then the sneaker would be superfluous. To make the sneaker mandatory, the sword must be prevented from being used against the monster. This is achieved with the following dependency chain:
+
+1. Our everyman player is no match for the monster unless it is made vulnerable first.
+2. The item that makes it vulnerable vanishes when the snake is freed.
+3. The snake is needed to reach the sword.
+
+Thus the player may experiment with skipping the dog or using the dagger against it, but will be unable to reach the exit unless the sneaker is used on the dog.
+
 * CALCULATOR expanded
 
 The criteria for when the calculator works and when it doesn't felt arbitrary and unjustified. So now it always works consistently. To preserve the puzzle gate of not being actually useful or effective until the monster is dead, it brings the monster with you.

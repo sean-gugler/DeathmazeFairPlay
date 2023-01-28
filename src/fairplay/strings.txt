@@ -9,6 +9,7 @@ climb
 drop leave put
 fill
 light
+peel
 play
 strike
 wear
@@ -31,6 +32,7 @@ help hint instructions directions
 
 [Nouns Unique]
 Ball
+Banana
 Brush
 Calculator
 Dagger
@@ -40,11 +42,11 @@ Hat
 Horn
 Jar 
 Key 
+Peel
 Ring
 Sneaker
 Staff
 Sword
-Wool
 Yoyo
 Snake
 
@@ -76,6 +78,7 @@ Torches:
 Lit:
 Unlit:
 crystal ball.
+nice banana.
 paintbrush used by Van Gogh.
 calculator with 10 buttons.
 razor sharp dagger.
@@ -85,11 +88,11 @@ hat with two ram's horns.
 carefully polished ram's horn.
 glass jar complete with lid.
 golden key.
+slippery banana peel.
 diamond ring.
 rotted mutilated sneaker.
 magic staff.
 heavy two-handed sword.
-ball of blue wool.
 yoyo.
 snake !!!
 basket of food.
@@ -101,7 +104,6 @@ and the key begins to tick!
 and a 20,000 volt shock kills you!
 A 600 pound gorilla rips your face off!
 Two men in white coats take you away!
-Having fun?
 The snake bites you and you die!
 Thunderbolts shoot out above you!
 The staff thunders with useless energy!
@@ -212,7 +214,7 @@ It's awfully dark.
 Look at what?
 It looks very dangerous!
 I'm sorry, but I can't 
-You are confusing me.
+Having fun?
 What in tarnation is a 
 I don't see that here.
 OK...if you really want to,
@@ -252,6 +254,7 @@ The snake is eating it!!!
 The snake eats the 
 The snake falls
 and slithers away.
+The banana is delicious!
 
 [Intro]
 "           Deathmaze 5000               "

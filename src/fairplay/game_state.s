@@ -105,7 +105,7 @@ gs_item_locs:
 	JUNK_BYTE {$08,$00,$01,$64,$02,$33,$08,$00}
 	JUNK_BYTE {$00,$00,$05,$72,$07,$00,$00,$00}
 	JUNK_BYTE {$02,$86,$08,$00,$04,$a8,$04,$57}
-	JUNK_BYTE {$00,$00}
+	JUNK_BYTE {$00,$00,$00,$00}
 	.assert * - gs_item_locs = items_unique * 2, error, "Miscount between data and definition"
 
 gs_item_food:

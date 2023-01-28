@@ -1151,7 +1151,7 @@ special_climb:
 	stx zp0F_action
 	jsr item_cmd
 
-	lda #noun_wool  ;noun_banana
+	lda #noun_banana
 	sta zp0E_object
 	pha
 	ldx #icmd_where
@@ -1162,7 +1162,7 @@ special_climb:
 	bcs @snake_eats
 
 	pla
-	lda #noun_wool  ;noun_peel
+	lda #noun_peel
 	sta zp0E_object
 	pha
 	ldx #icmd_where

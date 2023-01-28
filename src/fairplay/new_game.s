@@ -48,6 +48,7 @@ data_new_game:
 	.byte $00		;UNUSED
 ; item locations: place (level), position XY
 	.byte $01,$35	;ball
+	.byte $03,$6a	;banana
 	.byte $03,$a5	;brush
 	.byte $01,$33	;calculator
 	.byte $01,$46	;dagger
@@ -57,11 +58,11 @@ data_new_game:
 	.byte $04,$71	;horn
 	.byte $02,$11	;jar
 	.byte $05,$72	;key
+	.byte $00,$00	;peel
 	.byte $01,$23	;ring
 	.byte $01,$72	;sneaker
 	.byte $02,$86	;staff
 	.byte $03,$2a	;sword
-	.byte $03,$6a	;wool
 	.byte $04,$57	;yoyo
 	.byte $02,$39	;snake
 	.byte $02,$26	;food
