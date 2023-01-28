@@ -74,3 +74,7 @@ There is a situation where this verb is a perfectly reasonable thing to try. So 
 It is possible to avoid the dog entirely on Level 2, then return with the calculator after killing the monster. Throwing the sneaker had a scripted response that always mentioned getting eaten by the monster ... which should be impossible since it's already dead. I've fixed it so the dog will still chase the sneaker, even though it vanishes. This is not a win because the dog reappears immediately next turn.
 
 This scenario is also possible in the retail version so I incorporated my change into the fan-fixed version. The README is vague about the details to avoid spoilers.
+
+* PLAY with dog
+
+In the dog encounter, PLAY BALL is recognized. So is THROW BALL. You still die, but at least the stock answer "With who?" now has an answer.

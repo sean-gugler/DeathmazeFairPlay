@@ -315,21 +315,13 @@ special_dog:
 	lda gd_parsed_object
 	sta zp1A_object
 	lda gd_parsed_action
-	cmp #$59
+	cmp #verb_movement_begin
 	bcs @dead
-	cmp #verb_throw
-	beq @throw
-	cmp #verb_attack
-	beq @attack
-	cmp #verb_look
-	beq @look
-@dead:
-	jsr clear_status_lines
-	lda #$2f     ;He rips your throat out!
-	jsr print_to_line2
-	jmp game_over
 
 @look:
+	cmp #verb_look
+	bne @attack
+
 	lda zp1A_object
 	cmp #noun_dog
 	bne @dead
@@ -338,6 +330,9 @@ special_dog:
 	jmp @dog_input
 
 @attack:
+	cmp #verb_attack
+	bne @play
+
 	lda zp1A_object
 	cmp #noun_dog
 	bne @dead
@@ -365,6 +360,12 @@ special_dog:
 	jsr print_to_line1
 	rts
 
+@dead:
+	jsr clear_status_lines
+	lda #$2f     ;He rips your throat out!
+	jsr print_to_line2
+	jmp game_over
+
 @with_dagger:
 	ldx #icmd_destroy1
 	stx zp0F_action
@@ -378,21 +379,42 @@ special_dog:
 	jsr print_to_line2
 	jmp @killed
 
-@throw:
+@play:
+	cmp #verb_play
+	bne @throw
+
 	lda zp1A_object
+	cmp #noun_ball
+	beq @have
+	;bne @dead
+	; save 2 bytes. Any other object will fail the
+	; next cmp anyway, except frisbee (coincidentally
+	; same value as throw), which will still fail
+	; the subsequent noun check and end up @dead.
+
+@throw:
+	cmp #verb_throw
+	bne @dead
+
+	lda zp1A_object
+	cmp #noun_ball
+	beq @have
 	cmp #noun_sneaker
 	bne @dead
+@have:
+	pha
 	sta zp0E_object
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
+	pla
+	sta zp0E_object
+	ldx #icmd_destroy1
+	stx zp0F_action
+	;item_cmd performed in jsr thrown below
 	lda #carried_known
 	cmp zp1A_item_place
 	bne @dead
-	ldx #noun_sneaker
-	stx zp0E_object
-	ldx #icmd_destroy1
-	stx zp0F_action
 	jsr thrown
 	jsr wait_long
 	jsr clear_status_lines
