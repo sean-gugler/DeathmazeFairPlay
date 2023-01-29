@@ -52,7 +52,7 @@ data_new_game:
 	.byte $03,$a5	;brush
 	.byte $01,$33	;calculator
 	.byte $01,$46	;dagger
-	.byte $04,$58	;flute
+	.byte $02,$86	;flute
 	.byte $01,$64	;frisbee
 	.byte $01,$1b	;hat
 	.byte $04,$71	;horn
@@ -61,7 +61,7 @@ data_new_game:
 	.byte $00,$00	;peel
 	.byte $01,$23	;ring
 	.byte $01,$72	;sneaker
-	.byte $02,$86	;staff
+	.byte $04,$58	;staff
 	.byte $03,$2a	;sword
 	.byte $04,$57	;yoyo
 	.byte $02,$39	;snake

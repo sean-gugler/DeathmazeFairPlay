@@ -75,6 +75,14 @@ The criteria for when the calculator works and when it doesn't felt arbitrary an
 
 It is now reusable as well, not only to encourage exploration without resorting to save games, but to give a purpose to having so many buttons. In the original design only one mattered. Since some of the "useless" items are now required and there is not enough inventory capacity to bring them all along at once, the ability to go fetch them later becomes important. The extra buttons now serve a vital purpose to be able to revisit earlier areas.
 
+* STAFF swapped with FLUTE
+
+Making the calculator re-usable undermines a puzzle in the original design: how to reach the item on the other side of the level 2 pit. One way is to defeat the guard dog, but doing so uses up an item needed elsewhere (dagger for monster, or sneaker for roaming dog). The other way is to discover the verb "fart".
+
+By allowing multiple teleports, the sword could now be brought back to defeat the guard dog. In general it can be enriching to have more than one way to solve a puzzle, but it is poor design to have a mechanic (fart) whose sole usefulness can be bypassed. So we need a new interlock to prevent this solution.
+
+Putting the flute behind the pit achieves this goal, because the flute is needed to reach the sword. It can still be reached for early experimentation before figuring out how to beat the monster, by defeating both dogs with dagger and sneaker. There wasn't much benefit in obtaining the staff early; unlike the flute and snake, the staff has no demonstrable effect on the world until very late in the game. After the monster is dead, the sword can optionally be used to defeat the guard dog - not needed to bypass the pit, just as an optional but satisfying "clean up" task.
+
 * "Darkens" message when appropriate
 
 When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.
