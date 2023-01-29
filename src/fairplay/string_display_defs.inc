@@ -16,7 +16,7 @@
 	msbstring "diamond ring."
 	msbstring "rotted mutilated sneaker."
 	msbstring "magic staff."
-	msbstring "7 pound two-handed sword."
+	msbstring "heavy two-handed sword."
 	msbstring "ball of blue wool."
 	msbstring "yoyo."
 	msbstring "snake !!!"

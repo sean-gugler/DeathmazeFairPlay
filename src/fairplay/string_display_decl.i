@@ -15,7 +15,7 @@
 	text_diamond_ring_ = $0f
 	text_rotted_mutilated_sneaker_ = $10
 	text_magic_staff_ = $11
-	text_7_pound_two_handed_sword_ = $12
+	text_heavy_two_handed_sword_ = $12
 	text_ball_of_blue_wool_ = $13
 	text_yoyo_ = $14
 	text_snake____ = $15

@@ -35,7 +35,7 @@ The original printed game manual had nearly the same text as the instructions yo
 
 * RING revision
 
-The ring was originally the light source for level 5 after your torch goes out. Its magic light is activated by raising it ... but it confusingly only works on level 5. To improve the experience, I've changed it to glow hot when rubbed. It can then be used to re-light an extinguished torch. The glow only lasts for one turn but can be invoked over and over. This allows its purpose to be consistent and also discoverable much earlier. It shouldn't break the game duration because the torches are still limited in number. Admittedly it also softens the game's harsh lethality by providing a recovery path after the torch goes out through use or by carelessly dropping it. Some might feel this dampens the spirit of the original game. I justify it by noting that those situations are still lethal if the ring is not engaged, and it adds satisfaction of solving one more puzzle.
+The ring was originally the light source for level 5 after your torch goes out. Its magic light is activated by raising it ... but it confusingly only works on level 5. To improve the experience, I've changed it to glow hot when rubbed. It can then be used to re-light an extinguished torch. The glow only lasts for one turn but can be invoked over and over. This allows its purpose to be consistent and also discoverable much earlier. It shouldn't break the game duration limits because the torches are still limited in number. If anything, it imposes a new time limit on level 5 exploration in addition to starvation. Admittedly it also softens the game's harsh lethality by providing a recovery path after the torch goes out through use or by carelessly dropping it. Some might feel this dampens the spirit of the original game. I justify it by noting that those situations are still lethal if the ring is not engaged, and it adds satisfaction of solving one more puzzle.
 
 * FRISBEE purpose
 
@@ -49,7 +49,7 @@ There is now a reason for the yoyo to exist.
 
 The criteria for when the calculator works and when it doesn't felt arbitrary and unjustified. So now it always works consistently. To preserve the puzzle gate of not being actually useful or effective until the monster is dead, it brings the monster with you.
 
-It is now reusable as well, not only to encourage exploration without resorting to save games, but to give a purpose to having so many buttons. In the original design only one mattered. Since some of the "useless" items are now required and there is not enough inventory capacity to bring them all along, the ability to go fetch them later becomes important. The extra buttons now serve a vigtal purpose to be able to revisit earlier areas.
+It is now reusable as well, not only to encourage exploration without resorting to save games, but to give a purpose to having so many buttons. In the original design only one mattered. Since some of the "useless" items are now required and there is not enough inventory capacity to bring them all along at once, the ability to go fetch them later becomes important. The extra buttons now serve a vital purpose to be able to revisit earlier areas.
 
 ## Quality of Life improvements
 
@@ -65,9 +65,11 @@ There are times when "open" also implies "unlock", and this behavior is preserve
 
 There is a situation where this verb is a perfectly reasonable thing to try. So I've enabled that.
 
-* SWORD weight reduced
+* SWORD weight made reasonable
 
-90 pounds is absurd. The heaviest swords weigh about 7, so I reduced it to that. The weight is purely cosmetic, it doesn't affect game play at all. May as well retain player immersion better by demanding less suspension of disbelief. https://swordscorner.com/how-much-do-swords-weigh-full-analysis-table-lbs-kgs/
+90 pounds is absurd. The heaviest real swords weigh about 7 (see link below). The weight is purely cosmetic, it doesn't affect game play at all. May as well retain player immersion better by demanding less suspension of disbelief. I removed the number and simply describe the sword as "heavy".
+
+https://swordscorner.com/how-much-do-swords-weigh-full-analysis-table-lbs-kgs/
 
 * DOG vs MONSTER
 
