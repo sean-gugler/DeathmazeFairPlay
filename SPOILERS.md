@@ -75,6 +75,10 @@ The criteria for when the calculator works and when it doesn't felt arbitrary an
 
 It is now reusable as well, not only to encourage exploration without resorting to save games, but to give a purpose to having so many buttons. In the original design only one mattered. Since some of the "useless" items are now required and there is not enough inventory capacity to bring them all along at once, the ability to go fetch them later becomes important. The extra buttons now serve a vital purpose to be able to revisit earlier areas.
 
+* "Darkens" message when appropriate
+
+When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.
+
 ## Quality of Life improvements
 
 * Numbers allowed

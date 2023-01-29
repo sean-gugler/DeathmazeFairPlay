@@ -141,8 +141,8 @@ The key blows up the whole maze!
 The ground beneath your feet
 begins to shake!
 A disgusting odor permeates
-the hallway as it darkens!
-the hallway!
+the hallway
+ as it darkens
 It is the monster's mother!
 She has been seduced!
 She tiptoes up to you ...

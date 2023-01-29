@@ -67,8 +67,8 @@
 	text_The_ground_beneath_your_feet = $43
 	text_begins_to_shake_ = $44
 	text_A_disgusting_odor_permeates = $45
-	text_the_hallway_as_it_darkens_ = $46
-	text_the_hallway_ = $47
+	text_the_hallway = $46
+	text__as_it_darkens = $47
 	text_It_is_the_monster_s_mother_ = $48
 	text_She_has_been_seduced_ = $49
 	text_She_tiptoes_up_to_you____ = $4a

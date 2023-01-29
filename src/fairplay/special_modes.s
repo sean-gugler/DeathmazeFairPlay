@@ -481,8 +481,14 @@ special_monster:
 	jsr wait_if_prior_text
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
-	lda #$46     ;the hallway!
+	lda #$46     ;the hallway
 	jsr print_to_line2
+	lda gs_room_lit
+	beq :+
+	lda #$47     ;as it darkens
+	jsr print_display_string
+:	lda #'!'
+	jsr char_out
 	jmp input_during_encounter
 
 @monster_here:
@@ -603,8 +609,14 @@ special_mother:
 	jsr wait_if_prior_text
 	lda #$45     ;A disgusting odor permeates
 	jsr print_to_line1
-	lda #$46     ;the hallway as it darkens!
+	lda #$46     ;the hallway
 	jsr print_to_line2
+	lda gs_room_lit
+	beq :+
+	lda #$47     ;as it darkens
+	jsr print_display_string
+:	lda #'!'
+	jsr char_out
 	jmp input_during_encounter
 
 @mother_arrives:
