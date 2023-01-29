@@ -45,7 +45,7 @@ data_new_game:
 	.byte $00		;rotate puzzle: total turns
 	.byte $00		;lair raided
 	.byte $00		;snake freed
-	.byte $00		;UNUSED
+	.byte $00		;hat used
 ; item locations: place (level), position XY
 	.byte $01,$35	;ball
 	.byte $03,$6a	;banana
@@ -54,7 +54,7 @@ data_new_game:
 	.byte $01,$46	;dagger
 	.byte $02,$86	;flute
 	.byte $01,$64	;frisbee
-	.byte $01,$1b	;hat
+	.byte $01,$16	;hat
 	.byte $04,$71	;horn
 	.byte $02,$11	;jar
 	.byte $05,$72	;key

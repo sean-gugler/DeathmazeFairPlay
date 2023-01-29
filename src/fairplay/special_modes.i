@@ -1,4 +1,5 @@
 ; Values for gs_special_mode
+special_mode_pit1 = $01
 special_mode_calc_puzzle = $02
 special_mode_bat = $04
 special_mode_dog1 = $06

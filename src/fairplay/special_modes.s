@@ -65,22 +65,117 @@ zp1A_hint_mode     = $1A;
 
 check_special_mode:
 	ldx gs_special_mode
-	bne :+
+	bne special_pit1
 	rts
 
-:	dex
+special_pit1:
 	dex
-	beq special_calc_puzzle
+	beq :+
+	jmp special_calc_puzzle
+
+:	lda gs_player_x
+	cmp #$02
+	beq :+
+	jmp pop_mode_continue
+
+:	jsr get_player_input
+	jsr normal_input_handler
+	lda gs_action_flags
+	and #action_forward
+	beq :+
+	jsr count_as_move
+:	lda gs_action_flags
+	and #(action_forward | action_turn)
+	beq :+
+	jsr @probe_special
+	bcs :+
+	jsr update_view
+:	jsr print_timers
+	jmp check_special_mode
+
+@abort:
+	clc
+	rts
+
+@probe_special:
+	lda gs_player_y
+	cmp #$0a
+	beq :+
+	cmp #$09
+	bne @abort
+	lda gs_facing
+	cmp #$02
+	bne @abort
+
+	; y $09  facing $02
+	lda #$00
+	sta gs_walls_left
+	ldx #$22
+	stx gs_walls_right_depth
+	bne @continue
+
+:	lda gs_facing
+	cmp #$02
+	bne :+
+
+	; y $0a  facing $02
+	lda #$00
+	sta gs_walls_left
+	ldx #$01
+	stx gs_walls_right_depth
+	bne @continue
+
+:	cmp #$01
+	bne @abort
+
+	; y $0a  facing $01
+	lda #$02
+	sta gs_walls_left
+	ldx #$23
+	stx gs_walls_right_depth
+;	bne @continue
+
+@continue:
+	pha
+	jsr clear_maze_window
+	lda gs_room_lit
+	beq @done
+	jsr draw_maze
+
+	pla
+	pha
+	beq :+
+	lda #$04 ;pit floor
+	sta zp0F_action
+	lda #$00 ;distance 1
+	sta zp0E_draw_param
+	jsr draw_special
+
+:	ldx #icmd_probe_boxes
+	stx zp0F_action
+	jsr item_cmd
+	lda gs_box_visible
+	beq @done
+	sta zp0E_draw_param
+	ldx #drawcmd06_boxes
+	stx zp0F_action
+	jsr draw_special
+@done:
+	pla
+	sec
+	rts
+
+
+special_calc_puzzle:
+	dex
+	beq :+
 	jmp special_bat
-
-
 
 ;	lda #$9e     ;A cruel laugh booms out
 ;	lda #$9f     ;Invert and telephone.
 ;	jmp print_to_line2
 
-special_calc_puzzle:
-	jsr update_view
+:	jsr update_view
 	jsr @init_puzzle
 	ldx #$01
 	stx zp1A_hint_mode

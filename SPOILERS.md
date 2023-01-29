@@ -83,6 +83,10 @@ By allowing multiple teleports, the sword could now be brought back to defeat th
 
 Putting the flute behind the pit achieves this goal, because the flute is needed to reach the sword. It can still be reached for early experimentation before figuring out how to beat the monster, by defeating both dogs with dagger and sneaker. There wasn't much benefit in obtaining the staff early; unlike the flute and snake, the staff has no demonstrable effect on the world until very late in the game. After the monster is dead, the sword can optionally be used to defeat the guard dog - not needed to bypass the pit, just as an optional but satisfying "clean up" task.
 
+* Draw the level 1 pit 
+
+After this pit is exposed, make it visible. This is more than just cosmetic; it is now required since the hat has been changed from re-usable to single-use.
+
 * "Darkens" message when appropriate
 
 When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.

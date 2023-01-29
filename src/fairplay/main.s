@@ -423,8 +423,8 @@ get_maze_feature:
 	dec zp19_count
 	bne @next
 	lda #$00
-	sta zp0E_ptr+1
-	sta zp0E_ptr
+	sta zp0F_action
+	sta zp0E_draw_param
 	rts
 
 @check_position:

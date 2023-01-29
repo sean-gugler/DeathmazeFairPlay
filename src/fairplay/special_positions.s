@@ -38,10 +38,11 @@ check_special_position:
 
 ;check_level_1:
 	lda zp1A_pos_x
-	cmp #$03
-	beq check_calculator
 	cmp #$06
 	beq check_guillotine
+	cmp #$03
+	beq check_calculator
+	bcc check_level_1_pit
 	rts
 
 check_calculator:
@@ -70,6 +71,30 @@ beheaded:
 	lda #$29     ;Invisible guillotine
 	jsr print_display_string
 	jmp game_over
+
+check_level_1_pit:
+	cmp #$01
+	beq @fall
+	lda gs_hat_used
+	beq :+
+	lda zp19_pos_y
+	cmp #$09
+	bcc :+
+	jsr push_special_mode
+	ldx #special_mode_pit1
+	stx gs_special_mode
+:	rts
+
+@fall:
+	lda zp19_pos_y
+	cmp #$0a
+	bne :+
+	jsr pit
+	ldx #$03
+	stx gs_player_x
+;	ldx #$03
+	stx gs_player_y
+:	rts
 
 check_level_3:
 	lda zp19_pos_y

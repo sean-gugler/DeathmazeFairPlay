@@ -1474,15 +1474,16 @@ cmd_charge:
 	jmp cmd_fart
 
 @propel_player:
-	lda #$02
+	lda #$01
 	cmp gs_facing
 	bne @normal
-	lda #$01
+;	lda #$01
 	cmp gs_level
 	bne @normal
+	lda #$02
 	cmp gs_player_x
 	bne @normal
-	lda #$0b
+	lda #$0a
 	cmp gs_player_y
 	bne @normal
 	ldx #noun_hat
@@ -1500,6 +1501,7 @@ cmd_charge:
 	ldx #$03
 	stx gs_player_y
 	stx gs_player_x
+	inc gs_hat_used
 	jmp update_view
 
 @normal:

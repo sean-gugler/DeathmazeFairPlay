@@ -1,6 +1,6 @@
 ;;; THIS FILE IS AUTO-GENERATED
 ;;; BY  ../../tools/build_maze.py
-;;; FROM  ../../src/faithful/maze.txt
+;;; FROM  ../../src/fairplay/maze.txt
 
 	.export maze_walls
 
@@ -11,10 +11,10 @@ maze_walls:
 	;Columns are sequenced west to east.
 	;Each pair of bits is whether there is a wall to South and West of each cell.
 	; Level 1
-	.byte %11010101,%01111101,%01010111 ; $d5,$7d,$57
-	.byte %10100110,%10010101,%11010011 ; $a6,$95,$d3
-	.byte %10110110,%01010110,%10011100 ; $b6,$56,$9c
-	.byte %10100101,%11011010,%01001000 ; $a5,$da,$48
+	.byte %11010101,%01110101,%01111111 ; $d5,$75,$7f
+	.byte %10100110,%10010101,%10011111 ; $a6,$95,$9f
+	.byte %10110110,%01010110,%10011111 ; $b6,$56,$9f
+	.byte %10100101,%11011010,%01001111 ; $a5,$da,$4f
 	.byte %10010110,%00010011,%01101111 ; $96,$13,$6f
 	.byte %11001011,%10010100,%10101111 ; $cb,$94,$af
 	.byte %10111000,%01010111,%00101111 ; $b8,$57,$2f
