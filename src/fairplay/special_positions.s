@@ -52,6 +52,7 @@ check_calculator:
 	rts
 
 at_calculator:
+	jsr push_special_mode
 	ldx #special_mode_calc_puzzle
 	stx gs_special_mode
 	rts
