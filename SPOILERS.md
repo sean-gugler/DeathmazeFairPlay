@@ -39,11 +39,11 @@ The ring was originally the light source for level 5 after your torch goes out. 
 
 * FRISBEE purpose
 
-There is now a reason for the frisbee to exist, apart from being a death trap.
+There is now a reason for the frisbee to exist, apart from being a death trap. If it can saw your head off, how about we use it to saw the monster's head off when it's helpless? Adding one step between kill monster and collect blood gives the frisbee a sensible purpose. I've given it a LOOK description to assist with hinting.
 
 * YOYO purpose
 
-There is now a reason for the yoyo to exist.
+There is now a reason for the yoyo to exist. Since it's establish that it can hit you in the eye, how about we turn that into a hint to hit something else in the eye? The monster encounter already has several steps, so we'll add it to the mother encounter. If you don't blind her first, she can dodge your sword attack.
 
 * HORN breaks off hat
 
