@@ -1019,7 +1019,6 @@ special_elevator:
 	lda gd_parsed_action
 	cmp #verb_forward
 	beq enter_elevator
-	jsr update_view
 ;pop_mode_do_cmd:
 	lda gs_mode_stack1
 	sta gs_special_mode
@@ -1028,6 +1027,7 @@ special_elevator:
 	stx gs_mode_stack2
 	sta gs_mode_stack1
 	jsr normal_input_handler
+	jsr update_view
 	jmp check_special_mode
 
 ride_elevator:
