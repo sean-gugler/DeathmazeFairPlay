@@ -55,8 +55,9 @@ data_new_game:
 	.byte $02,$86	;flute
 	.byte $01,$64	;frisbee
 	.byte $01,$16	;hat
-	.byte $04,$71	;horn
-	.byte $02,$11	;jar
+	.byte $02,$33	;horn
+	.byte $04,$71	;jar
+;	.byte $02,$11	;jar
 	.byte $05,$72	;key
 	.byte $00,$00	;peel
 	.byte $01,$23	;ring

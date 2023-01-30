@@ -255,6 +255,8 @@ The snake falls
 and slithers away.
 You peel and eat the banana. Delicious!
 the banana peel is slippery.
+The hat breaks into pieces.
+One of the horns falls to the floor.
 
 [Intro]
 "           Deathmaze 5000               "

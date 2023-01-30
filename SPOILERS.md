@@ -45,6 +45,12 @@ There is now a reason for the frisbee to exist, apart from being a death trap.
 
 There is now a reason for the yoyo to exist.
 
+* HORN breaks off hat
+
+I assumed it was a brass horn when I played. I think it's supposed to be an animal horn. That makes a lot more sense as something that would seduce a monster.
+
+We already have rams horns on the hat; why not make one of them break off after charging? That also reduces time wasted trying to charge other walls in the game, which will never work.
+
 * WOOL replaced with BANANA
 
 It never made sense that the wool disappears when you climb the snake into the monster's lair. There's no logical reason for this. Doubly strange if you weren't even carrying the wool, or hadn't discovered it yet. Like, what wool? And how would I know it had vanished if it's not even here?

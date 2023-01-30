@@ -1494,6 +1494,7 @@ cmd_charge:
 	lda #carried_active
 	cmp zp1A_item_place
 	bne brained
+;@crash_into_pit
 	jsr update_view
 	jsr wait_short
 	jsr flash_screen
@@ -1502,6 +1503,18 @@ cmd_charge:
 	stx gs_player_y
 	stx gs_player_x
 	inc gs_hat_used
+	ldx #noun_hat
+	stx zp0E_object
+	ldx #icmd_destroy1
+	stx zp0F_action
+	jsr item_cmd
+	ldx #icmd_draw_inv
+	stx zp0F_action
+	jsr item_cmd
+	lda #$b8     ;The hat breaks into pieces.
+	jsr print_to_line1
+	lda #$b9     ;One of the horns falls to the floor.
+	jsr print_to_line2
 	jmp update_view
 
 @normal:

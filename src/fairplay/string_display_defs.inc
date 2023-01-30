@@ -182,3 +182,5 @@
 	msbstring "and slithers away."
 	msbstring "You peel and eat the banana. Delicious!"
 	msbstring "the banana peel is slippery."
+	msbstring "The hat breaks into pieces."
+	msbstring "One of the horns falls to the floor."

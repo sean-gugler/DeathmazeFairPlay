@@ -181,3 +181,5 @@
 	text_and_slithers_away_ = $b5
 	text_You_peel_and_eat_the_banana__Delicious_ = $b6
 	text_the_banana_peel_is_slippery_ = $b7
+	text_The_hat_breaks_into_pieces_ = $b8
+	text_One_of_the_horns_falls_to_the_floor_ = $b9
