@@ -74,28 +74,24 @@ beheaded:
 	jmp game_over
 
 check_level_1_pit:
-	cmp #$01
-	beq @fall
+	lda #$0a
+	cmp zp19_pos_y
+	bcc @fall
+	bne :+
 	lda gs_hat_used
-	beq :+
-	lda zp19_pos_y
-	cmp #$09
-	bcc :+
+	bne :+
 	jsr push_special_mode
 	ldx #special_mode_pit1
 	stx gs_special_mode
 :	rts
 
 @fall:
-	lda zp19_pos_y
-	cmp #$0a
-	bne :+
 	jsr pit
 	ldx #$03
 	stx gs_player_x
 ;	ldx #$03
 	stx gs_player_y
-:	rts
+	rts
 
 check_level_3:
 	lda zp19_pos_y
