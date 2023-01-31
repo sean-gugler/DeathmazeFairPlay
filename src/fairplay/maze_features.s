@@ -5,27 +5,27 @@
 
 ; facing|level, X|Y, drawcmd, draw_param
 maze_features:
-	.byte $42,$34,$05,$01 ;pit roof
+	.byte $42,$34,$05,$03 ;pit roof
 	.byte $42,$35,$05,$02 ;pit roof
-	.byte $42,$36,$05,$00 ;pit roof
-	.byte $22,$83,$04,$01 ;pit floor
-	.byte $22,$84,$04,$00 ;pit floor
-	.byte $42,$86,$04,$00 ;pit floor
-	.byte $13,$2a,$04,$00 ;pit floor
+	.byte $42,$36,$05,$01 ;pit roof
+	.byte $22,$83,$04,$02 ;pit floor
+	.byte $22,$84,$04,$03 ;pit floor
+	.byte $42,$86,$04,$03 ;pit floor
+	.byte $13,$2a,$04,$03 ;pit floor
 	.byte $22,$75,$08,$01 ;elevator on right
 	.byte $22,$76,$08,$02 ;elevator on right
 	.byte $32,$77,$02,$00 ;elevator face-on
 	.byte $23,$43,$08,$04 ;elevator on left
 	.byte $13,$44,$02,$00 ;elevator face-on
-	.byte $13,$95,$05,$01 ;pit roof
+	.byte $13,$95,$05,$03 ;pit roof
 	.byte $33,$68,$07,$04 ;square left
 	.byte $23,$78,$07,$02 ;square front
 	.byte $13,$88,$07,$01 ;square right
 	.byte $24,$14,$02,$00 ;elevator face-on
 	.byte $14,$24,$08,$02 ;elevator on right
-	.byte $14,$2a,$05,$01 ;pit roof
+	.byte $14,$2a,$05,$03 ;pit roof
 	.byte $14,$3a,$05,$02 ;pit roof
-	.byte $14,$4a,$05,$00 ;pit roof
+	.byte $14,$4a,$05,$01 ;pit roof
 	.byte $35,$25,$08,$04 ;elevator on left
 	.byte $25,$35,$02,$00 ;elevator face-on
 	.byte $35,$3a,$09,$f0 ;keyholes on left

@@ -321,141 +321,97 @@ draw_special:
 
 :	rts
 
-	.segment "DATA_PIT_FLOOR"
+	.segment "DATA_PIT"
 
-@pit_floor_data:
-	;--- distance 1 (0E = 0)
-	.byte $11,$11,$04      ;X,Y,len
-	.byte $05,$11,$04      ;X,Y,len
-	.byte raster_hi $11,4,0
-	.byte raster_lo $11,4,0
-	.byte $0d              ;len
-	.byte raster_hi $14,0,7
-	.byte raster_lo $14,0,7
-	.byte $15              ;len
-	;--- distance 2 (0E > 0)
-	.byte $0e,$0e,$03      ;X,Y,len
-	.byte $08,$0e,$03      ;X,Y,len
-	.byte raster_hi $0e,7,0
-	.byte raster_lo $0e,7,0
-	.byte $07              ;len
-	.byte raster_hi $10,4,7
-	.byte raster_lo $10,4,7
-	.byte $0d              ;len
+; Indexed by SIZE, inverse of DISTANCE.
+@quadratic_dec:
+	.byte $0a,$09,$07,$04,$00
+@quadratic_inc:
+	.byte $0b,$0c,$0e,$11,$15
+@quadratic_len:
+	.byte $01,$03,$07,$0d,$15
+.assert >* = >@quadratic_dec, error, "Pit tables must fit in one page."
 
 	.segment "DRAW_SPECIAL3"
 
 @draw_4_pit_floor:
-	dey
-	bne @draw_5_pit_roof
-
-	lda #<@pit_floor_data
-	sta zp0A_data_ptr
-	lda #>@pit_floor_data
-	sta zp0A_data_ptr+1
-	lda #$02
-	sta zp19_count
-	lda zp0E_draw_param
-	beq @pit_walls
-	ldy #$0c
-@pit_walls:
-	lda (zp0A_data_ptr),y
-	sta zp_col
-	iny
-	lda (zp0A_data_ptr),y
-	sta zp_row
-	iny
-	lda (zp0A_data_ptr),y
-	iny
-	sta zp1A_temp  ;GUG: sty/ldy instead of pha/pla? or tya/pha before lda(),y
-	tya
-	pha
-	lda zp1A_temp
-	tay
-	lda #$02
 	clc
-	adc zp19_count
-	jsr draw_down
-	pla
-	tay
-	dec zp19_count
-	bne @pit_walls
-
-	lda #$02
-	sta zp19_count
-@pit_rim:
-	lda (zp0A_data_ptr),y
-	sta screen_ptr+1
-	iny
-	lda (zp0A_data_ptr),y
-	sta screen_ptr
-	iny
-	lda (zp0A_data_ptr),y
-	sta zp1A_temp
-	iny
-	tya
-	pha
-	lda zp1A_temp
-	tay
-	jsr draw_right
-	pla
-	tay
-	dec zp19_count
-	bne @pit_rim
-	rts
-
-;	.segment "DATA_PIT_ROOF"
-
-@pit_roof_data:
-	;--- distance 1
-	.byte $11,$00,$04      ;X,Y,len
-	.byte $05,$00,$04      ;X,Y,len
-	.byte raster_hi $00,0,0
-	.byte raster_lo $00,0,0
-	.byte $15              ;len
-	.byte raster_hi $04,4,0
-	.byte raster_lo $04,4,0
-	.byte $0d              ;len
-	;--- distance 2
-	.byte $0e,$04,$03      ;X,Y,len
-	.byte $08,$04,$03      ;X,Y,len
-	.byte raster_hi $04,4,0
-	.byte raster_lo $04,4,0
-	.byte $0d              ;len
-	.byte raster_hi $07,7,0
-	.byte raster_lo $07,7,0
-	.byte $07              ;len
-	;--- distance 3 (0E = 0)
-	.byte $0c,$07,$02      ;X,Y,len
-	.byte $0a,$07,$02      ;X,Y,len
-	.byte raster_hi $07,7,0
-	.byte raster_lo $07,7,0
-	.byte $07              ;len
-	.byte raster_hi $09,9,0
-	.byte raster_lo $09,9,0
-	.byte $03              ;len
-
-;	.segment "DRAW_SPECIAL4"
+	dey
+	beq @draw_pit
 
 @draw_5_pit_roof:
+	sec
 	dey
 	bne @draw_6_boxes
 
-	lda #<@pit_roof_data
-	sta zp0A_data_ptr
-	lda #>@pit_roof_data
-	sta zp0A_data_ptr+1
-	lda #$02
-	sta zp19_count
+@draw_pit:
+	; RIGHT wall
 	ldy zp0E_draw_param
-	beq :+
-	dey
-	beq @pit_walls
-	ldy #$0c
-	jmp @pit_walls
+	lda @quadratic_inc,y
+	sta zp_col
+	iny
+	bcc :+
+	lda @quadratic_dec,y
+:	php
+	sta zp_row
+	pha
+	lda #glyph_R
+	jsr draw_down
 
-:	ldy #$18
-	jmp @pit_walls
+	; LEFT wall
+	pla
+	sta zp_row
+	pha
+	lda #glyph_L
+	ldy zp0E_draw_param
+	bne :+
+	lda #glyph_LR
+:	ldx @quadratic_dec,y
+	inx
+	stx zp_col
+	iny
+	jsr draw_down
+
+	; UPPER rim
+	pla
+	sta zp_row
+	plp
+	php
+	bcs :+
+	ldx zp0E_draw_param
+	lda @quadratic_dec,x
+:	sta zp_col
+	jsr get_rowcol_addr
+	ldx zp0E_draw_param
+	plp
+	php
+	bcc :+
+	inx
+:	ldy @quadratic_len,x
+	jsr draw_right
+
+	; LOWER rim
+	plp
+	bcs :+
+	inc zp0E_draw_param
+:	ldx zp0E_draw_param
+	ldy @quadratic_dec,x
+	sty zp_col
+	bcs :+
+	ldy @quadratic_inc,x
+:	dey
+	sty zp_row
+	jsr get_rowcol_addr
+	lda #$1c  ;raster 7 of this char row
+	clc
+	adc screen_ptr + 1
+	sta screen_ptr + 1
+	ldx zp0E_draw_param
+	ldy @quadratic_len,x
+	jsr draw_right
+	
+	rts
+
 
 @draw_6_boxes:
 	dey
