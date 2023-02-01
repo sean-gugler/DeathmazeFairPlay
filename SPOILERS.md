@@ -103,6 +103,10 @@ Clear the screen after charging a steel wall. Consistent with other deaths like 
 
 When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.
 
+* Expose access to level 3 room
+
+There were two cells in the middle of the level inaccessible by any means. This is a pointless mystery. Might as well extend the switchback through them.
+
 ## Quality of Life improvements
 
 * Numbers allowed
