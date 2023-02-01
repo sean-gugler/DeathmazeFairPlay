@@ -1524,6 +1524,7 @@ cmd_charge:
 	jmp update_view
 
 @brained:
+	jsr clear_hgr2
 	lda #$2a     ;You have rammed your head into a steel
 	jsr print_to_line1
 	lda #$2b     ;wall and bashed your brains out!

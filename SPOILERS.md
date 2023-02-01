@@ -95,6 +95,10 @@ After this pit is exposed, make it visible. This is more than just cosmetic; it 
 
 Also, allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
 
+* World goes dark after a bad charge
+
+Clear the screen after charging a steel wall. Consistent with other deaths like guillotine, monster, and bomb.
+
 * "Darkens" message when appropriate
 
 When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.
