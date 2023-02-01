@@ -1109,7 +1109,10 @@ special_climb:
 	sta zp1A_pos_x
 	lda gs_player_y
 	sta zp19_pos_y
+
 	lda gs_level
+	cmp #$02
+	beq @on_level_2
 	cmp #$03
 	beq @on_level_3
 	cmp #$04
@@ -1121,8 +1124,7 @@ special_climb:
 	lda zp19_pos_y
 	cmp #$0a
 	bne @ceiling
-	jmp @up_level
-
+	beq @up_level
 @on_level_3:
 	lda zp1A_pos_x
 	cmp #$08
@@ -1130,6 +1132,19 @@ special_climb:
 	lda zp19_pos_y
 	cmp #$05
 	beq @up_level
+@on_level_2:
+	lda #$03
+	cmp zp1A_pos_x
+	bne @ceiling
+;	lda #$03
+	cmp zp19_pos_y
+	bne @ceiling
+	lda #$01
+	sta gs_player_x
+	lda #$0b
+	sta gs_player_y
+	bne @up_level
+
 @ceiling:
 	jsr flash_screen
 	lda #$2d     ;Wham!
