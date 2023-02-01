@@ -76,32 +76,23 @@ beheaded:
 check_level_1_pit:
 	lda #$0a
 	cmp zp19_pos_y
-	bcc @fall
-	bne :+
-	lda gs_hat_used
-	bne :+
-	jsr push_special_mode
-	ldx #special_mode_pit1
-	stx gs_special_mode
-:	rts
-
-@fall:
-	jsr pit
+	bcs done
 	ldx #$03
 	stx gs_player_x
 ;	ldx #$03
 	stx gs_player_y
-	rts
+	jmp pit
+	;rts
 
 check_level_3:
 	lda zp19_pos_y
 	cmp #$0a
-	bne :+
+	bne done
 	lda zp1A_pos_x
 	cmp #$01
-	bne :+
-	jsr pit
-:	rts
+	bne done
+	jmp pit
+	;rts
 
 check_level_2:
 	lda zp19_pos_y
@@ -112,14 +103,14 @@ check_dog_roaming:
 	cmp #moves_until_dog1
 	bcs :+
 	lda gs_level_moves_hi
-	beq @done
+	beq done
 :	lda gs_dog1_alive
 	and #$01
-	beq @done
+	beq done
 	jsr push_special_mode
 	ldx #special_mode_dog1
 	stx gs_special_mode
-@done:
+done:
 	rts
 
 check_guarded_pit:

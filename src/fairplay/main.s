@@ -328,11 +328,14 @@ multiples:
 update_view:
 	jsr clear_maze_window
 	jsr probe_forward
+	jsr @probe_pit1
 	lda gs_room_lit
 	beq @done
 	jsr draw_maze
+	jsr @draw_pit1
+	bcs :+
 	jsr get_maze_feature
-	lda zp0F_action
+:	lda zp0F_action
 	ora zp0E_draw_param
 	beq :+
 	jsr draw_special
@@ -346,6 +349,51 @@ update_view:
 	stx zp0F_action
 	jsr draw_special
 @done:
+	rts
+
+@probe_pit1:
+	jsr @facing_pit1
+	bcc @done
+	lda gs_hat_used
+	bne @return_false
+	lda gs_player_y
+	cmp #$06
+	bcc @done
+	lda gs_walls_right_depth
+	sbc #%00100000
+	sta gs_walls_right_depth
+	rts
+
+@draw_pit1:
+	jsr @facing_pit1
+	bcc @done
+	lda gs_hat_used
+	beq @return_false
+	lda #drawcmd04_pit_floor
+	sta zp0F_action
+	sec
+	lda gs_player_y
+	sbc #$07
+	bcc @done
+	sta zp0E_draw_param
+	sec
+;@done:
+	rts
+
+; Returns C=1 if in line of sight
+@facing_pit1:
+	lda #$01
+	cmp gs_level
+	bcc @done
+;	lda #$01
+	cmp gs_player_x
+	bcc @done
+	lda #$02
+	cmp gs_facing
+	beq @done
+@return_false:
+	clc
+;@done:
 	rts
 
 

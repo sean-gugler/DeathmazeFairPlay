@@ -30,7 +30,6 @@
 	.import update_view
 	.import normal_input_handler
 	.import check_special_position
-	.import probe_forward
 
 ;	.include "apple.i"
 	.include "char.i"
@@ -66,105 +65,22 @@ zp1A_hint_mode     = $1A;
 
 check_special_mode:
 	ldx gs_special_mode
-	bne special_pit1
+	bne :+
 	rts
 
-special_pit1:
+:	dex
 	dex
-	beq :+
-	jmp special_calc_puzzle
-
-:	lda gs_player_x
-	cmp #$03
-	bcc @input
-	jmp pop_mode_continue
-
-	; copy-modified from main_game_loop
-	; to override probe inside update_view
-@input:
-	jsr get_player_input
-	jsr normal_input_handler
-	lda gs_action_flags
-	and #action_forward
-	beq :+
-	jsr count_as_move
-:	lda gs_action_flags
-	and #(action_forward | action_turn)
-	beq check_special_mode
-	jsr @update_view
-	jsr print_timers
-	jmp check_special_mode
-
-	; copy-modified from update-view to
-	; hide the pit until gs_hat_used is set
-@update_view:
-	jsr clear_maze_window
-	jsr @probe_forward
-	lda gs_room_lit
-	beq @done
-	jsr draw_maze
-;	jsr get_maze_feature
-;	lda zp0F_action
-;	ora zp0E_draw_param
-;	beq :+
-;	jsr draw_special
-:	ldx #icmd_probe_boxes
-	stx zp0F_action
-	jsr item_cmd
-	lda gs_box_visible
-	beq @done
-	sta zp0E_draw_param
-	ldx #drawcmd06_boxes
-	stx zp0F_action
-	jsr draw_special
-@done:
-	rts
-
-@probe_forward:
-	jsr probe_forward
-	ldx gs_facing
-;@west:
-	dex
-	bne @north
-	lda gs_player_y
-	cmp #$0a
-	bne @done
-	lda gs_walls_right_depth
-	ora gs_player_x
-	sta gs_walls_right_depth
-	rts
-@north:
-	dex
-	bne @east
-	lda gs_player_x
-	cmp #$01
-	bne @done
-	sec
-	lda gs_walls_right_depth
-	sbc #%00100000
-	sta gs_walls_right_depth
-	rts
-@east:
-	dex
-	bne @done
-	lda gs_walls_right_depth
-	cmp #%00100000
-	bcc @done
-	inc gs_walls_left
-	rts
-
-
-
-special_calc_puzzle:
-	dex
-	beq :+
+	beq special_calc_puzzle
 	jmp special_bat
+
+
 
 ;	lda #$9e     ;A cruel laugh booms out
 ;	lda #$9f     ;Invert and telephone.
 ;	jmp print_to_line2
 
-:	jsr update_view
+special_calc_puzzle:
+	jsr update_view
 	jsr @init_puzzle
 	ldx #$01
 	stx zp1A_hint_mode

@@ -1473,19 +1473,28 @@ cmd_charge:
 	beq @propel_player
 	jmp cmd_fart
 
+@loop:
+	jsr propel_next_step
+	jsr update_view
 @propel_player:
-	lda #$01
-	cmp gs_facing
-	bne @normal
-;	lda #$01
-	cmp gs_level
-	bne @normal
+	jsr wait_short
+	lda gs_walls_right_depth
+	and #%11100000
+	bne @loop
+;@rammed:
+	jsr flash_screen
 	lda #$02
+	cmp gs_facing
+	bne @brained
+	lda #$01
+	cmp gs_level
+	bne @brained
+;	lda #$01
 	cmp gs_player_x
-	bne @normal
+	bne @brained
 	lda #$0a
 	cmp gs_player_y
-	bne @normal
+	bne @brained
 	ldx #noun_hat
 	stx zp0E_object
 	ldx #icmd_where
@@ -1493,11 +1502,8 @@ cmd_charge:
 	jsr item_cmd
 	lda #carried_active
 	cmp zp1A_item_place
-	bne brained
-;@crash_into_pit
-	jsr update_view
-	jsr wait_short
-	jsr flash_screen
+	bne @brained
+;@crash_into_pit:
 	jsr pit
 	ldx #$03
 	stx gs_player_y
@@ -1517,14 +1523,12 @@ cmd_charge:
 	jsr print_to_line2
 	jmp update_view
 
-@normal:
-	lda gs_walls_right_depth
-	and #%11100000
-	beq brained
-	jsr propel_next_step
-	jsr wait_short
-	jsr update_view
-	jmp @propel_player
+@brained:
+	lda #$2a     ;You have rammed your head into a steel
+	jsr print_to_line1
+	lda #$2b     ;wall and bashed your brains out!
+	jsr print_to_line2
+	jmp game_over
 
 propel_next_step:
 	ldx gs_facing
@@ -1537,28 +1541,15 @@ propel_next_step:
 @south_4:
 	dec gs_player_y
 	rts
-
 @west_1:
 	dec gs_player_x
 	rts
-
 @north_2:
 	inc gs_player_y
 	rts
-
 @east_3:
 	inc gs_player_x
 	rts
-
-brained:
-	jsr update_view
-	jsr wait_short
-	jsr flash_screen
-	lda #$2a     ;You have rammed your head into a steel
-	jsr print_to_line1
-	lda #$2b     ;wall and bashed your brains out!
-	jsr print_to_line2
-	jmp game_over
 
 cmd_fart:
 	dec zp0F_action

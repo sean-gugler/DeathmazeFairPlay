@@ -5,10 +5,6 @@
 
 ; facing|level, X|Y, drawcmd, draw_param
 maze_features:
-	.byte $21,$17,$04,$00 ;pit floor
-	.byte $21,$18,$04,$01 ;pit floor
-	.byte $21,$19,$04,$02 ;pit floor
-	.byte $21,$1a,$04,$03 ;pit floor
 	.byte $42,$34,$05,$03 ;pit roof
 	.byte $42,$35,$05,$02 ;pit roof
 	.byte $42,$36,$05,$01 ;pit roof
