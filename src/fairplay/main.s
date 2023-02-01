@@ -32,6 +32,7 @@
 	.import clear_status_lines
 	.import input_Y_or_N
 	.import new_session
+	.import maze_walls
 	.import maze_features
 	.importzp maze_features_end
 	.import item_cmd
@@ -327,15 +328,12 @@ multiples:
 
 update_view:
 	jsr clear_maze_window
-	jsr probe_forward
-	jsr @probe_pit1
+	jsr @probe
 	lda gs_room_lit
 	beq @done
 	jsr draw_maze
-	jsr @draw_pit1
-	bcs :+
-	jsr get_maze_feature
-:	lda zp0F_action
+	jsr @get_feature
+	lda zp0F_action
 	ora zp0E_draw_param
 	beq :+
 	jsr draw_special
@@ -351,50 +349,48 @@ update_view:
 @done:
 	rts
 
-@probe_pit1:
-	jsr @facing_pit1
-	bcc @done
-	lda gs_hat_used
-	bne @return_false
-	lda gs_player_y
-	cmp #$06
-	bcc @done
-	lda gs_walls_right_depth
-	sbc #%00100000
-	sta gs_walls_right_depth
+; Draw the flimsy wall if it hasn't been charged down yet.
+@probe:
+	lda maze_walls + 2
+	pha
+
+	ldx gs_hat_used
+	bne :+
+	ora #%00001000
+:	sta maze_walls + 2
+
+	jsr probe_forward
+
+	pla
+	sta maze_walls + 2
 	rts
 
-@draw_pit1:
-	jsr @facing_pit1
-	bcc @done
-	lda gs_hat_used
-	beq @return_false
-	lda #drawcmd04_pit_floor
-	sta zp0F_action
-	sec
-	lda gs_player_y
-	sbc #$07
-	bcc @done
-	sta zp0E_draw_param
-	sec
-;@done:
-	rts
-
-; Returns C=1 if in line of sight
-@facing_pit1:
+; Draw the pit if it has been exposed.
+@get_feature:
 	lda #$01
 	cmp gs_level
-	bcc @done
+	bne @normal
 ;	lda #$01
 	cmp gs_player_x
-	bcc @done
+	bne @normal
 	lda #$02
 	cmp gs_facing
-	beq @done
-@return_false:
-	clc
-;@done:
+	bne @normal
+	lda gs_hat_used
+	beq @normal
+
+	sec
+	lda gs_player_y
+	sbc #$06
+	cmp #$05
+	bcs @normal
+	sta zp0E_draw_param
+	dec zp0E_draw_param
+	lda #drawcmd04_pit_floor
+	sta zp0F_action
 	rts
+@normal:
+	jmp get_maze_feature
 
 
 	.segment "MAIN4"

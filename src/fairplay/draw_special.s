@@ -347,6 +347,7 @@ draw_special:
 @draw_pit:
 	; RIGHT wall
 	ldy zp0E_draw_param
+	bmi @tiny_pit
 	lda @quadratic_inc,y
 	sta zp_col
 	iny
@@ -410,6 +411,20 @@ draw_special:
 	ldy @quadratic_len,x
 	jsr draw_right
 	
+	rts
+
+; Assigned to symbols instead of inline to avoid
+; compiler errors with addressing mode,
+; since macro expands wrapped in parentheses.
+@tiny_roof  = raster $0a,$0b,0
+@tiny_floor = raster $0a,$0b,7
+
+@tiny_pit:
+	lda #$ff
+	bcc :+
+	sta @tiny_roof
+	rts
+:	sta @tiny_floor
 	rts
 
 
