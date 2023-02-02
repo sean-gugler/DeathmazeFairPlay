@@ -9,8 +9,6 @@ moves_until_mother = $32
 moves_until_dog1 = $3c
 moves_until_monster = $50
 
-puzzle_step1 = $05
-
 torch_low = $0a
 torch_lifespan = $96
 

@@ -91,7 +91,7 @@ gs_rotate_count:
 	JUNK_BYTE $00
 gs_rotate_direction:
 	JUNK_BYTE $00
-gs_rotate_total:
+gs_rotate_hint_counter:
 	JUNK_BYTE $00
 gs_lair_raided:
 	JUNK_BYTE $00

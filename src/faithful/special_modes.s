@@ -97,10 +97,11 @@ special_calc_puzzle:
 	sta zp1A_move_action
 	lda gs_rotate_direction
 	bne @check_repeat_turn
+;Set initial turn direction
 	ldx zp1A_move_action
-	stx gs_rotate_direction  ;Set initial turn direction
+	stx gs_rotate_direction
 	inc gs_rotate_count
-	jmp @update_display
+	jmp @rotate_done
 
 @check_repeat_turn:
 	cmp zp1A_move_action
@@ -108,9 +109,9 @@ special_calc_puzzle:
 	inc gs_rotate_count
 	lda gs_rotate_target
 	cmp #$03
-	bne @update_display
+	bne @rotate_done
 	cmp gs_rotate_count
-	bne @update_display
+	bne @rotate_done
 ;@solved
 	ldx #$04
 	stx gs_facing
@@ -127,15 +128,15 @@ special_calc_puzzle:
 	ldx #$01
 	stx gs_rotate_count
 	dec gs_rotate_target
-	jmp @update_display
+	jmp @rotate_done
 
 :	jsr @reset_target
 	inc gs_rotate_count
 	ldx zp1A_move_action
 	stx gs_rotate_direction
-@update_display:
+@rotate_done:
 	jsr update_view
-	inc gs_rotate_total
+	inc gs_rotate_hint_counter
 	jmp @continue_loop
 
 @bump_into_wall:
@@ -175,7 +176,7 @@ special_calc_puzzle:
 
 @init_puzzle:
 	ldx #$00
-	stx gs_rotate_total
+	stx gs_rotate_hint_counter
 @reset_target:
 	ldx #puzzle_step1
 	stx gs_rotate_target
@@ -185,7 +186,7 @@ special_calc_puzzle:
 	rts
 
 @print_timed_hint:
-	lda gs_rotate_total
+	lda gs_rotate_hint_counter
 	cmp #$06
 	bcc @print_hint_basic
 	cmp #$0f

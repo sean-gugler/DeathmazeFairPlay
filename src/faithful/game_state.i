@@ -38,7 +38,7 @@
 	.global gs_rotate_count
 	.global gs_rotate_direction
 	.global gs_bomb_tick
-	.global gs_rotate_total
+	.global gs_rotate_hint_counter
 	.global gs_lair_raided
 	.global gs_snake_used
 ;	.global gs_UNUSED

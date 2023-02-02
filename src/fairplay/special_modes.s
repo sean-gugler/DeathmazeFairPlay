@@ -58,7 +58,6 @@ zp1A_item_place    = $1A;
 zp0F_action        = $0F;
 zp0E_object        = $0E;
 zp1A_object        = $1A;
-zp1A_move_action   = $1A;
 zp1A_hint_mode     = $1A;
 
 	.segment "SPECIAL_MODES"
@@ -74,10 +73,13 @@ check_special_mode:
 	jmp special_bat
 
 
-
-;	lda #$9e     ;A cruel laugh booms out
-;	lda #$9f     ;Invert and telephone.
-;	jmp print_to_line2
+; First column yields a hint.
+; Second column solves the puzzle.
+rotate_table:
+	.byte 0,0
+	.byte 3,5
+	.byte 1,4
+	.byte 7,3
 
 special_calc_puzzle:
 	jsr update_view
@@ -87,9 +89,8 @@ special_calc_puzzle:
 	jsr @print_hint
 @puzzle_loop:
 	jsr get_player_input
-;GUG: TODO needed?
-;	lda #$00
-;	sta gs_action_flags
+	lda #$00
+	sta gs_action_flags
 	lda gd_parsed_action
 	cmp #verb_movement_begin
 	bpl @move
@@ -103,24 +104,29 @@ special_calc_puzzle:
 @move:
 	cmp #verb_forward
 	beq @bump_into_wall
-	sta zp1A_move_action
-	lda gs_rotate_direction
-	bne @check_repeat_turn
-	ldx zp1A_move_action
-	stx gs_rotate_direction  ;Set initial turn direction
-	inc gs_rotate_count
-	jmp @update_display
-
-@check_repeat_turn:
-	cmp zp1A_move_action
+	cmp gs_rotate_direction
 	bne @new_direction
 	inc gs_rotate_count
-	lda gs_rotate_target
-	cmp #$03
-	bne @update_display
-	cmp gs_rotate_count
-	bne @update_display
-;@solved
+	;  Match next target?
+	lda gs_rotate_count
+	ldx gs_rotate_target
+	cmp rotate_table,x
+	bne @rotate_done
+	;  Is it the final target?
+	txa
+	lsr
+	eor #%00000011
+	bne @rotate_done
+	bcs @solved
+;@hint
+	lda #$9e     ;A cruel laugh booms out
+	jsr print_to_line1
+	lda #$9f     ;Invert and telephone.
+	jsr print_to_line2
+	jsr wait_long
+	jsr @reset_target
+	jmp @rotate_done
+@solved:
 	ldx #$04
 	stx gs_facing
 	jsr update_view
@@ -128,23 +134,38 @@ special_calc_puzzle:
 	jmp pop_mode_continue
 
 @new_direction:
-	ldx zp1A_move_action
-	stx gs_rotate_direction
-	lda gs_rotate_target
-	cmp gs_rotate_count
-	bne :+
+	sta gs_rotate_direction
+	;  Are we partway into a sequence already?
+	lda gs_rotate_count
+	ldx gs_rotate_target
+	beq @no_target
+	;  Should we advance the sequence?
+	cmp rotate_table,x
+	beq @next_target
+	;  Mismatch, start over.
+	ldx #%00000000
+	stx gs_rotate_target
+@no_target:
+	;  Check start of HINT sequence
+	ldx #%00000010
+	cmp rotate_table,x
+	beq @sequence_started
+	;  Check start of SOLVE sequence
+	inx
+	cmp rotate_table,x
+	bne @fresh_count
+@sequence_started:
+	stx gs_rotate_target
+@next_target:
+	inc gs_rotate_target
+	inc gs_rotate_target
+@fresh_count:
 	ldx #$01
 	stx gs_rotate_count
-	dec gs_rotate_target
-	jmp @update_display
 
-:	jsr @reset_target
-	inc gs_rotate_count
-	ldx zp1A_move_action
-	stx gs_rotate_direction
-@update_display:
+@rotate_done:
 	jsr update_view
-	inc gs_rotate_total
+	inc gs_rotate_hint_counter
 	jmp @continue_loop
 
 @bump_into_wall:
@@ -184,17 +205,16 @@ special_calc_puzzle:
 
 @init_puzzle:
 	ldx #$00
-	stx gs_rotate_total
+	stx gs_rotate_hint_counter
 @reset_target:
-	ldx #puzzle_step1
-	stx gs_rotate_target
 	ldx #$00
+	stx gs_rotate_target
 	stx gs_rotate_count
 	stx gs_rotate_direction
 	rts
 
 @print_timed_hint:
-	lda gs_rotate_total
+	lda gs_rotate_hint_counter
 	cmp #$06
 	bcc @print_hint_basic
 	cmp #$0f

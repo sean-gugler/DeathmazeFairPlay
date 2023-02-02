@@ -94,7 +94,7 @@ gs_rotate_count:
 gs_rotate_direction:
 gs_bomb_tick:  ;Deliberate. Two purposes for the same memory location.
 	JUNK_BYTE $00
-gs_rotate_total:
+gs_rotate_hint_counter:
 	JUNK_BYTE $00
 gs_lair_raided:
 	JUNK_BYTE $00

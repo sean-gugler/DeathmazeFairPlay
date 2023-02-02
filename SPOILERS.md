@@ -13,7 +13,9 @@ You have been warned.
 
 * Hint system revised
 
-The HELP command was nearly useless. It only provided one hint for one puzzle. In all other circumstances, it gave a bland response that wasn't very helpful at all. This command and its synonym "hint" have been re-assigned as synonyms for "instructions" and "directions" to re-display the introductory help screen. The one valid hint has been relocated to appear organically during a partial solve of that puzzle.
+The HELP command was nearly useless. It only provided one hint for one puzzle. In all other circumstances, it gave a bland response that wasn't very helpful at all. This command and its synonym "hint" have been re-assigned as synonyms for "instructions" and "directions" to re-display the introductory help screen.
+
+The one valid hint was for the calculator puzzle. This has been relocated to appear organically during a partial solve of that puzzle. If you follow the display instructions literally, you'll get the old "invert and telephone" hint towards the proper solution. This provides partial confirmation for the player that the mechanic is correct, only the data is not right yet.
 
 * LOOK command revised
 
