@@ -948,8 +948,10 @@ special_elevator:
 	stx gs_mode_stack2
 	sta gs_mode_stack1
 	jsr normal_input_handler
+	lda gs_special_mode
+	bne :+
 	jsr update_view
-	jmp check_special_mode
+:	jmp check_special_mode
 
 ride_elevator:
 	lda #action_level
