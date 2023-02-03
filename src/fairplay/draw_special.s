@@ -1017,7 +1017,11 @@ draw_keyhole_4:
 	rts
 
 draw_A_door_opening:
-	lda #$0a
+	dey
+	beq :+
+	jmp draw_B_rod
+
+:	lda #$0a
 	sta zp_col
 	lda #$03
 	sta zp_row
@@ -1092,3 +1096,17 @@ draw_A_door_opening:
 	bne @next_frame_opening
 	rts
 
+draw_B_rod:
+	lda #$0b
+	sta zp_col
+	lda #$01
+	sta zp_row
+	lda #glyph_LR
+	ldy #$04
+	jsr draw_down
+;	dec zp_col
+;	inc zp_row
+	jsr get_rowcol_addr
+	lda #glyph_X
+	jsr char_out
+	rts

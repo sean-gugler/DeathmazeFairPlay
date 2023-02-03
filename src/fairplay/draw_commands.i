@@ -8,3 +8,4 @@ drawcmd07_the_square = $07
 drawcmd08_doors = $08  ;side views, all
 drawcmd09_keyholes = $09  ;side views, all
 drawcmd0A_door_opening = $0a  ;animated
+drawcmd0B_rod = $0b

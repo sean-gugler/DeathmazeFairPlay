@@ -47,6 +47,8 @@ maze_features:
 	.byte $25,$6a,$01,$00 ;keyhole face-on
 	.byte $25,$7a,$01,$00 ;keyhole face-on
 	.byte $25,$8a,$01,$00 ;keyhole face-on
+	.byte $41,$a6,$0b,$00 ;lightning rod
+	.byte $15,$45,$0b,$00 ;lightning rod
 maze_features_end = <((* - maze_features) / 4)
 
 	.assert >* = >maze_features, error, "Maze feature table must be within one page"
