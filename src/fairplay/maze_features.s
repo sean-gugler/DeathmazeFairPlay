@@ -1,7 +1,7 @@
 	.export maze_features
 	.export maze_features_end
 
-	.segment "MAZE"
+	.segment "FEATURE_DATA"
 
 ; facing|level, X|Y, drawcmd, draw_param
 maze_features:

@@ -405,7 +405,7 @@ vector_reset:
 	jmp main_game_loop
 
 
-	.segment "FEATURES"
+	.segment "FEATURE_CODE"
 
 ; Output: $0F = action, $0E = param (input args for draw_special)
 get_maze_feature:

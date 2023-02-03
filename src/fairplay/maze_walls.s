@@ -70,3 +70,5 @@ maze_walls:
 	.byte %10100010,%01010010,%00101111 ; $a2,$52,$2f
 	.byte %10011100,%10011101,%00000111 ; $9c,$9d,$07
 	.byte %11111111,%11111111,%11111111 ; $ff,$ff,$ff
+
+.assert >* = >maze_walls, error, "Maze must fit in one page"
