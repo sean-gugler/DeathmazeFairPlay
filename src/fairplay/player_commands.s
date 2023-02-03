@@ -739,9 +739,9 @@ cmd_strike:
 	lda #$4d     ;Sparks shoot out above you!
 	jmp print_to_line2
 
-:	lda #$21     ;Thunderbolts shoot out above you!
+:	lda #$25     ;Thunderbolts shoot out above you!
 	jsr print_to_line1
-	lda #$22     ;The staff thunders with useless energy!
+	lda #$26     ;The staff thunders with useless energy!
 	jmp print_to_line2
 
 ;	lda #$3c     ;They do not reach the lighting rod
@@ -760,7 +760,7 @@ cmd_wear:
 	jsr clear_status_lines
 	lda #$91     ;OK...if you really want to,
 	jsr print_to_line1
-	lda #$23     ;you are wearing it.
+	lda #$27     ;you are wearing it.
 	jmp print_to_line2
 
 @hat:
@@ -811,7 +811,7 @@ print_inspected:
 	bne look_print
 :	cmp #noun_calculator
 	bne :+
-	lda #$27     ;The calculator displays 317.
+	lda #$c2     ;The calculator displays 317.
 	bne look_print
 :	cmp #noun_dagger
 	bne :+
@@ -1248,12 +1248,12 @@ cmd_press:
 teleport_table:
 	; facing, level, X position, Y position
 	.byte $02,$02,$05,$04 ;button 0
-	.byte $02,$02,$07,$09 ;button 1
+	.byte $01,$02,$07,$09 ;button 1
 	.byte $01,$05,$03,$03 ;button 2
 	.byte $02,$03,$04,$06 ;button 3
 	.byte $02,$01,$08,$05 ;button 4
 	.byte $03,$02,$01,$03 ;button 5
-	.byte $02,$01,$05,$05 ;button 6
+	.byte $02,$03,$09,$06 ;button 6
 	.byte $01,$01,$07,$0a ;button 7
 	.byte $03,$04,$09,$0a ;button 8
 	.byte $03,$03,$07,$0a ;button 9

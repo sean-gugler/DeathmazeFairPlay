@@ -52,7 +52,7 @@
 	gs_size = <game_state_end
 
 
-	items_unique    = $12
+	items_unique    = $16
 	items_food      = $04
 	items_torches   = $04
 

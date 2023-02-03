@@ -47,6 +47,10 @@ Sneaker
 Staff
 Sword
 Yoyo
+Bead
+Hook
+Loop
+Tube
 Snake
 
 [Nouns Multiple]
@@ -86,13 +90,17 @@ precision crafted frisbee.
 hat with two ram's horns.
 carefully polished ram's horn.
 glass jar.
-golden key.
+golden key!
 slippery banana peel.
 diamond ring.
 rotted mutilated sneaker.
 magic staff.
 heavy two-handed sword.
 yoyo.
+golden bead.
+golden hook.
+golden loop.
+golden tube.
 snake !!!
 basket of food.
 torch.
@@ -107,10 +115,6 @@ The snake bites you and you die!
 Thunderbolts shoot out above you!
 The staff thunders with useless energy!
 you are wearing it.
-To everything
-There is a season
-, TURN,TURN,TURN
-the calculator displays 317.
 The diamond glows red hot!
 The invisible guillotine beheads you!
 You have rammed your head into a steel
@@ -262,6 +266,11 @@ it is empty.
 it is full of black paint.
 it is full of toxic monster blood.
 You poison yourself and die instantly!
+To everything
+There is a season
+, TURN,TURN,TURN
+the calculator displays 317.
+partially formed 
 
 [Intro]
 "           Deathmaze 5000               "

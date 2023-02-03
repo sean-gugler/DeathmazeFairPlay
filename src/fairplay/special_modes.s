@@ -186,19 +186,19 @@ special_calc_puzzle:
 	cmp #verb_movement_begin
 	bpl :+
 	jsr wait_long
-:	lda #$24     ;To everything
+:	lda #$bf     ;To everything
 	jsr print_to_line1
 	lda zp1A_hint_mode
 	cmp #$01
 	beq :+
-	lda #$26     ;Turn turn turn
+	lda #$c1     ;Turn turn turn
 	jsr print_display_string
-:	lda #$25     ;There is a season
+:	lda #$c0     ;There is a season
 	jsr print_to_line2
 	lda zp1A_hint_mode
 	cmp #$01
 	beq @done
-	lda #$26     ;Turn turn turn
+	lda #$c1     ;Turn turn turn
 	jsr print_display_string
 @done:
 	rts
@@ -795,7 +795,7 @@ dead_by_snake:
 	bne :+
 	lda #$b2     ;A snake is eating it!!!
 	jsr print_to_line1
-:	lda #$20     ;Snake bites you!
+:	lda #$24     ;Snake bites you!
 	jsr print_to_line2
 	jmp game_over
 
