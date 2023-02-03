@@ -1036,22 +1036,22 @@ which_door:
 	stx zp0E_ptr
 	ldx #>door_table
 	stx zp0E_ptr+1
-	ldx gs_level
-	stx zp19_level_facing
+
 	lda gs_player_x
-	ldx #$04
-	stx zp1A_count_loop
-:	asl
-	asl zp19_level_facing
-	dec zp1A_count_loop
-	bne :-
-	clc
-	adc gs_player_y
+	asl
+	asl
+	asl
+	asl
+	ora gs_player_y
 	sta zp11_position
-	lda zp19_level_facing
-	clc
-	adc gs_facing
+	lda gs_level
+	asl
+	asl
+	asl
+	asl
+	ora gs_facing
 	sta zp19_level_facing
+
 	ldx #doors
 	stx zp1A_count_loop
 @find:
