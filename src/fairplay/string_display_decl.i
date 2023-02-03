@@ -58,7 +58,7 @@
 	text_You_fall_through_the_floor = $3a
 	text_onto_a_bed_of_spikes_ = $3b
 	text_They_do_not_reach_the_lightning_rod_ = $3c
-	text_They_blast_the_lighting_rod_above_ = $3d
+	text_They_blast_the_lightning_rod_above_ = $3d
 	text_The_gold_pieces_fall__fused_together_ = $3e
 	text_The_monster_grabs_the_frisbee__throws_ = $3f
 	text_it_back__and_it_saws_your_head_off_ = $40

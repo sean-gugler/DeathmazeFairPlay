@@ -72,7 +72,6 @@ zp11_action         = $11;
 zp0E_item           = $0E;
 zp19_delta16        = $19;
 zp0E_count16        = $0E;
-zp10_temp           = $10;
 zp13_temp           = $13;
 zp1A_item_place     = $1A;
 zp11_item           = $11;
@@ -726,27 +725,113 @@ play_flute:
 
 cmd_strike:
 	dec zp0F_action
-	bne cmd_wear
+	beq :+
+	jmp cmd_wear
 
-	lda zp0E_object
+:	lda zp0E_object
 	cmp #noun_staff
 	beq :+
 	jmp nonsense
 
 :	jsr clear_status_lines
-	lda gs_staff_charged
-	bne :+
 	lda #$4d     ;Sparks shoot out above you!
+	ldx gs_staff_charged
+	beq :+
+	lda #$25     ;Thunderbolts shoot out above you!
+:	jsr print_to_line1
+
+	lda #$05
+	cmp gs_level
+	bne @useless
+	cmp gs_player_y
+	bne @useless
+	lda #$04
+	cmp gs_player_x
+	bne @useless
+
+	ldx gs_staff_charged
+	bne :+
+	lda #$3c     ;They do not reach the lightning rod.
+	bne @print_line2
+
+:	lda #maze_flag_key_fused
+	and gs_maze_flags
+	bne @blast
+
+	lda #$00
+	sta zp11_count
+	lda #noun_tube
+	sta zp10_noun
+@loop_count:
+	sta zp0E_object
+	lda #icmd_where
+	sta zp0F_action
+	jsr item_cmd
+	lda #$00
+	ldx zp1A_item_place
+	cpx #carried_unboxed
+	bcc :+
+	lda zp10_noun
+	inc zp11_count
+:	pha
+	dec zp10_noun
+	lda zp10_noun
+	cmp #noun_bead
+	bcs @loop_count
+
+	lda zp11_count
+	cmp #$02
+	bcs @fuse
+	pla
+	pla
+	pla
+	pla
+@blast:
+	lda #$3d     ;They blast the lighting rod above!
+	bne @print_line2
+
+@useless:
+	ldx gs_staff_charged
+	bne :+
+	rts
+:	lda #$26     ;The staff thunders with useless energy!
+	bne @print_line2
+
+@fuse:
+	tax
+	lda #maze_flag_key_fused
+	cpx #$04
+	bne :+
+	ora #maze_flag_key_whole
+:	ora gs_maze_flags
+	sta gs_maze_flags
+
+	lda #$04
+	sta zp11_count
+@loop_destroy:
+	pla
+	beq :+
+	sta zp0E_object
+	lda #icmd_destroy1
+	sta zp0F_action
+	jsr item_cmd
+:	dec zp11_count
+	bne @loop_destroy
+
+	lda #noun_key
+	sta zp0E_object
+	lda #icmd_drop
+	sta zp0F_action
+	jsr item_cmd
+	lda #icmd_draw_inv
+	sta zp0F_action
+	jsr item_cmd
+
+	lda #$3e     ;The gold pieces fall, fused together!
+@print_line2:
 	jmp print_to_line2
 
-:	lda #$25     ;Thunderbolts shoot out above you!
-	jsr print_to_line1
-	lda #$26     ;The staff thunders with useless energy!
-	jmp print_to_line2
 
-;	lda #$3c     ;They do not reach the lighting rod
-;	lda #$3d     ;They blast the lighting rod above!
-;	lda #$3e     ;The gold pieces fall, fused together!
 
 cmd_wear:
 	dec zp0F_action

@@ -59,7 +59,7 @@
 	msbstring "You fall through the floor"
 	msbstring "onto a bed of spikes!"
 	msbstring "They do not reach the lightning rod."
-	msbstring "They blast the lighting rod above!"
+	msbstring "They blast the lightning rod above!"
 	msbstring "The gold pieces fall, fused together!"
 	msbstring "The monster grabs the frisbee, throws "
 	msbstring "it back, and it saws your head off!"

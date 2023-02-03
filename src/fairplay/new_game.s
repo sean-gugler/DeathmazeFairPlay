@@ -57,7 +57,7 @@ data_new_game:
 	.byte $01,$16	;hat
 	.byte $02,$33	;horn
 	.byte $04,$71	;jar
-	.byte $05,$72	;key
+	.byte $00,$00	;key
 	.byte $00,$00	;peel
 	.byte $01,$23	;ring
 	.byte $01,$72	;sneaker
@@ -65,7 +65,7 @@ data_new_game:
 	.byte $03,$2a	;sword
 	.byte $04,$57	;yoyo
 	.byte $03,$96	;bead
-	.byte $05,$45	;hook
+	.byte $05,$72	;hook
 	.byte $02,$11	;loop
 	.byte $05,$a2	;tube
 	.byte $02,$39	;snake

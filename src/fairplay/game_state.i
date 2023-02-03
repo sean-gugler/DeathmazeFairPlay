@@ -85,6 +85,8 @@ maze_flag_hat_used      = 1 << 0
 maze_flag_snake_freed   = 1 << 1
 maze_flag_door_painted  = 1 << 2
 maze_flag_lair_raided   = 1 << 3
+maze_flag_key_fused     = 1 << 4
+maze_flag_key_whole     = 1 << 5
 
 monster_flag_dying = $01
 monster_flag_roaming = $02

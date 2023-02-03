@@ -1282,6 +1282,8 @@ special_climb:
 
 
 special_endgame:
+	rts
+.if 0
 	jsr clear_maze_window
 	lda #$07
 	sta gs_walls_left
@@ -1548,5 +1550,4 @@ special_endgame:
 	lda #$9a     ;It is currently impossible.
 	jsr print_to_line2
 	jmp @endgame_input_loop
-
-
+.endif
