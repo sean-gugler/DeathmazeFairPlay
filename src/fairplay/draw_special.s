@@ -1101,21 +1101,10 @@ draw_B_rod:
 	sta zp_col
 	lda #$01
 	sta zp_row
-	lda #glyph_LR
+	lda #glyph_box_R
 	ldy #$04
 	jsr draw_down
 	jsr get_rowcol_addr
-	lda #glyph_slash_down_R
-	jsr char_out
-
-	lda #$0c
-	sta zp_col
-	lda #$01
-	sta zp_row
-	lda #glyph_R
-	ldy #$04
-	jsr draw_down
-	jsr get_rowcol_addr
-	lda #glyph_slash_up
+	lda #glyph_box_BR
 	jsr char_out
 	rts
