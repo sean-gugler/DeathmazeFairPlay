@@ -820,14 +820,14 @@ cmd_strike:
 
 	lda #noun_key
 	sta zp0E_object
-	lda #icmd_drop
+	lda #icmd_set_carried_known
 	sta zp0F_action
 	jsr item_cmd
 	lda #icmd_draw_inv
 	sta zp0F_action
 	jsr item_cmd
 
-	lda #$3e     ;The gold pieces fall, fused together!
+	lda #$3e     ;The gold pieces fuse together!
 @print_line2:
 	jmp print_to_line2
 
@@ -859,9 +859,10 @@ cmd_look:
 	sec
 	sbc #verb_look
 	sta zp0F_action
-	bne cmd_rub
+	beq :+
+	jmp cmd_rub
 
-	lda zp0E_object
+:	lda zp0E_object
 	cmp #noun_hat
 	bne :+
 	jmp look_hat
@@ -915,6 +916,13 @@ print_inspected:
 	clc
 	lda #$bb     ;The jar is ...
 	adc gs_jar_full
+	bne look_print
+:	cmp #noun_key
+	bne :+
+	lda #maze_flag_key_whole
+	and gs_maze_flags
+	bne :+
+	lda #$c4     ;it looks incomplete.
 	bne look_print
 :	lda #$68     ;nothing of interest.
 	bne look_print
@@ -1003,9 +1011,22 @@ cmd_open:
 @print_item_name:
 	jsr clear_status_lines
 	sta zp10_noun
+	cmp #noun_key
+	bne @normal
+	lda #maze_flag_key_whole
+	and gs_maze_flags
+	bne @normal
+	lda #$c3     ;partially formed
+	jsr print_to_line2
+	lda #noun_key + 4
+	jsr print_display_string
+	jmp @line1
+@normal:
+	lda zp10_noun
 	clc
 	adc #$04
 	jsr print_to_line2
+@line1:
 	lda #($03 + nouns_item_end)     ;Inside the box there is a
 	jsr print_to_line1
 	lda zp10_noun
@@ -1080,6 +1101,7 @@ cmd_unlock:
 	bcs locked_door
 	;GUG: jsr noun_to_item ?
 :	lda #$9d     ;It's not locked.
+print_line2u:
 	jmp print_to_line2
 
 locked_door:
@@ -1092,6 +1114,9 @@ locked_door:
 	lda zp1A_item_place
 	cmp #carried_unboxed
 	bmi @no_key
+	lda #maze_flag_key_whole
+	and gs_maze_flags
+	beq @no_fit
 	pla
 	clc
 	adc #doormsg_lock_begin - doors_locked_begin
@@ -1105,7 +1130,12 @@ locked_door:
 @no_key:
 	pla
 	lda #$92     ;But you have no key.
-	jmp print_to_line2
+	bne print_line2u
+
+@no_fit:
+	pla
+	lda #$c5     ;It doesn't fit.
+	bne print_line2u
 
 @correct_lock:
 	ldx #special_mode_bomb
@@ -1114,7 +1144,7 @@ locked_door:
 	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
 	lda #doormsg_lock_begin + door_correct
-	jmp print_to_line2
+	bne print_line2u
 
 which_door:
 	ldx #<door_table

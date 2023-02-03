@@ -57,6 +57,12 @@ There is now a reason for the frisbee to exist, apart from being a death trap. I
 
 There is now a reason for the yoyo to exist. Since it's establish that it can hit you in the eye, how about we turn that into a hint to hit something else in the eye? The monster encounter already has several steps, so we'll add it to the mother encounter. If you don't blind her first, she can dodge your sword attack.
 
+* STAFF purpose
+
+There is now a reason for the staff to exist. One of the most frustrating red herrings in the original game was the remarkably developed staff that ended up serving no purpose whatsoever. (That was the original motivator behind this entire project, actually.) So now it has one: the golden key is no longer freely given. It must be forged from golden parts with the staff when used properly in the correct location.
+
+For extra fun, I've hidden one of the parts in a previously-inaccessible area on level 3 and changed one of the teleport destinations to reach it.
+
 * HORN breaks off hat
 
 I assumed it was a brass horn when I played. I think it's supposed to be an animal horn. That makes a lot more sense as something that would seduce a monster.
@@ -107,6 +113,8 @@ After this pit is exposed, make it visible. This is more than just cosmetic; it 
 
 Also, allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
 
+## Quality of Life improvements
+
 * World goes dark after a bad charge
 
 Clear the screen after charging a steel wall. Consistent with other deaths like guillotine, monster, and bomb.
@@ -114,12 +122,6 @@ Clear the screen after charging a steel wall. Consistent with other deaths like 
 * "Darkens" message when appropriate
 
 When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.
-
-* Expose access to level 3 room
-
-There were two cells in the middle of the level inaccessible by any means. This is a pointless mystery. Might as well extend the switchback through them.
-
-## Quality of Life improvements
 
 * Numbers allowed
 
@@ -141,7 +143,7 @@ https://swordscorner.com/how-much-do-swords-weigh-full-analysis-table-lbs-kgs/
 
 * DOG vs MONSTER
 
-It is possible to avoid the dog entirely on Level 2, then return with the calculator after killing the monster. Throwing the sneaker had a scripted response that always mentioned getting eaten by the monster ... which should be impossible since it's already dead. I've fixed it so the dog will still chase the sneaker, even though it vanishes. This is not a win because the dog reappears immediately next turn.
+It is possible to avoid the dog entirely on Level 2, then return with the calculator after killing the monster. Throwing the sneaker had a scripted response that always mentioned getting eaten by the monster ... which should be impossible since it's already dead. I've fixed it so the dog will still chase the sneaker, even though it vanishes. This is not a victory because the dog reappears immediately next turn.
 
 This scenario is also possible in the retail version so I incorporated my change into the fan-fixed version. The README is vague about the details to avoid spoilers.
 

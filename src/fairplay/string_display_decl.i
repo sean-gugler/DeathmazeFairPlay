@@ -59,7 +59,7 @@
 	text_onto_a_bed_of_spikes_ = $3b
 	text_They_do_not_reach_the_lightning_rod_ = $3c
 	text_They_blast_the_lightning_rod_above_ = $3d
-	text_The_gold_pieces_fall__fused_together_ = $3e
+	text_The_gold_pieces_fuse_together_ = $3e
 	text_The_monster_grabs_the_frisbee__throws_ = $3f
 	text_it_back__and_it_saws_your_head_off_ = $40
 	text_TICK__TICK_ = $41
@@ -193,3 +193,5 @@
 	text___TURN_TURN_TURN = $c1
 	text_the_calculator_displays_317_ = $c2
 	text_partially_formed_ = $c3
+	text_it_looks_incomplete_ = $c4
+	text_The_key_doesn_t_fit_ = $c5
