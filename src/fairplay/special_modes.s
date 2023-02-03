@@ -1156,7 +1156,10 @@ special_climb:
 	lda zp19_pos_y
 	cmp #$0a
 	bne @ceiling
-	beq @up_level
+	lda #maze_flag_lair_raided
+	ora gs_maze_flags
+	sta gs_maze_flags
+	bne @up_level
 @on_level_3:
 	lda zp1A_pos_x
 	cmp #$08
