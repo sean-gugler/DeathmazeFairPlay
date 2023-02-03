@@ -1104,9 +1104,18 @@ draw_B_rod:
 	lda #glyph_LR
 	ldy #$04
 	jsr draw_down
-;	dec zp_col
-;	inc zp_row
 	jsr get_rowcol_addr
-	lda #glyph_X
+	lda #glyph_slash_down_R
+	jsr char_out
+
+	lda #$0c
+	sta zp_col
+	lda #$01
+	sta zp_row
+	lda #glyph_R
+	ldy #$04
+	jsr draw_down
+	jsr get_rowcol_addr
+	lda #glyph_slash_up
 	jsr char_out
 	rts
