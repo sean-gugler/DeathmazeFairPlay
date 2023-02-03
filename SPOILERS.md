@@ -45,6 +45,10 @@ There is now a reason for the brush to exist, and for the verb "paint" to exist.
 
 Instead, it is now a "magic door" and the jar comes pre-filled with black paint. Painting the door turns it into a real one. This references a trope from early cartoons. Even if the player is not familiar with the trope, the hints of calling it a "magic door", coloring it brightly, and finding black paint should be enough to make the solution fairly discoverable.
 
+* DRINK verb
+
+Since the jar can be full of liquid, I added the verb "drink". It's just another death trap, though.
+
 * FRISBEE purpose
 
 There is now a reason for the frisbee to exist, apart from being a death trap. If it can saw your head off, how about we use it to saw the monster's head off when it's helpless? Adding one step between kill monster and collect blood gives the frisbee a sensible purpose. I've given it a LOOK description to assist with hinting.

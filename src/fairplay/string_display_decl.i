@@ -187,3 +187,4 @@
 	text_it_is_empty_ = $bb
 	text_it_is_full_of_black_paint_ = $bc
 	text_it_is_full_of_toxic_monster_blood_ = $bd
+	text_You_poison_yourself_and_die_instantly_ = $be

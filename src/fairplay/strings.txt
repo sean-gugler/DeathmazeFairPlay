@@ -261,6 +261,7 @@ You're no Van Gogh.
 it is empty.
 it is full of black paint.
 it is full of toxic monster blood.
+You poison yourself and die instantly!
 
 [Intro]
 "           Deathmaze 5000               "

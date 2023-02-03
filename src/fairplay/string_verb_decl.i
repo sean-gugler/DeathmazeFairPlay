@@ -38,7 +38,7 @@
 	verb_paint = $15
 	verb_drink = $16
 
-	verb_intransitive = $16
+	verb_intransitive = $17
 
 	verb_charge = $17
 	verb_fart = $18

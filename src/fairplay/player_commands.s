@@ -1525,7 +1525,21 @@ cmd_paint:
 cmd_drink:
 	dec zp0F_action
 	bne cmd_charge
-	lda #$9a     ;It is currently impossible.
+
+	ldx #noun_jar
+	stx zp0E_object
+	ldx #icmd_where
+	stx zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_unboxed
+	bcc :+
+	lda gs_jar_full
+	beq :+
+	lda #$be     ;You poison yourself and die instantly!
+	jsr print_to_line1
+	jmp game_over
+:	lda #$9a     ;It is currently impossible.
 	jmp print_to_line2
 
 cmd_charge:

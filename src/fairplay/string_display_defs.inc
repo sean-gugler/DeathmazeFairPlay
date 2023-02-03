@@ -188,3 +188,4 @@
 	msbstring "it is empty."
 	msbstring "it is full of black paint."
 	msbstring "it is full of toxic monster blood."
+	msbstring "You poison yourself and die instantly!"

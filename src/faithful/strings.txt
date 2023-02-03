@@ -18,9 +18,9 @@ open unlock
 press
 get grab hold take
 stab kill slash attack hack
-paint
 
 [Verbs Intransitive]
+paint
 grendel
 say yell scream
 charge

@@ -94,11 +94,15 @@ def main(argv):
 
     VT = S['Verbs Transitive']
     VI = S['Verbs Intransitive']
+    marker = {
+        1 + len(VT): 'verb_intransitive',
+    }
     with open(args.verbs + DECL, 'wt') as out:
         for i,line in declare_vocab('verb', VT + VI):
+            if label := marker.get(i):
+                out.write(f'\n\t{label} = ${i:02x}\n\n')
+                del marker[i]
             out.write(line)
-            if i == len(VT):
-                out.write(f'\n\tverb_intransitive = ${i:02x}\n\n')
     with open(args.verbs + DEF, 'wt') as out:
         for line in define_vocab(fit4, VT + VI):
             out.write(line)
@@ -106,13 +110,16 @@ def main(argv):
     NU = S['Nouns Unique']
     NM = S['Nouns Multiple']
     NN = S['Nouns Non-Item']
+    marker = {
+        1 + len(NU): 'nouns_unique_end',
+        1 + len(NU) + len(NM): 'nouns_item_end',
+    }
     with open(args.nouns + DECL, 'wt') as out:
         for i,line in declare_vocab('noun', NU + NM + NN):
+            if label := marker.get(i):
+                out.write(f'\n\t{label} = ${i:02x}\n\n')
+                del marker[i]
             out.write(line)
-            if i == len(NU):
-                out.write(f'\n\tnouns_unique_end = ${i+1:02x}\n\n')
-            elif i == len(NU) + len(NM):
-                out.write(f'\n\tnouns_item_end = ${i+1:02x}\n\n')
     with open(args.nouns + DEF, 'wt') as out:
         for line in define_vocab(min4, NU + NM + NN):
             out.write(line)

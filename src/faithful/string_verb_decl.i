@@ -35,10 +35,10 @@
 	verb_slash = $13
 	verb_attack = $13
 	verb_hack = $13
-	verb_paint = $14
 
 	verb_intransitive = $14
 
+	verb_paint = $14
 	verb_grendel = $15
 	verb_say = $16
 	verb_yell = $16
