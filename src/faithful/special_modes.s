@@ -246,6 +246,10 @@ special_bat:
 
 @try_action:
 	jsr clear_status_lines
+.if REVISION >= 100
+	lda gs_jar_full
+	beq @dead
+.else ;RETAIL
 	ldx #noun_jar
 	stx zp0E_object
 	ldx #icmd_where
@@ -254,6 +258,7 @@ special_bat:
 	lda zp1A_item_place
 	cmp #carried_active
 	bne @dead
+.endif
 	lda gd_parsed_object
 	cmp #noun_jar
 	bne @dead
@@ -1092,11 +1097,15 @@ special_tripped:
 	cmp zp1A_item_place
 	bne @done
 
+.if REVISION >= 100
+	inc gs_jar_full
+.else ;RETAIL
 	ldx #noun_jar
 	stx zp0E_object
 	ldx #icmd_set_carried_active
 	stx zp0F_action
 	jsr item_cmd
+.endif
 
 	lda #$60     ;It is now full of blood.
 	jsr print_to_line2

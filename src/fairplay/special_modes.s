@@ -273,15 +273,10 @@ special_bat:
 
 @try_action:
 	jsr clear_status_lines
+	lda gs_jar_full
+	beq @dead
 	lda gd_parsed_object
 	cmp #noun_jar
-	bne @dead
-	sta zp0E_object
-	ldx #icmd_where
-	stx zp0F_action
-	jsr item_cmd
-	lda zp1A_item_place
-	cmp #carried_active
 	bne @dead
 	lda #$50     ;What a mess! The vampire bat
 	jsr print_to_line1
@@ -522,7 +517,8 @@ monster_kills_you:
 	jsr print_to_line1
 	lda #$37     ;you are his next meal!
 	jsr print_to_line2
-	lda gs_lair_raided
+	lda #maze_flag_lair_raided
+	and gs_maze_flags
 	beq :+
 	lda #$75     ;Never raid a monster's lair
 	ldx #$00
@@ -1008,10 +1004,26 @@ enter_elevator:
 	jmp game_over
 
 @level3:
+	ldx gs_player_x
+	cpx #$07
+	beq @magic
 	inc gs_level
 	ldx #$01
 	stx gs_player_x
 	bne @clear_turns
+@magic:
+	; Y += (3 - facing)
+	; 8,2 => 9
+	; 9,4 => 8
+	lda #$03
+	sec
+	sbc gs_facing
+	clc
+	adc gs_player_y
+	sta gs_player_y
+	jsr update_view
+	jmp pop_mode_continue
+
 @level4:
 	dec gs_level
 	ldx #$04

@@ -144,31 +144,7 @@ move_turn:
 	inc gs_facing
 	bpl @turned
 
-; First check: move through The Perfect Square
 move_forward:
-	lda gs_level
-	cmp #$03
-	bne @normal
-	lda gs_player_x
-	cmp #$07
-	bne @normal
-	lda gs_player_y
-	ldx gs_facing
-	stx zp1A_facing
-	cmp #$08
-	beq @perfect_square_N
-	cmp #$09
-	bne @normal
-@perfect_square_S:
-	lda zp1A_facing
-	cmp #$04
-	bne @normal
-	beq @move_player
-@perfect_square_N:
-	lda zp1A_facing
-	cmp #$02
-	beq @move_player
-@normal:
 	lda gs_walls_right_depth
 	and #%11100000
 	bne @move_player
@@ -351,16 +327,16 @@ update_view:
 
 ; Draw the flimsy wall if it hasn't been charged down yet.
 @probe:
-	lda maze_walls + 2
+	lda #maze_flag_hat_used
+	and gs_maze_flags
+	beq :+
+	jmp probe_forward
+
+:	lda maze_walls + 2
 	pha
-
-	ldx gs_hat_used
-	bne :+
 	ora #%00001000
-:	sta maze_walls + 2
-
+	sta maze_walls + 2
 	jsr probe_forward
-
 	pla
 	sta maze_walls + 2
 	rts
@@ -376,7 +352,8 @@ update_view:
 	lda #$02
 	cmp gs_facing
 	bne @normal
-	lda gs_hat_used
+	lda #maze_flag_hat_used
+	and gs_maze_flags
 	beq @normal
 
 	sec

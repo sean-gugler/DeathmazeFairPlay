@@ -85,7 +85,7 @@ flute.
 precision crafted frisbee.
 hat with two ram's horns.
 carefully polished ram's horn.
-glass jar complete with lid.
+glass jar.
 golden key.
 slippery banana peel.
 diamond ring.
@@ -257,6 +257,10 @@ You peel and eat the banana. Delicious!
 the banana peel is slippery.
 The hat breaks into pieces.
 One of the horns falls to the floor.
+You're no Van Gogh.
+it is empty.
+it is full of black paint.
+it is full of toxic monster blood.
 
 [Intro]
 "           Deathmaze 5000               "

@@ -39,6 +39,12 @@ The original printed game manual had nearly the same text as the instructions yo
 
 The ring was originally the light source for level 5 after your torch goes out. Its magic light is activated by raising it ... but it confusingly only works on level 5. To improve the experience, I've changed it to glow hot when rubbed. It can then be used to re-light an extinguished torch. The glow only lasts for one turn but can be invoked over and over. This allows its purpose to be consistent and also discoverable much earlier. It shouldn't break the game duration limits because the torches are still limited in number. If anything, it imposes a new time limit on level 5 exploration in addition to starvation. Admittedly it also softens the game's harsh lethality by providing a recovery path after the torch goes out through use or by carelessly dropping it. Some might feel this dampens the spirit of the original game. I justify it by noting that those situations are still lethal if the ring is not engaged, and it adds satisfaction of solving one more puzzle.
 
+* BRUSH purpose
+
+There is now a reason for the brush to exist, and for the verb "paint" to exist. The "perfect square" made no sense. It's not a reference to anything I'm aware of and its appearance and description have nothing to do with its nature as a pass-through wall. All it does is mark that wall as special and worth experimenting with.
+
+Instead, it is now a "magic door" and the jar comes pre-filled with black paint. Painting the door turns it into a real one. This references a trope from early cartoons. Even if the player is not familiar with the trope, the hints of calling it a "magic door", coloring it brightly, and finding black paint should be enough to make the solution fairly discoverable.
+
 * FRISBEE purpose
 
 There is now a reason for the frisbee to exist, apart from being a death trap. If it can saw your head off, how about we use it to saw the monster's head off when it's helpless? Adding one step between kill monster and collect blood gives the frisbee a sensible purpose. I've given it a LOOK description to assist with hinting.

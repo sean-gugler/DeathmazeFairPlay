@@ -100,7 +100,7 @@ gs_lair_raided:
 	JUNK_BYTE $00
 gs_snake_used:
 	JUNK_BYTE $01
-gs_unused4:
+gs_jar_full:
 	JUNK_BYTE $00
 
 gs_item_locs:

@@ -41,7 +41,7 @@
 	.global gs_rotate_hint_counter
 	.global gs_lair_raided
 	.global gs_snake_used
-;	.global gs_UNUSED
+	.global gs_jar_full
 
 	.global gs_item_locs
 	.global gs_item_snake

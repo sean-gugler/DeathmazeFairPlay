@@ -38,9 +38,9 @@
 	.global gs_rotate_count
 	.global gs_rotate_direction
 	.global gs_rotate_hint_counter
-	.global gs_lair_raided
+	.global gs_maze_flags
 	.global gs_snake_freed
-	.global gs_hat_used
+	.global gs_jar_full
 
 	.global gs_item_locs
 	.global gs_item_snake
@@ -80,6 +80,11 @@ carried_known = $08
 ; for >= comparisons
 carried_begin = $06
 carried_unboxed = $07
+
+maze_flag_hat_used      = 1 << 0
+maze_flag_snake_freed   = 1 << 1
+maze_flag_door_painted  = 1 << 2
+maze_flag_lair_raided   = 1 << 3
 
 monster_flag_dying = $01
 monster_flag_roaming = $02

@@ -116,23 +116,23 @@ cmd_verbal:
 
 ;cmd_raise:
 	dec zp0F_action
-	bne @cmd_blow
+	bne cmd_blow
 
 	lda #noun_staff
 	cmp zp0E_object
-	beq @staff
-@having_fun:
+	beq raise_staff
+having_fun:
 	lda #$8e     ;Having fun?
-@print_line2:
+print_line2r:
 	jmp print_to_line2
 
-@staff:
+raise_staff:
 	lda #$02
 	sta gs_staff_charged
 	lda #$73     ;Staff begins to quake
-	bne @print_line2
+	bne print_line2r
 
-@cmd_blow:
+cmd_blow:
 	dec zp0F_action
 	bne cmd_break
 
@@ -140,7 +140,7 @@ cmd_verbal:
 	cmp #noun_flute
 	beq @play
 	cmp #noun_horn
-	bne @having_fun
+	bne having_fun
 	lda gs_special_mode
 	cmp #special_mode_mother
 	bne :+
@@ -559,11 +559,7 @@ cmd_fill:
 	beq :+
 	jmp nonsense
 
-	lda #icmd_where
-	sta zp0F_action
-	jsr item_cmd
-	lda zp1A_item_place
-	cmp #carried_active
+	lda gs_jar_full
 	bne :+
 	lda #$ac     ;It's already full.
 	jmp print_to_line2
@@ -571,9 +567,8 @@ cmd_fill:
 :	lda gs_monster_step
 	cmp #$06
 	bne :+
-	lda #icmd_set_carried_active
-	sta zp0F_action
-	jsr item_cmd
+	lda #$02
+	sta gs_jar_full
 	lda #$60     ;It is now full of blood.
 	jmp print_to_line2
 
@@ -830,6 +825,12 @@ print_inspected:
 	bne :+
 	lda #$b7     ;the banana peel is slippery.
 	bne look_print
+:	cmp #noun_jar
+	bne :+
+	clc
+	lda #$bb     ;The jar is ...
+	adc gs_jar_full
+	bne look_print
 :	lda #$68     ;nothing of interest.
 	bne look_print
 
@@ -964,6 +965,17 @@ cmd_open:
 
 :	cmp #doors_locked_begin
 	bcs locked_door
+
+:	cmp #door_magic
+	bcc @push_mode
+	lda #maze_flag_door_painted
+	and gs_maze_flags
+	bne @push_mode
+	jmp having_fun
+;	lda #$8e     ;Having fun?
+;	jmp print_to_line2
+
+@push_mode:
 	jsr push_special_mode
 	ldx #special_mode_elevator
 	stx gs_special_mode
@@ -1078,15 +1090,19 @@ door_table:
 	.byte $31,$44
 	.byte $42,$14
 	.byte $52,$35
-door_locked_begin:
+door_magic         = 1 + ((* - door_table) / 2)  ;one-based indexing
+	.byte $32,$78
+	.byte $34,$79
+doors_locked_begin = 1 + ((* - door_table) / 2)  ;one-based indexing
 	.byte $52,$4a
 	.byte $52,$5a
 	.byte $52,$6a
 	.byte $52,$7a
 	.byte $52,$8a
 doors = (* - door_table) / 2
-doors_locked = (* - door_locked_begin) / 2
-doors_locked_begin = 1 + (doors - doors_locked)  ;one-based indexing
+
+.assert >* = >door_table, error, "Door table must fit in one page"
+
 
 	.segment "COMMAND3"
 
@@ -1442,13 +1458,14 @@ cmd_attack:
 
 @not_here:
 	lda #$90     ;I don't see that here.
-print_line2_ap:
+print_line2a:
 	jsr print_to_line2
 	rts
 
 cmd_paint:
 	dec zp0F_action
 	bne cmd_drink
+
 	ldx #noun_brush
 	stx zp0E_object
 	ldx #icmd_where
@@ -1459,8 +1476,51 @@ cmd_paint:
 	beq :+
 	jmp not_carried
 
-:	lda #$6f     ;With what? Toenail polish?
-	bne print_line2_ap
+:	ldx #noun_jar
+	stx zp0E_object
+	ldx #icmd_where
+	stx zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_unboxed
+	bcc @no_paint
+
+:	lda gs_jar_full
+	beq @no_paint
+	ror
+	bcc @no_artist
+
+	lda gd_parsed_object
+	cmp #noun_door
+	bcc @no_artist
+
+;@magic_door:
+	lda gs_level
+	cmp #$03
+	bne @no_artist
+	lda gs_player_x
+	cmp #$07
+	bne @no_artist
+	lda gs_player_y
+	cmp #$08
+	bne @no_artist
+	lda gs_facing
+	cmp #$02
+	bne @no_artist
+
+	dec gs_jar_full
+	lda #maze_flag_door_painted
+	ora gs_maze_flags
+	sta gs_maze_flags
+	jmp update_view
+
+@no_artist:
+	lda #$ba     ;You're no Van Gogh.
+	bne print_line2a
+
+@no_paint:
+	lda #$6f     ;With what? Toenail polish?
+	bne print_line2a
 
 cmd_drink:
 	dec zp0F_action
@@ -1508,7 +1568,9 @@ cmd_charge:
 	ldx #$03
 	stx gs_player_y
 	stx gs_player_x
-	inc gs_hat_used
+	lda #maze_flag_hat_used
+	ora gs_maze_flags
+	sta gs_maze_flags
 	ldx #noun_hat
 	stx zp0E_object
 	ldx #icmd_destroy1

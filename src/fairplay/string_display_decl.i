@@ -11,7 +11,7 @@
 	text_precision_crafted_frisbee_ = $0b
 	text_hat_with_two_ram_s_horns_ = $0c
 	text_carefully_polished_ram_s_horn_ = $0d
-	text_glass_jar_complete_with_lid_ = $0e
+	text_glass_jar_ = $0e
 	text_golden_key_ = $0f
 	text_slippery_banana_peel_ = $10
 	text_diamond_ring_ = $11
@@ -183,3 +183,7 @@
 	text_the_banana_peel_is_slippery_ = $b7
 	text_The_hat_breaks_into_pieces_ = $b8
 	text_One_of_the_horns_falls_to_the_floor_ = $b9
+	text_You_re_no_Van_Gogh_ = $ba
+	text_it_is_empty_ = $bb
+	text_it_is_full_of_black_paint_ = $bc
+	text_it_is_full_of_toxic_monster_blood_ = $bd

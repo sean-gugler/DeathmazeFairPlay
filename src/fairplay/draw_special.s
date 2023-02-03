@@ -134,7 +134,11 @@ draw_special:
 	sta screen_ptr+1
 	ldy #$0a
 	jsr draw_right
-	lda #$07
+	
+	lda zp0E_draw_param
+	bne :+
+	rts
+:	lda #$07
 	sta zp_col
 	lda #$01
 	sta zp_row
@@ -585,6 +589,12 @@ draw_special:
 	.byte $0b,$0b
 	.byte $0b,$0b
 	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
 	.byte $0b,$09
 	.byte $09,$20
 @square_data_right:
@@ -593,27 +603,45 @@ draw_special:
 	.byte $0b,$0b
 	.byte $0b,$0b
 	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
+	.byte $0b,$0b
 	.byte $08,$0b
 	.byte $20,$08
+.assert >* = >@square_data_left, error, "Square data must be within one page"
 
 	.segment "STRING_SQUARE"
 
 @string_square:
-	.byte "THEPERFECTSQUARE"
+	.byte "THEMAGICDOOR!"
 
 	.segment "DRAW_SPECIAL5"
 
-; Input: 0E = 1 right, 2 front, 4 left
+; Input: 0E = 0 front, 1 right(1), 2 right(2), 4 left(1)
 @draw_7_the_square:
 	dey
-	beq :+
+	beq @square_open
 	jmp @draw_8_doors
 
-:	lda zp0E_draw_param
+@square_open:
+	lda #maze_flag_door_painted
+	and gs_maze_flags
+	beq @square_closed
+	iny
+	lda zp0E_draw_param
+	bne :+
+	jmp @draw_2_elevator
+:	jmp @draw_8_doors
+
+@square_closed:
+	lda zp0E_draw_param
+	beq @square_front
 	cmp #$01
 	beq @square_right
-	cmp #$04
-	bne @square_front
+;	cmp #$04
 	jmp @square_left
 
 @square_front:
@@ -625,7 +653,7 @@ draw_special:
 	pha
 @sq_next_col:
 	lda #glyph_solid
-	ldy #$07
+	ldy #$0e
 	jsr draw_down
 	pla
 	sta zp_row
@@ -653,12 +681,12 @@ draw_special:
 	lda #$03
 	sta zp1A_count_loop
 	jsr @print_square_row
-	lda #$08
+	lda #$09
 	sta zp_col
 	lda #$05
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$07
+	lda #$05
 	sta zp1A_count_loop
 	jsr @print_square_row
 	lda #$09
@@ -666,7 +694,7 @@ draw_special:
 	lda #$06
 	sta zp_row
 	jsr get_rowcol_addr
-	lda #$06
+	lda #$05
 	sta zp1A_count_loop
 @print_square_row:
 	ldy #$00
@@ -685,9 +713,11 @@ draw_special:
 	lda #>@square_data_right
 	sta zp0A_text_ptr+1
 	lda #$13
+@sq_side:
 	sta zp_col
 	lda #$07
 	sta zp_row
+	lda #$0d
 	sta zp1A_count_loop
 @sq_next_row:
 	jsr get_rowcol_addr
@@ -716,12 +746,10 @@ draw_special:
 	lda #>@square_data_left
 	sta zp0A_text_ptr+1
 	lda #$02
-	sta zp_col
-	lda #$07
-	sta zp_row
-	sta zp1A_count_loop
-	jmp @sq_next_row
+	jmp @sq_side
 
+
+; Input: 0E = 1 right(1), 2 right(2), 4 left(1)
 @draw_8_doors:
 	dey
 	beq :+
@@ -733,7 +761,7 @@ draw_special:
 	jmp @door_1_left
 
 @door_2_right:
-	cmp #$02
+	cmp #$01
 	beq @door_1_right
 	lda #$10
 	sta zp_col

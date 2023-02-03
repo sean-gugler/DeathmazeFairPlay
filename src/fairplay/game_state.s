@@ -93,11 +93,11 @@ gs_rotate_direction:
 	JUNK_BYTE $00
 gs_rotate_hint_counter:
 	JUNK_BYTE $00
-gs_lair_raided:
+gs_maze_flags:
 	JUNK_BYTE $00
 gs_snake_freed:
 	JUNK_BYTE $01
-gs_hat_used:
+gs_jar_full:
 	JUNK_BYTE $00
 
 gs_item_locs:
