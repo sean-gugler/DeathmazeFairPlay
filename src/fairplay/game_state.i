@@ -30,7 +30,7 @@
 	.global gs_monster_alive
 	.global gs_dog1_alive
 	.global gs_dog2_alive
-;	.global gs_UNUSED
+	.global gs_broken_door
 	.global gs_bomb_tick
 	.global gs_monster_step
 	.global gs_action_flags

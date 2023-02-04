@@ -195,3 +195,7 @@
 	text_partially_formed_ = $c3
 	text_it_looks_incomplete_ = $c4
 	text_The_key_doesn_t_fit_ = $c5
+	text_The_ball_sails_through_the_open_door = $c6
+	text_The_ceiling_has_collapsed_ = $c7
+	text_blocking_the_door_ = $c8
+	text_filling_a_hidden_pit_ = $c9

@@ -30,6 +30,7 @@
 	.import update_view
 	.import normal_input_handler
 	.import check_special_position
+	.import which_door
 
 ;	.include "apple.i"
 	.include "char.i"
@@ -925,7 +926,13 @@ special_elevator:
 	lda gd_parsed_action
 	cmp #verb_forward
 	beq enter_elevator
-;pop_mode_do_cmd:
+	cmp #verb_throw
+	bne @pop_mode_do_cmd
+	lda gd_parsed_object
+	cmp #noun_ball
+	bne @pop_mode_do_cmd
+	jmp throw_ball
+@pop_mode_do_cmd:
 	lda gs_mode_stack1
 	sta gs_special_mode
 	lda gs_mode_stack2
@@ -1047,6 +1054,42 @@ enter_elevator:
 	lda #$6e     ;elevator. There is no escape!
 	jsr print_to_line2
 	jmp game_over
+
+throw_ball:
+	lda #$c6     ;The ball sails through the open door
+	jsr print_to_line1
+	jsr wait_short
+	jsr wait_short
+	jsr update_view
+	jsr wait_short
+	jsr flash_screen
+	jsr clear_maze_window
+	jsr wait_long
+	jsr update_view
+
+	.assert noun_ball = icmd_destroy2, error, "Nouns changed, need to undo optimization in special_elevator"
+	ldx #icmd_destroy2
+	stx zp0F_action
+;	ldx #noun_ball
+	stx zp0E_object
+	jsr item_cmd
+	ldx #icmd_draw_inv
+	stx zp0F_action
+	jsr item_cmd
+
+	jsr which_door
+	sta gs_broken_door
+
+	lda #$c7     ;The ceiling has collapsed,
+	jsr print_to_line1
+	lda gs_special_mode
+	cmp #special_mode_endgame
+	lda #$c8     ;blocking the door.
+	bne :+
+	lda #$c9     ;filling a hidden pit!
+:	jsr print_to_line2
+
+	jmp pop_mode_continue
 
 
 

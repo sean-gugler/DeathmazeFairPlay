@@ -150,3 +150,7 @@ This scenario is also possible in the retail version so I incorporated my change
 * PLAY with dog
 
 In the dog encounter, PLAY BALL is recognized. So is THROW BALL. You still die, but at least the stock answer "With who?" now has an answer.
+
+* BALL works anywhere
+
+The crystal ball can now be used to destroy any open door, not just the final one. This allows earlier discovery of its purpose.

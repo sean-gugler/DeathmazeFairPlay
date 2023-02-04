@@ -35,7 +35,7 @@ data_new_game:
 	.byte $02		;monster alive (flag $02)
 	.byte $01		;dog 1 alive
 	.byte $01		;dog 2 alive
-	.byte $00		;UNUSED
+	.byte $00		;broken door
 	.byte $00		;next hint
 	.byte $00		;monster step
 	.byte $00		;action flags

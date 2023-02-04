@@ -77,7 +77,7 @@ gs_dog1_alive:
 	JUNK_BYTE $00
 gs_dog2_alive:
 	JUNK_BYTE $01
-gs_unused3:
+gs_broken_door:
 	JUNK_BYTE $00
 gs_bomb_tick:
 	JUNK_BYTE $00

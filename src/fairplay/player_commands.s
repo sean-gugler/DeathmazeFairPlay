@@ -8,6 +8,7 @@
 	.export push_special_mode
 	.export save_to_tape
 	.export thrown
+	.export which_door
 
 	.import print_string
 	.import draw_special
@@ -78,6 +79,7 @@ zp11_item           = $11;
 zp0F_action         = $0F;
 zp0E_object         = $0E;
 
+item_msg_begin = text_crystal_ball_ - 1
 
 doormsg_lock_begin = text_You_unlock_the_door___ + 1
 
@@ -1018,13 +1020,13 @@ cmd_open:
 	bne @normal
 	lda #$c3     ;partially formed
 	jsr print_to_line2
-	lda #noun_key + 4
+	lda #item_msg_begin + noun_key
 	jsr print_display_string
 	jmp @line1
 @normal:
 	lda zp10_noun
 	clc
-	adc #$04
+	adc #item_msg_begin
 	jsr print_to_line2
 @line1:
 	lda #($03 + nouns_item_end)     ;Inside the box there is a
@@ -1071,6 +1073,10 @@ cmd_open:
 
 :	cmp #doors_locked_begin
 	bcs locked_door
+
+:	cmp gs_broken_door
+	bne :+
+	jmp impossible
 
 :	cmp #door_magic
 	bcc @push_mode
@@ -1865,6 +1871,7 @@ cmd_save:
 	bne cmd_quit
 	lda gs_special_mode
 	beq ask_save_game
+impossible:
 	lda #$9a     ;It is currently impossible.
 	jmp print_to_line2
 

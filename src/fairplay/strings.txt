@@ -273,6 +273,10 @@ the calculator displays 317.
 partially formed 
 it looks incomplete.
 The key doesn't fit.
+The ball sails through the open door
+The ceiling has collapsed,
+blocking the door.
+filling a hidden pit!
 
 [Intro]
 "           Deathmaze 5000               "

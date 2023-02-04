@@ -196,3 +196,7 @@
 	msbstring "partially formed "
 	msbstring "it looks incomplete."
 	msbstring "The key doesn't fit."
+	msbstring "The ball sails through the open door"
+	msbstring "The ceiling has collapsed,"
+	msbstring "blocking the door."
+	msbstring "filling a hidden pit!"
