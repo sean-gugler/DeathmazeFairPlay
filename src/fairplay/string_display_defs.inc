@@ -158,7 +158,7 @@
 	msbstring "It's not locked."
 	msbstring "A cruel laugh booms out: not quite!"
 	msbstring "Invert and telephone."
-	msbstring "Don't make unnecessary turns."
+	msbstring "Don't look back!"
 	msbstring "You have turned into a pillar of salt!"
 	msbstring "Don't say I didn't warn you!"
 	msbstring "The elevator is moving!"

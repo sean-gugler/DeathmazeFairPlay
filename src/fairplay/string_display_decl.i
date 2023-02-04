@@ -157,7 +157,7 @@
 	text_It_s_not_locked_ = $9d
 	text_A_cruel_laugh_booms_out__not_quite_ = $9e
 	text_Invert_and_telephone_ = $9f
-	text_Don_t_make_unnecessary_turns_ = $a0
+	text_Don_t_look_back_ = $a0
 	text_You_have_turned_into_a_pillar_of_salt_ = $a1
 	text_Don_t_say_I_didn_t_warn_you_ = $a2
 	text_The_elevator_is_moving_ = $a3

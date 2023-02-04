@@ -807,7 +807,7 @@ special_bomb:
 	jmp special_elevator
 
 :	lda gd_parsed_action
-	cmp #$50
+	cmp #verb_movement_begin
 	bcc :+
 	jsr update_view
 :	lda gs_bomb_tick
@@ -871,8 +871,10 @@ special_bomb:
 	jsr get_player_input
 	lda gd_parsed_action
 	cmp #verb_open
+	beq :+
+	cmp #verb_unlock
 	bne @boom
-	lda gd_parsed_object
+:	lda gd_parsed_object
 	cmp #noun_door
 	bne @boom
 	lda gs_facing
@@ -884,7 +886,14 @@ special_bomb:
 	lda gs_player_y
 	cmp #$0b
 	bne @boom
-	jmp special_endgame
+	
+	dec gs_player_x
+	jsr update_view
+	lda #$a0     ;Don't look back!
+	jsr print_to_line1
+	lda #special_mode_endgame
+	sta gs_special_mode
+	jmp check_special_mode
 
 @boom:
 	jsr flash_screen
@@ -899,32 +908,8 @@ special_bomb:
 
 @regular_move:
 	jsr get_player_input
-	lda gd_parsed_action
-	cmp #$59
-	bcc :+
-	jsr cmd_movement
-	jmp check_special_mode
-
-:	lda gd_parsed_action
-	cmp #verb_open
-	bne @continue
-	lda gd_parsed_object
-	cmp #noun_door
-	bne @continue
-	lda gs_facing
-	cmp #$01
-	bne @continue
-	lda gs_player_x
-	cmp #$0a
-	bne @continue
-	lda gs_player_y
-	cmp #$0b
-	bne @continue
-	jmp special_endgame
-
-@continue:
+	jsr normal_input_handler
 	jsr count_as_move
-	jsr cmd_verbal
 	jsr print_timers
 	jmp check_special_mode
 
@@ -949,9 +934,13 @@ special_elevator:
 	sta gs_mode_stack1
 	jsr normal_input_handler
 	lda gs_special_mode
-	bne :+
+	beq @update
+	cmp #special_mode_endgame
+	bne @done
+@update:
 	jsr update_view
-:	jmp check_special_mode
+@done:
+	jmp check_special_mode
 
 ride_elevator:
 	lda #action_level
@@ -970,26 +959,15 @@ enter_elevator:
 	jsr clear_maze_window
 	ldx gs_level
 	dex
-	dex
-	beq @level2
-	dex
-	beq @level3
-	dex
-	beq @level4
-@level5:
-	lda #$6d     ;You are trapped in a fake
-	jsr print_to_line1
-	lda #$6e     ;elevator. There is no escape!
-	jsr print_to_line2
-	jmp game_over
 
 @level2:
+	dex
+	bne @level3
+
 	jsr clear_maze_window
 	ldx #$03
-	stx zp0F_action  ;GUG: no effect
 	stx gs_walls_left
 	ldx #$23
-	stx zp0E_draw_param  ;GUG: no effect
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd03_compactor
@@ -1006,6 +984,9 @@ enter_elevator:
 	jmp game_over
 
 @level3:
+	dex
+	bne @level4
+
 	ldx gs_player_x
 	cpx #$07
 	beq @magic
@@ -1027,6 +1008,9 @@ enter_elevator:
 	jmp pop_mode_continue
 
 @level4:
+	dex
+	bne @level5
+
 	dec gs_level
 	ldx #$04
 	stx gs_player_x
@@ -1035,6 +1019,34 @@ enter_elevator:
 	stx gs_level_moves_hi
 	stx gs_level_moves_lo
 	jmp ride_elevator
+
+	beq @level2
+	dex
+	beq @level3
+	dex
+	beq @level4
+
+@level5:
+	lda gs_player_x
+	cmp #$01
+	bne :+
+	ldx #$00
+	stx zp_col
+	ldx #$14
+	stx zp_row
+	lda #$3a     ;You fall through the floor
+	jsr print_display_string
+	lda #char_newline
+	jsr char_out
+	lda #$3b     ;onto a bed of spikes!
+	jsr print_display_string
+	jmp game_over
+
+:	lda #$6d     ;You are trapped in a fake
+	jsr print_to_line1
+	lda #$6e     ;elevator. There is no escape!
+	jsr print_to_line2
+	jmp game_over
 
 
 
@@ -1282,7 +1294,27 @@ special_climb:
 
 
 special_endgame:
-	rts
+	lda gs_facing
+	cmp #$03
+	bne :+
+
+;@dead_salt:
+	jsr clear_maze_window
+	jsr clear_status_lines
+	ldx #$00
+	stx zp_col
+	ldx #$14
+	stx zp_row
+	lda #$a1     ;You have turned into a pillar of salt!
+	jsr print_display_string
+	lda #char_newline
+	jsr char_out
+	lda #$a2     ;Don't say I didn't warn you!
+	jsr print_display_string
+	jmp game_over
+
+:	rts
+
 .if 0
 	jsr clear_maze_window
 	lda #$07

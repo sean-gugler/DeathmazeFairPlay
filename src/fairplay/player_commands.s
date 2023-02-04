@@ -1205,6 +1205,7 @@ door_table:
 	.byte $31,$44
 	.byte $42,$14
 	.byte $52,$35
+	.byte $52,$1a
 door_magic         = 1 + ((* - door_table) / 2)  ;one-based indexing
 	.byte $32,$78
 	.byte $34,$79
