@@ -1065,7 +1065,6 @@ throw_ball:
 	jsr flash_screen
 	jsr clear_maze_window
 	jsr wait_long
-	jsr update_view
 
 	.assert noun_ball = icmd_destroy2, error, "Nouns changed, need to undo optimization in special_elevator"
 	ldx #icmd_destroy2
@@ -1089,6 +1088,7 @@ throw_ball:
 	lda #$c9     ;filling a hidden pit!
 :	jsr print_to_line2
 
+	jsr update_view
 	jmp pop_mode_continue
 
 

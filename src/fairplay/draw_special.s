@@ -8,6 +8,7 @@
 	.import draw_down
 	.import print_char
 	.import get_rowcol_addr
+	.import which_door
 
 	.include "apple.i"
 	.include "char.i"
@@ -99,9 +100,10 @@ draw_special:
 
 @draw_2_elevator:
 	dey
-	bne @draw_3_compactor
+	beq :+
+	jmp @draw_3_compactor
 
-	lda #$03
+:	lda #$03
 	sta zp_row
 	lda #$05
 	sta zp_col
@@ -135,6 +137,26 @@ draw_special:
 	ldy #$0a
 	jsr draw_right
 	
+	jsr which_door
+	cmp gs_broken_door
+	bne @draw_sign
+	ldx #$00
+@draw_broken:
+	stx zp1A_count_row
+	lda #$0a
+	sta zp_col
+	lda @broken_door,x
+	sta zp_row
+	jsr get_rowcol_addr
+	lda @broken_door + 1,x
+	jsr print_char
+	ldx zp1A_count_row
+	inx
+	inx
+	cpx #@broken_door_end
+	bne @draw_broken
+
+@draw_sign:
 	lda zp0E_draw_param
 	bne :+
 	rts
@@ -165,6 +187,15 @@ draw_special:
 
 @string_elevator:
 	.byte "ELEVATOR"
+
+@broken_door:
+	.byte $03, glyph_slash_down
+	.byte $08, glyph_slash_up
+	.byte $09, glyph_slash_down
+	.byte $12, glyph_slash_up
+	.byte $13, glyph_LR
+	.byte $14, glyph_slash_up
+@broken_door_end = * - @broken_door
 
 ;	.segment "DRAW_SPECIAL2"
 
