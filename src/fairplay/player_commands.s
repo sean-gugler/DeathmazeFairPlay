@@ -1652,7 +1652,7 @@ cmd_paint:
 
 cmd_drink:
 	dec zp0F_action
-	bne cmd_charge
+	bne cmd_say
 
 	ldx #noun_jar
 	stx zp0E_object
@@ -1669,6 +1669,45 @@ cmd_drink:
 	jmp game_over
 :	lda #$9a     ;It is currently impossible.
 	jmp print_to_line2
+
+cmd_say:
+	dec zp0F_action
+	bne cmd_charge
+
+	lda gs_parsed_object
+	bne :+
+	jmp nonsense
+:	lda #$76     ;OK...
+	jsr print_to_line2
+	lda #<text_buffer_line1
+	sta zp0E_ptr
+	lda #>text_buffer_line1
+	sta zp0E_ptr+1
+	ldy #$00
+	lda #' '
+:	cmp (zp0E_ptr),y
+	beq @next_char
+	inc zp0E_ptr
+	bne :-
+	inc zp0E_ptr+1
+	bne :-
+@echo_word:
+	ldy #$00
+	lda (zp0E_ptr),y
+	cmp #' '
+	beq @done
+	sta (zp0A_text_ptr),y
+	jsr print_char
+@next_char:
+	inc zp0A_text_ptr
+	bne :+
+	inc zp0A_text_ptr+1
+:	inc zp0E_ptr
+	bne @echo_word
+	inc zp0E_ptr+1
+	bne @echo_word
+@done:
+	rts
 
 cmd_charge:
 	dec zp0F_action

@@ -23,6 +23,7 @@ paint
 drink
 
 [Verbs Intransitive]
+say yell scream
 charge
 fart
 save
