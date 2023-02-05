@@ -412,7 +412,7 @@ parse_input:
 	bne @echo
 @next_verb_letter:
 	lda (zp19_input_ptr),y
-	cmp #$20
+	cmp #' '
 	beq @verb_word_end
 @echo:
 	jsr char_out

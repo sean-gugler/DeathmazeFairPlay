@@ -313,7 +313,7 @@ draw_special:
 	dec zp_col
 	dec zp_col
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	pla
 	sta zp_col
@@ -335,11 +335,11 @@ draw_special:
 	jsr draw_down
 	inc zp_col
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	inc zp_row
 	jsr get_rowcol_addr
-	lda #$20
+	lda #' '
 	jsr char_out
 	pla
 	sta zp_row
