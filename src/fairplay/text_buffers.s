@@ -34,6 +34,9 @@ text_buffer_line2:
 	.byte $20,$d0,$e9,$ad,$9c,$61,$c9,$0e
 	.byte $f0,$52,$c9,$13,$d0,$ee,$a2,$04
 	.assert * - text_buffer_line2 = textbuf_size / 2, error, "Mismatch text buffer size"
+
+.assert >* = >text_buffer_prev, error, "Text buffers must fit in one page"
+
 ;
 ; cruft decoded:
 ;	cmp #$50

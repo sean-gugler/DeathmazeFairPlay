@@ -1689,8 +1689,6 @@ cmd_say:
 	beq @next_char
 	inc zp0E_ptr
 	bne :-
-	inc zp0E_ptr+1
-	bne :-
 @echo_word:
 	ldy #$00
 	lda (zp0E_ptr),y
@@ -1700,11 +1698,7 @@ cmd_say:
 	jsr print_char
 @next_char:
 	inc zp0A_text_ptr
-	bne :+
-	inc zp0A_text_ptr+1
-:	inc zp0E_ptr
-	bne @echo_word
-	inc zp0E_ptr+1
+	inc zp0E_ptr
 	bne @echo_word
 @done:
 	rts

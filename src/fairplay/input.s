@@ -295,24 +295,18 @@ parse_input:
 	ldy zp11_count_chars
 	sta (zp19_input_ptr),y
 	inc zp19_input_ptr
-	bne @parse_verb
-	inc zp19_input_ptr+1
-@parse_verb:
+;@parse_verb:
 	jsr get_vocab
 	lda zp10_count_vocab
 	sta gs_parsed_action
 	ldy #$00
 @skip_word:
 	inc zp19_input_ptr
-	bne :+
-	inc zp19_input_ptr+1
-:	lda (zp19_input_ptr),y
+	lda (zp19_input_ptr),y
 	cmp #' '
 	bne @skip_word
 	inc zp19_input_ptr
-	bne :+
-	inc zp19_input_ptr+1
-:	lda (zp19_input_ptr),y
+	lda (zp19_input_ptr),y
 	cmp #$80
 	beq @verb_only
 	cmp #' '
@@ -371,13 +365,9 @@ parse_input:
 	beq @found_word_end
 	inc zp19_input_ptr
 	bne @find_word_end
-	inc zp19_input_ptr+1
-	bne @find_word_end
 @found_word_end:
 	inc zp19_input_ptr
-	bne :+
-	inc zp19_input_ptr+1
-:	jsr @echo_word
+	jsr @echo_word
 	lda #'?'
 	sta (zp0A_text_ptr),y
 	jsr char_out
@@ -485,9 +475,7 @@ get_vocab:
 	cmp zp13_char_input
 	bne @mismatch
 	inc zp19_input_ptr
-	bne :+
-	inc zp19_input_ptr+1
-:	inc zp0E_ptr
+	inc zp0E_ptr
 	bne :+
 	inc zp0E_ptr+1
 :	dec zp11_count_chars

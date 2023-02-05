@@ -71,9 +71,7 @@ print_to_line:
 	bne :+
 	inc zp0C_string_ptr+1
 :	inc zp0A_text_ptr
-	bne :+
-	inc zp0A_text_ptr+1
-:	ldy #$00
+	ldy #$00
 	lda (zp0C_string_ptr),y
 	bpl @next_char
 	lda #char_ClearLine
