@@ -1838,6 +1838,8 @@ flash_screen:
 check_fart:
 	lda gs_special_mode
 	beq :+
+	cmp #special_mode_endgame
+	beq :+
 	lda #$98     ;You will do no such thing!
 	jmp print_to_line1
 
