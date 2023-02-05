@@ -34,8 +34,11 @@
 	.importzp door_final
 	.import get_rowcol_addr
 	.import print_char
+	.importzp magic_word_length
+	.import exit_game
 
-;	.include "apple.i"
+
+	.include "apple.i"
 	.include "char.i"
 	.include "draw_commands.i"
 	.include "game_design.i"
@@ -63,6 +66,7 @@ zp0F_action        = $0F;
 zp0E_object        = $0E;
 zp1A_object        = $1A;
 zp1A_hint_mode     = $1A;
+zp11_count         = $11;
 
 	.segment "SPECIAL_MODES"
 
@@ -1427,275 +1431,23 @@ special_endgame:
 	rts
 
 @check_word:
-;	lda gs_parsed_action
-;	cmp #verb_say
-	rts
-
-.if 0
-	jsr clear_maze_window
-	lda #$07
-	sta gs_walls_left
-	ldx #$47     ;GUG: depth 4? not 3?
-	stx gs_walls_right_depth
-	jsr draw_maze
-	ldx #drawcmd08_doors
-	stx zp0F_action
-	ldx #$01
-	stx zp0E_draw_param
-	jsr draw_special
-	ldx #$01
-	stx gs_endgame_step
-@endgame_input_loop:
-	lda #$a0     ;Don't make unnecessary turns.
-	jsr print_to_line1
-	jsr get_player_input
-	lda gs_endgame_step
-	sta zp1A_endgame_step
 	lda gs_parsed_action
+	cmp #verb_say
+	bne @normal
+	lda zp11_count
+	cmp #magic_word_length
+	bne @normal
 
-@step1:
-	dec zp1A_endgame_step
-	bne @step2
-	cmp #$5a
-	bpl :+
-	jmp @nope
-
-:	cmp #verb_forward
-	beq :+
-	jmp @dead_salt
-
-:	jsr clear_maze_window
-	ldx #$03
-	stx gs_walls_left
-	ldx #$23
-	stx gs_walls_right_depth
-	jsr draw_maze
-	ldx #drawcmd08_doors
-	stx zp0F_action
-	ldx #$02
-	stx zp0E_draw_param
-	jsr draw_special
-	inc gs_endgame_step
-	jmp @endgame_input_loop
-
-@step2:
-	dec zp1A_endgame_step
-	bne @step3
-	cmp #$5a
-	bpl :+
-	jmp @nope
-
-:	cmp #verb_forward
-	beq :+
-	jmp @dead_salt
-
-:	jsr clear_maze_window
-	ldx #$01
-	stx gs_walls_left
-	ldx #$00
-	stx gs_walls_right_depth
-	jsr draw_maze
-	inc gs_endgame_step
-	jmp @endgame_input_loop
-
-@step3:
-	dec zp1A_endgame_step
-	bne @step4
-	cmp #$5a
-	bpl :+
-	jmp @nope
-
-:	cmp #verb_right
-	beq :+
-	jmp @dead_salt
-
-:	jsr clear_maze_window
-	ldx #$01
-	stx gs_walls_left
-	ldx #$00
-	stx gs_walls_right_depth
-	jsr draw_maze
-	ldx #drawcmd02_elevator
-	stx zp0F_action
-	jsr draw_special
-	inc gs_endgame_step
-	jmp @endgame_input_loop
-
-@step4:
-	dec zp1A_endgame_step
-	bne @step5
-	cmp #$5a
-	bmi :+
-	jmp @dead_salt
-
-:	cmp #verb_open
-	beq :+
-	jmp @nope
-
-:	lda gs_parsed_object
-	cmp #noun_door
-	beq :+
-	jmp @nope
-
-:	ldx #drawcmd0A_door_opening
-	stx zp0F_action
-	jsr draw_special
-	inc gs_endgame_step
-	jmp @endgame_input_loop
-
-@step5:
-	dec zp1A_endgame_step
-	bne @step6
-	cmp #verb_forward
-	bne :+
-	jsr clear_maze_window
-	ldx #$00
-	stx zp_col
-	ldx #$14
-	stx zp_row
-	lda #$3a     ;You fall through the floor
-	jsr print_display_string
-	lda #char_newline
-	jsr char_out
-	lda #$3b     ;onto a bed of spikes!
-	jsr print_display_string
-	jmp game_over
-
-:	cmp #$5a
-	bmi :+
-	jmp @dead_salt
-
-:	cmp #verb_throw
-	beq :+
-@nope5:
-	jmp @nope
-
-:	lda gs_parsed_object
-	cmp #noun_ball
-	bne @nope5
-	ldx #icmd_where
-	stx zp0F_action
-	ldx #noun_ball
-	stx zp0E_object
-	jsr item_cmd
-	lda zp1A_item_place
-	cmp #carried_known
-	bne @nope5
-	jsr clear_maze_window
-	jsr flash_screen
-	ldx #$07
-	stx gs_walls_left
-	ldx #$46
-	stx gs_walls_right_depth
-	jsr draw_maze
-	ldx #icmd_destroy2
-	stx zp0F_action
-;	ldx #noun_ball  ;optimized - same value as icmd_destroy2
-	stx zp0E_object
-	jsr item_cmd
-	ldx #icmd_draw_inv
-	stx zp0F_action
-	jsr item_cmd
-	inc gs_endgame_step
-	jmp @endgame_input_loop
-
-@step6:
-	dec zp1A_endgame_step
-	bne @step7
-	cmp #$5a
-	bpl :+
-@nope6:
-	jmp @nope
-
-:	cmp #verb_forward
-	beq :+
-@dead6:
-	jmp @dead_salt
-
-:	jsr clear_maze_window
-	ldx #$03
-	stx gs_walls_left
-	ldx #$23
-	stx gs_walls_right_depth
-	jsr draw_maze
-	inc gs_endgame_step
-	jmp @endgame_input_loop
-
-@step7:
-	cmp #$5a
-	bmi @nope6
-	cmp #verb_forward
-	bne @dead6
-	jsr clear_maze_window
-	ldx #$01
-	stx gs_walls_left
-	stx gs_walls_right_depth
-	jsr draw_maze
-@final_quiz:
-	lda #$3c     ;Before I let you go free
-	jsr print_to_line1
-	lda #$3d     ;what was the name of the monster?
-	jsr print_to_line2
-	jsr get_player_input
-	lda gs_parsed_action
-	cmp #$5a
-	bpl @dead6
-	cmp #noun_grendel
-	beq @win
-	jmp @print_hint
-
-@text_hint:
-	.byte "BEOWULF DISAGREES!", $80
-@print_hint:
-	jsr clear_status_lines
-	ldx #$00
-	stx zp_col
-	ldx #$16
-	stx zp_row
-	ldx #<@text_hint
-	stx zp0C_string_ptr
-	ldx #>@text_hint
-	stx zp0C_string_ptr+1
-	jsr print_string
-	jsr wait_long
-	jmp @final_quiz
-
-@text_congrats:
-	.byte "RETURN TO SANITY BY PRESSING RESET!", $80
 @win:
-	jsr clear_hgr2
-	ldx #$00
-	stx zp_col
-	stx zp_row
-	lda #$4d     ;Correct! You have survived!
-	jsr print_display_string
-	lda #char_newline
-	jsr char_out
-	ldx #<@text_congrats
-	stx zp0C_string_ptr
-	ldx #>@text_congrats
-	stx zp0C_string_ptr+1
-	jsr print_string
-@infinite_loop:
-	jmp @infinite_loop
-
-@dead_salt:
-	jsr clear_maze_window
-	jsr clear_status_lines
-	ldx #$00
-	stx zp_col
-	ldx #$14
-	stx zp_row
-	lda #$a1     ;You have turned into a pillar of salt!
-	jsr print_display_string
-	lda #char_newline
-	jsr char_out
-	lda #$a2     ;Don't say I didn't warn you!
-	jsr print_display_string
-	jmp game_over
-
-@nope:
-	lda #$9a     ;It is currently impossible.
+	lda #$38     ;The magic word works! You have escaped!
+	jsr print_to_line1
+	lda #$96     ;When ready, press any key.
 	jsr print_to_line2
-	jmp @endgame_input_loop
-.endif
+
+	bit hw_STROBE
+:	bit hw_KEYBOARD
+	bpl :-
+	bit hw_STROBE
+
+	jsr clear_hgr2
+	jmp exit_game

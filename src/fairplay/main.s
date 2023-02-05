@@ -1,5 +1,6 @@
 	.export cmd_movement
 	.export count_as_move
+	.export exit_game
 	.export game_over
 	.export main_game_loop
 	.export move_turn
@@ -382,10 +383,10 @@ play_again:
 	jsr print_to_line2
 	jsr input_Y_or_N
 	cmp #'Y'
-	bne :+
+	bne exit_game
 	jmp new_session
-
-:	bit hw_PAGE1
+exit_game:
+	bit hw_PAGE1
 	bit hw_TEXT
 .if REVISION >= 100
 	bit hw_STROBE

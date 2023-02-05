@@ -4,6 +4,7 @@
 	.export flash_screen
 	.export lose_lit_torch
 	.export lose_unlit_torch
+	.export magic_word_length
 	.export nonsense
 	.export print_thrown
 	.export push_special_mode
@@ -1681,7 +1682,12 @@ cmd_say:
 	sta zp0E_ptr
 	lda #>text_buffer_line1
 	sta zp0E_ptr+1
+	lda #<text_magic_word
+	sta zp0C_string_ptr
+	lda #>text_magic_word
+	sta zp0C_string_ptr+1
 	ldy #$00
+	sty zp11_count
 	lda #' '
 :	cmp (zp0E_ptr),y
 	beq @next_char
@@ -1690,16 +1696,27 @@ cmd_say:
 @echo_word:
 	ldy #$00
 	lda (zp0E_ptr),y
-	cmp #' '
+	cmp (zp0C_string_ptr),y
+	bne :+
+	inc zp11_count
+:	cmp #' '
 	beq @done
 	sta (zp0A_text_ptr),y
 	jsr print_char
+	inc zp0C_string_ptr
 @next_char:
 	inc zp0A_text_ptr
 	inc zp0E_ptr
 	bne @echo_word
 @done:
-	rts
+	lda zp0C_string_ptr
+	sec
+	sbc #<text_magic_word
+	cmp #magic_word_length
+	beq :+
+	lda #$00
+	sta zp11_count
+:	rts
 
 cmd_charge:
 	dec zp0F_action
@@ -2006,6 +2023,11 @@ dec_item_ptr:
 .endif
 
 	.segment "STRING_HAT"
+
+text_magic_word:
+	.byte "Grendel"
+	magic_word_length = <(* - text_magic_word)
+	.assert >* = >text_magic_word, error, "Magic word must be in one page"
 
 text_hat:
 	.byte "A sewn label reads: WEAR THIS HAT AND   "

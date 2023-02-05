@@ -132,7 +132,7 @@ You are another victim of the maze!
 You have died of starvation!
 The monster attacks you and
 you are his next meal!
-*the magic word works! you have escaped!
+The magic word works! You have escaped!
 Do you want to play again (Y or N)?
 You fall through the floor
 onto a bed of spikes!

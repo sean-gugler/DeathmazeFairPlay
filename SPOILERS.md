@@ -25,12 +25,6 @@ More hints were added for a few objects when you LOOK at them. The bland "look a
 
 LOOK BALL now provides a colorful description of its violent nature. It also now activates on BURN, BREAK, and EAT, not just THROW and ROLL.
 
-* SAY command removed
-
-This command served no gameplay purpose whatsoever. It provided a modicum of player agency and atmosphere, allowing the player to express any arbitrary word and have it be acknowledged within the game's world.
-
-However, the presence of this feature could also imply the existence of some "magic word" needed to solve a puzzle. There is none. Rather than create one and give the player false hope that disappointingly never materializes, I elected to simply remove the feature.
-
 * FART hint
 
 The original printed game manual had nearly the same text as the instructions you see upon starting a new game. One key difference was that it mentioned the verb "FART" instead of "CHARGE". This is a valuable clue for one of the puzzles. I could restore it here, since Charge already appears later in the game and doesn't need to be mentioned here. That doesn't feel as rewarding as figuring it out from a less direct hint inside the game, though. Instead, I've chosen to rephrase the "eat food" response to suggest gas.
@@ -113,6 +107,14 @@ After this pit is exposed, make it visible. This is more than just cosmetic; it 
 
 Also, allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
 
+* End game are extended
+
+There was a ton of custom code to manage the end game sequence. Most of that was probably to disallow behaviors they hadn't or didn't want to fully test. I ripped it all out and pared down that special mode to its bare minimum.
+
+I retained the "pillar of salt", but invoked it only if the player turned back towards the keyhole entrance, rather than for taking any action that deviated from the tightly-scripted final sequence of moves. The elevator is now a one-unit chamber containing the final riddle. Instead of a weirdly-personified narrator asking the question, which was inconsistent with the rest of the game's voice, I wrote the riddle on the wall. And instead of making the answer a custom verb, I employed the otherwise-unused "Say" mechanic.
+
+Finally, instead of locking up the machine upon winning, I exit back to the operating system, same as when a player answers "No" to the "Play Again?" prompt.
+
 ## Quality of Life improvements
 
 * World goes dark after a bad charge
@@ -153,4 +155,4 @@ In the dog encounter, PLAY BALL is recognized. So is THROW BALL. You still die, 
 
 * BALL works anywhere
 
-The crystal ball can now be used to destroy any open door, not just the final one. This allows earlier discovery of its purpose.
+The crystal ball can now be used to destroy any open door, not just the final one. This allows earlier discovery of its purpose. The destroyed door looks visibly altered as well.

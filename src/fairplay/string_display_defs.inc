@@ -54,7 +54,7 @@
 	msbstring "You have died of starvation!"
 	msbstring "The monster attacks you and"
 	msbstring "you are his next meal!"
-	msbstring "*the magic word works! you have escaped!"
+	msbstring "The magic word works! You have escaped!"
 	msbstring "Do you want to play again (Y or N)?"
 	msbstring "You fall through the floor"
 	msbstring "onto a bed of spikes!"

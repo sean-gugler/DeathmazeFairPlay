@@ -53,7 +53,7 @@
 	text_You_have_died_of_starvation_ = $35
 	text_The_monster_attacks_you_and = $36
 	text_you_are_his_next_meal_ = $37
-	text__the_magic_word_works__you_have_escaped_ = $38
+	text_The_magic_word_works__You_have_escaped_ = $38
 	text_Do_you_want_to_play_again__Y_or_N__ = $39
 	text_You_fall_through_the_floor = $3a
 	text_onto_a_bed_of_spikes_ = $3b
