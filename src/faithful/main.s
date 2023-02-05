@@ -16,7 +16,7 @@
 	.export wait_short
 
 	.import get_player_input
-	.import gd_parsed_action
+	.import gs_parsed_action
 	.import check_special_mode
 	.import cmd_verbal
 	.import clear_maze_window
@@ -66,7 +66,7 @@ zp0E_wait1         = $0E;
 
 main_game_loop:
 	jsr get_player_input
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bmi verbal
 	jsr cmd_movement
@@ -280,7 +280,7 @@ print_timers:
 	rts
 
 noun_to_item:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #nouns_unique_end
 	bpl multiples
 	ldx #icmd_where

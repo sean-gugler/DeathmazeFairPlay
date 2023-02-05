@@ -92,7 +92,7 @@ special_calc_puzzle:
 	jsr get_player_input
 	lda #$00
 	sta gs_action_flags
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bpl @move
 	jsr cmd_verbal
@@ -181,7 +181,7 @@ special_calc_puzzle:
 	jmp @puzzle_loop
 
 @print_hint:
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_drop
 	beq :+
 	cmp #verb_movement_begin
@@ -249,9 +249,9 @@ special_bat:
 	jsr wait_long
 @bat_loop:
 	jsr get_player_input
-	ldx gd_parsed_object
+	ldx gs_parsed_object
 	stx zp1A_object
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_look
 	beq @look
 	cmp #verb_throw
@@ -276,7 +276,7 @@ special_bat:
 	jsr clear_status_lines
 	lda gs_jar_full
 	beq @dead
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_jar
 	bne @dead
 	lda #$50     ;What a mess! The vampire bat
@@ -329,9 +329,9 @@ special_dog:
 	jsr wait_long
 @dog_input:
 	jsr get_player_input
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sta zp1A_object
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bcs @dead
 
@@ -654,8 +654,8 @@ special_mother:
 
 @input_seduced:
 	jsr get_player_input
-	lda gd_parsed_object
-	ldx gd_parsed_action
+	lda gs_parsed_object
+	ldx gs_parsed_action
 	cpx #verb_throw
 	bne @last_chance
 	cmp #noun_yoyo
@@ -807,7 +807,7 @@ special_bomb:
 	beq :+
 	jmp special_elevator
 
-:	lda gd_parsed_action
+:	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bcc :+
 	jsr update_view
@@ -870,12 +870,12 @@ special_bomb:
 @last_move:
 	jsr @draw_new_keyhole
 	jsr get_player_input
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_open
 	beq :+
 	cmp #verb_unlock
 	bne @boom
-:	lda gd_parsed_object
+:	lda gs_parsed_object
 	cmp #noun_door
 	bne @boom
 	lda gs_facing
@@ -923,12 +923,12 @@ special_elevator:
 	jmp special_climb
 
 :	jsr get_player_input
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_forward
 	beq enter_elevator
 	cmp #verb_throw
 	bne @pop_mode_do_cmd
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_ball
 	bne @pop_mode_do_cmd
 	jmp throw_ball
@@ -1099,7 +1099,7 @@ special_tripped:
 
 @check_input:
 	jsr get_player_input
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_monster
 	beq @look
 @dead:
@@ -1107,7 +1107,7 @@ special_tripped:
 	jmp monster_kills_you
 
 @look:
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_look
 	bne @attack
 	lda #$8c     ;It looks very dangerous!
@@ -1183,7 +1183,7 @@ special_climb:
 	jmp special_endgame
 
 :	jsr get_player_input
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bcc @climb_snake
 @dead:
@@ -1191,7 +1191,7 @@ special_climb:
 @climb_snake:
 	cmp #verb_climb
 	bne @dead
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_snake
 	bne @dead
 	lda gs_player_x
@@ -1254,7 +1254,7 @@ special_climb:
 	dec gs_level
 	jsr update_view
 	jsr get_player_input
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bcs :+
 	jsr clear_status_lines
@@ -1378,7 +1378,7 @@ special_endgame:
 	jsr get_player_input
 	lda gs_endgame_step
 	sta zp1A_endgame_step
-	lda gd_parsed_action
+	lda gs_parsed_action
 
 @step1:
 	dec zp1A_endgame_step
@@ -1459,7 +1459,7 @@ special_endgame:
 	beq :+
 	jmp @nope
 
-:	lda gd_parsed_object
+:	lda gs_parsed_object
 	cmp #noun_door
 	beq :+
 	jmp @nope
@@ -1497,7 +1497,7 @@ special_endgame:
 @nope5:
 	jmp @nope
 
-:	lda gd_parsed_object
+:	lda gs_parsed_object
 	cmp #noun_ball
 	bne @nope5
 	ldx #icmd_where
@@ -1564,7 +1564,7 @@ special_endgame:
 	lda #$3d     ;what was the name of the monster?
 	jsr print_to_line2
 	jsr get_player_input
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #$5a
 	bpl @dead6
 	cmp #noun_grendel

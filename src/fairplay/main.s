@@ -16,7 +16,7 @@
 	.export wait_short
 
 	.import get_player_input
-	.import gd_parsed_action
+	.import gs_parsed_action
 	.import check_special_mode
 	.import cmd_verbal
 	.import clear_maze_window
@@ -90,7 +90,7 @@ main_game_loop:
 normal_input_handler:
 	lda #$00
 	sta gs_action_flags
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_movement_begin
 	bmi :+
 	jmp cmd_movement
@@ -245,7 +245,7 @@ return:
 	rts
 
 noun_to_item:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #nouns_unique_end
 	bpl multiples
 	ldx #icmd_where

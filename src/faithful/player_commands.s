@@ -100,9 +100,9 @@ nonsense:
 	.segment "COMMAND2"
 
 cmd_verbal:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sta zp0E_object
-	lda gd_parsed_action
+	lda gs_parsed_action
 	sta zp0F_action
 	cmp #verb_look
 	bmi :+
@@ -115,9 +115,9 @@ cmd_verbal:
 
 :	jsr noun_to_item
 	sta zp11_item
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sta zp0E_object
-	lda gd_parsed_action
+	lda gs_parsed_action
 	sta zp0F_action
 
 ;cmd_raise:
@@ -242,7 +242,7 @@ cmd_break:
 	lda #' '
 	jsr char_out
 .endif
-	lda gd_parsed_object
+	lda gs_parsed_object
 	jsr print_noun
 	lda #$4f     ;and it disappears!
 	jmp print_to_line2
@@ -357,7 +357,7 @@ cmd_eat:
 	jsr print_to_line1
 	lda #' '
 	jsr char_out
-	lda gd_parsed_object
+	lda gs_parsed_object
 	jsr print_noun
 	lda #$7e     ;and you get heartburn!
 @print:
@@ -521,7 +521,7 @@ print_thrown:
 	jsr item_cmd
 	lda #$59     ;The
 	jsr print_to_line1
-	lda gd_parsed_object
+	lda gs_parsed_object
 	jsr print_noun
 .if REVISION < 100 ;RETAIL
 	; This section has no effect.
@@ -731,7 +731,7 @@ cmd_play:
 
 play_horn:
 	lda #verb_blow
-	sta gd_parsed_action
+	sta gs_parsed_action
 	jmp cmd_verbal
 
 play_ball:
@@ -873,7 +873,7 @@ print_inspected:
 	jsr clear_status_lines
 	lda #$67     ;A close inspection reveals
 	jsr print_to_line1
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_calculator
 	beq :+
 	lda #$68     ;Nothing of value
@@ -886,7 +886,7 @@ cmd_rub:
 	bne cmd_open
 
 	jsr noun_to_item
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_calculator
 	beq :+
 	lda #$7a     ;Ok, it is clean
@@ -1142,13 +1142,13 @@ cmd_press:
 	jsr print_to_line2
 	lda #' '
 	jsr char_out
-	lda gd_parsed_object
+	lda gs_parsed_object
 	clc
 	adc #'0' - noun_zero
 	jmp char_out
 
 @teleport:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sec
 	sbc #noun_zero-1
 	ldx #<teleport_table
@@ -1192,7 +1192,7 @@ cmd_press:
 	ldx #$00
 	stx gs_level_moves_hi
 	stx gs_level_moves_lo
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_two
 	bne @teleported
 	lda gs_room_lit
@@ -1229,7 +1229,7 @@ cmd_press:
 	jsr print_to_line1
 	lda #$74     ;The calculator vanishes.
 	jsr print_to_line2
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_two
 	bne @done
 	lda gs_teleported_dark
@@ -1281,7 +1281,7 @@ cmd_take:
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_box
 	bne :+
 	jmp take_box
@@ -1309,7 +1309,7 @@ cmd_take:
 	beq :+
 	jmp cannot_take
 
-:	ldx gd_parsed_object
+:	ldx gs_parsed_object
 	stx zp0E_object
 	jmp take_and_reveal
 
@@ -1335,7 +1335,7 @@ react_taken:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_calculator
 	bne :+
 	jsr on_reveal_calc
@@ -1351,7 +1351,7 @@ on_reveal_calc:
 	lda gs_special_mode
 	cmp #special_mode_calc_puzzle
 	bne @done
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_take
 	beq :+
 	jsr wait_long
@@ -1498,7 +1498,7 @@ find_boxed:
 	pla
 	sta zp0F_action
 .endif
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_torch
 	beq :+
 	jmp take_and_reveal
@@ -1556,7 +1556,7 @@ cmd_say:
 	dec zp0F_action
 	bne cmd_charge
 .if REVISION >= 2
-	lda gd_parsed_object
+	lda gs_parsed_object
 	bne :+
 	jmp nonsense
 .endif
@@ -1948,7 +1948,7 @@ look_hat:
 
 
 throw_react:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_ball
 	beq :+
 	lda gs_monster_alive

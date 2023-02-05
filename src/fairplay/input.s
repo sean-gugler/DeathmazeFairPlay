@@ -219,7 +219,7 @@ process_input_char:
 @around:
 	lda #verb_uturn
 @return_move:
-	sta gd_parsed_action
+	sta gs_parsed_action
 	jmp clear_cursor
 
 input_enter:
@@ -300,7 +300,7 @@ parse_input:
 @parse_verb:
 	jsr get_vocab
 	lda zp10_count_vocab
-	sta gd_parsed_action
+	sta gs_parsed_action
 	ldy #$00
 @skip_word:
 	inc zp19_input_ptr
@@ -319,14 +319,14 @@ parse_input:
 	bne @parse_object
 @verb_only:
 	lda #$00
-	sta gd_parsed_object
+	sta gs_parsed_object
 	beq @check_verb
 @parse_object:
 	jsr get_vocab
 	lda zp10_count_vocab
-	sta gd_parsed_object
+	sta gs_parsed_object
 @check_verb:
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verbs_end
 	bcc @known_verb
 	lda #$8d     ;I'm sorry, but I can't
@@ -345,7 +345,7 @@ parse_input:
 @known_verb:
 	cmp #verb_intransitive
 	bcs @verb_no_object
-	lda gd_parsed_object
+	lda gs_parsed_object
 	beq @verb_no_object
 	cmp #vocab_end
 	beq @unknown_object
@@ -353,7 +353,7 @@ parse_input:
 	bcc @unknown_object
 	sec
 	sbc #verbs_end-1
-	sta gd_parsed_object
+	sta gs_parsed_object
 @done_verb:
 	rts
 
@@ -399,7 +399,7 @@ parse_input:
 	rts
 
 @verb_no_object:
-	lda gd_parsed_action
+	lda gs_parsed_action
 	cmp #verb_intransitive
 	bcs @done_verb
 	cmp #verb_look

@@ -11,7 +11,7 @@
 	.import game_save_begin
 	.import main_game_loop
 	.import cmd_verbal
-	.import gd_parsed_action
+	.import gs_parsed_action
 	.import item_cmd
 	.import input_char
 	.import print_to_line2
@@ -79,7 +79,7 @@ new_game:
 	jsr item_cmd
 start_game:
 	ldx #verb_directions
-	stx gd_parsed_action
+	stx gs_parsed_action
 	jsr cmd_verbal
 	jmp main_game_loop
 

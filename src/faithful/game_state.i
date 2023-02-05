@@ -10,8 +10,8 @@
 	.global gs_walls_left
 	.global gs_walls_right_depth
 	.global gs_box_visible
-	.global gd_parsed_action
-	.global gd_parsed_object
+	.global gs_parsed_action
+	.global gs_parsed_object
 	.global gs_room_lit
 	.global gs_food_time_hi
 	.global gs_food_time_lo

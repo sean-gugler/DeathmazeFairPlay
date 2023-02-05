@@ -47,7 +47,7 @@ b110D:
 	sta zp0E_object
 	pla
 	sta zp0F_action
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_torch
 	beq :+
 	jmp $2E72  ;in cmd_take

@@ -39,9 +39,9 @@ gs_walls_right_depth:
 	JUNK_BYTE $00
 gs_box_visible:
 	JUNK_BYTE $00
-gd_parsed_action:
+gs_parsed_action:
 	JUNK_BYTE $10
-gd_parsed_object:
+gs_parsed_object:
 	JUNK_BYTE $17
 gs_room_lit:
 	JUNK_BYTE $01

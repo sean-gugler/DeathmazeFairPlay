@@ -22,7 +22,7 @@
 ;	stx $1A
 ;	jsr $33F3
 ;	jsr get_player_input
-;	lda gd_parsed_action
+;	lda gs_parsed_action
 ;	cmp #$46
 ;	bpl +15  ;to $337A
 ;	jsr cmd_verbal

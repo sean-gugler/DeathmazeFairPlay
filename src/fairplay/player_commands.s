@@ -95,9 +95,9 @@ nonsense:
 	.segment "COMMAND2"
 
 cmd_verbal:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sta zp0E_object
-	lda gd_parsed_action
+	lda gs_parsed_action
 	sta zp0F_action
 	cmp #verb_look
 	bmi :+
@@ -110,9 +110,9 @@ cmd_verbal:
 
 :	jsr noun_to_item
 	sta zp11_item
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sta zp0E_object
-	lda gd_parsed_action
+	lda gs_parsed_action
 	sta zp0F_action
 
 ;cmd_raise:
@@ -190,7 +190,7 @@ cmd_break:
 	jsr print_to_line1
 	lda #' '
 	jsr char_out
-	lda gd_parsed_object
+	lda gs_parsed_object
 	jsr print_noun
 	lda #$4f     ;and it disappears!
 	jmp print_to_line2
@@ -322,7 +322,7 @@ cmd_eat:
 	jsr print_to_line1
 	lda #' '
 	jsr char_out
-	lda gd_parsed_object
+	lda gs_parsed_object
 	jsr print_noun
 	lda #$7e     ;and you get heartburn!
 @print:
@@ -457,7 +457,7 @@ print_thrown:
 	jsr item_cmd
 	lda #$59     ;The
 	jsr print_to_line1
-	lda gd_parsed_object
+	lda gs_parsed_object
 	jsr print_noun
 	lda #$5a     ;magically sails
 	jsr print_display_string
@@ -658,7 +658,7 @@ cmd_play:
 
 play_horn:
 	lda #verb_blow
-	sta gd_parsed_action
+	sta gs_parsed_action
 	jmp cmd_verbal
 
 play_with_who:
@@ -888,7 +888,7 @@ print_inspected:
 	jsr clear_status_lines
 	lda #$67     ;A close inspection reveals
 	jsr print_to_line1
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_ball
 	bne :+
 	lda #$6a     ;it sparkles with energy
@@ -939,7 +939,7 @@ cmd_rub:
 	bne cmd_open
 
 	jsr noun_to_item
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_ring
 	beq :+
 	lda #$7a     ;Ok, it is clean
@@ -1256,7 +1256,7 @@ cmd_press:
 	beq @no_effect
 
 ;@lookup_location:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	sec
 	sbc #noun_zero
 	asl
@@ -1399,7 +1399,7 @@ cmd_take:
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_box
 	bne :+
 	jmp take_box
@@ -1427,7 +1427,7 @@ cmd_take:
 	beq :+
 	jmp cannot_take
 
-:	ldx gd_parsed_object
+:	ldx gs_parsed_object
 	stx zp0E_object
 	jmp take_and_reveal
 
@@ -1453,7 +1453,7 @@ react_taken:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_snake
 	beq @snake
 	cmp #noun_banana
@@ -1553,7 +1553,7 @@ find_boxed:
 	jmp cannot_take
 
 @found:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_torch
 	bne :+
 	inc gs_torches_unlit
@@ -1612,7 +1612,7 @@ cmd_paint:
 	ror
 	bcc @no_artist
 
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_door
 	bcc @no_artist
 
@@ -1990,7 +1990,7 @@ look_hat:
 
 
 throw_react:
-	lda gd_parsed_object
+	lda gs_parsed_object
 	cmp #noun_ball
 	beq :+
 	lda gs_monster_alive
