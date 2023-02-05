@@ -63,6 +63,8 @@ I assumed it was a brass horn when I played. I think it's supposed to be an anim
 
 We already have rams horns on the hat; why not make one of them break off after charging? That also reduces time wasted trying to charge other walls in the game, which will never work.
 
+I've put something else where the horn was (see below).
+
 * WOOL replaced with BANANA
 
 It never made sense that the wool disappears when you climb the snake into the monster's lair. There's no logical reason for this. Doubly strange if you weren't even carrying the wool, or hadn't discovered it yet. Like, what wool? And how would I know it had vanished if it's not even here?
@@ -101,13 +103,23 @@ By allowing multiple teleports, the sword could now be brought back to defeat th
 
 Putting the flute behind the pit achieves this goal, because the flute is needed to reach the sword. It can still be reached for early experimentation before figuring out how to beat the monster, by defeating both dogs with dagger and sneaker. There wasn't much benefit in obtaining the staff early; unlike the flute and snake, the staff has no demonstrable effect on the world until very late in the game. After the monster is dead, the sword can optionally be used to defeat the guard dog - not needed to bypass the pit, just as an optional but satisfying "clean up" task.
 
+The staff is now on level 4 - although not where the flute was. I've put something else of interest there (see below). The staff now occupies the place where the horn used to be.
+
 * Make the level 1 pit real
 
 After this pit is exposed, make it visible. This is more than just cosmetic; it is practical since the hat has been changed from re-usable to single-use.
 
 Also, allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
 
-* End game are extended
+* Timing of monster tightened
+
+To raise the tension on level 4 and enhance excitement, I've placed the jar where the flute was and reduced the monster timer so that it now appears in precisely the number of moves it takes to reach the jar and return to the elevator. The player is able to barely escape his clutches in the nick of time. This is a guaranteed experience because the jar is necessary to obtain the banana, which is required to defeat the monster.
+
+The timing of the mother has also been tightened to make it just possible to obtain the golden hook but not escape alive with it. The mother must be defeated before the hook can be obtained. This guarantees the mother cannot be bypassed in solving the game, which was possible in the retail edition.
+
+Since the jar's original location is now vacant, I placed one of the pieces of the golden key there.
+
+* End game area extended
 
 There was a ton of custom code to manage the end game sequence. Most of that was probably to disallow behaviors they hadn't or didn't want to fully test. I ripped it all out and pared down that special mode to its bare minimum.
 

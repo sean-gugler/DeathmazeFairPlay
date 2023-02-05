@@ -56,12 +56,12 @@ data_new_game:
 	.byte $01,$64	;frisbee
 	.byte $01,$16	;hat
 	.byte $02,$33	;horn
-	.byte $04,$71	;jar
+	.byte $04,$58	;jar
 	.byte $00,$00	;key
 	.byte $00,$00	;peel
 	.byte $01,$23	;ring
 	.byte $01,$72	;sneaker
-	.byte $04,$58	;staff
+	.byte $04,$71	;staff
 	.byte $03,$2a	;sword
 	.byte $04,$57	;yoyo
 	.byte $03,$96	;bead
