@@ -277,6 +277,12 @@ The ball sails through the open door
 The ceiling has collapsed,
 blocking the door.
 filling a hidden pit!
+it is inscribed "BEOWULF"
+EXIT
+SEALED BY ORDER
+OF THE MONSTER,
+WHOSE NAME MUST
+NEVER BE SPOKEN
 
 [Intro]
 "           Deathmaze 5000               "

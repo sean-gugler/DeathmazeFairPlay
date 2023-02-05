@@ -31,6 +31,9 @@
 	.import normal_input_handler
 	.import check_special_position
 	.import which_door
+	.importzp door_final
+	.import get_rowcol_addr
+	.import print_char
 
 ;	.include "apple.i"
 	.include "char.i"
@@ -1036,7 +1039,14 @@ enter_elevator:
 @level5:
 	lda gs_player_x
 	cmp #$01
-	bne :+
+	bne @fake
+	lda gs_broken_door
+	bpl @spike
+	inc gs_player_y
+	jsr update_view
+	jmp pop_mode_continue
+
+@spike:
 	ldx #$00
 	stx zp_col
 	ldx #$14
@@ -1049,7 +1059,8 @@ enter_elevator:
 	jsr print_display_string
 	jmp game_over
 
-:	lda #$6d     ;You are trapped in a fake
+@fake:
+	lda #$6d     ;You are trapped in a fake
 	jsr print_to_line1
 	lda #$6e     ;elevator. There is no escape!
 	jsr print_to_line2
@@ -1081,14 +1092,14 @@ throw_ball:
 
 	lda #$c7     ;The ceiling has collapsed,
 	jsr print_to_line1
-	lda gs_special_mode
-	cmp #special_mode_endgame
-	lda #$c8     ;blocking the door.
-	bne :+
 	lda #$c9     ;filling a hidden pit!
+	ldx gs_mode_stack1
+	cpx #special_mode_endgame
+	beq :+
+	jsr update_view
+	lda #$c8     ;blocking the door.
 :	jsr print_to_line2
 
-	jsr update_view
 	jmp pop_mode_continue
 
 
@@ -1338,10 +1349,24 @@ special_climb:
 
 special_endgame:
 	lda gs_facing
-	cmp #$03
-	bne :+
+	ldy gs_broken_door
 
-;@dead_salt:
+; When final door is blown, change it to -1 here
+; so it behaves like a regualar door again
+; without making player fall on spikes.
+
+;@check_door:
+	bmi @check_riddle
+	cpy #door_final
+	bne @check_dead
+	lda #$ff
+	sta gs_broken_door
+	jmp update_view
+	;rts
+
+@check_dead:
+	cmp #$03  ;gs_facing
+	bne @normal
 	jsr clear_maze_window
 	jsr clear_status_lines
 	ldx #$00
@@ -1355,8 +1380,56 @@ special_endgame:
 	lda #$a2     ;Don't say I didn't warn you!
 	jsr print_display_string
 	jmp game_over
+@normal:
+	rts
 
-:	rts
+@check_riddle:
+	ldy gs_player_y
+	cpy #$0b
+	bne @check_dead
+	cmp #$02  ;gs_facing
+	bne @normal
+	jsr @check_word
+	jmp @draw_riddle
+	;rts
+
+@draw_riddle:
+	lda #$09
+	sta zp_col
+	ldx #$06
+	stx zp_row
+	lda #$cb     ;EXIT
+	jsr print_display_string
+	lda #$03
+	sta zp_col
+	ldx #$0a
+	stx zp_row
+	lda #$cc     ;SEALED BY ORDER
+	jsr print_display_string
+	lda #$03
+	sta zp_col
+	ldx #$0b
+	stx zp_row
+	lda #$cd     ;OF THE MONSTER,
+	jsr print_display_string
+	lda #$03
+	sta zp_col
+	ldx #$0c
+	stx zp_row
+	lda #$ce     ;WHOSE NAME MUST 
+	jsr print_display_string
+	lda #$03
+	sta zp_col
+	ldx #$0d
+	stx zp_row
+	lda #$cf     ;NEVER BE SPOKEN
+	jsr print_display_string
+	rts
+
+@check_word:
+;	lda gs_parsed_action
+;	cmp #verb_say
+	rts
 
 .if 0
 	jsr clear_maze_window

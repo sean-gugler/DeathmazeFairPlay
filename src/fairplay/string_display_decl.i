@@ -199,3 +199,9 @@
 	text_The_ceiling_has_collapsed_ = $c7
 	text_blocking_the_door_ = $c8
 	text_filling_a_hidden_pit_ = $c9
+	text_it_is_inscribed__BEOWULF_ = $ca
+	text_EXIT = $cb
+	text_SEALED_BY_ORDER = $cc
+	text_OF_THE_MONSTER_ = $cd
+	text_WHOSE_NAME_MUST = $ce
+	text_NEVER_BE_SPOKEN = $cf

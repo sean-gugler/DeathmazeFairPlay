@@ -1,5 +1,6 @@
 	.export cmd_verbal
 	.export destroy_one_torch
+	.exportzp door_final
 	.export flash_screen
 	.export lose_lit_torch
 	.export lose_unlit_torch
@@ -919,6 +920,10 @@ print_inspected:
 	lda #$bb     ;The jar is ...
 	adc gs_jar_full
 	bne look_print
+:	cmp #noun_sword
+	bne :+
+	lda #$ca     ;it is inscribed "BEOWULF"
+	bne look_print
 :	cmp #noun_key
 	bne :+
 	lda #maze_flag_key_whole
@@ -1211,6 +1216,7 @@ door_table:
 	.byte $31,$44
 	.byte $42,$14
 	.byte $52,$35
+door_final         = 1 + ((* - door_table) / 2)  ;one-based indexing
 	.byte $52,$1a
 door_magic         = 1 + ((* - door_table) / 2)  ;one-based indexing
 	.byte $32,$78
