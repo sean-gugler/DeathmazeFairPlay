@@ -1,6 +1,6 @@
 	.export cmd_verbal
 	.export destroy_one_torch
-	.exportzp door_final
+	.export door_final
 	.export flash_screen
 	.export lose_lit_torch
 	.export lose_unlit_torch
@@ -1079,7 +1079,7 @@ cmd_open:
 :	cmp #doors_locked_begin
 	bcs locked_door
 
-:	cmp gs_broken_door
+	cmp gs_broken_door
 	bne :+
 	jmp impossible
 
@@ -1089,8 +1089,6 @@ cmd_open:
 	and gs_maze_flags
 	bne @push_mode
 	jmp having_fun
-;	lda #$8e     ;Having fun?
-;	jmp print_to_line2
 
 @push_mode:
 	jsr push_special_mode
@@ -1216,12 +1214,12 @@ door_table:
 	.byte $31,$44
 	.byte $42,$14
 	.byte $52,$35
-door_final         = 1 + ((* - door_table) / 2)  ;one-based indexing
+door_final         = < (1 + ((* - door_table) / 2))  ;one-based indexing
 	.byte $52,$1a
-door_magic         = 1 + ((* - door_table) / 2)  ;one-based indexing
+door_magic         = < (1 + ((* - door_table) / 2))  ;one-based indexing
 	.byte $32,$78
 	.byte $34,$79
-doors_locked_begin = 1 + ((* - door_table) / 2)  ;one-based indexing
+doors_locked_begin = < (1 + ((* - door_table) / 2))  ;one-based indexing
 	.byte $52,$4a
 	.byte $52,$5a
 	.byte $52,$6a
@@ -1613,7 +1611,7 @@ cmd_paint:
 	cmp #carried_unboxed
 	bcc @no_paint
 
-:	lda gs_jar_full
+	lda gs_jar_full
 	beq @no_paint
 	ror
 	bcc @no_artist
