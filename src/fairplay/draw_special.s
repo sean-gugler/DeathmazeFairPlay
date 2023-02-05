@@ -136,7 +136,9 @@ draw_special:
 	sta screen_ptr+1
 	ldy #$0a
 	jsr draw_right
-	
+
+	lda zp0E_draw_param
+	pha
 	jsr which_door
 	cmp gs_broken_door
 	bne @draw_sign
@@ -157,7 +159,7 @@ draw_special:
 	bne @draw_broken
 
 @draw_sign:
-	lda zp0E_draw_param
+	pla
 	bne :+
 	rts
 :	lda #$07
