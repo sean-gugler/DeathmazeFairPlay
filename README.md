@@ -2,11 +2,11 @@
 
 # About the game
 
-Deathmaze 5000 was a commercial game released in 1980 by Med Systems Software for the TRS-80 and Apple II platforms. We would describe it today as an "escape room" experience; players are tasked with navigating a maze, manipulating objects, and solving puzzles with the purpose of escape. This was a novel mash-up of play elements at the time. Maze games and text adventures already existed but I am not aware of any earlier example than Deathmaze 5000 that combined the two formats.
+Deathmaze 5000 was released in 1980 by Med Systems Software for the TRS-80 and Apple II platforms. We would describe it today as an "escape room" experience; players are tasked with navigating a maze, manipulating objects, and solving puzzles with the purpose of escape. This was a novel mash-up of play elements at the time. Maze games and text adventures already existed but I am not aware of any earlier example than Deathmaze 5000 that combined the two formats.
 
-The writing was quite clever, but suffered from moon logic, items with no purpose, unfinished puzzles, and some inconsistent behaviors. When I finally solved it after 40 YEARS of trying (never consulted a walkthrough), I was both satisfied and disappointed. I decided I could do better. Armed with my recent experience disassembling Ultima IV, and using as much of Deathmaze's original material as I could, I wove the loose ends together and improved the structure of the weaker puzzles. I also patched up a small handful of bugs discovered along the way.
+The writing was quite clever, but suffered from moon logic, items with no purpose, unfinished puzzles, and some inconsistent behaviors. When I finally solved it after 40 YEARS of trying, I was both satisfied and disappointed. I decided I could do better. Armed with my recent technical experience disassembling Ultima IV, I wove the loose ends together and improved the structure of the weaker puzzles while retaining as much of Deathmaze's original material as I could. I also patched up a small handful of bugs discovered along the way.
 
-The "Fair Play" edition reflects my sensibilities on what consitutes fair puzzle design. My alterations attempt to be consistent with the original writing tone and style.
+The "Fair Play" edition reflects my sensibilities on what consitutes fair puzzle design. My alterations attempt to be consistent with the original writing tone and style. To the degree I've failed, I ask your humble forgiveness.
 
 # Release Notes
 This project builds four versions of the game:
