@@ -1055,79 +1055,102 @@ draw_A_door_opening:
 	jmp draw_B_rod
 
 :	lda #$0a
-	sta zp_col
-	lda #$03
-	sta zp_row
-;	lda #glyph_L  ;$03, redundant
-	ldy #$12
-	jsr draw_down
-	lda #$0b
-	sta zp_col
-	lda #$03
-	sta zp_row
-	lda #glyph_R
-	ldy #$12
-	jsr draw_down
-	lda #raster_hi 17,9,0
-	sta screen_ptr+1
-	lda #raster_lo 17,9,0
-	sta screen_ptr
-	ldy #$02
-	jsr draw_right
-	lda #$0a
 	sta zp0C_col_left
 	lda #$0b
 	sta zp19_col_right
-	lda #$04
+	lda #$06
 	sta zp11_count_loop
-	lda #$02
+	lda #$00
 	sta zp10_length
+	beq @start_frame_opening
+
 @next_frame_opening:
 	jsr wait_brief
-	lda zp0C_col_left
-	sta zp_col
-	lda #$03
-	sta zp_row
-	lda #' '
-	ldy #$12
-	jsr draw_down
-	lda zp19_col_right
-	sta zp_col
-	lda #$03
-	sta zp_row
-	lda #' '
-	ldy #$12
-	jsr draw_down
+	ldx zp0C_col_left
+	jsr draw_up_reveal
+	ldx zp19_col_right
+	jsr draw_up_reveal
 	dec zp0C_col_left
 	inc zp19_col_right
+
+@start_frame_opening:
 	lda zp0C_col_left
-	sta zp_col
-	lda #$03
-	sta zp_row
-;	lda #glyph_L  ;$03, redundant
-	ldy #$12
-	jsr draw_down
-	lda zp19_col_right
 	sta zp_col
 	lda #$03
 	sta zp_row
 	lda #glyph_R
+	ldy #$12
+	jsr draw_down
+	lda zp19_col_right
+	sta zp_col
+	lda #$03
+	sta zp_row
+;	lda #glyph_L  ;$03, redundant
 	ldy #$12
 	jsr draw_down
 	lda #$11
 	sta zp_row
-	dec zp0C_col_left
+
 	lda zp0C_col_left
-	inc zp0C_col_left
 	sta zp_col
 	jsr get_rowcol_addr
+	ldy zp10_length
+	beq :+
+	jsr draw_right
+:	lda #$14
+	sta zp_row
+
+	lda zp0C_col_left
+	sta zp_col
+	dec zp_col
+	jsr get_rowcol_addr
+
+	lda screen_ptr+1
+	clc
+	adc #$1c
+	sta screen_ptr+1
+
 	inc zp10_length
 	inc zp10_length
 	ldy zp10_length
 	jsr draw_right
 	dec zp11_count_loop
+;	bpl @next_frame_opening
 	bne @next_frame_opening
+@done:
 	rts
+
+draw_up_reveal:
+	stx zp_col
+	ldy #$14
+	sty zp_row
+	lda #$12
+	sta zp1A_count_loop
+@next:
+	jsr get_rowcol_addr
+
+	lda #$0f
+    cmp zp1A_count_loop
+    bcc :+
+	lda zp1A_count_loop
+:	asl
+	asl
+	asl
+	asl
+	adc zp_col
+	tax
+	lda #' '
+;	lda reveal_buffer,x
+	jsr print_char
+
+	dec zp_col
+	dec zp_row
+	dec zp1A_count_loop
+	bne @next
+@done:
+	rts
+
+reveal_buffer:
 
 draw_B_rod:
 	lda #$0b
