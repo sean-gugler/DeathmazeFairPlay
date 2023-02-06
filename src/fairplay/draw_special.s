@@ -9,6 +9,7 @@
 	.import print_char
 	.import get_rowcol_addr
 	.import get_display_string
+	.import memcpy
 	.import which_door
 
 	.include "apple.i"
@@ -21,6 +22,8 @@ zp_row = $07
 
 screen_ptr = $08 ;$09
 
+zp0E_src         = $0E;
+zp10_dst         = $10;
 zp10_length      = $10;
 zp11_count_loop  = $11;
 zp19_col_right   = $19;
@@ -1071,9 +1074,9 @@ draw_A_door_opening:
 @next_frame_opening:
 	jsr wait_brief
 	ldx zp0C_col_left
-	jsr draw_up_reveal
+	jsr draw_down_reveal
 	ldx zp19_col_right
-	jsr draw_up_reveal
+	jsr draw_down_reveal
 	dec zp0C_col_left
 	inc zp19_col_right
 
@@ -1124,30 +1127,29 @@ draw_A_door_opening:
 @done:
 	rts
 
-draw_up_reveal:
+draw_down_reveal:
 	stx zp_col
-	ldy #$14
-	sty zp_row
+	lda #$03
+	sta zp_row
 	lda #$12
 	sta zp1A_count_loop
+	clc
+	lda #<(reveal_buffer - 6)
+	adc zp_col
+	sta zp0A_text_ptr
+	lda #>reveal_buffer
+	sta zp0A_text_ptr + 1
 @next:
 	jsr get_rowcol_addr
-
-	lda #$0f
-    cmp zp1A_count_loop
-    bcc :+
-	lda zp1A_count_loop
-:	asl
-	asl
-	asl
-	asl
-	adc zp_col
-	tax
-	lda reveal_buffer,x
+	ldy #$00
+	lda (zp0A_text_ptr),y
 	jsr print_char
-
+	clc
+	lda #$0a
+	adc zp0A_text_ptr
+	sta zp0A_text_ptr
 	dec zp_col
-	dec zp_row
+	inc zp_row
 	dec zp1A_count_loop
 	bne @next
 @done:
@@ -1178,7 +1180,7 @@ reveal_key_hint:
 	sta zp0C_string_ptr
 	lda #>key_hint_text
 	sta zp0C_string_ptr + 1
-	lda #<reveal_buffer + $67 ;row col
+	lda #<reveal_buffer + 61 ;10*row+col
 	sta zp0A_text_ptr
 	lda #>reveal_buffer
 	sta zp0A_text_ptr + 1
@@ -1197,14 +1199,14 @@ reveal_key_hint:
 	adc #$08
 	sta zp0C_string_ptr
 	lda zp0A_text_ptr
-	adc #$10
+	adc #$0a
 	sta zp0A_text_ptr
 	bne @next
 
 reveal_exit:
 	lda #>reveal_buffer
 	sta zp0A_text_ptr + 1
-	lda #<reveal_buffer + $59 ;row col
+	lda #<reveal_buffer + 63 ;10*row+col
 	sta zp0A_text_ptr
 	lda #$cb     ;EXIT
 
@@ -1217,7 +1219,7 @@ reveal_exit:
 	dey
 	bpl :-
 
-	lda #<reveal_buffer + $83 ;row col
+	lda #<reveal_buffer + 80 ;10*row+col
 	sta zp0A_text_ptr
 	lda #$04
 	sta zp1A_count_loop
@@ -1226,12 +1228,15 @@ reveal_exit:
 	inc zp19_string
 	lda zp0A_text_ptr
 	clc
-	adc #$10
+	adc #$0a
 	sta zp0A_text_ptr
 
 	lda zp19_string
 	jsr get_display_string
-	ldy #$0e
+	inc zp0C_string_ptr
+	inc zp0C_string_ptr
+	inc zp0C_string_ptr
+	ldy #$09
 :	lda (zp0C_string_ptr),y
 	sta (zp0A_text_ptr),y
 	dey
@@ -1243,38 +1248,18 @@ reveal_exit:
 
 reveal_escape:
 	lda #<escape_data
-	sta zp0C_string_ptr
+	sta zp0E_src
 	lda #>escape_data
-	sta zp0C_string_ptr + 1
-	lda #<reveal_buffer + $16 ;row col
-	sta zp0A_text_ptr
+	sta zp0E_src + 1
+	lda #<reveal_buffer
+	sta zp10_dst
 	lda #>reveal_buffer
-	sta zp0A_text_ptr + 1
-
-	lda #$10
-	sta zp1A_count_loop
-	lda #$08
-	sta zp10_length
-	ldy #$00
-@next_row:
-@next_col:
-	lda (zp0C_string_ptr),y
-	sta (zp0A_text_ptr),y
-	inc zp0C_string_ptr
-	bne :+
-	inc zp0C_string_ptr + 1
-:	inc zp0A_text_ptr
-	dec zp10_length
-	bne @next_col
-
-	lda #$08
-	sta zp10_length
-	clc
-	adc zp0A_text_ptr
-	sta zp0A_text_ptr
-	dec zp1A_count_loop
-	bne @next_row
-	rts
+	sta zp10_dst + 1
+	lda #180
+	sta zp19_count
+	lda #$00
+	sta zp19_count + 1
+	jmp memcpy
 
 
 draw_B_rod:
@@ -1299,24 +1284,26 @@ key_hint_text:
 	.assert >* = >key_hint_text, error, "Key hint text must be in one page"
 
 escape_data:
-	.byte $01,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$01,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$01,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$01,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
-	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$0B,$0B,$0B
+	.byte $01,$20,$20,$20,$20,$20,$20,$08,$0B,$7F
+	.byte $20,$01,$20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$01,$20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$01,$20,$20,$20,$76,$20,$20,$20
+	.byte $01,$20,$01,$01,$20,$20,$20,$76,$20,$20
+	.byte $1B,$01,$20,$20,$20,$20,$20,$20,$20,$20
+	.byte $1B,$20,$20,$20,$20,$20,$20,$20,$20,$20
+	.byte $1B,$20,$20,$20,$20,$20,$20,$20,$20,$02
+	.byte $1B,$20,$20,$20,$20,$20,$02,$01,$02,$20
+	.byte $1B,$20,$20,$20,$20,$02,$20,$20,$01,$20
+	.byte $1B,$20,$20,$20,$02,$20,$20,$20,$20,$20
+	.byte $1B,$20,$20,$02,$20,$20,$20,$20,$02,$01
+	.byte $1B,$20,$02,$20,$20,$20,$20,$20,$20,$1B
+	.byte $1B,$20,$20,$02,$20,$20,$01,$20,$20,$1B
+	.byte $1B,$20,$02,$20,$20,$20,$20,$01,$20,$20
+	.byte $20,$02,$20,$20,$20,$20,$20,$20,$01,$20
+	.byte $02,$20,$20,$20,$20,$20,$20,$20,$20,$01
 
 	.segment "DOOR_REVEAL_BUFFER"
 
 reveal_buffer:
-	.res $100
+	.res $140

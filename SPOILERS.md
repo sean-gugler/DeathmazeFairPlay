@@ -119,11 +119,21 @@ The timing of the mother has also been tightened to make it just possible to obt
 
 Since the jar's original location is now vacant, I placed one of the pieces of the golden key there.
 
+* Elevator reveals
+
+The disappointing elevator trap on level 5 (seen it, ho hum) now has a purpose. Opening the doors reveals a hint as to which keyhole is the correct one. But the way I phrased it can also be read as a simple taunt, daring the player to enter, when of course it's yet another deathtrap.
+
+It came in handy later to re-use the new mechanic of revealing something behind opening doors, too. (see below)
+
 * End game area extended
 
 There was a ton of custom code to manage the end game sequence. Most of that was probably to disallow behaviors they hadn't or didn't want to fully test. I ripped it all out and pared down that special mode to its bare minimum.
 
 I retained the "pillar of salt", but invoked it only if the player turned back towards the keyhole entrance, rather than for taking any action that deviated from the tightly-scripted final sequence of moves. The elevator is now a one-unit chamber containing the final riddle. Instead of a weirdly-personified narrator asking the question, which was inconsistent with the rest of the game's voice, I wrote the riddle on the wall. And instead of making the answer a custom verb, I employed the otherwise-unused "Say" mechanic.
+
+* Finale artwork
+
+The ending is now more satisfying with a pictorial reward. Also, I added one last jump scare before the final reveal, just for kicks. Upon saying the monster's name, the ground begins to shake, as if you'd summoned him back from the grave. But no, it's just the exit doors rumbling open. Heh heh.
 
 Finally, instead of locking up the machine upon winning, I exit back to the operating system, same as when a player answers "No" to the "Play Again?" prompt.
 

@@ -1439,6 +1439,16 @@ special_endgame:
 	bne @normal
 
 @win:
+	jsr update_view
+	jsr wait_long
+	dec gs_facing
+	jsr update_view
+	jsr clear_status_lines
+	lda #$43     ;The ground beneath your feet
+	jsr print_to_line1
+	lda #$44     ;begins to shake!
+	jsr print_to_line2
+	jsr wait_long
 	lda #drawcmd0A_door_opening
 	sta zp0F_action
 	jsr draw_special
@@ -1452,8 +1462,6 @@ special_endgame:
 :	bit hw_KEYBOARD
 	bpl :-
 	bit hw_STROBE
-
-	jmp @win
 
 	jsr clear_hgr2
 	jmp exit_game
