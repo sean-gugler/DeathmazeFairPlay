@@ -32,6 +32,7 @@ zp0C_col_animate = $0C;
 zp1A_count_loop  = $1A;
 zp19_count_col   = $19;
 zp0A_text_ptr    = $0A;
+zp0C_string_ptr  = $0C;
 zp1A_count_row   = $1A;
 zp0F_action      = $0F;
 
@@ -1054,7 +1055,8 @@ draw_A_door_opening:
 	beq :+
 	jmp draw_B_rod
 
-:	lda #$0a
+:	jsr prepare_reveal_buffer
+	lda #$0a
 	sta zp0C_col_left
 	lda #$0b
 	sta zp19_col_right
@@ -1139,8 +1141,7 @@ draw_up_reveal:
 	asl
 	adc zp_col
 	tax
-	lda #' '
-;	lda reveal_buffer,x
+	lda reveal_buffer,x
 	jsr print_char
 
 	dec zp_col
@@ -1150,7 +1151,57 @@ draw_up_reveal:
 @done:
 	rts
 
-reveal_buffer:
+prepare_reveal_buffer:
+	lda #' '
+	ldy #$00
+:	sta reveal_buffer,y
+	iny
+	bne :-
+
+	lda gs_level
+	cmp #$05
+	bne @done
+	lda gs_player_y
+	cmp #$05
+	beq @key_hint
+	cmp #$0a
+	beq @exit
+	cmp #$0b
+	beq @escape
+@done:
+	rts
+
+@key_hint:
+	lda #<key_hint_text
+	sta zp0C_string_ptr
+	lda #>key_hint_text
+	sta zp0C_string_ptr + 1
+	lda #<reveal_buffer + $67 ;row col
+	sta zp0A_text_ptr
+	lda #>reveal_buffer
+	sta zp0A_text_ptr + 1
+
+	ldx #$03
+@key_next:
+	ldy #$07
+:	lda (zp0C_string_ptr),y
+	sta (zp0A_text_ptr),y
+	dey
+	bpl :-
+	dex
+	beq @done
+	clc
+	lda zp0C_string_ptr
+	adc #$08
+	sta zp0C_string_ptr
+	lda zp0A_text_ptr
+	adc #$10
+	sta zp0A_text_ptr
+	bne @key_next
+
+@exit:
+@escape:
+	rts
 
 draw_B_rod:
 	lda #$0b
@@ -1164,3 +1215,17 @@ draw_B_rod:
 	lda #glyph_box_BR
 	jsr char_out
 	rts
+
+	.segment "REVEAL_TEXT"
+
+key_hint_text:
+	.byte "WILL YOU"
+	.byte "TRUST ME"
+	.byte " ?!???  "
+	.assert >* = >key_hint_text, error, "Key hint text must be in one page"
+
+
+	.segment "DOOR_REVEAL_BUFFER"
+
+reveal_buffer:
+	.res $100
