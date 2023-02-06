@@ -703,8 +703,7 @@ draw_right:
 
 ; Input: Y=count
 draw_down_left:
-	tya
-	sta zp1A_count_loop
+	sty zp1A_count_loop
 :	jsr get_rowcol_addr
 	lda #glyph_slash_up
 	jsr char_out
@@ -717,8 +716,7 @@ draw_down_left:
 
 ; Input: Y=count
 draw_down_right:
-	tya
-	sta zp1A_count_loop
+	sty zp1A_count_loop
 :	jsr get_rowcol_addr
 	lda #glyph_slash_down
 	jsr char_out
@@ -729,10 +727,7 @@ draw_down_right:
 
 ; Input: A=char Y=count
 draw_down:
-	pha
-	tya
-	sta zp1A_count_loop
-	pla
+	sty zp1A_count_loop
 @next:
 	pha
 	jsr get_rowcol_addr
