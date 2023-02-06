@@ -2,6 +2,7 @@
 	.export char_out
 	.export clear_cursor
 	.export clear_status_lines
+	.export get_display_string
 	.export get_rowcol_addr
 	.export print_char
 	.export print_display_string

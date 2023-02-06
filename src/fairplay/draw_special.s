@@ -8,6 +8,7 @@
 	.import draw_down
 	.import print_char
 	.import get_rowcol_addr
+	.import get_display_string
 	.import which_door
 
 	.include "apple.i"
@@ -35,6 +36,7 @@ zp0A_text_ptr    = $0A;
 zp0C_string_ptr  = $0C;
 zp1A_count_row   = $1A;
 zp0F_action      = $0F;
+zp19_string      = $19;
 
 	.segment "DATA_KEYHOLE"
 
@@ -1160,18 +1162,18 @@ prepare_reveal_buffer:
 
 	lda gs_level
 	cmp #$05
-	bne @done
+	bne prepare_done
 	lda gs_player_y
 	cmp #$05
-	beq @key_hint
+	beq reveal_key_hint
 	cmp #$0a
-	beq @exit
+	beq reveal_exit
 	cmp #$0b
-	beq @escape
-@done:
+	beq reveal_escape
+prepare_done:
 	rts
 
-@key_hint:
+reveal_key_hint:
 	lda #<key_hint_text
 	sta zp0C_string_ptr
 	lda #>key_hint_text
@@ -1182,14 +1184,14 @@ prepare_reveal_buffer:
 	sta zp0A_text_ptr + 1
 
 	ldx #$03
-@key_next:
+@next:
 	ldy #$07
 :	lda (zp0C_string_ptr),y
 	sta (zp0A_text_ptr),y
 	dey
 	bpl :-
 	dex
-	beq @done
+	beq prepare_done
 	clc
 	lda zp0C_string_ptr
 	adc #$08
@@ -1197,11 +1199,83 @@ prepare_reveal_buffer:
 	lda zp0A_text_ptr
 	adc #$10
 	sta zp0A_text_ptr
-	bne @key_next
+	bne @next
 
-@exit:
-@escape:
+reveal_exit:
+	lda #>reveal_buffer
+	sta zp0A_text_ptr + 1
+	lda #<reveal_buffer + $59 ;row col
+	sta zp0A_text_ptr
+	lda #$cb     ;EXIT
+
+	sta zp19_string
+	jsr get_display_string
+	ldy #$03
+:	lda (zp0C_string_ptr),y
+	and #$7F
+	sta (zp0A_text_ptr),y
+	dey
+	bpl :-
+
+	lda #<reveal_buffer + $83 ;row col
+	sta zp0A_text_ptr
+	lda #$04
+	sta zp1A_count_loop
+
+@next:
+	inc zp19_string
+	lda zp0A_text_ptr
+	clc
+	adc #$10
+	sta zp0A_text_ptr
+
+	lda zp19_string
+	jsr get_display_string
+	ldy #$0e
+:	lda (zp0C_string_ptr),y
+	sta (zp0A_text_ptr),y
+	dey
+	bpl :-
+
+	dec zp1A_count_loop
+	bne @next
 	rts
+
+reveal_escape:
+	lda #<escape_data
+	sta zp0C_string_ptr
+	lda #>escape_data
+	sta zp0C_string_ptr + 1
+	lda #<reveal_buffer + $16 ;row col
+	sta zp0A_text_ptr
+	lda #>reveal_buffer
+	sta zp0A_text_ptr + 1
+
+	lda #$10
+	sta zp1A_count_loop
+	lda #$08
+	sta zp10_length
+	ldy #$00
+@next_row:
+@next_col:
+	lda (zp0C_string_ptr),y
+	sta (zp0A_text_ptr),y
+	inc zp0C_string_ptr
+	bne :+
+	inc zp0C_string_ptr + 1
+:	inc zp0A_text_ptr
+	dec zp10_length
+	bne @next_col
+
+	lda #$08
+	sta zp10_length
+	clc
+	adc zp0A_text_ptr
+	sta zp0A_text_ptr
+	dec zp1A_count_loop
+	bne @next_row
+	rts
+
 
 draw_B_rod:
 	lda #$0b
@@ -1224,6 +1298,23 @@ key_hint_text:
 	.byte " ?!???  "
 	.assert >* = >key_hint_text, error, "Key hint text must be in one page"
 
+escape_data:
+	.byte $01,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$01,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$01,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$01,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
+	.byte $20,$20,$20,$20,$20,$20,$20,$20
 
 	.segment "DOOR_REVEAL_BUFFER"
 

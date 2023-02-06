@@ -1439,6 +1439,10 @@ special_endgame:
 	bne @normal
 
 @win:
+	lda #drawcmd0A_door_opening
+	sta zp0F_action
+	jsr draw_special
+
 	lda #$38     ;The magic word works! You have escaped!
 	jsr print_to_line1
 	lda #$96     ;When ready, press any key.
@@ -1448,6 +1452,8 @@ special_endgame:
 :	bit hw_KEYBOARD
 	bpl :-
 	bit hw_STROBE
+
+	jmp @win
 
 	jsr clear_hgr2
 	jmp exit_game
