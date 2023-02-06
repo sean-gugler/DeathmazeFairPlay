@@ -20,12 +20,8 @@ zp0E_src   = $0E;
 zp10_dst   = $10;
 zp19_count = $19;
 
-.if REVISION >= 100
 	; Compact memory without needing segment padding
 	RELOCATE_SIZE = __HIGH_LAST__ - __HIGH_START__
-.else
-	RELOCATE_SIZE = __HIGH_SIZE__
-.endif
 
 
 	.segment "RELOCATOR"
@@ -37,13 +33,7 @@ relocate_data:
 	; Relocate data that might overlap HGR2 ($4000-$5FFF) to above it ($6000-$7FFF)
 	ldx #<__MAIN_LAST__
 	stx zp0E_src
-.if REVISION >= 100
 	ldx #<__HIGH_START__  ;no longer guaranteed 0
-.else ;RETAIL
-	.assert <__HIGH_START__ = <__MAIN_LAST__, error, "Segment MAIN isn't full"
-	.assert screen_HGR2 = __MAIN_LAST__, error, "Segment HIGH wasn't loaded in HGR2"
-	; Retail padded MAIN with junk to make sure relocatable data was aligned on start of HGR2 page
-.endif
 	stx zp10_dst
 	stx relocated
 	ldx #>__MAIN_LAST__

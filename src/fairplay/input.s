@@ -270,13 +270,6 @@ input_letter:
 input_space:
 	ldy zp11_count_chars
 	; Prevent double-space.
-.if REVISION >= 100
-	;removed DEY to fix bug
-.else ;RETAIL
-	; This looks back too far by one char. It mistakenly prevents
-	; space after first letter of second word, as in:  WORD_L_
-	dey
-.endif
 	lda (zp19_input_ptr),y
 	cmp #' '
 	bne :+

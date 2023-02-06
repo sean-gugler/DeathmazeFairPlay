@@ -396,10 +396,6 @@ thrown:
 	jsr item_cmd
 	jsr print_thrown
 	jsr throw_react
-.if REVISION < 100 ;RETAIL
-	nop
-	nop
-.endif
 	bne :+
 	lda #$97     ;and it vanishes!
 	jmp print_to_line1
@@ -2011,18 +2007,6 @@ draw_doors_opening:
 
 
 	.segment "COMMAND5"
-
-.if REVISION < 100 ;RETAIL
-dec_item_ptr:
-	pha
-	dec zp0E_item
-	lda zp0E_item
-	cmp #$ff
-	bne :+
-	dec zp0E_item+1
-:	pla
-	rts
-.endif
 
 	.segment "STRING_HAT"
 

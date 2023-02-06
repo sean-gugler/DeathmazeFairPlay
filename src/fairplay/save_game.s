@@ -41,8 +41,6 @@ zp0C_string_ptr = $0C;
 
 	.segment "SAVE_GAME"
 
-.if REVISION = 1
-
 text_save_device:
 	.byte "Save to DISK or TAPE (T or D)?"
 	.byte $80
@@ -50,15 +48,6 @@ text_load_device:
 	msbstring "Get from DISK or TAPE (T or D)?"
 	.byte $80
 
-.elseif REVISION >= 2
-
-text_save_device:
-	.byte "SAVE TO DISK OR TAPE (T OR D)?", $80
-text_load_device:
-	.byte "GET FROM DISK OR TAPE (T OR D)?", $80
-
-.endif
-;	.assert * = $7c3f, error, "Unexpected alignment"
 load_disk_or_tape:
 	jsr clear_hgr2
 	ldx #$00
@@ -136,18 +125,8 @@ iob_return_code:
 iob_last_volume:
 	.byte $00,$60,$01
 
-.if REVISION = 1
-
 text_insert_disk:
-	msbstring "Place data diskette in DRIVE 1, SLOT 6."
-	.byte $80
-
-.elseif REVISION >= 2
-
-text_insert_disk:
-	.byte "PLACE DATA DISKETTE IN DRIVE 1, SLOT 6.", $80
-
-.endif
+	.byte "Place data diskette in the drive.", $80
 
 save_to_disk:
 	ldx #$02

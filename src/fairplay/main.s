@@ -388,12 +388,8 @@ play_again:
 exit_game:
 	bit hw_PAGE1
 	bit hw_TEXT
-.if REVISION >= 100
 	bit hw_STROBE
 	jmp DOS_warm_start
-.else ;RETAIL
-	jmp rom_MONITOR
-.endif
 
 
 	.segment "RESET"
