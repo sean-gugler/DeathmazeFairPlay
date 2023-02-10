@@ -3,17 +3,15 @@
 RWTS_IOBPL = $48   ; I/O Block Pointer, LO byte
 RWTS_IOBPH = $49   ; I/O Block Pointer, HI byte
 
-DOS_data_prologue_3 = $4e
-
 DOS_warm_start = $03d0
 DOS_call_rwts = $03d9
 DOS_hook_cout = $03ea
 DOS_hook_monitor = $03f8
-;DOS_hook_monitor+1 = $03f9
-;DOS_hook_monitor+2 = $03fa
 
-DOS_BREAK  = $9d58
-DOS_ASIBSW = $aaae
+; WARNING - not part of DOS API!
+; Known for DOS 3.3C but may differ in other DOS editions.
+DOS_BREAK  = $9d5a
+DOS_ASIBSW = $aab6
 
 RWTS_readblock = $b7b5
 
@@ -39,3 +37,15 @@ RWTS_command_read = $01
 RWTS_data_epilogue_byte1 = $d5
 RWTS_data_epilogue_byte2 = $aa
 RWTS_data_epilogue_byte3 = $ad
+
+; DOS_ASIBSW
+BASIC_Integer = $00
+BASIC_AppleSoft = $40
+
+DOS_error_write_protected = $04
+DOS_error_end_of_data = $05
+DOS_error_file_not_found = $06
+DOS_error_volume_mismatch = $07
+DOS_error_io_error = $08
+DOS_error_disk_full = $09
+DOS_error_file_locked = $0a

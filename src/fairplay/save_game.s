@@ -34,10 +34,10 @@ error_bad_save = $05
 zp_col = $06
 zp_row = $07
 
-zp19_delta16    = $19;
-zp10_retry      = $10;
-zp0F_action     = $0F;
-zp0C_string_ptr = $0C;
+zp19_delta16        = $19;
+zp0E_ptr            = $0E;
+zp0F_action         = $0F;
+zp0C_string_ptr     = $0C;
 
 	.segment "SAVE_GAME"
 
@@ -108,77 +108,63 @@ input_T_or_D:
 	pla
 	rts
 
-dos_dct:
-	.byte $00,$01
-	.word $d8ef
-dos_iob:
-	.byte $01,$60,$01,$00,$03,$00
-iob_dct:
-	.word relocate_data
-iob_buffer:
-	.word game_save_begin
-	.byte $00,$00
-iob_cmd:
-	.byte $01
-iob_return_code:
-	.byte $00
-iob_last_volume:
-	.byte $00,$60,$01
-
 text_insert_disk:
 	.byte "Place data diskette in the drive.", $80
 
 save_to_disk:
-	ldx #$02
-	stx iob_cmd
+	ldx #<dos_cmd_save
+	stx zp0E_ptr
+	ldx #>dos_cmd_save
+	stx zp0E_ptr + 1
 	jsr prompt_and_call_dos
-	bcc prepare_disk_save
+	bcs resume_game
 	jsr dos_code_to_message
-	jmp disk_error_retry
-
-prepare_disk_save:
+resume_game:
 	jsr clear_hgr2
 	jsr update_view
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jmp item_cmd
+	;rts
 
 load_from_disk:
-	ldx #$01
-	stx iob_cmd
+	inc signature
+	ldx #<dos_cmd_load
+	stx zp0E_ptr
+	ldx #>dos_cmd_load
+	stx zp0E_ptr + 1
 	jsr prompt_and_call_dos
-	bcc check_signature
-	jsr dos_code_to_message
-	jmp disk_error_fatal
+	bcc load_failed
 
 check_signature:
+	lda #error_bad_save
 	ldy #$00
 	lda signature,y
 	cmp #'D'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'E'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'A'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'T'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'H'
-	bne @fail
-	pla
-	pla
+	bne load_failed
 	jmp start_game
 
-@fail:
-	lda #error_bad_save
-	jmp disk_error_fatal
+load_failed:
+	jsr dos_code_to_message
+	pla
+	pla
+	jmp cold_start
 
 prompt_and_call_dos:
 	lda #char_newline
@@ -193,87 +179,140 @@ prompt_and_call_dos:
 	lda #$96     ;Press any key
 	jsr print_display_string
 	jsr input_char
-	lda #>dos_iob
-	ldy #<dos_iob
-	jsr DOS_call_rwts
+
+	jsr save_dos_handler
+	jsr hook_dos_handler
+	jsr call_dos
+	jsr restore_dos_handler
 	rts
+
+call_dos:
+	tsx
+	stx dos_save_stack
+	ldx zp0E_ptr
+	stx zp0C_string_ptr
+	ldx zp0E_ptr + 1
+	stx zp0C_string_ptr + 1
+	lda #$0d
+@next:
+	ora #$80
+	jsr rom_COUT
+	ldy #$00
+	lda (zp0C_string_ptr),y
+	beq @done
+	inc zp0C_string_ptr
+	bne @next
+	inc zp0C_string_ptr + 1
+	bne @next
+@done:
+
+return_from_dos:
+	; If there was an error, Carry is clear and X has error code.
+	txa
+	ldx dos_save_stack
+	txs
+	rts
+
+	; Tried appending these strings to the
+	; string memory, but turns out there's more
+	; room below HGR2 than in the relocate region
+	; above it. So they stay in the same segment.
+	.segment "STRINGS_IO"
+	.segment "SAVE_GAME"
+
+dos_cmd_load:
+	.byte $04,"BLOAD DM.SAVE,A$8300",$0d,$00
+dos_cmd_save:
+	.byte $04,"BSAVE DM.SAVE,A$8300,L$90",$0d,$00
+
+string_disk_error:
+diskmsg_write_protect:
+	.byte "DISKETTE WRITE PROTECTED!", $80
+diskmsg_disk_full:
+	.byte "DISK FULL!", $80
+diskmsg_misc:
+	.byte "DRIVE ERROR! CAUSE UNKNOWN!", $80
+diskmsg_file_locked:
+	.byte "FILE LOCKED! CHECK YOUR DISKETTE!", $80
+diskmsg_cannot_read:
+	.byte "NO DEATHMAZE DATA FOUND!", $80
+
+.define offset(message) <(message - string_disk_error)
+table_disk_error = * - 4
+	.byte offset(diskmsg_write_protect) ;$04 DOS_error_write_protected
+	.byte offset(diskmsg_cannot_read)   ;$05 DOS_error_end_of_data
+	.byte offset(diskmsg_cannot_read)   ;$06 DOS_error_file_not_found
+	.byte offset(diskmsg_misc)          ;$07 DOS_error_volume_mismatch
+	.byte offset(diskmsg_misc)          ;$08 DOS_error_io_error
+	.byte offset(diskmsg_disk_full)     ;$09 DOS_error_disk_full
+	.byte offset(diskmsg_file_locked)   ;$0a DOS_error_file_locked
+.undef offset
+
+	.segment "SAVE_GAME"
 
 dos_code_to_message:
-	lda iob_return_code
-	cmp #$10
-	bne :+
-	lda #error_write_protect
-	rts
-
-:	cmp #$20
-	bne :+
-	lda #error_volume_mismatch
-	rts
-
-:	cmp #$40
-	bne :+
-	lda #error_unknown_cause
-	rts
-
-:	lda #error_reading
-	rts
-
-; 1-based indexing via 'A'
-string_disk_error:
-	.byte "DISKETTE WRITE PROTECTED!", $80
-	.byte "VOLUME MISMATCH!", $80
-	.byte "DRIVE ERROR! CAUSE UNKNOWN!", $80
-	.byte "READ ERROR! CHECK YOUR DISKETTE!", $80
-	.byte "NOT A DEATHMAZE FILE! INPUT REJECTED!", $80
-
-disk_error_fatal:
-	ldx #$00
-	stx zp10_retry
-	beq disk_error
-disk_error_retry:
-	ldx #$ff
-	stx zp10_retry
-disk_error:
-	tay
-	dey
-	bne :+
-	beq @print_message
-:	dey
-	bne :+
-	ldy #$1a
-	bne @print_message
-:	dey
-	bne :+
-	ldy #$2b
-	bne @print_message
-:	dey
-	bne :+
-	ldy #$47
-	bne @print_message
-:	ldy #$68
-@print_message:
-	sty zp19_delta16
-	ldx #$00
-	stx zp19_delta16+1
-	ldx #<string_disk_error
-	stx zp0C_string_ptr
-	ldx #>string_disk_error
-	stx zp0C_string_ptr+1
+	tax
+	lda table_disk_error,x
 	clc
-	lda zp19_delta16
-	adc zp0C_string_ptr
+	adc #<string_disk_error
 	sta zp0C_string_ptr
-	lda zp19_delta16+1
-	adc zp0C_string_ptr+1
+	lda #$00
+	adc #>string_disk_error
 	sta zp0C_string_ptr+1
+
 	lda #char_newline
 	jsr char_out
 	jsr print_string
-	jsr input_char
-	lda zp10_retry
-	beq :+
-	jmp prepare_disk_save
+	jmp input_char
+	;rts
 
-:	pla
-	pla
-	jmp cold_start
+hook_dos_handler:
+	; Force DOS to bypass error PRINT
+	; and call BREAK handler.
+	; (WARNING: relies on private address DOS_BREAK)
+	lda #OnErr_Active
+	sta APPLESOFT_OnErrMode
+	lda #APPLESOFT_Running
+	sta APPLESOFT_RunState
+	lda #Prompt_None
+	sta APPLESOFT_Prompt
+	lda #<return_from_dos
+	sta DOS_BREAK
+	lda #>return_from_dos
+	sta DOS_BREAK + 1
+	rts
+
+save_dos_handler:
+	ldx DOS_BREAK
+	stx dos_saved
+	ldx DOS_BREAK + 1
+	stx dos_saved + 1
+	ldx APPLESOFT_OnErrMode
+	stx dos_saved + 2
+	ldx APPLESOFT_RunState
+	stx dos_saved + 3
+	ldx APPLESOFT_Prompt
+	stx dos_saved + 4
+	rts
+
+restore_dos_handler:
+	ldx dos_saved
+	stx DOS_BREAK
+	ldx dos_saved + 1
+	stx DOS_BREAK + 1
+	ldx dos_saved + 2
+	stx APPLESOFT_OnErrMode
+	ldx dos_saved + 3
+	stx APPLESOFT_RunState
+	ldx dos_saved + 4
+	stx APPLESOFT_Prompt
+	rts
+
+
+	.segment "DATA_PERSIST"
+
+dos_save_stack:
+	.res 1
+
+dos_saved:
+	.res 5

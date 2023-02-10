@@ -7,6 +7,12 @@ zp_A2 = $003e ;$3e
 tape_addr_start = $003c ;$3d
 tape_addr_end = $003e ;$3f
 
+APPLESOFT_Prompt = $33
+APPLESOFT_OnErrMode = $d8
+INTBASIC_RunState = $d9
+APPLESOFT_ErrorCode = $de
+APPLESOFT_RunState = $76
+
 irq_IIgs = $03fe
 
 screen_TEXT = $0400
@@ -65,3 +71,19 @@ opcode_BIT = $2c  ; BIT $hhll
 opcode_JMP = $4c  ; JMP $hhll
 opcode_RTS = $60  ; RTS
 opcode_BCC = $90  ; BCC $rr
+
+; APPLESOFT_OnErrMode
+OnErr_Inactive = $00
+OnErr_Active = $80
+
+; INTBASIC_RunState = $d9
+INTBASIC_Running = $80  ;anything MI
+INTBASIC_NotRunning = $00  ;anything PL
+
+; APPLESOFT_RunState = $76
+APPLESOFT_Running = $00  ;or anything not $ff
+APPLESOFT_NotRunning = $ff
+
+; APPLESOFT_Prompt = $33
+Prompt_Ready = ']'
+Prompt_None = $80

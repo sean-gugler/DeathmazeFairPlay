@@ -34,10 +34,10 @@ error_bad_save = $05
 zp_col = $06
 zp_row = $07
 
-zp19_delta16    = $19;
-zp10_retry      = $10;
-zp0F_action     = $0F;
-zp0C_string_ptr = $0C;
+zp19_delta16        = $19;
+zp10_resume_game    = $10;
+zp0F_action         = $0F;
+zp0C_string_ptr     = $0C;
 
 	.segment "SAVE_GAME"
 
@@ -153,11 +153,11 @@ save_to_disk:
 	ldx #$02
 	stx iob_cmd
 	jsr prompt_and_call_dos
-	bcc prepare_disk_save
+	bcc resume_game
 	jsr dos_code_to_message
-	jmp disk_error_retry
+	jmp disk_error_continue
 
-prepare_disk_save:
+resume_game:
 	jsr clear_hgr2
 	jsr update_view
 	ldx #icmd_draw_inv
@@ -170,7 +170,7 @@ load_from_disk:
 	jsr prompt_and_call_dos
 	bcc check_signature
 	jsr dos_code_to_message
-	jmp disk_error_fatal
+	jmp disk_error_restart
 
 check_signature:
 	ldy #$00
@@ -199,7 +199,7 @@ check_signature:
 
 @fail:
 	lda #error_bad_save
-	jmp disk_error_fatal
+	jmp disk_error_restart
 
 prompt_and_call_dos:
 	lda #char_newline
@@ -247,13 +247,13 @@ string_disk_error:
 	.byte "READ ERROR! CHECK YOUR DISKETTE!", $80
 	.byte "NOT A DEATHMAZE FILE! INPUT REJECTED!", $80
 
-disk_error_fatal:
+disk_error_restart:
 	ldx #$00
-	stx zp10_retry
+	stx zp10_resume_game
 	beq disk_error
-disk_error_retry:
+disk_error_continue:
 	ldx #$ff
-	stx zp10_retry
+	stx zp10_resume_game
 disk_error:
 	tay
 	dey
@@ -291,9 +291,9 @@ disk_error:
 	jsr char_out
 	jsr print_string
 	jsr input_char
-	lda zp10_retry
+	lda zp10_resume_game
 	beq :+
-	jmp prepare_disk_save
+	jmp resume_game
 
 :	pla
 	pla
