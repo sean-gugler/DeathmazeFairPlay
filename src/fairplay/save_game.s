@@ -22,6 +22,7 @@
 	.include "apple.i"
 	.include "char.i"
 	.include "dos.i"
+	.include "game_state.i"
 	.include "item_commands.i"
 	.include "msbstring.i"
 
@@ -220,10 +221,23 @@ return_from_dos:
 	.segment "STRINGS_IO"
 	.segment "SAVE_GAME"
 
+.macro byte_to_text b
+	.byte '0' + ((b >> 4) & $0f)
+	.byte '0' + ((b >> 0) & $0f)
+.endmacro
+
 dos_cmd_load:
-	.byte $04,"BLOAD DM.SAVE,A$8300",$0d,$00
+	.byte $04,"BLOAD DM.SAVE,A$"
+	byte_to_text >game_save_begin
+	byte_to_text <game_save_begin
+	.byte $0d,$00
 dos_cmd_save:
-	.byte $04,"BSAVE DM.SAVE,A$8300,L$90",$0d,$00
+	.byte $04,"BSAVE DM.SAVE,A$"
+	byte_to_text >game_save_begin
+	byte_to_text <game_save_begin
+	.byte ",L$"
+	byte_to_text game_save_size
+	.byte $0d,$00
 
 string_disk_error:
 diskmsg_write_protect:

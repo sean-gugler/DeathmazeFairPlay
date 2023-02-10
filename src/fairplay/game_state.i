@@ -1,6 +1,3 @@
-	.global game_save_begin
-	.global game_save_end
-
 	.global gs_facing
 	.global gs_level
 	.global gs_player_x
@@ -48,8 +45,17 @@
 	.global gs_item_torch
 	.global gs_torch_life
 
+	.global game_save_begin
+	.global game_save_end
+
+	.global game_state_begin
 	.global game_state_end
-	gs_size = <game_state_end
+
+	.assert >(game_state_end - game_state_begin) = 0, error, "Game state data larger than one page"
+
+	game_state_size = <(game_state_end - game_state_begin)
+	game_save_size = <(game_save_end - game_save_begin)
+
 
 
 	items_unique    = $16

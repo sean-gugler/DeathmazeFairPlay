@@ -1,23 +1,11 @@
-	.include "junk_byte.i"
-
-	.export signature
-
-	.segment "SIGNATURE"
-
-signature:
-	JUNK_BYTE "DEATH"
-
-
 	.include "game_state.i"
+	.include "junk_byte.i"
 	.include "string_noun_decl.i"
-
-	.import __GAME_STATE_RUN__
-;	.import __GAME_STATE_SIZE__
-__GAME_STATE_SIZE__  = $FF
 
 	.segment "GAME_STATE"
 
-game_save_begin = __GAME_STATE_RUN__
+game_save_begin = *
+game_state_begin = *
 
 gs_facing:
 	JUNK_BYTE $02
@@ -127,8 +115,18 @@ gs_torch_life:
 gs_item_snake = gs_item_locs + (noun_snake - 1) * 2
 
 
-game_state_end = * - game_save_begin
-	.assert >game_state_end = 0, error, "Game state data larger than one page"
+game_state_end = *
 
-game_save_end = game_save_begin + __GAME_STATE_SIZE__
-	.assert game_save_end >= game_state_end, error, "Game state data overflowed save file"
+
+	.export signature
+
+	.segment "SIGNATURE"
+
+signature:
+	JUNK_BYTE "D"
+	JUNK_BYTE "E"
+	JUNK_BYTE "A"
+	JUNK_BYTE "T"
+	JUNK_BYTE "H"
+
+game_save_end = *

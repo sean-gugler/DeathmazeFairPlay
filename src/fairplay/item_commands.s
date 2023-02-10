@@ -309,14 +309,14 @@ icmd09_new_game:
 	dec zp1A_cmds_to_check
 	bne icmd0A
 
-	ldy #gs_size-1
+	ldy #game_state_size-1
 	lda #>data_new_game
 	sta zp0E_src+1
 	lda #<data_new_game
 	sta zp0E_src
-	lda #<gs_facing
+	lda #<game_state_begin
 	sta zp10_dst
-	lda #>gs_facing
+	lda #>game_state_begin
 	sta zp10_dst+1
 :	lda (zp0E_src),y
 	sta (zp10_dst),y
