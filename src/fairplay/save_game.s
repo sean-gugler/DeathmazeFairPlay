@@ -112,18 +112,10 @@ text_insert_disk:
 	.byte "Place data diskette in the drive.", $80
 
 save_to_disk:
-	lda #<dos_cmd_prefix
-	ldy #>dos_cmd_prefix
-	jsr print_cout
-	lda #<dos_cmd_save
-	ldy #>dos_cmd_save
-	jsr print_cout
-	lda #<dos_cmd_filename
-	ldy #>dos_cmd_filename
-	jsr print_cout
-	lda #<dos_cmd_length
-	ldy #>dos_cmd_length
-	jsr print_cout
+	ldx #<dos_cmd_save
+	stx zp0E_ptr
+	ldx #>dos_cmd_save
+	stx zp0E_ptr + 1
 	jsr prompt_and_call_dos
 	bcs resume_game
 	jsr dos_code_to_message
@@ -137,15 +129,10 @@ resume_game:
 
 load_from_disk:
 	inc signature
-	lda #<dos_cmd_prefix
-	ldy #>dos_cmd_prefix
-	jsr print_cout
-	lda #<dos_cmd_load
-	ldy #>dos_cmd_load
-	jsr print_cout
-	lda #<dos_cmd_filename
-	ldy #>dos_cmd_filename
-	jsr print_cout
+	ldx #<dos_cmd_load
+	stx zp0E_ptr
+	ldx #>dos_cmd_load
+	stx zp0E_ptr + 1
 	jsr prompt_and_call_dos
 	bcc load_failed
 
@@ -202,30 +189,28 @@ prompt_and_call_dos:
 call_dos:
 	tsx
 	stx dos_save_stack
-	lda #$8d
+	ldx zp0E_ptr
+	stx zp0C_string_ptr
+	ldx zp0E_ptr + 1
+	stx zp0C_string_ptr + 1
+	lda #$0d
+@next:
+	ora #$80
 	jsr rom_COUT
+	ldy #$00
+	lda (zp0C_string_ptr),y
+	beq @done
+	inc zp0C_string_ptr
+	bne @next
+	inc zp0C_string_ptr + 1
+	bne @next
+@done:
 
 return_from_dos:
 	; If there was an error, Carry is clear and X has error code.
 	txa
 	ldx dos_save_stack
 	txs
-	rts
-
-print_cout:
-	sta zp0C_string_ptr
-	sty zp0C_string_ptr + 1
-@next:
-	ldy #$00
-	lda (zp0C_string_ptr),y
-	beq @done
-	ora #$80
-	jsr rom_COUT
-	inc zp0C_string_ptr
-	bne :+
-	inc zp0C_string_ptr + 1
-:	bne @next
-@done:
 	rts
 
 	; Tried appending these strings to the
@@ -235,16 +220,10 @@ print_cout:
 	.segment "STRINGS_IO"
 	.segment "SAVE_GAME"
 
-dos_cmd_prefix:
-	.byte $0d,$04,"B",$00
 dos_cmd_load:
-	.byte "LOAD",$00
+	.byte $04,"BLOAD DM.SAVE,A$8300",$0d,$00
 dos_cmd_save:
-	.byte "SAVE",$00
-dos_cmd_filename:
-	.byte " DM.SAVE,A$8300",$00
-dos_cmd_length:
-	.byte ",L$90",$00
+	.byte $04,"BSAVE DM.SAVE,A$8300,L$90",$0d,$00
 
 string_disk_error:
 diskmsg_write_protect:
