@@ -751,10 +751,11 @@ cmd_strike:
 	bne @useless
 
 	ldx gs_staff_charged
+	bne :+
 	lda #$3c     ;They do not reach the lightning rod.
-	beq :+
-	lda #$3d     ;They blast the lighting rod above!
-:	jsr @print_line2
+	bne @print_line2
+:	lda #$3d     ;They blast the lighting rod above!
+	jsr print_to_line2
 
 	lda #maze_flag_key_fused
 	and gs_maze_flags
@@ -795,7 +796,8 @@ cmd_strike:
 	ldx gs_staff_charged
 	beq @done
 	lda #$26     ;The staff thunders with useless energy!
-	bne @print_line2
+@print_line2:
+	jmp print_to_line2
 
 @fuse:
 	tax
@@ -828,8 +830,8 @@ cmd_strike:
 	sta zp0F_action
 	jsr item_cmd
 
+	jsr clear_status_lines
 	lda #$3e     ;The gold pieces fuse together!
-@print_line2:
 	jmp print_to_line1
 
 

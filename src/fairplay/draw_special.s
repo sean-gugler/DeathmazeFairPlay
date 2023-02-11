@@ -1208,7 +1208,7 @@ reveal_exit:
 	sta zp0A_text_ptr + 1
 	lda #<reveal_buffer + 63 ;10*row+col
 	sta zp0A_text_ptr
-	lda #$cb     ;EXIT
+	lda #$cc     ;EXIT
 
 	sta zp19_string
 	jsr get_display_string
