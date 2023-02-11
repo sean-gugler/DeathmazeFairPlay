@@ -25,9 +25,17 @@ More hints were added for a few objects when you LOOK at them. The bland "look a
 
 LOOK BALL now provides a colorful description of its violent nature. It also now activates on BURN, BREAK, and EAT, not just THROW and ROLL.
 
+* Intro text trimmed
+
+There's no need to mention CHARGE in the intro. There's already a very explicit in-game hint that reveals its existence and use. I pulled out that entire line.
+
 * FART hint
 
-The original printed game manual had nearly the same text as the instructions you see upon starting a new game. One key difference was that it mentioned the verb "FART" instead of "CHARGE". This is a valuable clue for one of the puzzles. I could restore it here, since Charge already appears later in the game and doesn't need to be mentioned here. That doesn't feel as rewarding as figuring it out from a less direct hint inside the game, though. Instead, I've chosen to rephrase the "eat food" response to suggest gas.
+The original printed game manual had nearly the same text as the instructions you see upon starting a new game. One key difference was that it mentioned the verb "FART" instead of "CHARGE". This is a valuable clue for one of the puzzles, and not terribly intuitive to discover unless you're inclined to experiment with crude words for the sake of it.
+
+Rather than restore FART in the intro text, in place of CHARGE, I decided it would feel more rewarding to figure it out from a less direct hint inside the game. To meet this goal I've chosen to rephrase the "eat food" response to suggest gas.
+
+(Side note: the puzzle it solves was unnecessary in the original. The solution isn't required to win the game, and in fact leads to a fascinating but purposeless object. The fair play edition corrects that loose end; see both STAFF notes below.)
 
 * RING revision
 
