@@ -4,6 +4,7 @@ RWTS_IOBPL = $48   ; I/O Block Pointer, LO byte
 RWTS_IOBPH = $49   ; I/O Block Pointer, HI byte
 
 DOS_warm_start = $03d0
+DOS_cold_start = $03d3
 DOS_call_rwts = $03d9
 DOS_hook_cout = $03ea
 DOS_hook_monitor = $03f8

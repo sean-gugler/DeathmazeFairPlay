@@ -389,7 +389,8 @@ exit_game:
 	bit hw_PAGE1
 	bit hw_TEXT
 	bit hw_STROBE
-	jmp DOS_warm_start
+	jsr rom_HOME
+	jmp DOS_cold_start
 
 
 	.segment "RESET"
