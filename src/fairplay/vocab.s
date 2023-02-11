@@ -11,7 +11,7 @@
 	.segment "STRINGS"
 
 vocab_table:
-	.byte $ff
+;	.byte $ff
 
 verb_table:
 	.include "string_verb_defs.inc"

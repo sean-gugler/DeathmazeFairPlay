@@ -427,6 +427,8 @@ parse_input:
 :	jsr print_to_line2
 	jmp get_player_input
 
+; Return value in zp10_count_vocab is 1-based index
+; into string table of Verbs + Nouns
 get_vocab:
 	lda zp19_input_ptr+1
 	pha
@@ -436,50 +438,38 @@ get_vocab:
 	sta zp0E_ptr+1
 	lda #<vocab_table
 	sta zp0E_ptr
-	lda #$00
-	sta zp10_count_vocab
-@next_word:
-	ldy #$01
+	ldy #$00
+	sty zp10_count_vocab
+
 @find_string:
 	lda (zp0E_ptr),y
-	and #$80
-	bne @found_start
+	bmi @found_start
+@next_word:
 	inc zp0E_ptr
 	bne @find_string
 	inc zp0E_ptr+1
 	bne @find_string
+
 @found_start:
-	dey
-	lda (zp0E_ptr),y
+	and #$7f
 	cmp #'*'
-	beq :+
+	beq @next_char
 	inc zp10_count_vocab
-:	inc zp0E_ptr
-	bne :+
-	inc zp0E_ptr+1
-:	lda #vocab_word_size
-	sta zp11_count_chars
 @compare_char:
-	lda (zp0E_ptr),y
-	and #char_mask_upper
-	sta zp13_char_input
-	lda (zp19_input_ptr),y
-	and #char_mask_upper
-	cmp zp13_char_input
+	cmp (zp19_input_ptr),y
 	bne @mismatch
 	inc zp19_input_ptr
+@next_char:
 	inc zp0E_ptr
 	bne :+
 	inc zp0E_ptr+1
-:	dec zp11_count_chars
-	bne @compare_char
-@done:
-	pla
-	sta zp19_input_ptr
-	pla
-	sta zp19_input_ptr+1
-	rts
+:	lda (zp0E_ptr),y
+	bpl @compare_char
 
+@end_word:
+	lda #' '
+	cmp (zp19_input_ptr),y
+	beq @done
 @mismatch:
 	lda zp10_count_vocab
 	cmp #vocab_end-1
@@ -495,7 +485,12 @@ get_vocab:
 
 @fail:
 	inc zp10_count_vocab
-	bne @done
+@done:
+	pla
+	sta zp19_input_ptr
+	pla
+	sta zp19_input_ptr+1
+	rts
 
 
 	.segment "INPUT2"

@@ -48,9 +48,9 @@
 	verb_fart = $19
 	verb_save = $1a
 	verb_quit = $1b
-	verb_help = $1c
-	verb_hint = $1c
 	verb_instructions = $1c
 	verb_directions = $1c
+	verb_help = $1c
+	verb_hint = $1c
 
 	verbs_end = $1d

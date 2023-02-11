@@ -28,7 +28,7 @@ charge
 fart
 save
 quit
-help hint instructions directions
+instructions directions help hint
 
 [Nouns Unique]
 Ball

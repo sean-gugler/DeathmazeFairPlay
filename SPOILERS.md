@@ -145,6 +145,14 @@ There are times when the game deliberately waits a short time and goes unrespons
 
 I added visual "spinner" in the corner for two reasons: the player knows the game is stalling, not crashed; and the player knows immediately when the time is up. I always hated guessing when it was ok to start typing again after a dog attacked me.
 
+* Full words required
+
+This might feel like a step backward to some players. The original parser only checked the first four letters of words you entered. I've changed it to require typing out the full word.
+
+Partly this is to avoid the frustration of "aliased" words, like thinking the game recognizes the verb "strip" (alias "strike") or the noun "thread" (alias "three"). But my alteration turns out to use *fewer* total bytes, even with the extra string data. Most parsers of the era that limited word length did so to save on storage - if the limit is not serving that purpose, that's one more reason to remove it.
+
+Another benefit is that short words with fewer than four letters are no longer padded in the string table with spaces. This makes them display more nicely without extraneous spaces when the game prints them. For example, it used to say "The Jar  sails around the corner".
+
 * World goes dark after a bad charge
 
 Clear the screen after charging a steel wall. Consistent with other deaths like guillotine, monster, and bomb.

@@ -43,7 +43,7 @@ STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
 STRINGS = $(STRING_DECL) $(STRING_DEF)
 
 $(STRINGS): $(tools_dir)/build_strings.py $(src_dir)/strings.txt
-	$^ $(STRING_STEMS)
+	$^ $(STRING_STEMS) --full
 
 GENERATED += $(STRINGS)
 

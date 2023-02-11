@@ -19,6 +19,7 @@ def usage(argv):
     p.add_argument('nouns', help="file stem for noun strings")
     p.add_argument('messages', help="file stem for message strings")
     p.add_argument('intro', help="file stem for intro")
+    p.add_argument('-f', '--full', action='store_true', help="Retain full words, do not truncate to 4 letters")
     return p.parse_args(argv[1:])
 
 def sections(it):
@@ -29,7 +30,7 @@ def sections(it):
 
     def make_list(grouper):
         # Grouper requires 'for' iteration to function properly.
-        # It doesn't coerce nicely with list().
+        # Coercing with 'list(group)' doesn't work.
         L = [v for v in grouper]
 
         # First line is section name, and last is always blank.
@@ -57,6 +58,17 @@ def define_vocab(fit, T):
 
         for word in W:
             yield f'\tmsbstring "{word}"\n'
+
+def define_vocab_full(T):
+    for text in T:
+        # Synonyms get * prepended
+        W = ['*' + w for w in text.split()]
+
+        # Remove * from first element, though
+        W[0] = W[0][1:]
+
+        for word in W:
+            yield f'\tmsbstring "{word.title()}"\n'
 
 def declare_vocab(prefix, T):
     for i,text in enumerate(T, 1):
@@ -104,7 +116,11 @@ def main(argv):
                 del marker[i]
             out.write(line)
     with open(args.verbs + DEF, 'wt') as out:
-        for line in define_vocab(fit4, VT + VI):
+        if args.full:
+            lines = define_vocab_full(VT + VI)
+        else:
+            lines = define_vocab(fit4, VT + VI)
+        for line in lines:
             out.write(line)
 
     NU = S['Nouns Unique']
@@ -121,7 +137,11 @@ def main(argv):
                 del marker[i]
             out.write(line)
     with open(args.nouns + DEF, 'wt') as out:
-        for line in define_vocab(min4, NU + NM + NN):
+        if args.full:
+            lines = define_vocab_full(NU + NM + NN)
+        else:
+            lines = define_vocab(min4, NU + NM + NN)
+        for line in lines:
             out.write(line)
 
     M = S['Messages']
