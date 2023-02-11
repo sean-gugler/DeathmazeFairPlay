@@ -77,10 +77,13 @@ $(FOLDERS):
 
 FILES = \
 	files/HELLO.bas \
+	files/RESERVED.prg \
 	$(output_dir)/deathmaze_rev1.prg \
 	$(output_dir)/deathmaze_rev2.prg \
 	$(output_dir)/deathmaze_fixed.prg \
 	$(output_dir)/deathmaze_fairplay.prg
+
+ATTR = files/DOS_attributes.txt
 
 DOS = files/DOS.bin
 
@@ -90,7 +93,7 @@ $(DISK): $(FILES) $(DOS) | $(output_dir)
 	@echo "Creating $@"
 	tools/dos33.py --format $@  || (rm -f $@ && exit 1)
 	tools/dos33.py --sector-write --track 0 --sector 0 $@ $(DOS)  || (rm -f $@ && exit 1)
-	tools/dos33.py --write --caps $@ $(FILES) || (rm -f $@ && exit 1)
+	tools/dos33.py --write --caps --attr $(ATTR) $@ $(FILES) || (rm -f $@ && exit 1)
 
 disk: $(DISK)
 

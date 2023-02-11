@@ -20,7 +20,16 @@ flatten = chain.from_iterable
 verbose = False
 
 def usage(argv):
-    p = argparse.ArgumentParser(description = __doc__.split('\n')[1])  # extract first line of ''' header
+    p = argparse.ArgumentParser(description = __doc__.split('\n')[1],  # extract first line of ''' header
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog = '''
+Attribute file format includes lock "*", file type, and track:sector allocation.
+EXAMPLES:
+ A -12:F HELLO
+*B +04:0 ALLOC_UPWARD
+*B -22:F ALLOC_DOWNWARD
+ B -**:* ALLOC_FROM_END_OF_DISK
+''')
     p.add_argument('-v', '--verbose', action='store_true', help="Verbose output.")
     p.add_argument('disk_image', help="Existing Apple DOS 3.3 formatted disk image")
     p.add_argument('-d', '--host_dir', default=".", help="Folder on host to copy files to or from. Default is current folder.")
@@ -221,12 +230,32 @@ class VTOC:
     def mark(self, track, sector, free):
         self.free[track][sector ^ 8] = free
 
-    def alloc_strategy(self):
-        for track in reversed(range(Disk.TRACKS_PER_DISK)):
-            for sector in reversed(range(Disk.SECTORS_PER_TRACK)):
-                if self.is_marked(track, sector):
-                    self.mark(track, sector, False)
-                    yield track, sector
+    def set_alloc_strategy(self, direction, track, sector):
+        try:
+            t = int(track, 16)
+            s = int(sector, 16)
+            seeking = True
+        except ValueError:
+            seeking = False
+
+        T = range(Disk.TRACKS_PER_DISK)
+        S = range(Disk.SECTORS_PER_TRACK)
+        if direction == '-':
+            T = reversed(T)
+            S = reversed(S)
+        T = tuple(T)
+        S = tuple(S)
+
+        def alloc_strategy(self):
+            nonlocal seeking
+            for track in T:
+                for sector in S:
+                    if seeking:
+                        seeking = not (t == track and s == sector)
+                    if not seeking and self.is_marked(track, sector):
+                        self.mark(track, sector, False)
+                        yield track, sector
+        VTOC.alloc_strategy = alloc_strategy
 
     def alloc(self, count):
         yield from islice(self.alloc_strategy(), count)
@@ -509,7 +538,7 @@ def write_sectors(image_name, track, sector, raw_file):
     vtoc.write(disk)
     disk.write_image(image_name)
 
-reAttr = re.compile(r'([ *])([baRSBAIT]) (.*)')
+reAttr = re.compile(r'([ *])([baRSBAIT]) (.)(..):(.) (.*)')
 
 def read_attr(attr_file):
     """Read locked status and file type from an attributes file, such as one written by read_files()"""
@@ -517,10 +546,13 @@ def read_attr(attr_file):
     try:
         with open(attr_file, "rt") as f:
             for line in f.readlines():
-                lock, ftype, name = reAttr.match(line).groups() 
-                attr[name] = (lock == '*', ftype)
+                lock, ftype, direction, track, sector, name = reAttr.match(line).groups() 
+                attr[name] = (lock == '*', ftype, direction, track, sector)
     except TypeError:
-        if attr_file: print(f'cannot read "{attri_file}"')
+        if attr_file: print(f'cannot read "{attr_file}"')
+    except AttributeError:
+        print(f'Mis-formatted line in {attr_file}')
+        sys.exit(1)
     return attr
 
 def write_files(image_name, output_folder, attr_file, force_caps, *files):
@@ -547,13 +579,16 @@ def write_files(image_name, output_folder, attr_file, force_caps, *files):
 
         e = CatalogEntry()
 
-        (e.track, e.sector), e.blocks = File(vtoc).write(data)
         e.name = os.path.basename(path)
-        e.locked, ftype = attr.get(e.name, (True, ftype))
-        e.file_type = Catalog.FILE_CODES[ftype]
-
         if force_caps:
             e.name = e.name.upper()
+
+        attr_default = (True, ftype, '-', '**', '*')
+        e.locked, ftype, direction, track, sector = attr.get(e.name, attr_default)
+        vtoc.set_alloc_strategy(direction, track, sector)
+        (e.track, e.sector), e.blocks = File(vtoc).write(data)
+
+        e.file_type = Catalog.FILE_CODES[ftype]
 
         cat.write(e)
 

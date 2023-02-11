@@ -21,7 +21,7 @@ saved_zp19:
 	JUNK_BYTE $07
 saved_zp1A:
 	JUNK_BYTE $00
-
+.res $01
 
 	.segment "SWAP_CODE"
 

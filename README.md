@@ -16,6 +16,12 @@ This project builds four versions of the game:
 3. Bug fixed fan release
 4. Fair Play fan release
 
+## Saved Game file
+
+WARNING: Editions 1 through 3 save the game directly to track 3, sector 0. This is safe on the provided disk because I've allocated a "RESERVED" file to protect that sector. The same may not be true if you copy the files to another disk, so be careful! Safest (though wasteful) to use a completely blank disk for saved games.
+
+Edition 4 saves the game to a proper DOS file through ordinary catalog allocation. This edition and its save file are safe to transport by ordinary means to any other disk. Probably won't work in ProDOS, though.
+
 ## Bugs fixed in later retail
 * Breaking an item now clears it from the inventory display.
 * Using the "Say" verb by itself no longer prints garbage.
