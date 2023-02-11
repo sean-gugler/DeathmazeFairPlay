@@ -743,6 +743,7 @@ cmd_strike:
 	lda #$05
 	cmp gs_level
 	bne @useless
+;	lda #$05  ;optimized redundant
 	cmp gs_player_y
 	bne @useless
 	lda #$04
@@ -750,13 +751,14 @@ cmd_strike:
 	bne @useless
 
 	ldx gs_staff_charged
-	bne :+
 	lda #$3c     ;They do not reach the lightning rod.
-	bne @print_line2
+	beq :+
+	lda #$3d     ;They blast the lighting rod above!
+:	jsr @print_line2
 
-:	lda #maze_flag_key_fused
+	lda #maze_flag_key_fused
 	and gs_maze_flags
-	bne @blast
+	bne @done
 
 	lda #$00
 	sta zp11_count
@@ -786,15 +788,13 @@ cmd_strike:
 	pla
 	pla
 	pla
-@blast:
-	lda #$3d     ;They blast the lighting rod above!
-	bne @print_line2
+@done:
+	rts
 
 @useless:
 	ldx gs_staff_charged
-	bne :+
-	rts
-:	lda #$26     ;The staff thunders with useless energy!
+	beq @done
+	lda #$26     ;The staff thunders with useless energy!
 	bne @print_line2
 
 @fuse:
@@ -818,6 +818,7 @@ cmd_strike:
 :	dec zp11_count
 	bne @loop_destroy
 
+	jsr wait_long
 	lda #noun_key
 	sta zp0E_object
 	lda #icmd_set_carried_known
@@ -829,7 +830,7 @@ cmd_strike:
 
 	lda #$3e     ;The gold pieces fuse together!
 @print_line2:
-	jmp print_to_line2
+	jmp print_to_line1
 
 
 
