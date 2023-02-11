@@ -40,10 +40,11 @@ Edition 4 saves the game to a proper DOS file through ordinary catalog allocatio
 * Move forward into wall during monster encounter, "splat" remains and doesn't flicker.
 * Always time to read fate about "the body". Message would briefly flicker if you did an action with a text result, such as "open box".
 * Open a door, then immediately open it again. Moving forward would print "splat". It now correctly moves forward.
-* If you drop the lit torch, no escaping the monster by killing a dog.
-* If you drop the lit torch while it was dying, the "torch dying" message stops appearing.
+* If you drop the lit torch, you could temporarily escape the monster by killing a dog.
+* If you drop the lit torch while it is dying, the "torch dying" message stops appearing.
 * Rare possibility of getting illogical text when defeating the dog.
 * Dropping the jar would silently empty it.
+* Arriving after a teleport should always face open space. If you arrive facing a wall, your first move can be forward through it.
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.
@@ -59,7 +60,7 @@ Edition 4 saves the game to a proper DOS file through ordinary catalog allocatio
 
 The earlier release I have had in my own collection since 1980. It is not an official retail disk, so I have no way of knowing for sure if it was cracked or if the original was not protected. There is no evidence of any vanity vandalism typically inserted by crackers, though.
 
-The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work; it relies on standard DOS, and this disk has "Beautiful Boot" installed. It works fine when the entire program file is transplanted to a standard DOS disk, though.
+The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work; it relies on standard DOS, and this disk has "Beautiful Boot" installed. It works fine when the entire program file is transplanted to a standard DOS disk, though. I have no other information on its provenance, such as whether it was cracked or the original was just not protected.
 
 ## Observations
 

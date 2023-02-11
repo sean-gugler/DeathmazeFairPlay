@@ -1248,7 +1248,11 @@ cmd_press:
 teleport_table:
 	; facing, level, X position, Y position
 	.byte $02,$02,$05,$04 ;button 0
+.if REVISION >= 100
+	.byte $01,$02,$07,$09 ;button 1
+.else ;RETAIL
 	.byte $02,$02,$07,$09 ;button 1
+.endif
 	.byte $01,$05,$03,$03 ;button 2
 	.byte $02,$03,$04,$06 ;button 3
 	.byte $02,$01,$08,$05 ;button 4
