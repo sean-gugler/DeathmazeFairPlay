@@ -734,7 +734,7 @@ cmd_strike:
 	jmp nonsense
 
 :	jsr clear_status_lines
-	lda #$4d     ;Sparks shoot out above you!
+	lda #$28     ;Sparks shoot out above you!
 	ldx gs_staff_charged
 	beq :+
 	lda #$25     ;Thunderbolts shoot out above you!
@@ -901,7 +901,7 @@ print_inspected:
 	bne look_print
 :	cmp #noun_dagger
 	bne :+
-	lda #$72     ;the handle seems flimsy.
+	lda #$cb     ;it isn't very sturdy.
 	bne look_print
 :	cmp #noun_frisbee
 	bne :+
@@ -948,7 +948,7 @@ cmd_rub:
 	bne look_print
 :	lda #$02
 	sta gs_ring_glow
-	lda #$28     ;Glows hot
+	lda #$72     ;Glows hot
 	bne look_print
 
 cmd_open:

@@ -37,7 +37,7 @@
 	text_Thunderbolts_shoot_out_above_you_ = $25
 	text_The_staff_thunders_with_useless_energy_ = $26
 	text_you_are_wearing_it_ = $27
-	text_The_diamond_glows_red_hot_ = $28
+	text_Sparks_shoot_out_above_you_ = $28
 	text_The_invisible_guillotine_beheads_you_ = $29
 	text_You_have_rammed_your_head_into_a_steel = $2a
 	text_wall_and_bashed_your_brains_out_ = $2b
@@ -74,7 +74,7 @@
 	text_She_tiptoes_up_to_you____ = $4a
 	text_She_slashes_you_to_bits_ = $4b
 	text_You_slash_her_to_bits_ = $4c
-	text_Sparks_shoot_out_above_you_ = $4d
+	text__Press_any_key_to_exit__ = $4d
 	text_You_break_the = $4e
 	text_and_it_disappears_ = $4f
 	text_What_a_mess__The_vampire_bat = $50
@@ -111,7 +111,7 @@
 	text_With_what__Toenail_polish_ = $6f
 	text_A_draft_blows_your_torch_out_ = $70
 	text_The_ring_ignites_the_torch_ = $71
-	text_it_isn_t_very_sturdy_ = $72
+	text_The_diamond_glows_red_hot_ = $72
 	text_The_staff_begins_to_quake_ = $73
 	text_The_monster_teleports_with_you_and = $74
 	text_NEVER__EVER_raid_a_monster_s_lair_ = $75
@@ -200,8 +200,9 @@
 	text_blocking_the_door_ = $c8
 	text_filling_a_hidden_pit_ = $c9
 	text_it_is_inscribed__BEOWULF_ = $ca
-	text_EXIT = $cb
-	text_SEALED_BY_ORDER = $cc
-	text_OF_THE_MONSTER_ = $cd
-	text_WHOSE_NAME_MUST = $ce
-	text_NEVER_BE_SPOKEN = $cf
+	text_it_isn_t_very_sturdy_ = $cb
+	text_EXIT = $cc
+	text_SEALED_BY_ORDER = $cd
+	text_OF_THE_MONSTER_ = $ce
+	text_WHOSE_NAME_MUST = $cf
+	text_NEVER_BE_SPOKEN = $d0

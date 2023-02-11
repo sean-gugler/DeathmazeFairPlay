@@ -1402,31 +1402,31 @@ special_endgame:
 	sta zp_col
 	ldx #$06
 	stx zp_row
-	lda #$cb     ;EXIT
+	lda #$cc     ;EXIT
 	jsr print_display_string
 	lda #$03
 	sta zp_col
 	ldx #$0a
 	stx zp_row
-	lda #$cc     ;SEALED BY ORDER
+	lda #$cd     ;SEALED BY ORDER
 	jsr print_display_string
 	lda #$03
 	sta zp_col
 	ldx #$0b
 	stx zp_row
-	lda #$cd     ;OF THE MONSTER,
+	lda #$ce     ;OF THE MONSTER,
 	jsr print_display_string
 	lda #$03
 	sta zp_col
 	ldx #$0c
 	stx zp_row
-	lda #$ce     ;WHOSE NAME MUST 
+	lda #$cf     ;WHOSE NAME MUST 
 	jsr print_display_string
 	lda #$03
 	sta zp_col
 	ldx #$0d
 	stx zp_row
-	lda #$cf     ;NEVER BE SPOKEN
+	lda #$d0     ;NEVER BE SPOKEN
 	jsr print_display_string
 	rts
 
@@ -1455,7 +1455,7 @@ special_endgame:
 
 	lda #$38     ;The magic word works! You have escaped!
 	jsr print_to_line1
-	lda #$96     ;When ready, press any key.
+	lda #$4d     ;(Press any key to exit.)
 	jsr print_to_line2
 
 	bit hw_STROBE
