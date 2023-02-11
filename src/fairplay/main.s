@@ -43,6 +43,7 @@
 	.import char_out
 
 	.include "apple.i"
+	.include "char.i"
 	.include "dos.i"
 	.include "draw_commands.i"
 	.include "game_design.i"
@@ -181,8 +182,8 @@ move_forward:
 	lda #action_forward
 	ora gs_action_flags
 	sta gs_action_flags
-	jsr check_special_position
-	rts
+	jmp check_special_position
+	;rts
 
 
 	.segment "MAIN2"
@@ -468,10 +469,20 @@ get_maze_feature:
 	.segment "WAIT_LONG"
 
 wait_long:
+	bit hw_STROBE
 	ldx #$05
 	stx zp10_wait3
 @dec16:
-	lda zp10_wait3
+	lda hw_KEYBOARD
+	bpl :+
+	bit hw_STROBE
+	cmp #$80 + ' '
+	beq @print
+	cmp #$80 + char_enter
+	beq @done
+	cmp #$80 + char_esc
+	beq @done
+:	lda zp10_wait3
 	and #$01
 	clc
 	adc #$01
@@ -484,6 +495,7 @@ wait_long:
 	bne :-
 	dec zp10_wait3
 	bne @dec16
+@done:
 	lda #' '
 @print:
 	ldx #$27
