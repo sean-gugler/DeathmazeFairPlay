@@ -1534,13 +1534,13 @@ inventory_full:
 find_boxed_torch:
 	ldx #item_torch_begin - 1
 	stx zp0E_object
+	ldx #items_torches
 	bne find_boxed
 find_boxed_food:
 	ldx #item_food_begin - 1
 	stx zp0E_object
-find_boxed:
 	ldx #items_food
-	.assert items_food = items_torches, error, "Need to edit cmd_take for separate food,torch counts"
+find_boxed:
 	stx zp11_count
 @next:
 	ldx #icmd_where

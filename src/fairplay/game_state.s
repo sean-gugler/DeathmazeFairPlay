@@ -103,10 +103,11 @@ gs_item_food:
 
 gs_item_torch:
 	JUNK_BYTE {$00,$00,$00,$00,$08,$00,$00,$00}
+	JUNK_BYTE {$00,$00}
 	.assert * - gs_item_torch = items_torches * 2, error, "Miscount between data and definition"
 
 gs_torch_life:
-	JUNK_BYTE {$00,$00,$00,$00}
+	JUNK_BYTE {$00,$00,$00,$00,$00}
 	.assert * - gs_torch_life = items_torches, error, "Miscount between data and definition"
 
 ; Relate items to noun vocabulary

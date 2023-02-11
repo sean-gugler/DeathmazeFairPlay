@@ -72,13 +72,15 @@ data_new_game:
 	.byte $02,$26	;food
 	.byte $03,$56	;food
 	.byte $04,$72	;food
-	.byte $05,$1b	;food  ;placement TBD
+	.byte $05,$65	;food
 	.byte $07,$00	;torch
 	.byte $02,$82	;torch
 	.byte $03,$26	;torch
 	.byte $04,$96	;torch
+	.byte $05,$19	;torch
 ; torch lifespans - first is longer per original game design
 	.byte $c8
+	.byte torch_lifespan
 	.byte torch_lifespan
 	.byte torch_lifespan
 	.byte torch_lifespan
