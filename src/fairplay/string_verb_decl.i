@@ -16,6 +16,7 @@
 	verb_light = $0a
 	verb_play = $0b
 	verb_strike = $0c
+	verb_pound = $0c
 	verb_wear = $0d
 	verb_examine = $0e
 	verb_look = $0e

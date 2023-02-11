@@ -10,7 +10,7 @@ drop leave put
 fill
 light
 play
-strike
+strike pound
 wear
 examine look
 wipe clean polish rub
