@@ -139,6 +139,12 @@ Finally, instead of locking up the machine upon winning, I exit back to the oper
 
 ## Quality of Life improvements
 
+* Spinner during long waits
+
+There are times when the game deliberately waits a short time and goes unresponsive. This is probably to make sure the player doesn't miss out on important text, such as when a random dog attacks. It also helps narrative timing during events like falling down a pit.
+
+I added visual "spinner" in the corner for two reasons: the player knows the game is stalling, not crashed; and the player knows immediately when the time is up. I always hated guessing when it was ok to start typing again after a dog attacked me.
+
 * World goes dark after a bad charge
 
 Clear the screen after charging a steel wall. Consistent with other deaths like guillotine, monster, and bomb.
