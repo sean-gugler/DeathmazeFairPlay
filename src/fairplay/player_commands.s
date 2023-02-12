@@ -1104,12 +1104,16 @@ cmd_unlock:
 
 :	lda zp0E_object
 	cmp #noun_door
-	bne :+
+	bne @not_locked
 	jsr which_door
-	cmp #doors_locked_begin
+	bne :+
+	lda #$90     ;I don't see that here.
+	bne print_line2u
+:	cmp #doors_locked_begin
 	bcs locked_door
 	;GUG: jsr noun_to_item ?
-:	lda #$9d     ;It's not locked.
+@not_locked:
+	lda #$9d     ;It's not locked.
 print_line2u:
 	jmp print_to_line2
 
