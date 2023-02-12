@@ -2,7 +2,7 @@
 	.export destroy_one_torch
 	.export door_correct
 	.export door_final
-	.export doors_locked_begin
+	.exportzp doors_locked_begin
 	.export flash_screen
 	.export lose_lit_torch
 	.export lose_unlit_torch

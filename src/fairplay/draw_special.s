@@ -12,7 +12,7 @@
 	.import memcpy
 	.import which_door
 	.import door_correct
-	.import doors_locked_begin
+	.importzp doors_locked_begin
 
 	.include "apple.i"
 	.include "char.i"
@@ -1228,7 +1228,7 @@ reveal_key_hint:
 	and #$07
 	cmp #$05
 	bcs :-
-	adc #<doors_locked_begin
+	adc #doors_locked_begin
 	sta door_correct
 @mark_correct:
 	adc #<(reveal_buffer + 82 - doors_locked_begin) ;10*row+col
