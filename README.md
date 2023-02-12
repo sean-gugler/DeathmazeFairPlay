@@ -1,8 +1,12 @@
 # Deathmaze 5000 Fair Play Edition
 
+*A fan mod by Sean Gugler*
+
 You can play online right now:
 1. Download `deathmaze.dsk`
 2. Visit https://www.scullinsteel.com/apple2/ and click the "open folder" icon (tip: F2 toggles full-screen)
+
+When the disk boots, choose option 4 to play the Fair Play edition.
 
 # About the game
 
@@ -13,18 +17,20 @@ The writing was quite clever, but suffered from moon logic, items with no purpos
 The "Fair Play" edition reflects my sensibilities on what consitutes fair puzzle design. My alterations attempt to be consistent with the original writing tone and style. To the degree I've failed, I ask your humble forgiveness.
 
 # Release Notes
-This project builds four versions of the game:
+This project builds four editions of the game:
 
-1. Early retail release
-2. Later retail release
-3. Bug fixed fan release
+1. Original game, early retail release
+2. Original game, later retail release
+3. Original game, with more bugs fixed by the Fair Play author
 4. Fair Play fan release
+
+All four are included in the provided disk image for easy comparison.
 
 ## Saved Game file
 
-WARNING: Editions 1 through 3 save the game directly to track 3, sector 0. This is safe on the provided disk because I've allocated a "RESERVED" file to protect that sector. The same may not be true if you copy the files to another disk, so be careful! Safest (though wasteful) to use a completely blank disk for saved games.
+WARNING: The original game (editions 1 through 3) save the game directly to track 3, sector 0. This is safe on the provided disk because I've allocated a "RESERVED" file to protect that sector. The same may not be true if you copy the files to another disk, so be careful! The safest (though wasteful) thing to do is use a completely blank disk for saved games.
 
-Edition 4 saves the game to a proper DOS file through ordinary catalog allocation. This edition and its save file are safe to transport by ordinary means to any other disk. Probably won't work in ProDOS, though.
+The **Fair Play** edition saves the game to a proper DOS file through ordinary catalog allocation. This edition and its save file are safe to transport by ordinary means to any other disk. Probably won't work in ProDOS, though.
 
 ## Bugs fixed in later retail
 * Breaking an item now clears it from the inventory display.
@@ -40,7 +46,7 @@ Edition 4 saves the game to a proper DOS file through ordinary catalog allocatio
 * Pressing ESC first thing on game start no longer displays garbage.
 * After entering a command with an unknown verb or noun, subsequently pressing ESC no longer omits the unknown word when re-displaying the response.
 * Double-space is properly prevented. Previously it mistakenly prevented a second space only after first letter of second word was started, as in:  WORD_L_
-* Torch count now increments if you "get box" then "get torch" and it's the only box you're carrying. Previously it would be off by one. (For fun, try "drop torch"! Repeat all three commands for endless entertainment walking backwards through the font.)
+* Torch count now increments if you "get box" then "get torch" and it's the only box you're carrying. Previously it would be off by one. (For fun, try this in a retail edition and then "drop torch"! Repeat all three commands for endless entertainment walking backwards through the font.)
 * Move forward into wall during monster encounter, "splat" remains and doesn't flicker.
 * Always time to read fate about "the body". Message would briefly flicker if you did an action with a text result, such as "open box".
 * Open a door, then immediately open it again. Moving forward would print "splat". It now correctly moves forward.
@@ -52,7 +58,7 @@ Edition 4 saves the game to a proper DOS file through ordinary catalog allocatio
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.
-* Quitting the game cleanly returns you to the BASIC prompt (]) instead of the MONITOR (*).
+* Quitting the game cleanly returns you to the BASIC prompt (`]`) instead of the MONITOR (`*`).
 
 ## Changes in the Fair Play release
 * see SPOILERS.md

@@ -2,7 +2,7 @@
 
 All the details of what is different in the Fair Play edition are revealed here. Naturally, reading this will give away many of the secrets and puzzle solutions and potentially spoil the play experience for you.
 
-**ONLY PROCEED IF YOU HAVE ALREADY SOLVED THE GAME OR HAVE NO INTEREST IN DOING SO**
+**ONLY PROCEED IF YOU HAVE ALREADY SOLVED THE GAME OR HAVE NO INTEREST IN DOING SO!**
 
 You have been warned.
 
@@ -39,13 +39,13 @@ Rather than restore FART in the intro text, in place of CHARGE, I decided it wou
 
 * RING revision
 
-The ring was originally the light source for level 5 after your torch goes out. Its magic light is activated by raising it ... but it confusingly only works on level 5. To improve the experience, I've changed it to glow hot when rubbed. It can then be used to re-light an extinguished torch. The glow only lasts for one turn but can be invoked over and over. This allows its purpose to be consistent and also discoverable much earlier. It shouldn't break the game duration limits because the torches are still limited in number. If anything, it imposes a new time limit on level 5 exploration in addition to starvation. Admittedly it also softens the game's harsh lethality by providing a recovery path after the torch goes out through use or by carelessly dropping it. Some might feel this dampens the spirit of the original game. I justify it by noting that those situations are still lethal if the ring is not engaged, and it adds satisfaction of solving one more puzzle.
+The ring was originally the light source for level 5 after your torch goes out. Its magic light is activated by raising it ... but it confusingly only works on level 5. To improve the experience, I've changed it to glow hot when rubbed on any level. It can then be used to re-light an extinguished torch. The glow only lasts for one turn but can be invoked over and over. This allows its purpose to be consistent and also discoverable much earlier. It shouldn't break the game duration limits because the torches are still limited in number. If anything, it imposes a new time limit on level 5 exploration in addition to starvation. Admittedly it also softens the game's harsh lethality by providing a recovery path after the torch goes out through use or by carelessly dropping it. Some might feel this dampens the spirit of the original game. I justify it by noting that those situations are still lethal if the ring is not engaged, and it adds satisfaction of solving one more puzzle.
 
 * BRUSH purpose
 
 There is now a reason for the brush to exist, and for the verb "paint" to exist. The "perfect square" made no sense. It's not a reference to anything I'm aware of and its appearance and description have nothing to do with its nature as a pass-through wall. All it does is mark that wall as special and worth experimenting with.
 
-Instead, it is now a "magic door" and the jar comes pre-filled with black paint. Painting the door turns it into a real one. This references a trope from early cartoons. Even if the player is not familiar with the trope, the hints of calling it a "magic door", coloring it brightly, and finding black paint should be enough to make the solution fairly discoverable.
+Instead, it is now a "magic door" and the jar comes pre-filled with black paint. Painting the door turns it into a real one. This references a trope from early comedy cartoons. Even if the player is not familiar with the trope, the hints of calling it a "magic door", coloring it brightly, and finding black paint should be enough to make the solution fairly discoverable.
 
 * DRINK verb
 
@@ -57,7 +57,7 @@ There is now a reason for the frisbee to exist, apart from being a death trap. I
 
 * YOYO purpose
 
-There is now a reason for the yoyo to exist. Since it's establish that it can hit you in the eye, how about we turn that into a hint to hit something else in the eye? The monster encounter already has several steps, so we'll add it to the mother encounter. If you don't blind her first, she can dodge your sword attack.
+There is now a reason for the yoyo to exist. Since the response to throwing it establishes that it can hit you in the eye, how about we turn that into a hint to hit something else in the eye? The monster encounter already has several steps, so we'll add it to the mother encounter. If you don't blind her first, she can dodge your sword attack.
 
 * STAFF purpose
 
@@ -67,11 +67,11 @@ For extra fun, I've hidden one of the parts in a previously-inaccessible area on
 
 * HORN breaks off hat
 
-I assumed it was a brass horn when I played. I think it's supposed to be an animal horn. That makes a lot more sense as something that would seduce a monster.
+I assumed it was a brass horn for years. Now that I know its purpose I think it was supposed to be an animal horn. That makes a lot more sense as something that would seduce a monster.
 
 We already have rams horns on the hat; why not make one of them break off after charging? That also reduces time wasted trying to charge other walls in the game, which will never work.
 
-I've put something else where the horn was (see below).
+I've put something else in the maze location where the horn was originally placed (see below).
 
 * WOOL replaced with BANANA
 
@@ -81,7 +81,7 @@ The intended purpose for the wool is also not intuitive. Wool is used for keepin
 
 So what item can trip up a monster and would be stolen by a freed snake? How about a banana? True, real snakes won't eat bananas, but you can't climb a real snake charmed by a flute either. At least slipping on a banana peel is a much more well-known trope than getting tangled in wool. 
 
-I didn't want to just remove the wool because I admire the solid logic chain of the core puzzle:
+I didn't want to just remove the wool because I admire the solid logic chain at the core of the original puzzle design:
 
 1. The player cannot reach the exit until the monster is dead.
 2. The monster's mother guards the exit.
@@ -89,7 +89,7 @@ I didn't want to just remove the wool because I admire the solid logic chain of 
 4. The snake is needed to reach the sword.
 5. The roaming dog will be encountered on the way to fetching the snake.
 
-If the dagger is used to defeat the dog, and the sword to defeat both the monster and its mother, then the sneaker would be superfluous. To make the sneaker mandatory, the sword must be prevented from being used against the monster. This is achieved with the following dependency chain:
+If the dagger is used to defeat the dog, and the sword to defeat both the monster and its mother, then the sneaker would be superfluous. To make the sneaker mandatory, the sword must be prevented from being used against the monster. The designers achieved this with an additional, related dependency chain:
 
 1. Our everyman player is no match for the monster unless it is made vulnerable first.
 2. The item that makes it vulnerable vanishes when the snake is freed.
@@ -97,11 +97,15 @@ If the dagger is used to defeat the dog, and the sword to defeat both the monste
 
 Thus the player may experiment with skipping the dog or using the dagger against it, but will be unable to reach the exit unless the sneaker is used on the dog.
 
+All I changed was the identity of the item to feel more sensible. I also improved some of the text responses to account for locations of the various items. For example, if you have the banana with you when the snake is freed, it eats it immediately and leaves. If you don't have it with you, the snake simply leaves ... and re-appears if you try to open the box that contains the banana.
+
 * CALCULATOR expanded
 
 The criteria for when the calculator works and when it doesn't felt arbitrary and unjustified. So now it always works consistently. To preserve the puzzle gate of not being actually useful or effective until the monster is dead, it brings the monster with you.
 
 It is now reusable as well, not only to encourage exploration without resorting to save games, but to give a purpose to having so many buttons. In the original design only one mattered. Since some of the "useless" items are now required and there is not enough inventory capacity to bring them all along at once, the ability to go fetch them later becomes important. The extra buttons now serve a vital purpose to be able to revisit earlier areas.
+
+I've also removed the ".2" suffix from the display. No more smudge, no more wiping. The number 2 is no longer as important since multiple destinations are useful, not just one. More importantly, in my experience, it clouded the solution of escaping the chamber where you find it with information not yet relevant.
 
 * STAFF swapped with FLUTE
 
@@ -109,15 +113,17 @@ Making the calculator re-usable undermines a puzzle in the original design: how 
 
 By allowing multiple teleports, the sword could now be brought back to defeat the guard dog. In general it can be enriching to have more than one way to solve a puzzle, but it is poor design to have a mechanic (fart) whose sole usefulness can be bypassed. So we need a new interlock to prevent this solution.
 
-Putting the flute behind the pit achieves this goal, because the flute is needed to reach the sword. It can still be reached for early experimentation before figuring out how to beat the monster, by defeating both dogs with dagger and sneaker. There wasn't much benefit in obtaining the staff early; unlike the flute and snake, the staff has no demonstrable effect on the world until very late in the game. After the monster is dead, the sword can optionally be used to defeat the guard dog - not needed to bypass the pit, just as an optional but satisfying "clean up" task.
+Putting the flute behind the pit achieves this goal, because the flute is needed to reach the sword. This admittedly makes the flute less accessible for experimentation - it was previously freely obtainable by walking around enough to find it. But there are still two ways to reach it fairly early: either solve the fart puzzle, or defeat the guard dog with the dagger. The latter makes the monster encounter more challenging, when the player realizes there must be a second way past the guard dog.
+
+There wasn't much benefit in obtaining the staff early; unlike the flute and snake, the staff has no demonstrable effect on the world until very late in the game. After the monster is dead, the sword can optionally be used to defeat the guard dog - not needed to bypass the pit, just as an optional but satisfying "clean up" task.
 
 The staff is now on level 4 - although not where the flute was. I've put something else of interest there (see below). The staff now occupies the place where the horn used to be.
 
 * Make the level 1 pit real
 
-After this pit is exposed, make it visible. This is more than just cosmetic; it is practical since the hat has been changed from re-usable to single-use.
+The original game relied on smoke and mirrors to fake the existence of that pit. Now it becomes visible like any other pit once it has been exposed. This is more than just cosmetic; it is practical since the hat has been changed from re-usable to single-use.
 
-Also, allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
+I also now allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
 
 * Timing of monster tightened
 
@@ -129,9 +135,9 @@ Since the jar's original location is now vacant, I placed one of the pieces of t
 
 * Elevator reveals
 
-The disappointing elevator trap on level 5 (seen it, ho hum) now has a purpose. Opening the doors reveals a hint as to which keyhole is the correct one. But the way I phrased it can also be read as a simple taunt, daring the player to enter, when of course it's yet another deathtrap.
+The disappointing elevator trap on level 5 (fool me once, etc.) now has a purpose. Opening the doors reveals a hint regarding which keyhole is the correct one. But the way I phrased it can also be read as a simple taunt, daring the player to enter, when of course it's yet another deathtrap.
 
-It came in handy later to re-use the new mechanic of revealing something behind opening doors, too. (see below)
+It came in handy later to re-use the new code mechanic of revealing something behind opening doors, too. (see below)
 
 * Random keyhole
 
@@ -153,9 +159,9 @@ Finally, instead of locking up the machine upon winning, I exit back to the oper
 
 * Spinner during long waits
 
-There are times when the game deliberately waits a short time and goes unresponsive. This is probably to make sure the player doesn't miss out on important text, such as when a random dog attacks. It also helps narrative timing during events like falling down a pit.
+There are times when the game deliberately waits a short time and goes unresponsive. This is probably to make sure the player doesn't miss out on important text, such as when a random dog attacks. It also enables narrative pacing during events like falling down a pit.
 
-I added visual "spinner" in the corner for two reasons: the player knows the game is stalling, not crashed; and the player knows immediately when the time is up. I always hated guessing when it was ok to start typing again after a dog attacked me.
+I added visual "spinner" in the corner for two reasons: the player knows the game is stalling, not crashed; and the player knows immediately when the time is up. I always hated guessing when it was ok to start typing again after a dog attacked me. I also let the spacebar, Enter, and Esc keys interrupt the wait.
 
 * Full words required
 
@@ -163,19 +169,19 @@ This might feel like a step backward to some players. The original parser only c
 
 Partly this is to avoid the frustration of "aliased" words, like thinking the game recognizes the verb "strip" (alias "strike") or the noun "thread" (alias "three"). But my alteration turns out to use *fewer* total bytes, even with the extra string data. Most parsers of the era that limited word length did so to save on storage - if the limit is not serving that purpose, that's one more reason to remove it.
 
-Another benefit is that short words with fewer than four letters are no longer padded in the string table with spaces. This makes them display more nicely without extraneous spaces when the game prints them. For example, it used to say "The Jar  sails around the corner".
+Another benefit is that short words with fewer than four letters are no longer padded in the string table with spaces. This makes them display more nicely without extraneous spaces when the game prints them. For example: `The Jar  sails around the corner`.
 
 * World goes dark after a bad charge
 
-Clear the screen after charging a steel wall. Consistent with other deaths like guillotine, monster, and bomb.
+The screen now clears after charging a steel wall. This is consistent with other deaths like the guillotine, monster, or bomb.
 
 * "Darkens" message when appropriate
 
-When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for mother encounter, not monster. I've changed it to print only when room is lit, for either foe.
+When the "disgusting odor permeates the hallway" message appears, retail added "as it darkens" only for the mother encounter, not the monster. I've changed it to print for either foe, but only when room is lit.
 
-* Numbers allowed
+* Numerals allowed
 
-In one situation, the game responds to numbers the player types in. Formerly, it required spelling out the name of the number, as in "Three". I allow the numeric "3" to work also.
+In one situation, the game responds to numbers the player types in. Formerly, it required spelling out the name of the number, as in "Three". I allow the numeral "3" to work also.
 
 * UNLOCK is a unique verb
 
@@ -197,13 +203,13 @@ https://swordscorner.com/how-much-do-swords-weigh-full-analysis-table-lbs-kgs/
 
 * DOG vs MONSTER
 
-It is possible to avoid the dog entirely on Level 2, then return with the calculator after killing the monster. Throwing the sneaker had a scripted response that always mentioned getting eaten by the monster ... which should be impossible since it's already dead. I've fixed it so the dog will still chase the sneaker, even though it vanishes. This is not a victory because the dog reappears immediately next turn.
+It is possible to avoid the dog entirely on Level 2, then return with the calculator after killing the monster. Throwing the sneaker had a scripted response that always mentioned getting eaten by the monster ... which should be impossible since it's already dead. I've fixed it so the dog will still chase the sneaker without getting eaten. Note this is not converted into a victory because the dog will reappear immediately next turn.
 
 This scenario is also possible in the retail version so I incorporated my change into the fan-fixed version. The README is vague about the details to avoid spoilers.
 
 * PLAY with dog
 
-In the dog encounter, PLAY BALL is recognized. So is THROW BALL. You still die, but at least the stock answer "With who?" now has an answer.
+In the dog encounter, PLAY BALL is now recognized. So is THROW BALL. You still die, but at least the stock answer to those actions ("With who?") is more than rhetorical - it now has an answer.
 
 * BALL works anywhere
 
