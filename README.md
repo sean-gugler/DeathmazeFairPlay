@@ -10,9 +10,9 @@ When the disk boots, choose option 4 to play the Fair Play edition.
 
 # About the game
 
-Deathmaze 5000 was released in 1980 by Med Systems Software for the TRS-80 and Apple II platforms. We would describe it today as an "escape room" experience; players are tasked with navigating a maze, manipulating objects, and solving puzzles with the purpose of escape. This was a novel mash-up of play elements at the time. Maze games and text adventures already existed but I am not aware of any earlier example than Deathmaze 5000 that combined the two formats.
+[Deathmaze 5000](https://wikipedia.org/wiki/Deathmaze_5000) was released in 1980 by Med Systems Software for the TRS-80 and Apple II platforms. We would describe it today as an "escape room" experience; players are tasked with navigating a maze, manipulating objects, and solving puzzles with the purpose of escape. This was a novel mash-up of play elements at the time. Maze games and text adventures already existed but I am not aware of any earlier example than Deathmaze 5000 that combined the two formats.
 
-The writing was quite clever, but suffered from moon logic, items with no purpose, unfinished puzzles, and some inconsistent behaviors. When I finally solved it after 40 YEARS of trying, I was both satisfied and disappointed. I decided I could do better. Armed with my recent technical experience disassembling Ultima IV, I wove the loose ends together and improved the structure of the weaker puzzles while retaining as much of Deathmaze's original material as I could. I also patched up a small handful of bugs discovered along the way.
+The writing was quite clever, but suffered from moon logic, items with no purpose, unfinished puzzles, and some inconsistent behaviors. When I finally solved it after 40 YEARS of trying, I was both satisfied and disappointed. I decided I could make it better. Armed with my recent technical experience disassembling Ultima IV, I wove the loose ends together and improved the structure of the weaker puzzles while retaining as much of Deathmaze's original material as I could. I also patched up a small handful of bugs discovered along the way.
 
 The "Fair Play" edition reflects my sensibilities on what consitutes fair puzzle design. My alterations attempt to be consistent with the original writing tone and style. To the degree I've failed, I ask your humble forgiveness.
 
@@ -68,7 +68,7 @@ The **Fair Play** edition saves the game to a proper DOS file through ordinary c
 
 ## Retail editions
 
-The earlier release I have had in my own collection since 1980. It is not an official retail disk, so I have no way of knowing for sure if it was cracked or if the original was not protected. There is no evidence of any vanity vandalism typically inserted by crackers, though.
+The earlier release has been in my own collection since 1980. It is not an official retail disk, so I have no way of knowing for sure if it was cracked or if the original was not protected. There is no evidence of any vanity vandalism typically inserted by crackers, though.
 
 The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work; it relies on standard DOS, and this disk has "Beautiful Boot" installed. It works fine when the entire program file is transplanted to a standard DOS disk, though. I have no other information on its provenance, such as whether it was cracked or the original was just not protected.
 
@@ -78,6 +78,19 @@ The original authors used 1-based indexing ubiquitously, rather than machine-fri
 
 The original authors used BPL and BMI after CMP, rather than the customary BCS and BCC. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at http://www.6502.org/tutorials/compare_beyond.html)
 
+The game was originally written for the Z80 instruction set of the TRS-80 and ported to 6502 for the Apple II. This could explain certain anomalies, such as always using indirect addressing with indexing (`lda (ptr),y`) rather than simple indexing (`lda addr,x`) where it would be more compact, or why the `A` register is used as an intermediary for loading values into `X` and `Y` rather than using `ldx` and `ldy`.
+
+## Development process
+
+Time spent: 8 weeks
+
+I used [Regenerator 1.7](https://csdb.dk/release/?id=149429) to disassemble and hand-label the binary program.
+
+## Fadden listing
+
+Literally one hour after I first published my work to github I coincidentally discovered Andy McFadden's excellent [disassembly listing](https://6502disassembly.com/a2-deathmaze/Deathmaze5000.html). From there I also discovered his tool SourceGen. I probably could have finished this project a few weeks sooner had I known about those. Oh well.
+
+Andy's copy of the game appears to exactly match the retail "Rev1" I have, except for one curiosity: his edition saves the game to Track 2 Sector F. I'm inclined to think that was a fan hack made at some point along the way. It lacks the modifications present in "Rev2" which clearly required recompiling from source ... yet Rev2 still saves to Track 3 Sector 0 same as Rev1.
 
 # Building from source
 
@@ -88,7 +101,7 @@ This source code has been reconstructed by disassembling and symbolicating the 1
 To build from the source you need this software:
 
 * [cc65](https://github.com/cc65/cc65) V2.19
-* Python 3.6
+* Python 3.8
 * GNU Make 4.2
 
 My development environment is Windows Subsystem for Linux, Ubuntu flavor ... although any Linux should do.
