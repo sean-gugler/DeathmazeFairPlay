@@ -133,6 +133,10 @@ The disappointing elevator trap on level 5 (seen it, ho hum) now has a purpose. 
 
 It came in handy later to re-use the new mechanic of revealing something behind opening doors, too. (see below)
 
+* Random keyhole
+
+The behaviors of the locked doors are no longer predictable. In the original game you were supposed to discover their contents through trial and error, relying on saved games. I now scramble them each time you start the game: the player is *required* to check the hint in the elevator to discover which keyhole leads to the exit instead of death.
+
 * End game area extended
 
 There was a ton of custom code to manage the end game sequence. Most of that was probably to disallow behaviors they hadn't or didn't want to fully test. I ripped it all out and pared down that special mode to its bare minimum.

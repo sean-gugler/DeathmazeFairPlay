@@ -1,6 +1,8 @@
 	.export cmd_verbal
 	.export destroy_one_torch
+	.export door_correct
 	.export door_final
+	.export doors_locked_begin
 	.export flash_screen
 	.export lose_lit_torch
 	.export lose_unlit_torch
@@ -84,8 +86,6 @@ zp0E_object         = $0E;
 item_msg_begin = text_crystal_ball_ - 1
 
 doormsg_lock_begin = text_You_unlock_the_door___ + 1
-
-door_correct = text_and_the_key_begins_to_tick_ - doormsg_lock_begin
 
 
 	.segment "COMMAND1"
@@ -1131,10 +1131,13 @@ locked_door:
 	and gs_maze_flags
 	beq @no_fit
 	pla
-	clc
-	adc #doormsg_lock_begin - doors_locked_begin
-	cmp #doormsg_lock_begin + door_correct
+	cmp door_correct
 	beq @correct_lock
+
+	lda zp_RND
+	and #$03
+	clc
+	adc #doormsg_lock_begin
 	jsr print_to_line2
 	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
@@ -1151,13 +1154,19 @@ locked_door:
 	bne print_line2u
 
 @correct_lock:
+	sec
+	lda #($0a + doors_locked_begin)
+	sbc door_correct
+	sta gs_bomb_tick
 	ldx #special_mode_bomb
 	stx gs_special_mode
 	jsr clear_status_lines
 	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
-	lda #doormsg_lock_begin + door_correct
+	lda #doormsg_lock_begin + 4
 	bne print_line2u
+
+.assert doors - doors_locked_begin = 4, error, "Locked door logic needs updating"
 
 which_door:
 	ldx #<door_table
@@ -1210,6 +1219,11 @@ which_door:
 	bne @find
 	lda #$00
 	rts
+
+	.segment "DATA_PERSIST"
+
+door_correct:
+	.res 1
 
 	.segment "DATA_DOOR"
 

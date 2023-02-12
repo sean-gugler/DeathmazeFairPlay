@@ -230,9 +230,21 @@ diskmsg_cannot_read:
 
 	.segment "SAVE_GAME"
 
+.define offset(message) <(message - string_disk_error)
+table_disk_error = * - 4
+	.byte offset(diskmsg_write_protect) ;$04 DOS_error_write_protected
+	.byte offset(diskmsg_cannot_read)   ;$05 DOS_error_end_of_data
+	.byte offset(diskmsg_cannot_read)   ;$06 DOS_error_file_not_found
+	.byte offset(diskmsg_misc)          ;$07 DOS_error_volume_mismatch
+	.byte offset(diskmsg_misc)          ;$08 DOS_error_io_error
+	.byte offset(diskmsg_disk_full)     ;$09 DOS_error_disk_full
+	.byte offset(diskmsg_file_locked)   ;$0a DOS_error_file_locked
+.undef offset
+	.assert >* = >table_disk_error, error, "Disk error table must fit in one page"
+
 	; Not quite enough room in the string table
-	; for these DOS commands. Keeping them in
-	; the main memory region instead.
+	; for the following DOS commands. Keeping them
+	; in the main memory region instead.
 
 .macro byte_to_text b
 	.byte '0' + ((b >> 4) & $0f)
@@ -251,18 +263,6 @@ dos_cmd_save:
 	.byte ",L$"
 	byte_to_text game_save_size
 	.byte $0d,$00
-
-.define offset(message) <(message - string_disk_error)
-table_disk_error = * - 4
-	.byte offset(diskmsg_write_protect) ;$04 DOS_error_write_protected
-	.byte offset(diskmsg_cannot_read)   ;$05 DOS_error_end_of_data
-	.byte offset(diskmsg_cannot_read)   ;$06 DOS_error_file_not_found
-	.byte offset(diskmsg_misc)          ;$07 DOS_error_volume_mismatch
-	.byte offset(diskmsg_misc)          ;$08 DOS_error_io_error
-	.byte offset(diskmsg_disk_full)     ;$09 DOS_error_disk_full
-	.byte offset(diskmsg_file_locked)   ;$0a DOS_error_file_locked
-.undef offset
-	.assert >* = >table_disk_error, error, "Disk error table must fit in one page"
 
 dos_code_to_message:
 	tax

@@ -123,6 +123,7 @@ home_cursor:
 input_blink_cursor:
 	bit hw_STROBE
 :	jsr blink_cursor
+	inc zp_RND
 	bit hw_KEYBOARD
 	bpl :-
 	lda hw_KEYBOARD

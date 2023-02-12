@@ -21,6 +21,7 @@
 	.import get_rowcol_addr
 	.import clear_text_buffer
 	.import relocate_data
+	.import door_correct
 
 	.include "apple.i"
 	.include "char.i"
@@ -44,6 +45,7 @@ cold_start:
 new_session:
 	jsr relocate_data
 	stx zp_col
+	stx door_correct
 	bit hw_PAGE2
 	bit hw_FULLSCREEN
 	bit hw_HIRES

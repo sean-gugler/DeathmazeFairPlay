@@ -11,6 +11,8 @@
 	.import get_display_string
 	.import memcpy
 	.import which_door
+	.import door_correct
+	.import doors_locked_begin
 
 	.include "apple.i"
 	.include "char.i"
@@ -1181,18 +1183,14 @@ prepare_reveal_buffer:
 
 	lda gs_level
 	cmp #$05
-	bne prepare_done
-	lda gs_player_y
-	cmp #$05
-	beq reveal_key_hint
-	cmp #$0a
-	beq reveal_exit
-	cmp #$0b
-	beq reveal_escape
-prepare_done:
+	beq :+
 	rts
+:	lda gs_player_y
 
 reveal_key_hint:
+	cmp #$05
+	bne reveal_exit
+
 	lda #<key_hint_text
 	sta zp0C_string_ptr
 	lda #>key_hint_text
@@ -1209,8 +1207,6 @@ reveal_key_hint:
 	sta (zp0A_text_ptr),y
 	dey
 	bpl :-
-	dex
-	beq prepare_done
 	clc
 	lda zp0C_string_ptr
 	adc #$08
@@ -1218,9 +1214,33 @@ reveal_key_hint:
 	lda zp0A_text_ptr
 	adc #$0a
 	sta zp0A_text_ptr
+	dex
 	bne @next
 
+	iny
+	clc
+	lda door_correct
+	bne @mark_correct
+	ldx zp_RND
+:	txa
+	ror
+	tax
+	and #$07
+	cmp #$05
+	bcs :-
+	adc #<doors_locked_begin
+	sta door_correct
+@mark_correct:
+	adc #<(reveal_buffer + 82 - doors_locked_begin) ;10*row+col
+	sta zp0A_text_ptr
+	lda #'!'
+	sta (zp0A_text_ptr),y
+	rts
+
 reveal_exit:
+	cmp #$0a
+	bne reveal_escape
+
 	lda #>reveal_buffer
 	sta zp0A_text_ptr + 1
 	lda #<reveal_buffer + 63 ;10*row+col
@@ -1261,9 +1281,13 @@ reveal_exit:
 
 	dec zp1A_count_loop
 	bne @next
+reveal_done:
 	rts
 
 reveal_escape:
+	cmp #$0b
+	bne reveal_done
+
 	lda #<escape_data
 	sta zp0E_src
 	lda #>escape_data
@@ -1297,7 +1321,7 @@ draw_B_rod:
 key_hint_text:
 	.byte "WILL YOU"
 	.byte "TRUST ME"
-	.byte " ?!???  "
+	.byte " ?????  "
 	.assert >* = >key_hint_text, error, "Key hint text must be in one page"
 
 escape_data:

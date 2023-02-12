@@ -107,11 +107,11 @@ basket of food.
 torch.
 Inside the box there is a
 You unlock the door...
-and the wall falls on you!
-and the key begins to tick!
+and it falls on you! You are crushed!
+Two men in white coats take you away!
 and a 20,000 volt shock kills you!
 A 600 pound gorilla rips your face off!
-Two men in white coats take you away!
+and the key begins to tick!
 The snake bites you and you die!
 Thunderbolts shoot out above you!
 The staff thunders with useless energy!

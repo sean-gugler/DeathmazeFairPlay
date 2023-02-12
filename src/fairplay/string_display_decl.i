@@ -28,11 +28,11 @@
 	text_torch_ = $1c
 	text_Inside_the_box_there_is_a = $1d
 	text_You_unlock_the_door___ = $1e
-	text_and_the_wall_falls_on_you_ = $1f
-	text_and_the_key_begins_to_tick_ = $20
+	text_and_it_falls_on_you__You_are_crushed_ = $1f
+	text_Two_men_in_white_coats_take_you_away_ = $20
 	text_and_a_20_000_volt_shock_kills_you_ = $21
 	text_A_600_pound_gorilla_rips_your_face_off_ = $22
-	text_Two_men_in_white_coats_take_you_away_ = $23
+	text_and_the_key_begins_to_tick_ = $23
 	text_The_snake_bites_you_and_you_die_ = $24
 	text_Thunderbolts_shoot_out_above_you_ = $25
 	text_The_staff_thunders_with_useless_energy_ = $26

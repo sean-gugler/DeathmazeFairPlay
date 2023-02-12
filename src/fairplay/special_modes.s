@@ -819,9 +819,8 @@ special_bomb:
 	bcc :+
 	jsr update_view
 :	lda gs_bomb_tick
-	cmp #$09
 	beq @last_move
-	inc gs_bomb_tick
+	dec gs_bomb_tick
 	jsr @draw_new_keyhole
 	jmp @regular_move
 
