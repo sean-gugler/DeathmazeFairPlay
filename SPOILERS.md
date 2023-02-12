@@ -177,6 +177,10 @@ In one situation, the game responds to numbers the player types in. Formerly, it
 
 There are times when "open" also implies "unlock", and this behavior is preserved. The converse is not true, though; it makes no sense that unlocking something that is not locked, when you have no key, should "open" it. The original game had them as strict synonyms. I have split them into separate verbs.
 
+* Keyholes look more like doors
+
+When facing a keyhole straight on, I now draw a door frame around it. I also draw a smaller, credibly-sized keyhole where you'd expect to see one, leaving the original giant image to be interpreted as a decoration whose purpose is to let the door be visible from farther away down the hall.
+
 * DRINK added
 
 There is a situation where this verb is a perfectly reasonable thing to try. So I've enabled that.

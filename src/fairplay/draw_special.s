@@ -63,6 +63,18 @@ draw_special:
 	bne @draw_2_elevator
 
 @draw_1_keyhole:
+	jsr @draw_door_frame
+
+	lda #$06
+	sta zp_col
+	lda #$0c
+	sta zp_row
+	jsr get_rowcol_addr
+	lda #glyph_keyhole_R
+	jsr print_char
+	lda #glyph_keyhole_L
+	jsr print_char
+
 	lda #$09
 	sta zp1A_count_row
 	sta zp_col
@@ -106,19 +118,13 @@ draw_special:
 
 @draw_2_elevator:
 	dey
-	beq :+
+	beq @draw_midline
 	jmp @draw_3_compactor
 
-:	lda #$03
-	sta zp_row
-	lda #$05
-	sta zp_col
-	lda #glyph_R
-	ldy #$12
-	jsr draw_down
+@draw_door_frame:
 	lda #$03
 	sta zp_row
-	lda #$0a
+	lda #$05
 	sta zp_col
 	lda #glyph_R
 	ldy #$12
@@ -141,8 +147,19 @@ draw_special:
 	lda #raster_hi 2,5,7
 	sta screen_ptr+1
 	ldy #$0a
-	jsr draw_right
+	jmp draw_right
+	;rts
 
+@draw_midline:
+	lda #$03
+	sta zp_row
+	lda #$0a
+	sta zp_col
+	lda #glyph_R
+	ldy #$12
+	jsr draw_down
+
+	jsr @draw_door_frame
 	lda zp0E_draw_param
 	pha
 	jsr which_door

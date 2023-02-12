@@ -214,12 +214,25 @@ return_from_dos:
 	txs
 	rts
 
-	; Tried appending these strings to the
-	; string memory, but turns out there's more
-	; room below HGR2 than in the relocate region
-	; above it. So they stay in the same segment.
 	.segment "STRINGS_IO"
+
+string_disk_error:
+diskmsg_write_protect:
+	.byte "DISKETTE WRITE PROTECTED!", $80
+diskmsg_disk_full:
+	.byte "DISK FULL!", $80
+diskmsg_misc:
+	.byte "DRIVE ERROR! CAUSE UNKNOWN!", $80
+diskmsg_file_locked:
+	.byte "FILE LOCKED! CHECK YOUR DISKETTE!", $80
+diskmsg_cannot_read:
+	.byte "NO DEATHMAZE DATA FOUND!", $80
+
 	.segment "SAVE_GAME"
+
+	; Not quite enough room in the string table
+	; for these DOS commands. Keeping them in
+	; the main memory region instead.
 
 .macro byte_to_text b
 	.byte '0' + ((b >> 4) & $0f)
@@ -239,18 +252,6 @@ dos_cmd_save:
 	byte_to_text game_save_size
 	.byte $0d,$00
 
-string_disk_error:
-diskmsg_write_protect:
-	.byte "DISKETTE WRITE PROTECTED!", $80
-diskmsg_disk_full:
-	.byte "DISK FULL!", $80
-diskmsg_misc:
-	.byte "DRIVE ERROR! CAUSE UNKNOWN!", $80
-diskmsg_file_locked:
-	.byte "FILE LOCKED! CHECK YOUR DISKETTE!", $80
-diskmsg_cannot_read:
-	.byte "NO DEATHMAZE DATA FOUND!", $80
-
 .define offset(message) <(message - string_disk_error)
 table_disk_error = * - 4
 	.byte offset(diskmsg_write_protect) ;$04 DOS_error_write_protected
@@ -261,8 +262,7 @@ table_disk_error = * - 4
 	.byte offset(diskmsg_disk_full)     ;$09 DOS_error_disk_full
 	.byte offset(diskmsg_file_locked)   ;$0a DOS_error_file_locked
 .undef offset
-
-	.segment "SAVE_GAME"
+	.assert >* = >table_disk_error, error, "Disk error table must fit in one page"
 
 dos_code_to_message:
 	tax
