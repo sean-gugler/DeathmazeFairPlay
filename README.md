@@ -3,7 +3,7 @@
 *A fan mod by Sean Gugler*
 
 You can play online right now:
-1. Download `deathmaze.dsk`
+1. Download `deathmaze.dsk` from https://github.com/sean-gugler/DeathmazeFairPlay/releases
 2. Visit https://www.scullinsteel.com/apple2/ and click the "open folder" icon (tip: F2 toggles full-screen)
 
 When the disk boots, choose option 4 to play the Fair Play edition.
@@ -77,3 +77,20 @@ The later release was found on Asimov, bundled on a disk with some other games. 
 The original authors used 1-based indexing ubiquitously, rather than machine-friendly 0-based indexing. In many cases this means setting up data table pointers to the address one entry earlier than where the table actually starts.
 
 The original authors used BPL and BMI after CMP, rather than the customary BCS and BCC. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at http://www.6502.org/tutorials/compare_beyond.html)
+
+
+# Building from source
+
+https://github.com/sean-gugler/u4remasteredA2
+
+This source code has been reconstructed by disassembling and symbolicating the 1980 binary code released for Apple II series computers. It likely bears little resemblance to the original source, but it can be used by modern tools to build the same playable binaries.
+
+To build from the source you need this software:
+
+* [cc65](https://github.com/cc65/cc65) V2.19
+* Python 3.6
+* GNU Make 4.2
+
+My development environment is Windows Subsystem for Linux, Ubuntu flavor ... although any Linux should do.
+
+Type `make all` to produce a DOS 3.3 disk image in the `output` folder.
