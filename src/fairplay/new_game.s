@@ -43,7 +43,7 @@ data_new_game:
 	.byte $00		;rotate puzzle: current count
 	.byte $00		;rotate puzzle: last direction - ALSO bomb timer, later in the game
 	.byte $00		;rotate puzzle: total turns
-	.byte $00		;lair raided
+	.byte $00		;maze flags
 	.byte $00		;snake freed
 	.byte $01		;jar full
 ; item locations: place (level), position XY
