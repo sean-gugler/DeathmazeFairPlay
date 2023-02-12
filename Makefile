@@ -118,4 +118,4 @@ clean: $(CLEAN)
 
 distclean: $(DISTCLEAN)
 
-all: $(VERSIONS)
+all: $(VERSIONS) disk
