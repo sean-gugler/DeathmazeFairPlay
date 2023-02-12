@@ -1,5 +1,9 @@
 # Deathmaze 5000 Fair Play Edition
 
+You can play online right now:
+1. Download `deathmaze.dsk`
+2. Visit https://www.scullinsteel.com/apple2/ and click the "open folder" icon (tip: F2 toggles full-screen)
+
 # About the game
 
 Deathmaze 5000 was released in 1980 by Med Systems Software for the TRS-80 and Apple II platforms. We would describe it today as an "escape room" experience; players are tasked with navigating a maze, manipulating objects, and solving puzzles with the purpose of escape. This was a novel mash-up of play elements at the time. Maze games and text adventures already existed but I am not aware of any earlier example than Deathmaze 5000 that combined the two formats.
