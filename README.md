@@ -70,13 +70,13 @@ The **Fair Play** edition saves the game to a proper DOS file through ordinary c
 
 The earlier release has been in my own collection since 1980. It is not an official retail disk, so I have no way of knowing for sure if it was cracked or if the original was not protected. There is no evidence of any vanity vandalism typically inserted by crackers, though.
 
-The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work; it relies on standard DOS, and this disk has "Beautiful Boot" installed. It works fine when the entire program file is transplanted to a standard DOS disk, though. I have no other information on its provenance, such as whether it was cracked or the original was just not protected.
+The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work in situ; it relies on standard DOS, and that disk has "Beautiful Boot" installed. It works fine when the entire program file is transplanted to a standard DOS disk, though. I have no other information on its provenance, such as whether it was cracked or the original was just not protected.
 
 ## Observations
 
 The original authors used 1-based indexing ubiquitously, rather than machine-friendly 0-based indexing. In many cases this means setting up data table pointers to the address one entry earlier than where the table actually starts.
 
-The original authors used BPL and BMI after CMP, rather than the customary BCS and BCC. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at http://www.6502.org/tutorials/compare_beyond.html)
+The original authors used the assembly code instructions BPL and BMI after CMP, rather than the customary BCS and BCC. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at http://www.6502.org/tutorials/compare_beyond.html)
 
 The game was originally written for the Z80 instruction set of the TRS-80 and ported to 6502 for the Apple II. This could explain certain anomalies, such as always using indirect addressing with indexing (`lda (ptr),y`) rather than simple indexing (`lda addr,x`) where it would be more compact, or why the `A` register is used as an intermediary for loading values into `X` and `Y` rather than using `ldx` and `ldy`.
 
