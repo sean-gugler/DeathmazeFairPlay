@@ -1701,9 +1701,21 @@ flash_screen:
 	ldy #$00
 @fill:
 	lda #$dd     ;yellow
+.if REVISION >= 100
+	sta (zp0E_ptr),y
+	iny
+	cpy #$78
+	bne :+
+	ldy #$80
+	bne @fill
+:	cpy #$f8
+	bne @fill
+	ldy #$00
+.else ; RETAIL
 :	sta (zp0E_ptr),y
 	inc zp0E_ptr
 	bne :-
+.endif
 	inc zp0E_ptr+1
 	lda zp0E_ptr+1
 	cmp #>screen_GR2

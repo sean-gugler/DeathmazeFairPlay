@@ -1832,15 +1832,21 @@ flash_screen:
 	ldx #>screen_GR1
 	stx zp0E_ptr+1
 	ldy #$00
-@fill:
 	lda #$dd     ;yellow
-:	sta (zp0E_ptr),y
-	inc zp0E_ptr
-	bne :-
+@loop:
+	sta (zp0E_ptr),y
+	iny
+	cpy #$78
+	bne :+
+	ldy #$80
+	bne @loop
+:	cpy #$f8
+	bne @loop
+	ldy #$00
 	inc zp0E_ptr+1
-	lda zp0E_ptr+1
-	cmp #>screen_GR2
-	bne @fill
+	ldx zp0E_ptr+1
+	cpx #>screen_GR2
+	bne @loop
 	bit hw_PAGE1
 	bit hw_FULLSCREEN
 	bit hw_LORES
