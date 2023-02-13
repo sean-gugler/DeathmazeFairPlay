@@ -51,7 +51,7 @@
 	.global game_state_begin
 	.global game_state_end
 
-	.assert >(game_state_end - game_state_begin) = 0, error, "Game state data larger than one page"
+	.assert game_state_end - game_state_begin <= $100, error, "Game state is too large for indexing"
 
 	game_state_size = <(game_state_end - game_state_begin)
 	game_save_size = <(game_save_end - game_save_begin)

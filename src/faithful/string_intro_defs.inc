@@ -1,3 +1,7 @@
+;;; THIS FILE IS AUTO-GENERATED
+;;; BY  ../../tools/build_strings.py
+;;; FROM  ../../src/faithful/strings.txt
+
 	.byte "           Deathmaze 5000               "
 	.byte " Location is constantly displayed via   "
 	.byte "3-D graphics. To move forward one step, "

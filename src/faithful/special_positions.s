@@ -178,10 +178,10 @@ check_monster:
 	beq return_dog_monster
 :	lda gs_monster_alive
 	and #monster_flag_roaming
-	beq done_timer
+	beq @done
 	ldx #special_mode_monster
 	stx gs_special_mode
-done_timer:
+@done:
 	rts
 
 	.segment "PIT"

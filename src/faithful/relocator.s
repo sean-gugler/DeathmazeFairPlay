@@ -76,7 +76,7 @@ relocate_data:
 	stx zp_row
 	rts
 
-	.segment "RELOCATOR_FLAG"
+	.segment "DATA_PERSIST"
 
 relocated:
 	.byte $ff

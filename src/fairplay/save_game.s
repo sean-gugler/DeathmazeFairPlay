@@ -240,7 +240,6 @@ table_disk_error = * - 4
 	.byte offset(diskmsg_disk_full)     ;$09 DOS_error_disk_full
 	.byte offset(diskmsg_file_locked)   ;$0a DOS_error_file_locked
 .undef offset
-	.assert >* = >table_disk_error, error, "Disk error table must fit in one page"
 
 	; Not quite enough room in the string table
 	; for the following DOS commands. Keeping them

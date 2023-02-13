@@ -485,7 +485,7 @@ parse_input:
 	bne @echo
 @next_verb_letter:
 	lda (zp19_input_ptr),y
-	cmp #$20
+	cmp #' '
 	beq @verb_word_end
 @echo:
 	jsr char_out
@@ -507,6 +507,8 @@ parse_input:
 :	jsr print_to_line2
 	jmp get_player_input
 
+; Return value in zp10_count_vocab is 1-based index
+; into string table of Verbs + Nouns
 get_vocab:
 	lda zp19_input_ptr+1
 	pha

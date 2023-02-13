@@ -52,4 +52,4 @@ maze_features:
 	.byte $25,$1a,$02,$00 ;door face-on
 maze_features_end = <((* - maze_features) / 4)
 
-	.assert >* = >maze_features, error, "Maze feature table must be within one page"
+	.assert * - maze_features <= $100, error, "Maze feature table is too large for indexing"

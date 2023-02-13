@@ -37,7 +37,7 @@ text_buffer_line2:
 	JUNK_BYTE {$f0,$52,$c9,$13,$d0,$ee,$a2,$04}
 	.assert * - text_buffer_line2 = textbuf_size / 2, error, "Mismatch text buffer size"
 
-.assert >* = >text_buffer_prev, error, "Text buffers must fit in one page"
+.assert * - text_buffer_prev <= $100, error, "Text buffers are too large for indexing"
 
 ;
 ; cruft decoded:

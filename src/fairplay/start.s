@@ -71,7 +71,7 @@ new_game:
 	jsr item_cmd
 start_game:
 	; Clear stack. There's no turning back from 'start_game',
-	; and it will only exit via 'jmp DOS_warm_start' in 'exit_game'.
+	; and it will only exit via JMP to system in 'exit_game'.
 	; This way we can jump here from any stack level,
 	; such as a 'game_over' inside any command or special mode,
 	; or after loading a saved game.

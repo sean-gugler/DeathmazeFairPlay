@@ -1,7 +1,7 @@
 	.export maze_features
 	.export maze_features_end
 
-	.segment "MAZE"
+	.segment "FEATURE_DATA"
 
 ; facing|level, X|Y, drawcmd, draw_param
 maze_features:
@@ -43,6 +43,6 @@ maze_features:
 	.byte $25,$6a,$01,$00 ;keyhole face-on
 	.byte $25,$7a,$01,$00 ;keyhole face-on
 	.byte $25,$8a,$01,$00 ;keyhole face-on
-maze_features_end = $26
-	.assert (* - maze_features) / 4 = maze_features_end, error, "Miscount maze features"
+maze_features_end = <((* - maze_features) / 4)
 
+	.assert * - maze_features <= $100, error, "Maze feature table is too large for indexing"

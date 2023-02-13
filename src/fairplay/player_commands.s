@@ -1,5 +1,4 @@
 	.export cmd_verbal
-	.export destroy_one_torch
 	.export door_correct
 	.export door_final
 	.exportzp doors_locked_begin
@@ -84,6 +83,7 @@ zp0F_action         = $0F;
 zp0E_object         = $0E;
 
 item_msg_begin = text_crystal_ball_ - 1
+	.assert noun_ball = 1, error, "Need to adjust item_msg_begin"
 
 doormsg_lock_begin = text_You_unlock_the_door___ + 1
 
@@ -209,7 +209,6 @@ lose_lit_torch:
 	jsr print_to_line2
 	jsr clear_maze_window
 	lda #$00
-;	sta gs_active_torch
 	sta gs_room_lit
 	jsr push_special_mode
 	lda #special_mode_dark
@@ -220,13 +219,6 @@ lose_unlit_torch:
 	dec gs_torches_unlit
 	lda #icmd_which_torch_unlit
 query_item:
-	sta zp0F_action
-	jmp item_cmd
-
-destroy_one_torch:
-	jsr lose_one_torch
-	sta zp0E_object
-	lda #icmd_destroy1
 	sta zp0F_action
 	jmp item_cmd
 
@@ -303,8 +295,8 @@ cmd_eat:
 :	cmp #nouns_unique_end
 	bmi @eaten  ;zp0F_action already 0 (icmd_destroy1)
 
-	.assert nouns_unique_end = noun_food, error, "Eat logic needs to change."
-;	cmp #noun_food   ;optimized based on assertion
+	.assert noun_food = nouns_unique_end, error, "Need to revert register optimization in cmd_eat"
+;	cmp #noun_food
 	beq @food
 	ldx zp11_item
 	cmp #noun_torch
@@ -319,7 +311,6 @@ cmd_eat:
 
 @eaten:
 	jsr item_cmd
-;	jsr update_view
 	lda #$7d     ;You eat the
 	jsr print_to_line1
 	lda #' '
@@ -378,8 +369,8 @@ cmd_throw:
 	cmp #nouns_unique_end
 	bmi thrown  ;zp0F_action already 0 (icmd_destroy1)
 
-	.assert nouns_unique_end = noun_food, error, "Throw logic needs to change."
-;	cmp #noun_food   ;optimized based on assertion
+	.assert noun_food = nouns_unique_end, error, "Need to revert register optimization in cmd_throw"
+;	cmp #noun_food
 	beq throw_food
 	ldx zp11_item
 	cmp #noun_torch
@@ -491,7 +482,6 @@ throw_frisbee:
 
 :	jsr item_cmd
 	jsr print_thrown
-;	jsr clear_status_lines
 	lda #$3f     ;The monster grabs the frisbee, throws
 	jsr print_to_line1
 	lda #$40     ;it back, and it saws your head off!
@@ -1007,8 +997,8 @@ cmd_open:
 @check_snake:
 	cmp #noun_snake
 	beq @push_mode_snake
-	.assert nouns_unique_end - 1 = noun_snake, error, "Snake is not last unique. Open Box logic needs to change."
-;	cmp #nouns_unique_end - 1   ;optimized based on assertion
+	.assert nouns_unique_end - 1 = noun_snake, error, "Snake is not last unique. Revert register optimization in check_contents."
+;	cmp #nouns_unique_end - 1
 	bmi @print_item_name
 	cmp #item_torch_begin
 	bmi :+
@@ -1034,7 +1024,7 @@ cmd_open:
 	adc #item_msg_begin
 	jsr print_to_line2
 @line1:
-	lda #($03 + nouns_item_end)     ;Inside the box there is a
+	lda #(item_msg_begin + nouns_item_end - 1)     ;Inside the box there is a
 	jsr print_to_line1
 	lda zp10_noun
 	sta zp13_temp  ;preserve 'object'
@@ -1245,8 +1235,6 @@ doors_locked_begin = < (1 + ((* - door_table) / 2))  ;one-based indexing
 	.byte $52,$8a
 doors = (* - door_table) / 2
 
-.assert >* = >door_table, error, "Door table must fit in one page"
-
 
 	.segment "COMMAND3"
 
@@ -1375,8 +1363,8 @@ cmd_press:
 	stx zp0F_action
 	sta zp0E_object
 	jsr item_cmd
-	lda #icmd_draw_inv
-	sta zp0F_action
+	ldx #icmd_draw_inv
+	stx zp0F_action
 	jsr item_cmd
 	jsr wait_short
 	lda #$70     ;A draft blows your torch out.
@@ -1401,7 +1389,6 @@ teleport_table:
 	.byte $01,$01,$07,$0a ;button 7
 	.byte $03,$04,$09,$0a ;button 8
 	.byte $03,$03,$07,$0a ;button 9
-.assert >* = >teleport_table, error, "Teleport table must fit in one page"
 
 	.segment "COMMAND4"
 
@@ -1833,20 +1820,20 @@ flash_screen:
 	stx zp0E_ptr+1
 	ldy #$00
 	lda #$dd     ;yellow
-@loop:
+@fill:
 	sta (zp0E_ptr),y
 	iny
 	cpy #$78
 	bne :+
 	ldy #$80
-	bne @loop
+	bne @fill
 :	cpy #$f8
-	bne @loop
+	bne @fill
 	ldy #$00
 	inc zp0E_ptr+1
 	ldx zp0E_ptr+1
 	cpx #>screen_GR2
-	bne @loop
+	bne @fill
 	bit hw_PAGE1
 	bit hw_FULLSCREEN
 	bit hw_LORES
@@ -1948,6 +1935,7 @@ check_fart:
 cmd_save:
 	dec zp0F_action
 	bne cmd_quit
+
 	lda gs_special_mode
 	beq ask_save_game
 impossible:
@@ -1986,6 +1974,7 @@ save_to_tape:
 cmd_quit:
 	dec zp0F_action
 	bne cmd_directions
+
 	jsr clear_status_lines
 	lda #$9c     ;Are you sure you want to quit?
 	jsr print_to_line1
@@ -2040,7 +2029,6 @@ draw_doors_opening:
 text_magic_word:
 	.byte "Grendel"
 	magic_word_length = <(* - text_magic_word)
-	.assert >* = >text_magic_word, error, "Magic word must be in one page"
 
 text_hat:
 	.byte "A sewn label reads: WEAR THIS HAT AND   "

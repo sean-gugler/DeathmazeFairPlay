@@ -1,3 +1,7 @@
+;;; THIS FILE IS AUTO-GENERATED
+;;; BY  ../../tools/build_strings.py
+;;; FROM  ../../src/fairplay/strings.txt
+
 	text_Inventory_ = $01
 	text_Torches_ = $02
 	text_Lit_ = $03

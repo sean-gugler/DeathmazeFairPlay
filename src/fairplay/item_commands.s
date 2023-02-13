@@ -163,12 +163,12 @@ check_item_known:
 	ldy #$00
 	lda (zp0E_item),y
 	cmp #$08
-	bne :+
-	jmp print_known_item
-:	cmp #$07
-	bne next_known_item
-	jmp print_known_item	;GUG: cleaner if this were JSR
-next_known_item:
+	beq @print
+	cmp #$07
+	bne @continue
+@print:
+	jsr print_known_item
+@continue:
 	inc zp0E_item
 	bne :+
 	inc zp0E_item+1
@@ -188,11 +188,9 @@ check_item_boxed:
 	ldy #$00
 	lda (zp0E_item),y
 	cmp #carried_boxed
-	bne next_boxed_item
-	jmp print_boxed_item	;GUG: cleaner if this were JSR
-
-next_boxed_item:
-	inc zp0E_item
+	bne :+
+	jsr print_boxed_item
+:	inc zp0E_item
 	bne :+
 	inc zp0E_item+1
 :	inc zp0E_item
@@ -257,8 +255,8 @@ print_known_item:
 	inc zp_row
 	pla
 	sta zp_col
-	jsr get_rowcol_addr
-	jmp next_known_item
+	jmp get_rowcol_addr
+	;rts
 
 print_boxed_item:
 	lda zp_col
@@ -272,8 +270,8 @@ print_boxed_item:
 	inc zp_row
 	pla
 	sta zp_col
-	jsr get_rowcol_addr
-	jmp next_boxed_item
+	jmp get_rowcol_addr
+	;rts
 
 icmd08_count_inv:
 	sta zp1A_cmds_to_check
@@ -474,26 +472,22 @@ icmd0A_probe_boxes:
 	lsr
 	lsr
 	lsr
-	beq @none  ;GUG: inline to compact better
+	bne :+
+	sta gs_box_visible
+	rts
+
+:	sta zp1A_count_loop
 	cmp #$05
 	bne :+
-	sec
-	sbc #$01
-:	sta zp1A_count_loop
-	lda gs_player_x
+	dec zp1A_count_loop
+:	lda gs_player_x
 	sta zp11_pos_x
 	lda gs_player_y
 	sta zp10_pos_y
 	lda gs_level
 	sta zp19_level
-	jmp @begin_probe
 
-@none:
-	lda #$00
-	sta gs_box_visible
-	rts
-
-@begin_probe:
+;@begin_probe:
 	lda zp1A_count_loop
 	sta zp0F_sight_depth
 	lda #$00

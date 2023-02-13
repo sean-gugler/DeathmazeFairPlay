@@ -82,13 +82,10 @@ zp11_item           = $11;
 zp0F_action         = $0F;
 zp0E_object         = $0E;
 
+item_msg_begin = text_crystal_ball_ - 1
+	.assert noun_ball = 1, error, "Need to adjust item_msg_begin"
 
-doormsg_lock_begin = text_You_unlock_the_door___ +1
-doormsg_lock_end   = text_Having_fun_
-
-doors_locked = doormsg_lock_end - doormsg_lock_begin
-
-door_correct = $02  ;1-based
+doormsg_lock_begin = text_You_unlock_the_door___ + 1
 
 
 	.segment "COMMAND1"
@@ -122,29 +119,29 @@ cmd_verbal:
 
 ;cmd_raise:
 	dec zp0F_action
-	bne @cmd_blow
+	bne cmd_blow
 
 	lda #noun_ring
 	cmp zp0E_object
-	beq @ring
+	beq raise_ring
 	lda #noun_staff
 	cmp zp0E_object
-	beq @staff
-@having_fun:
+	beq raise_staff
+having_fun:
 	lda #$1f     ;Having fun?
-@print_line2:
+print_line2r:
 	jmp print_to_line2
 
-@staff:
+raise_staff:
 	lda #$73     ;Staff begins to quake
-	bne @print_line2
-@ring:
+	bne print_line2r
+raise_ring:
 	lda gs_level
 	cmp #$05
-	bne @having_fun
+	bne having_fun
 	lda #carried_active
 	cmp zp1A_item_place
-	beq @having_fun
+	beq having_fun
 	lda #noun_ring
 	sta zp0E_object
 	lda #icmd_set_carried_active
@@ -156,9 +153,9 @@ cmd_verbal:
 	lda #$71     ;The ring is activated and
 	jsr print_to_line1
 	lda #$72     ;shines light everywhere!
-	bne @print_line2
+	bne print_line2r
 
-@cmd_blow:
+cmd_blow:
 	dec zp0F_action
 	bne cmd_break
 
@@ -166,7 +163,7 @@ cmd_verbal:
 	cmp #noun_flute
 	beq @play
 	cmp #noun_horn
-	bne @having_fun
+	bne having_fun
 .if REVISION >= 100
 	;unnecessary. special_mode_mother check is sufficient.
 .else ;RETAIL
@@ -203,7 +200,7 @@ cmd_break:
 	bmi @broken
 .if REVISION >= 100
 	; no need for all this, $10 and $11
-	; are not disturbed by destroy_one_torch
+	; are not disturbed by lose_one_torch
 .else ;RETAIL
 	sta zp13_temp  ;preserve 'object' while protecting $10,$11
 	lda zp10_temp
@@ -214,7 +211,7 @@ cmd_break:
 .endif
 	cmp #noun_torch
 	bne @food
-	jsr destroy_one_torch
+	jsr lose_one_torch
 @food:
 .if REVISION < 100
 	pla
@@ -249,10 +246,11 @@ cmd_break:
 
 ; Find a carried, unlit torch if possible, else the lit one.
 ; Decrement the relevant torch count.
-destroy_one_torch:
+; If it was unlit, destroy it as well.
+lose_one_torch:
 	lda gs_torches_unlit
-	bne @unlit
-;@lit:
+	bne lose_unlit_torch
+lose_lit_torch:
 	dec gs_torches_lit
 	lda gs_level
 	cmp #$05     ;level 5 is lit by ring, not torches
@@ -266,7 +264,7 @@ destroy_one_torch:
 @done:
 	rts
 
-@unlit:
+lose_unlit_torch:
 	dec gs_torches_unlit
 	lda #icmd_which_torch_unlit
 	sta zp0F_action
@@ -334,13 +332,13 @@ cmd_eat:
 	jsr lose_ring
 :	cmp #nouns_unique_end
 	bmi @eaten
-	.assert nouns_unique_end = noun_food, error, "Eat logic needs to change."
-;	cmp #noun_food   ;optimized based on assertion
+	.assert noun_food = nouns_unique_end, error, "Need to revert register optimization in cmd_eat"
+;	cmp #noun_food
 	beq @food
 	cmp #noun_torch
 .if REVISION >= 100
 	bne @torch_return
-	jsr destroy_one_torch
+	jsr lose_one_torch
 .else ;RETAIL
 	beq @torch
 .endif
@@ -368,14 +366,14 @@ cmd_eat:
 
 .if REVISION >= 100
 	; no need for all this, $10 and $11
-	; are not disturbed by destroy_one_torch
+	; are not disturbed by lose_one_torch
 .else ;RETAIL
 @torch:
 	lda zp10_temp
 	pha
 	lda zp11_item
 	pha
-	jsr destroy_one_torch
+	jsr lose_one_torch
 	pla
 	sta zp11_item
 	pla
@@ -446,12 +444,12 @@ cmd_throw:
 	cmp #nouns_unique_end
 	bmi thrown  ;zp0F_action already 0 (icmd_destroy1)
 
-	.assert nouns_unique_end = noun_food, error, "Throw logic needs to change."
-;	cmp #noun_food   ;optimized based on assertion
+	.assert noun_food = nouns_unique_end, error, "Need to revert register optimization in cmd_throw"
+;	cmp #noun_food
 	beq throw_food
 	cmp #noun_torch
 	bne :+
-	jsr destroy_one_torch
+	jsr lose_one_torch
 :	lda zp11_item
 	sta zp0E_object
 thrown:
@@ -549,15 +547,24 @@ print_thrown:
 	jmp clear_status_lines
 
 throw_frisbee:
+; These zp variables are already set to these values upon entry.
+;	lda #noun_frisbee
+;	sta zp0E_object
+;	lda #icmd_destroy1
+;	sta zp0F_action
+
 	lda gs_monster_alive
 	and #monster_flag_roaming
 	bne :+
 	jmp thrown
-
-:	lda #noun_frisbee
+:
+.if REVISION < 100  ;RETAIL
+	; redundant
+	lda #noun_frisbee
 	sta zp0E_object
 	lda #icmd_destroy1
 	sta zp0F_action
+.endif
 	jsr item_cmd
 	jsr print_thrown
 	jsr clear_status_lines
@@ -724,7 +731,7 @@ cmd_play:
 	cmp #noun_flute
 	beq play_flute
 	cmp #noun_ball
-	beq play_ball
+	beq play_with_who
 	cmp #noun_horn
 	beq play_horn
 	jmp nonsense
@@ -734,7 +741,7 @@ play_horn:
 	sta gs_parsed_action
 	jmp cmd_verbal
 
-play_ball:
+play_with_who:
 	lda #$87     ;With who? The monster?
 print_and_rts:
 	jmp print_to_line2
@@ -762,7 +769,7 @@ play_flute:
 	lda #$83     ;A high shrill note comes
 	jsr print_to_line1
 	lda #$84     ;from the flute!
-	jmp print_and_rts ;GUG: saves no bytes, adds time.
+	jmp print_and_rts  ;saves no bytes, adds time.
 
 @charm:
 	lda #$0a
@@ -797,7 +804,7 @@ play_flute:
 	lda #special_mode_climb
 	sta gs_special_mode
 	lda #$00
-	sta gs_snake_used
+	sta gs_snake_freed
 	rts
 
 cmd_strike:
@@ -839,7 +846,7 @@ cmd_wear:
 cmd_look:
 	lda zp0F_action
 	sec
-	sbc #$0e
+	sbc #verb_look
 	sta zp0F_action
 	bne cmd_rub
 
@@ -936,8 +943,8 @@ cmd_open:
 	lda zp11_item
 	cmp #noun_snake
 	beq @push_mode_snake
-	.assert nouns_unique_end - 1 = noun_snake, error, "Snake is not last unique. Open Box logic needs to change."
-;	cmp #nouns_unique_end - 1   ;optimized based on assertion
+	.assert nouns_unique_end - 1 = noun_snake, error, "Snake is not last unique. Revert register optimization in check_contents."
+;	cmp #nouns_unique_end - 1
 	bmi @print_item_name
 	cmp #item_torch_begin
 	bmi :+
@@ -948,9 +955,9 @@ cmd_open:
 	jsr clear_status_lines
 	sta zp10_noun
 	clc
-	adc #$04
+	adc #item_msg_begin
 	jsr print_to_line2
-	lda #$18     ;Inside the box there is a
+	lda #(item_msg_begin + nouns_item_end - 1)     ;Inside the box there is a
 	jsr print_to_line1
 	lda zp10_noun
 	cmp #noun_calculator
@@ -1014,7 +1021,7 @@ cmd_open:
 	beq @correct_lock
 	jsr swap_saved_A_2
 	jsr clear_status_lines
-	lda #$19     ;You unlock the door...
+	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
 	jsr swap_saved_A_2
 	jsr print_to_line2
@@ -1029,7 +1036,7 @@ cmd_open:
 	ldx #special_mode_bomb
 	stx gs_special_mode
 	jsr clear_status_lines
-	lda #$19     ;You unlock the door...
+	lda #doormsg_lock_begin - 1     ;You unlock the door...
 	jsr print_to_line1
 	lda #doormsg_lock_begin + (door_correct - 1)
 	jmp print_to_line2
@@ -1099,13 +1106,14 @@ door_table:
 	.byte $31,$44
 	.byte $42,$14
 	.byte $52,$35
+doors_locked_begin = < (1 + ((* - door_table) / 2))  ;one-based indexing
 	.byte $52,$4a
 	.byte $52,$5a
 	.byte $52,$6a
 	.byte $52,$7a
 	.byte $52,$8a
 doors = (* - door_table) / 2
-doors_locked_begin = 1 + (doors - doors_locked)  ;one-based indexing
+
 
 	.segment "COMMAND3"
 
@@ -1460,8 +1468,8 @@ find_boxed:
 	lda zp0E_object
 	pha
 .endif
-	ldx #items_food
 	.assert items_food = items_torches, error, "Need to edit cmd_take for separate food,torch counts"
+	ldx #items_food
 	stx zp11_count
 @next:
 .if REVISION < 100 ;RETAIL
@@ -1531,13 +1539,14 @@ cmd_attack:
 
 @not_here:
 	lda #$90     ;I don't see that here.
-print_line2_ap:
+print_line2a:
 	jsr print_to_line2
 	rts
 
 cmd_paint:
 	dec zp0F_action
 	bne cmd_grendel
+
 	ldx #noun_brush
 	stx zp0E_object
 	ldx #icmd_where
@@ -1549,22 +1558,24 @@ cmd_paint:
 	jmp not_carried
 
 :	lda #$6f     ;With what? Toenail polish?
-	bne print_line2_ap
+	bne print_line2a
 
 cmd_grendel:
 	dec zp0F_action
 	bne cmd_say
-	jmp nonsense ;GUG: maybe disguise this better
+	jmp nonsense
 
 cmd_say:
 	dec zp0F_action
 	bne cmd_charge
+
 .if REVISION >= 2
 	lda gs_parsed_object
 	bne :+
 	jmp nonsense
+:
 .endif
-:	lda #$76     ;OK...
+	lda #$76     ;OK...
 	jsr print_to_line2
 	lda #<text_buffer_line1
 	sta zp0E_ptr
@@ -1664,15 +1675,12 @@ propel_next_step:
 @south_4:
 	dec gs_player_y
 	rts
-
 @west_1:
 	dec gs_player_x
 	rts
-
 @north_2:
 	inc gs_player_y
 	rts
-
 @east_3:
 	inc gs_player_x
 	rts
@@ -1820,6 +1828,7 @@ check_fart:
 cmd_save:
 	dec zp0F_action
 	bne cmd_quit
+
 	lda gs_special_mode
 	beq ask_save_game
 	lda #$9a     ;It is currently impossible.
@@ -1857,6 +1866,7 @@ save_to_tape:
 cmd_quit:
 	dec zp0F_action
 	bne cmd_directions
+
 	jsr clear_status_lines
 	lda #$9c     ;Are you sure you want to quit?
 	jsr print_to_line1
@@ -1871,6 +1881,7 @@ cmd_quit:
 cmd_directions:
 	dec zp0F_action
 	bne cmd_hint
+
 	jsr clear_hgr2
 	lda #$00
 	sta zp_col

@@ -78,6 +78,16 @@ new_game:
 	stx zp0F_action
 	jsr item_cmd
 start_game:
+.if REVISION >= 100
+	; Clear stack. There's no turning back from 'start_game',
+	; and it will only exit via JMP to system in 'exit_game'.
+	; This way we can jump here from any stack level,
+	; such as a 'game_over' inside any command or special mode,
+	; or after loading a saved game.
+	ldx #$ff
+	txs
+.endif
+
 	ldx #verb_directions
 	stx gs_parsed_action
 	jsr cmd_verbal

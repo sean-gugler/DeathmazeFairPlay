@@ -1,3 +1,7 @@
+;;; THIS FILE IS AUTO-GENERATED
+;;; BY  ../../tools/build_strings.py
+;;; FROM  ../../src/fairplay/strings.txt
+
 	noun_ball = $01
 	noun_banana = $02
 	noun_brush = $03

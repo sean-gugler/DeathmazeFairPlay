@@ -48,7 +48,7 @@ def main(argv):
             as_hex = ','.join(f'${int(b,2):02x}' for b in B)
             asm.append(f'\t.byte {as_bin} ; {as_hex}\n')
 
-    asm.append('\n.assert >* = >maze_walls, error, "Maze must fit in one page"\n')
+    asm.append('\n.assert * - maze_walls <= $100, error, "Maze is too large for indexing"\n')
 
     with open(args.output, 'wt') as out:
         out.write(''.join(asm))

@@ -392,7 +392,6 @@ draw_special:
 	.byte $0b,$0c,$0e,$11,$15
 @quadratic_len:
 	.byte $01,$03,$07,$0d,$15
-.assert >* = >@quadratic_dec, error, "Pit tables must fit in one page."
 
 	.segment "DRAW_SPECIAL3"
 
@@ -669,7 +668,6 @@ draw_special:
 	.byte $0b,$0b
 	.byte $08,$0b
 	.byte $20,$08
-.assert >* = >@square_data_left, error, "Square data must be within one page"
 
 	.segment "STRING_SQUARE"
 
@@ -1322,7 +1320,6 @@ key_hint_text:
 	.byte "WILL YOU"
 	.byte "TRUST ME"
 	.byte " ?????  "
-	.assert >* = >key_hint_text, error, "Key hint text must be in one page"
 
 escape_data:
 	.byte $20,$20,$20,$20,$20,$20,$20,$0B,$0B,$0B

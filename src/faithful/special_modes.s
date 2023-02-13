@@ -29,7 +29,6 @@
 	.import get_player_input
 	.import update_view
 
-;	.include "apple.i"
 	.include "char.i"
 	.include "draw_commands.i"
 	.include "game_design.i"
@@ -82,7 +81,7 @@ special_calc_puzzle:
 @puzzle_loop:
 	jsr get_player_input
 	lda gs_parsed_action
-	cmp #$46
+	cmp #$46  ;should be #verb_movement_begin
 	bpl @move
 	jsr cmd_verbal
 @continue_loop:
@@ -321,7 +320,7 @@ special_dog:
 	lda gs_parsed_object
 	sta zp1A_object
 	lda gs_parsed_action
-	cmp #$59
+	cmp #$59  ;should be #verb_movement_begin
 	bcs @dead
 	cmp #verb_throw
 	beq @throw
@@ -430,9 +429,9 @@ special_dog:
 	lda gs_monster_alive
 	and #monster_flag_roaming
 	bne @dog_eaten
-	pla
-	pla
-	rts
+	pla ;skip clearing "dog alive" flag
+	pla ;and don't pop mode
+	rts ;resume main loop
 @dog_eaten:
 .endif
 	jsr wait_long
@@ -451,7 +450,7 @@ special_monster:
 	jmp special_mother
 
 :	lda gs_parsed_action
-	cmp #$50
+	cmp #$50  ;should be #verb_movement_begin
 	bcc :+
 	jsr update_view
 :	lda gs_monster_step
@@ -462,7 +461,7 @@ special_monster:
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
 	inc gs_monster_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @monster_smell:
 	lda gs_monster_step
@@ -473,7 +472,7 @@ special_monster:
 	lda #$46     ;the hallway!
 	jsr print_to_line2
 	inc gs_monster_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 monster_kills_you:
 	jsr clear_hgr2
@@ -493,10 +492,10 @@ monster_kills_you:
 	jsr print_display_string
 	jmp game_over
 
-input_near_danger:
+input_during_encounter:
 	jsr get_player_input
 	lda gs_parsed_action
-	cmp #$50
+	cmp #$50  ;should be #verb_movement_begin
 	bcc :+
 	jsr cmd_movement
 	jmp check_special_mode
@@ -506,6 +505,7 @@ input_near_danger:
 	stx gs_monster_step
 	jsr wait_if_prior_text
 	jmp check_special_mode
+
 
 wait_if_prior_text:
 	lda text_buffer_line1
@@ -530,7 +530,7 @@ special_mother:
 	jmp special_dark
 
 :	lda gs_parsed_action
-	cmp #$50
+	cmp #$50  ;should be #verb_movement_begin
 	bcc :+
 	jsr update_view
 :	lda gs_mother_step
@@ -541,7 +541,7 @@ special_mother:
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
 	inc gs_mother_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @mother_smell:
 	tax
@@ -560,7 +560,7 @@ special_mother:
 	lda #$46     ;the hallway as it darkens!
 	jsr print_to_line2
 	inc gs_mother_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @mother_arrives:
 	lda #$48     ;It is the monster's mother!
@@ -656,7 +656,7 @@ special_dark:
 	jmp special_snake
 
 :	lda gs_parsed_action
-	cmp #$50
+	cmp #$50  ;should be #verb_movement_begin
 	bcc :+
 	jsr update_view
 :	lda gs_room_lit
@@ -667,7 +667,7 @@ special_dark:
 
 @unlit:
 	ldx #$00
-	stx gs_level_moves_lo ;GUG: careful, if I revise to allow re-lighting torch
+	stx gs_level_moves_lo
 	lda gs_mother_step
 	bne @monster_smell
 	lda gs_level
@@ -689,7 +689,7 @@ special_dark:
 	lda #$44     ;begins to shake!
 	jsr print_to_line2
 	inc gs_mother_step
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @monster_smell:
 	cmp #$01
@@ -700,7 +700,7 @@ special_dark:
 	jsr print_to_line1
 	lda #$47     ;the hallway!
 	jsr print_to_line2
-	jmp input_near_danger
+	jmp input_during_encounter
 
 @monster_attacks:
 	jsr wait_if_prior_text
@@ -727,13 +727,20 @@ special_snake:
 	dex
 	bne special_bomb
 
+.if REVISION < 100
+	; The snake cannot actually be killed by the player.
+	; This is an unreachable code path.
 	lda gs_parsed_object
 	cmp #noun_snake
 	beq snake_check_verb
+.endif
 dead_by_snake:
 	jsr clear_status_lines
 	lda #$20     ;Snake bites you!
 	bne dead_bit
+.if REVISION < 100
+	; The snake cannot actually be killed by the player.
+	; This is an unreachable code path.
 snake_check_verb:
 	lda gs_parsed_action
 	cmp #verb_look
@@ -782,7 +789,8 @@ snake_check_verb:
 @look:
 	lda #$8c     ;It looks very dangerous!
 	jsr print_to_line2
-	jmp input_near_danger
+	jmp input_during_encounter
+.endif
 
 
 
@@ -792,7 +800,7 @@ special_bomb:
 	jmp special_elevator
 
 :	lda gs_parsed_action
-	cmp #$50
+	cmp #$50  ;should be #verb_movement_begin
 	bcc :+
 	jsr update_view
 :	lda gs_bomb_tick
@@ -885,7 +893,7 @@ special_bomb:
 @regular_move:
 	jsr get_player_input
 	lda gs_parsed_action
-	cmp #$59
+	cmp #$59  ;should be #verb_movement_begin
 	bcc :+
 	jsr cmd_movement
 	jmp check_special_mode
@@ -975,10 +983,10 @@ enter_elevator:
 @level2:
 	jsr clear_maze_window
 	ldx #$03
-	stx zp0F_action  ;GUG: no effect
+	stx zp0F_action  ;no effect
 	stx gs_walls_left
 	ldx #$23
-	stx zp0E_draw_param  ;GUG: no effect
+	stx zp0E_draw_param  ;no effect
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd03_compactor
@@ -1132,12 +1140,12 @@ special_climb:
 
 :	jsr get_player_input
 	lda gs_parsed_action
-	cmp #$5a
-	bcc :+
+	cmp #$5a  ;should be #verb_movement_begin
+	bcc @climb_snake
 @dead:
 	jmp dead_by_snake
-
-:	cmp #verb_climb
+@climb_snake:
+	cmp #verb_climb
 	bne @dead
 	lda gs_parsed_object
 	cmp #noun_snake
@@ -1146,6 +1154,7 @@ special_climb:
 	sta zp1A_pos_x
 	lda gs_player_y
 	sta zp19_pos_y
+
 	lda gs_level
 	cmp #$03
 	beq @on_level_3
@@ -1159,7 +1168,6 @@ special_climb:
 	cmp #$0a
 	bne @ceiling
 	jmp @to_level_3
-
 @on_level_3:
 	lda zp1A_pos_x
 	cmp #$08
@@ -1167,6 +1175,7 @@ special_climb:
 	lda zp19_pos_y
 	cmp #$05
 	beq @to_level_2
+
 @ceiling:
 	jsr flash_screen
 	lda #$2d     ;Wham!
@@ -1186,7 +1195,6 @@ special_climb:
 	inx
 	stx gs_facing
 	jmp @up_level
-
 @to_level_3:
 	ldx #$00
 	stx zp19_regular_climb
@@ -1267,14 +1275,14 @@ special_climb:
 	stx zp0F_action
 	jsr item_cmd
 :	ldx #$01
-	stx gs_snake_used
+	stx gs_snake_freed
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
 lair_input_loop:
 	jsr get_player_input
 	lda gs_parsed_action
-	cmp #$5a
+	cmp #$5a  ;should be #verb_movement_begin
 	bcs @move
 	cmp #verb_press
 	bne @command_allowed
@@ -1334,9 +1342,9 @@ lair_input_loop:
 
 special_endgame:
 	jsr clear_maze_window
-	lda #$07
+	lda #%00000111     ;walls --xxx
 	sta gs_walls_left
-	ldx #$47     ;GUG: depth 4? not 3?
+	ldx #%01000111     ;walls --xxx, depth 2
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd08_doors
@@ -1357,7 +1365,7 @@ special_endgame:
 @step1:
 	dec zp1A_endgame_step
 	bne @step2
-	cmp #$5a
+	cmp #verb_movement_begin
 	bpl :+
 	jmp @nope
 
@@ -1366,9 +1374,9 @@ special_endgame:
 	jmp @dead_salt
 
 :	jsr clear_maze_window
-	ldx #$03
+	ldx #%00000011
 	stx gs_walls_left
-	ldx #$23
+	ldx #%00100011
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd08_doors
@@ -1382,7 +1390,7 @@ special_endgame:
 @step2:
 	dec zp1A_endgame_step
 	bne @step3
-	cmp #$5a
+	cmp #verb_movement_begin
 	bpl :+
 	jmp @nope
 
@@ -1391,9 +1399,9 @@ special_endgame:
 	jmp @dead_salt
 
 :	jsr clear_maze_window
-	ldx #$01
+	ldx #%00000001
 	stx gs_walls_left
-	ldx #$00
+	ldx #%00000000
 	stx gs_walls_right_depth
 	jsr draw_maze
 	inc gs_endgame_step
@@ -1402,7 +1410,7 @@ special_endgame:
 @step3:
 	dec zp1A_endgame_step
 	bne @step4
-	cmp #$5a
+	cmp #verb_movement_begin
 	bpl :+
 	jmp @nope
 
@@ -1411,9 +1419,9 @@ special_endgame:
 	jmp @dead_salt
 
 :	jsr clear_maze_window
-	ldx #$01
+	ldx #%00000001
 	stx gs_walls_left
-	ldx #$00
+	ldx #%00000000
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #drawcmd02_elevator
@@ -1425,7 +1433,7 @@ special_endgame:
 @step4:
 	dec zp1A_endgame_step
 	bne @step5
-	cmp #$5a
+	cmp #verb_movement_begin
 	bmi :+
 	jmp @dead_salt
 
@@ -1462,7 +1470,7 @@ special_endgame:
 	jsr print_display_string
 	jmp game_over
 
-:	cmp #$5a
+:	cmp #verb_movement_begin
 	bmi :+
 	jmp @dead_salt
 
@@ -1484,9 +1492,9 @@ special_endgame:
 	bne @nope5
 	jsr clear_maze_window
 	jsr flash_screen
-	ldx #$07
+	ldx #%00000111
 	stx gs_walls_left
-	ldx #$46
+	ldx #%01000110
 	stx gs_walls_right_depth
 	jsr draw_maze
 	ldx #icmd_destroy2
@@ -1503,7 +1511,7 @@ special_endgame:
 @step6:
 	dec zp1A_endgame_step
 	bne @step7
-	cmp #$5a
+	cmp #verb_movement_begin
 	bpl :+
 @nope6:
 	jmp @nope
@@ -1514,21 +1522,21 @@ special_endgame:
 	jmp @dead_salt
 
 :	jsr clear_maze_window
-	ldx #$03
+	ldx #%00000011
 	stx gs_walls_left
-	ldx #$23
+	ldx #%00100011
 	stx gs_walls_right_depth
 	jsr draw_maze
 	inc gs_endgame_step
 	jmp @endgame_input_loop
 
 @step7:
-	cmp #$5a
+	cmp #verb_movement_begin
 	bmi @nope6
 	cmp #verb_forward
 	bne @dead6
 	jsr clear_maze_window
-	ldx #$01
+	ldx #%00000001
 	stx gs_walls_left
 	stx gs_walls_right_depth
 	jsr draw_maze
@@ -1539,7 +1547,7 @@ special_endgame:
 	jsr print_to_line2
 	jsr get_player_input
 	lda gs_parsed_action
-	cmp #$5a
+	cmp #verb_movement_begin
 	bpl @dead6
 	cmp #verb_grendel
 	beq @win

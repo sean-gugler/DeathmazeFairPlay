@@ -85,8 +85,11 @@ cmd_movement:
 	stx zp1A_facing
 	cmp #verb_forward
 	beq move_forward
+.if REVISION < 100 ;RETAIL
+	; waste of time and space
 	jsr move_turn
 	rts
+.endif
 
 move_turn:
 	cmp #verb_left
@@ -383,14 +386,15 @@ play_again:
 	jsr print_to_line2
 	jsr input_Y_or_N
 	cmp #'Y'
-	bne :+
+	bne exit_game
 	jmp new_session
-
-:	bit hw_PAGE1
+exit_game:
+	bit hw_PAGE1
 	bit hw_TEXT
 .if REVISION >= 100
 	bit hw_STROBE
-	jmp DOS_warm_start
+	jsr rom_HOME
+	jmp DOS_cold_start
 .else ;RETAIL
 	jmp rom_MONITOR
 .endif
@@ -417,7 +421,7 @@ vector_reset:
 	jmp next_game_loop
 
 
-	.segment "FEATURES"
+	.segment "FEATURE_CODE"
 
 ; Output: $0F = action, $0E = param (input args for draw_special)
 get_maze_feature:
@@ -456,8 +460,8 @@ get_maze_feature:
 	dec zp19_count
 	bne @next
 	lda #$00
-	sta zp0E_ptr+1
-	sta zp0E_ptr
+	sta zp0F_action
+	sta zp0E_draw_param
 	rts
 
 @check_position:

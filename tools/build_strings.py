@@ -97,6 +97,13 @@ ident_illegal = str.maketrans(
 def main(argv):
     args = usage(argv)
 
+    autogen = ''.join(
+        ';;; THIS FILE IS AUTO-GENERATED\n'
+        f';;; BY  {argv[0]}\n'
+        f';;; FROM  {args.input}\n'
+        '\n',
+    )
+
     with open(args.input, 'rt') as f:
         src = (s[:-1] for s in f.readlines())
     S = sections(src)
@@ -110,12 +117,14 @@ def main(argv):
         1 + len(VT): 'verb_intransitive',
     }
     with open(args.verbs + DECL, 'wt') as out:
+        out.write(autogen)
         for i,line in declare_vocab('verb', VT + VI):
             if label := marker.get(i):
                 out.write(f'\n\t{label} = ${i:02x}\n\n')
                 del marker[i]
             out.write(line)
     with open(args.verbs + DEF, 'wt') as out:
+        out.write(autogen)
         if args.full:
             lines = define_vocab_full(VT + VI)
         else:
@@ -131,12 +140,14 @@ def main(argv):
         1 + len(NU) + len(NM): 'nouns_item_end',
     }
     with open(args.nouns + DECL, 'wt') as out:
+        out.write(autogen)
         for i,line in declare_vocab('noun', NU + NM + NN):
             if label := marker.get(i):
                 out.write(f'\n\t{label} = ${i:02x}\n\n')
                 del marker[i]
             out.write(line)
     with open(args.nouns + DEF, 'wt') as out:
+        out.write(autogen)
         if args.full:
             lines = define_vocab_full(NU + NM + NN)
         else:
@@ -146,16 +157,20 @@ def main(argv):
 
     M = S['Messages']
     with open(args.messages + DECL, 'wt') as out:
+        out.write(autogen)
         for i,line in declare_message('text', M):
             out.write(line)
     with open(args.messages + DEF, 'wt') as out:
+        out.write(autogen)
         for line in define_message(M):
             out.write(line)
 
     I = S['Intro']
     with open(args.intro + DECL, 'wt') as out:
+        out.write(autogen)
         out.write('')
     with open(args.intro + DEF, 'wt') as out:
+        out.write(autogen)
         for line in I:
             out.write(f'\t.byte {line}\n')
 

@@ -1,3 +1,7 @@
+;;; THIS FILE IS AUTO-GENERATED
+;;; BY  ../../tools/build_strings.py
+;;; FROM  ../../src/fairplay/strings.txt
+
 	verb_raise = $01
 	verb_blow = $02
 	verb_break = $03

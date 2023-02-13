@@ -1080,9 +1080,9 @@ throw_ball:
 	jsr clear_maze_window
 	jsr wait_long
 
-	.assert noun_ball = icmd_destroy2, error, "Nouns changed, need to undo optimization in special_elevator"
 	ldx #icmd_destroy2
 	stx zp0F_action
+	.assert noun_ball = icmd_destroy2, error, "Need to revert register optimization in throw_ball"
 ;	ldx #noun_ball
 	stx zp0E_object
 	jsr item_cmd
@@ -1147,7 +1147,6 @@ special_tripped:
 	cmp zp1A_item_place
 	bne @dead
 
-;	jsr clear_status_lines
 	ldx #noun_dagger
 	stx zp0E_object
 	ldx #icmd_destroy2

@@ -58,7 +58,7 @@ text_load_device:
 	.byte "GET FROM DISK OR TAPE (T OR D)?", $80
 
 .endif
-;	.assert * = $7c3f, error, "Unexpected alignment"
+
 load_disk_or_tape:
 	jsr clear_hgr2
 	ldx #$00
@@ -180,28 +180,28 @@ check_signature:
 	ldy #$00
 	lda signature,y
 	cmp #'D'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'E'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'A'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'T'
-	bne @fail
+	bne load_failed
 	iny
 	lda signature,y
 	cmp #'H'
-	bne @fail
+	bne load_failed
 	pla
 	pla
 	jmp start_game
 
-@fail:
+load_failed:
 	lda #error_bad_save
 	jmp disk_error_restart
 

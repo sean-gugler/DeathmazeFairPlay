@@ -3,6 +3,8 @@
 	.export text_buffer_line2
 	.exportzp textbuf_size
 
+	.include "junk_byte.i"
+
 	.segment "TEXT_BUFFERS"
 
 textbuf_size = $28 * 2 ;40 columns, 2 lines
@@ -10,32 +12,32 @@ textbuf_size = $28 * 2 ;40 columns, 2 lines
 ; uninitialized buffers contain
 ; cruft leftover from earlier build
 text_buffer_prev:
-	.byte $c9,$50,$90,$03,$20,$15,$10,$ad
-	.byte $9e,$61,$f0,$08,$a2,$00,$8e,$b3
-	.byte $61,$4c,$93,$34,$a2,$00,$8e,$a4
-	.byte $61,$ad,$b3,$61,$d0,$29,$ad,$94
-	.byte $61,$c9,$05,$f0,$0a,$ad,$ad,$61
-	.byte $29,$02,$d0,$08,$4c,$93,$34,$ad
-	.byte $ac,$61,$f0,$f8,$20,$26,$36,$a9
-	.byte $43,$20,$92,$08,$a9,$44,$20,$a4
-	.byte $08,$ee,$b3,$61,$4c,$08,$36,$c9
-	.byte $01,$d0,$13,$20,$26,$36,$ee,$b3
+	JUNK_BYTE {$c9,$50,$90,$03,$20,$15,$10,$ad}
+	JUNK_BYTE {$9e,$61,$f0,$08,$a2,$00,$8e,$b3}
+	JUNK_BYTE {$61,$4c,$93,$34,$a2,$00,$8e,$a4}
+	JUNK_BYTE {$61,$ad,$b3,$61,$d0,$29,$ad,$94}
+	JUNK_BYTE {$61,$c9,$05,$f0,$0a,$ad,$ad,$61}
+	JUNK_BYTE {$29,$02,$d0,$08,$4c,$93,$34,$ad}
+	JUNK_BYTE {$ac,$61,$f0,$f8,$20,$26,$36,$a9}
+	JUNK_BYTE {$43,$20,$92,$08,$a9,$44,$20,$a4}
+	JUNK_BYTE {$08,$ee,$b3,$61,$4c,$08,$36,$c9}
+	JUNK_BYTE {$01,$d0,$13,$20,$26,$36,$ee,$b3}
 text_buffer_line1:
-	.byte $61,$a9,$45,$20,$92,$08,$a9,$47
-	.byte $20,$a4,$08,$4c,$08,$36,$20,$26
-	.byte $36,$ad,$94,$61,$c9,$05,$f0,$0d
-	.byte $a9,$36,$20,$92,$08,$a9,$37,$20
-	.byte $a4,$08,$4c,$b9,$10,$a9,$48,$20
+	JUNK_BYTE {$61,$a9,$45,$20,$92,$08,$a9,$47}
+	JUNK_BYTE {$20,$a4,$08,$4c,$08,$36,$20,$26}
+	JUNK_BYTE {$36,$ad,$94,$61,$c9,$05,$f0,$0d}
+	JUNK_BYTE {$a9,$36,$20,$92,$08,$a9,$37,$20}
+	JUNK_BYTE {$a4,$08,$4c,$b9,$10,$a9,$48,$20}
 	.assert * - text_buffer_line1 = textbuf_size / 2, error, "Mismatch text buffer size"
 text_buffer_line2:
-	.byte $92,$08,$a9,$4b,$20,$a4,$08,$4c
-	.byte $b9,$10,$ca,$d0,$6f,$ad,$9d,$61
-	.byte $c9,$11,$f0,$07,$20,$5f,$10,$a9
-	.byte $20,$d0,$e9,$ad,$9c,$61,$c9,$0e
-	.byte $f0,$52,$c9,$13,$d0,$ee,$a2,$04
+	JUNK_BYTE {$92,$08,$a9,$4b,$20,$a4,$08,$4c}
+	JUNK_BYTE {$b9,$10,$ca,$d0,$6f,$ad,$9d,$61}
+	JUNK_BYTE {$c9,$11,$f0,$07,$20,$5f,$10,$a9}
+	JUNK_BYTE {$20,$d0,$e9,$ad,$9c,$61,$c9,$0e}
+	JUNK_BYTE {$f0,$52,$c9,$13,$d0,$ee,$a2,$04}
 	.assert * - text_buffer_line2 = textbuf_size / 2, error, "Mismatch text buffer size"
 
-.assert >* = >text_buffer_prev, error, "Text buffers must fit in one page"
+.assert * - text_buffer_prev <= $100, error, "Text buffers are too large for indexing"
 
 ;
 ; cruft decoded:

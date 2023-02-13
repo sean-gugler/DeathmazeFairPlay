@@ -42,7 +42,7 @@ data_new_game:
 	.byte $00		;rotate puzzle: last direction - ALSO bomb timer, later in the game
 	.byte $00		;rotate puzzle: total turns
 	.byte $00		;lair raided
-	.byte $00		;snake used (useless; written but never checked)
+	.byte $00		;snake free (useless; written but never checked)
 	.byte $00		;jar full (UNUSED in retail)
 ; item locations: place (level), position XY
 	.byte $01,$35	;ball

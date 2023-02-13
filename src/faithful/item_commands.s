@@ -167,7 +167,7 @@ check_item_known:
 	jmp print_known_item
 :	cmp #$07
 	bne next_known_item
-	jmp print_known_item	;GUG: cleaner if this were JSR
+	jmp print_known_item
 next_known_item:
 	inc zp0E_item
 	bne :+
@@ -189,7 +189,7 @@ check_item_boxed:
 	lda (zp0E_item),y
 	cmp #carried_boxed
 	bne next_boxed_item
-	jmp print_boxed_item	;GUG: cleaner if this were JSR
+	jmp print_boxed_item
 
 next_boxed_item:
 	inc zp0E_item
@@ -311,14 +311,14 @@ icmd09_new_game:
 	dec zp1A_cmds_to_check
 	bne icmd0A
 
-	ldy #gs_size-1
+	ldy #game_state_size-1
 	lda #>data_new_game
 	sta zp0E_src+1
 	lda #<data_new_game
 	sta zp0E_src
-	lda #<gs_facing
+	lda #<game_state_begin
 	sta zp10_dst
-	lda #>gs_facing
+	lda #>game_state_begin
 	sta zp10_dst+1
 :	lda (zp0E_src),y
 	sta (zp10_dst),y
@@ -405,8 +405,8 @@ icmd0B_which_box:
 	sta zp0E_item
 	lda #items_total - noun_snake
 	sta zp1A_count_loop
-;	lda #carried_boxed
 	.assert carried_boxed = items_total - noun_snake, error, "Need to revert register optimization in which_box"
+;	lda #carried_boxed
 	ldy #$00
 @check_mult_carried:
 	cmp (zp0E_item),y
@@ -543,7 +543,7 @@ icmd0A_probe_boxes:
 	lsr
 	lsr
 	lsr
-	beq @none  ;GUG: inline to compact better
+	beq @none
 	cmp #$05
 	bne :+
 	sec
