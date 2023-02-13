@@ -125,7 +125,11 @@ dos_dct:
 dos_iob:
 	.byte $01,$60,$01,$00,$03,$00
 iob_dct:
-	.word relocate_data
+.if REVISION >= 100
+	.word dos_dct
+.else ; RETAIL
+	.word relocate_data  ;total luck that this even works
+.endif
 iob_buffer:
 	.word game_save_begin
 	.byte $00,$00

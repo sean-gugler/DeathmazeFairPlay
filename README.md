@@ -56,6 +56,7 @@ The **Fair Play** edition saves the game to a proper DOS file through ordinary c
 * Dropping the jar would silently empty it.
 * Arriving after a teleport should always face open space. If you arrive facing a wall, your first move can be forward through it.
 * Protect the "screen holes" in memory for better compatibility with later models of Apple II.
+* Save game routine properly points to the DCT (Device Characteristics Table). Retail builds only work by pure luck, and maybe not on all models of Apple II.
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.
