@@ -29,6 +29,7 @@
 	.import print_char
 	.import get_rowcol_addr
 	.import not_carried
+	.import find_which_multiple
 	.import swap_saved_vars
 	.import game_over
 	.import wait_long
@@ -77,6 +78,7 @@ zp0E_item           = $0E;
 zp19_delta16        = $19;
 zp0E_count16        = $0E;
 zp13_temp           = $13;
+zp10_which_place    = $10;
 zp1A_item_place     = $1A;
 zp11_item           = $11;
 zp0F_action         = $0F;
@@ -1540,28 +1542,24 @@ inventory_full:
 	bne take_print_and_return
 
 find_boxed_torch:
-	ldx #item_torch_begin - 1
+	ldx #item_torch_begin
 	stx zp0E_object
 	ldx #items_torches
 	bne find_boxed
 find_boxed_food:
-	ldx #item_food_begin - 1
+	ldx #item_food_begin
 	stx zp0E_object
 	ldx #items_food
 find_boxed:
 	stx zp11_count
-@next:
+	lda #carried_boxed
+	sta zp10_which_place
 	ldx #icmd_where
 	stx zp0F_action
-	jsr item_cmd
-	lda #carried_boxed
-	cmp zp1A_item_place
-	beq @found
-	dec zp11_count
-	bne @next
-	jmp cannot_take
+	jsr find_which_multiple
+	beq cannot_take
 
-@found:
+;@found:
 	lda gs_parsed_object
 	cmp #noun_torch
 	bne :+

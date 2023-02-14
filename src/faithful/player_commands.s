@@ -22,6 +22,7 @@
 	.import print_char
 	.import get_rowcol_addr
 	.import not_carried
+	.import find_which_multiple
 	.import swap_saved_vars
 	.import game_over
 	.import wait_long
@@ -77,6 +78,7 @@ zp19_delta16        = $19;
 zp0E_count16        = $0E;
 zp10_temp           = $10;
 zp13_temp           = $13;
+zp10_which_place    = $10;
 zp1A_item_place     = $1A;
 zp11_item           = $11;
 zp0F_action         = $0F;
@@ -1461,8 +1463,6 @@ find_boxed_food:
 	stx zp0E_object
 find_boxed:
 .if REVISION < 100 ;RETAIL
-	; Leftover 16-bit increment from earlier design.
-	; Pointless but harmless.
 	lda zp0F_action
 	pha
 	lda zp0E_object
@@ -1471,22 +1471,32 @@ find_boxed:
 	.assert items_food = items_torches, error, "Need to edit cmd_take for separate food,torch counts"
 	ldx #items_food
 	stx zp11_count
+
+.if REVISION >= 100
+	lda #carried_boxed
+	sta zp10_which_place
+	inc zp0E_object
+	ldx #icmd_where
+	stx zp0F_action
+	jsr find_which_multiple
+	bne @found
+.else ;RETAIL
 @next:
-.if REVISION < 100 ;RETAIL
-	; 16-bit increment, presumably leftover from earlier design.
-	; Pointless now but harmless.
 	pla
 	sta zp0E_object
 	pla
 	sta zp0F_action
 	inc zp0E_object
+	; Authors got confused and used 16-bit increment
+	; pattern, but 0E and 0F are separate values here.
+	; 0F gets overwritten by #icmd_where anyway, so
+	; it's harmless.
 	bne :+
 	inc zp0F_action
 :	lda zp0F_action
 	pha
 	lda zp0E_object
 	pha
-.endif
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
@@ -1495,7 +1505,6 @@ find_boxed:
 	beq @found
 	dec zp11_count
 	bne @next
-.if REVISION < 100 ;RETAIL
 	pla
 	sta zp0E_object
 	pla

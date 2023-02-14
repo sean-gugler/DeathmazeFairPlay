@@ -1,3 +1,4 @@
+	.export find_which_multiple
 	.export item_cmd
 
 	.import data_new_game
