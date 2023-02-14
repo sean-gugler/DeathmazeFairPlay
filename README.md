@@ -47,6 +47,7 @@ The **Fair Play** edition saves the game to a proper DOS file through ordinary c
 * After entering a command with an unknown verb or noun, subsequently pressing ESC no longer omits the unknown word when re-displaying the response.
 * Double-space is properly prevented. Previously it mistakenly prevented a second space only after first letter of second word was started, as in:  WORD_L_
 * Torch count now increments if you "get box" then "get torch" and it's the only box you're carrying. Previously it would be off by one. (For fun, try this in a retail edition and then "drop torch"! Repeat all three commands for endless entertainment walking backwards through the font.)
+* Boxed torches in your inventory count towards the carry limit.
 * Move forward into wall during monster encounter, "splat" remains and doesn't flicker.
 * Always time to read fate about "the body". Message would briefly flicker if you did an action with a text result, such as "open box".
 * Open a door, then immediately open it again. Moving forward would print "splat". It now correctly moves forward.

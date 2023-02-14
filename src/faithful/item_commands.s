@@ -299,6 +299,21 @@ icmd08_count_inv:
 	iny
 	dec zp1A_count_loop
 	bne @check_carried
+
+.if REVISION >= 100
+	lda #items_torches
+	sta zp1A_count_loop
+@check_boxed_torches:
+	lda (zp0E_item),y
+	cmp #carried_boxed
+	bne :+
+	inc zp19_count
+:	iny
+	iny
+	dec zp1A_count_loop
+	bne @check_boxed_torches
+.endif
+
 	lda gs_torch_time
 	bne @add_one
 	lda gs_torches_unlit
