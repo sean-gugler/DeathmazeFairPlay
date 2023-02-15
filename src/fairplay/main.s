@@ -477,7 +477,7 @@ wait_long:
 	bpl :+
 	bit hw_STROBE
 	cmp #$80 + ' '
-	beq @print
+	beq @done
 	cmp #$80 + char_enter
 	beq @done
 	cmp #$80 + char_esc
