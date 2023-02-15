@@ -142,6 +142,14 @@ process_input_char:
 	bne :+
 	jmp @around
 
+:	cmp #char_up
+	bne :+
+	jmp @forward
+
+:	cmp #char_down
+	bne :+
+	jmp @around
+
 :	cmp #char_left
 	bne :+
 	jmp @left

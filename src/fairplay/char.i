@@ -1,6 +1,8 @@
 char_cursor = $00
 char_left = $08
 char_newline = $0a
+char_down = $0a
+char_up = $0b
 char_enter = $0d
 char_right = $15
 char_ESC = $1b

@@ -177,6 +177,16 @@ process_input_char:
 	bne :+
 	jmp @around
 
+.if REVISION >= 100
+:	cmp #char_up
+	bne :+
+	jmp @forward
+
+:	cmp #char_down
+	bne :+
+	jmp @around
+.endif
+
 :	cmp #char_left
 	bne :+
 	jmp @left

@@ -62,6 +62,7 @@ The **Fair Play** edition saves the game to a proper DOS file through ordinary c
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.
 * Quitting the game cleanly returns you to the BASIC prompt (`]`) instead of the MONITOR (`*`).
+* Up and Down arrow keys work for movement, on keyboards that have them.
 
 ## Changes in the Fair Play release
 * see SPOILERS.md
