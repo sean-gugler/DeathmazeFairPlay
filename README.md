@@ -28,9 +28,11 @@ All four are included in the provided disk image for easy comparison.
 
 ## Saved Game file
 
-WARNING: The original game (editions 1 through 3) save the game directly to track 3, sector 0. This is safe on the provided disk because I've allocated a "RESERVED" file to protect that sector. The same may not be true if you copy the files to another disk, so be careful! The safest (though wasteful) thing to do is use a completely blank disk for saved games.
+WARNING: The original game (editions 1 through 3) saves the game directly to track 3, sector 0. This is safe on the provided disk because I've allocated a "RESERVED" file to protect that sector. The same may not be true if you copy the files to another disk, so be careful! The safest (though wasteful) thing to do is use a completely blank disk for saved games.
 
 The **Fair Play** edition saves the game to a proper DOS file through ordinary catalog allocation. This edition and its save file are safe to transport by ordinary means to any other disk. Probably won't work in ProDOS, though.
+
+The original game required saving to slot 6, drive 1. The Fair Play edition will save to the same slot and drive the game was launched from.
 
 ## Bugs fixed in later retail
 * Breaking an item now clears it from the inventory display.
@@ -58,6 +60,7 @@ The **Fair Play** edition saves the game to a proper DOS file through ordinary c
 * Arriving after a teleport should always face open space. If you arrive facing a wall, your first move can be forward through it.
 * Protect the "screen holes" in memory for better compatibility with later models of Apple II.
 * Save game routine properly points to the DCT (Device Characteristics Table). Retail builds only work by pure luck, and maybe not on all models of Apple II.
+* Where "save" is not allowed, "quit" will not prompt to save either.
 
 ## Other changes in fan releases
 * Smaller file size, trimmed hundreds of unused bytes and optimized some bloated routines.

@@ -1977,10 +1977,13 @@ cmd_quit:
 	jsr print_to_line1
 	jsr input_Y_or_N
 	cmp #$59
-	beq :+
+	beq @save
 	jmp clear_status_lines
-
-:	jsr ask_save_game
+@save:
+	lda gs_special_mode
+	bne @again
+	jsr ask_save_game
+@again:
 	jmp play_again
 
 cmd_directions:
