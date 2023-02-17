@@ -83,6 +83,8 @@ zp1A_item_place     = $1A;
 zp11_item           = $11;
 zp0F_action         = $0F;
 zp0E_object         = $0E;
+zp13_boxed_item     = $13;
+zp19_have_known     = $19;
 
 item_msg_begin = text_crystal_ball_ - 1
 	.assert noun_ball = 1, error, "Need to adjust item_msg_begin"
@@ -869,10 +871,10 @@ cmd_look:
 	jmp nonsense
 
 :	cmp #noun_door
-	bne look_not_here
+	bne not_here
 	jsr which_door
 	cmp #$00
-	beq look_not_here
+	beq not_here
 	bne print_inspected
 
 look_item:
@@ -926,7 +928,7 @@ print_inspected:
 :	lda #$68     ;nothing of interest.
 	bne look_print
 
-look_not_here:
+not_here:
 	lda #$90     ;I don't see that here.
 look_print:
 	jmp print_to_line2
@@ -965,7 +967,7 @@ cmd_open:
 	sta zp0F_action
 	jsr item_cmd
 	sta zp11_item
-	beq look_not_here
+	beq not_here
 	lda zp10_noun
 	pha
 	lda zp11_item
@@ -1066,7 +1068,7 @@ cmd_open:
 	jsr which_door
 	cmp #$00
 	bne :+
-	jmp look_not_here
+	jmp not_here
 
 :	cmp #doors_locked_begin
 	bcs locked_door
@@ -1396,71 +1398,156 @@ teleport_table:
 
 cmd_take:
 	dec zp0F_action
-	beq :+
+	beq @door
 	jmp cmd_attack
 
-:	ldx #icmd_which_box
+@door:
+	lda zp0E_object
+	cmp #noun_door
+	bne @not_item
+
+	jsr which_door
+	bne @not_here
+@nonsense:
+	jmp nonsense
+
+@not_item:
+	cmp #nouns_item_end
+	bcs @nonsense
+	bcc @box
+
+@box:
+	pha
+	ldx #icmd_which_box
 	stx zp0F_action
 	jsr item_cmd
-	bne :+
-	jmp cannot_take
+	sta zp13_boxed_item
+	pla
+	cmp #noun_box
+	bne @unique
 
-:	sta zp11_box_item
+	lda zp13_boxed_item
+	beq @not_here
+
+	sta zp0E_object
+	ldx #icmd_where
+	stx zp0F_action
+	jsr item_cmd
+	lda zp1A_item_place
+	cmp #carried_boxed
+	beq @not_carried
+	lda zp13_boxed_item
+	bne take_boxed
+	; terminate
+
+@unique:
+	cmp #noun_food
+	beq @food
+	bcs @torch
+
 	sta zp0E_object
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
 	lda gs_parsed_object
-	cmp #noun_box
+	ldx zp1A_item_place
+	cpx #carried_boxed
+	beq take_and_reveal
+	bcc @not_carried
+	cmp zp13_boxed_item
+	beq take_if_space
+@not_here:
+	jmp not_here
+
+@torch:
+	ldx #items_torches
+	lda #item_torch_begin
+	jsr find_boxed
 	bne :+
-	jmp take_box
+	lda zp13_boxed_item
+	sec
+	sbc #item_torch_begin
+	cmp #items_torches
+	bcs @cannot_take
+:
+	inc gs_torches_unlit
+	bne take_and_reveal
 
-:	cmp #nouns_unique_end
-	bmi @unique_item
-	jmp take_multiple
+@food:
+	ldx #items_food
+	lda #item_food_begin
+	jsr find_boxed
+	bne take_and_reveal
+	lda zp13_boxed_item
+	sec
+	sbc #item_food_begin
+	cmp #items_food
+	bcc take_if_space
+@cannot_take:
+	lda zp19_have_known
+	beq @not_here
+@not_carried:
+	jmp not_carried
 
-@unique_item:
-	cmp zp11_box_item
-	bne @open_if_carried
-	ldx zp11_box_item
-	stx zp0E_object
-	lda zp1A_item_place
-	cmp #carried_boxed
-	bne take_if_space ;at feet
-	lda zp11_box_item
-@open_if_carried:
+find_boxed:
+	stx zp11_count
+	ldx #$00
+	stx zp19_have_known
+@next:
 	sta zp0E_object
+	pha
 	ldx #icmd_where
 	stx zp0F_action
 	jsr item_cmd
-	lda #carried_boxed
-	cmp zp1A_item_place
-	beq :+
-	jmp cannot_take
+	pla
+	sta zp0E_object
+	ldx zp1A_item_place
+	cpx #carried_boxed
+	beq @found
+	bcc :+
+	inc zp19_have_known
+:	clc
+	adc #01
+	dec zp11_count
+	bne @next
+@not_found:
+	lda #$00
+@found:
+	rts
 
-:	ldx gs_parsed_object
-	stx zp0E_object
-	jmp take_and_reveal
 
-ensure_inv_space:
-	jsr swap_saved_vars
+take_and_reveal:
+	sta zp0E_object
+	ldx #icmd_set_carried_known
+	bne taken
+
+take_boxed:
+	ldx #icmd_set_carried_boxed
+	.byte opcode_BIT	;trick to skip next ldx
+take_if_space:
+	ldx #icmd_set_carried_known
+	stx zp11_action
+
 	ldx #icmd_count_inv
 	stx zp0F_action
 	jsr item_cmd
 	lda zp19_count
 	cmp #inventory_max
+;	bcs FULL
+
 	bcc :+
-	jmp inventory_full
+	lda #$99     ;Carrying the limit.
+take_print_and_return:
+	jmp print_to_line2
+;	bne take_print_and_return
+:
+	lda zp13_boxed_item
+	sta zp0E_object
+	ldx zp11_action
 
-:	jmp swap_saved_vars
-
-take_if_space:
-	jsr ensure_inv_space
-take_and_reveal:
-	ldx #icmd_set_carried_known
+taken:
 	stx zp0F_action
 	jsr item_cmd
-react_taken:
 	ldx #icmd_draw_inv
 	stx zp0F_action
 	jsr item_cmd
@@ -1481,90 +1568,7 @@ react_taken:
 @done:
 	rts
 
-take_box:
-	lda zp1A_item_place
-	cmp #carried_begin
-	bpl cannot_take
-	jsr ensure_inv_space
-	ldx zp11_box_item
-	stx zp0E_object
-	ldx #icmd_set_carried_boxed
-	stx zp0F_action
-	jsr item_cmd
-	jmp react_taken
 
-take_multiple:
-	cmp #noun_food
-	beq @food
-
-;@torch:
-	lda zp11_box_item
-	cmp #item_torch_end
-	bpl find_boxed_torch
-	cmp #item_torch_begin
-	bmi find_boxed_torch
-	ldx zp11_box_item
-	stx zp0E_object
-	lda zp1A_item_place
-	cmp #carried_boxed
-	bne :+
-	jsr ensure_inv_space
-:	inc gs_torches_unlit
-	jmp take_and_reveal
-
-@food:
-	lda zp11_box_item
-	cmp #item_food_end
-	bpl find_boxed_food
-	cmp #item_food_begin
-	bmi find_boxed_food
-	ldx zp11_box_item
-	stx zp0E_object
-	lda zp1A_item_place
-	cmp #carried_boxed
-	bne :+
-	jmp take_and_reveal
-
-:	jmp take_if_space
-
-cannot_take:
-	lda #$9a     ;It is currently impossible.
-take_print_and_return:
-	jmp print_to_line2
-
-inventory_full:
-	; Pop one call frame, do not return and continue.
-	; (By design of "ensure_inv_space")
-	pla
-	pla
-	jsr swap_saved_vars
-	lda #$99     ;Carrying the limit.
-	bne take_print_and_return
-
-find_boxed_torch:
-	ldx #item_torch_begin
-	stx zp0E_object
-	ldx #items_torches
-	bne find_boxed
-find_boxed_food:
-	ldx #item_food_begin
-	stx zp0E_object
-	ldx #items_food
-find_boxed:
-	stx zp11_count
-	lda #carried_boxed
-	sta zp10_which_place
-	ldx #icmd_where
-	stx zp0F_action
-	jsr find_which_multiple
-	beq cannot_take
-
-;@found:
-	lda gs_parsed_object
-	cmp #noun_torch
-	bne :+
-	inc gs_torches_unlit
-:	jmp take_and_reveal
 
 cmd_attack:
 	dec zp0F_action
@@ -1586,10 +1590,8 @@ cmd_attack:
 	jmp nonsense
 
 @not_here:
-	lda #$90     ;I don't see that here.
-print_line2a:
-	jsr print_to_line2
-	rts
+	jmp not_here
+
 
 cmd_paint:
 	dec zp0F_action
@@ -1645,11 +1647,13 @@ cmd_paint:
 
 @no_artist:
 	lda #$ba     ;You're no Van Gogh.
-	bne print_line2a
+	bne @print
 
 @no_paint:
 	lda #$6f     ;With what? Toenail polish?
-	bne print_line2a
+@print:
+	jmp print_to_line2
+
 
 cmd_drink:
 	dec zp0F_action
