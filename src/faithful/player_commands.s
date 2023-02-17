@@ -21,7 +21,7 @@
 	.import wait_short
 	.import print_char
 	.import get_rowcol_addr
-	.import not_carried
+	.import see_inventory
 	.import find_which_multiple
 	.import swap_saved_vars
 	.import game_over
@@ -680,7 +680,7 @@ cmd_light:
 :	lda zp1A_item_place ;still known from noun_to_item
 	cmp #carried_active
 	bne @check_igniter
-	jmp not_carried  ;only have an already-lit torch
+	jmp see_inventory  ;only have an already-lit torch
 
 @check_igniter:
 	lda gs_room_lit
@@ -1139,7 +1139,7 @@ cmd_press:
 	lda zp1A_item_place
 	cmp #carried_known
 	beq @check_teleport_allowed
-	jmp not_carried
+	jmp see_inventory
 
 @check_teleport_allowed:
 	lda gs_monster_alive
@@ -1564,7 +1564,7 @@ cmd_paint:
 	lda zp1A_item_place
 	cmp #carried_known
 	beq :+
-	jmp not_carried
+	jmp see_inventory
 
 :	lda #$6f     ;With what? Toenail polish?
 	bne print_line2a

@@ -8,7 +8,7 @@
 	.import nonsense
 	.import print_to_line2
 	.import row8_table
-	.import not_carried
+	.import see_inventory
 
 	.include "game_state.i"
 	.include "item_commands.i"
@@ -89,7 +89,7 @@ cruft_cmd_paint:
 	lda zp1A_item_place
 	cmp #carried_known
 	beq :+
-	jmp not_carried
+	jmp see_inventory
 
 :	lda #$6f
 ; (end cruft)

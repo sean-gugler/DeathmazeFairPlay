@@ -214,3 +214,11 @@ In the dog encounter, PLAY BALL is now recognized. So is THROW BALL. You still d
 * BALL works anywhere
 
 The crystal ball can now be used to destroy any open door, not just the final one. This allows earlier discovery of its purpose. The destroyed door looks visibly altered as well.
+
+* GET responses more nuanced
+
+The stock response "it is currently impossible" can mislead the player to think some actions which are always impossible might be possible at another time. Instead I print either "I don't see that here" or "Check your inventory" depending on whether the item is already carried.
+
+For non-carryable nouns such as "bat" or "two" I simply print "You are making little sense" with one exception: "get door" only prints that when facing a door. Otherwise it prints "I don't see that here".
+
+To my surprise, overhauling the cmd_take routine to support the additional cases actually reduced the code size by 42 bytes.

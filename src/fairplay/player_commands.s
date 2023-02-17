@@ -28,7 +28,7 @@
 	.import wait_short
 	.import print_char
 	.import get_rowcol_addr
-	.import not_carried
+	.import see_inventory
 	.import find_which_multiple
 	.import swap_saved_vars
 	.import game_over
@@ -83,8 +83,8 @@ zp1A_item_place     = $1A;
 zp11_item           = $11;
 zp0F_action         = $0F;
 zp0E_object         = $0E;
+zp11_have_known     = $11;
 zp13_boxed_item     = $13;
-zp19_have_known     = $19;
 
 item_msg_begin = text_crystal_ball_ - 1
 	.assert noun_ball = 1, error, "Need to adjust item_msg_begin"
@@ -580,7 +580,7 @@ cmd_light:
 :	lda zp1A_item_place ;still known from noun_to_item
 	cmp #carried_active
 	bne @check_igniter
-	jmp not_carried  ;only have an already-lit torch
+	jmp see_inventory  ;only have an already-lit torch
 
 @check_igniter:
 	lda zp11_item  ;the unlit torch found by noun_to_item
@@ -1262,7 +1262,7 @@ cmd_press:
 	lda zp1A_item_place
 	cmp #carried_known
 	beq @check_teleport_allowed
-	jmp not_carried
+	jmp see_inventory
 
 @check_teleport_allowed:
 	lda gs_special_mode
@@ -1407,16 +1407,15 @@ cmd_take:
 	bne @not_item
 
 	jsr which_door
-	bne @not_here
+	beq @not_here
 @nonsense:
 	jmp nonsense
 
 @not_item:
 	cmp #nouns_item_end
 	bcs @nonsense
-	bcc @box
 
-@box:
+;@box:
 	pha
 	ldx #icmd_which_box
 	stx zp0F_action
@@ -1435,10 +1434,8 @@ cmd_take:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_boxed
-	beq @not_carried
-	lda zp13_boxed_item
-	bne take_boxed
-	; terminate
+	beq @see_inventory
+	bne take_boxed  ;always
 
 @unique:
 	cmp #noun_food
@@ -1453,7 +1450,7 @@ cmd_take:
 	ldx zp1A_item_place
 	cpx #carried_boxed
 	beq take_and_reveal
-	bcc @not_carried
+	bcs @see_inventory
 	cmp zp13_boxed_item
 	beq take_if_space
 @not_here:
@@ -1463,64 +1460,65 @@ cmd_take:
 	ldx #items_torches
 	lda #item_torch_begin
 	jsr find_boxed
-	bne :+
+	bcs :+
 	lda zp13_boxed_item
 	sec
 	sbc #item_torch_begin
 	cmp #items_torches
 	bcs @cannot_take
-:
-	inc gs_torches_unlit
-	bne take_and_reveal
+	lda zp13_boxed_item
+:	inc gs_torches_unlit
+	bne take_and_reveal  ;always
 
 @food:
 	ldx #items_food
 	lda #item_food_begin
 	jsr find_boxed
-	bne take_and_reveal
+	bcs take_and_reveal
 	lda zp13_boxed_item
 	sec
 	sbc #item_food_begin
 	cmp #items_food
 	bcc take_if_space
 @cannot_take:
-	lda zp19_have_known
+	lda zp11_have_known
 	beq @not_here
-@not_carried:
-	jmp not_carried
+@see_inventory:
+	jmp see_inventory
 
+; Input: A = first item, X = num items
+; Output: C = 1 found, A = item, zp11 = num carried known/active
 find_boxed:
-	stx zp11_count
-	ldx #$00
-	stx zp19_have_known
+	ldy #$00
+	sty zp11_have_known
 @next:
 	sta zp0E_object
 	pha
-	ldx #icmd_where
-	stx zp0F_action
+	ldy #icmd_where
+	sty zp0F_action
 	jsr item_cmd
 	pla
 	sta zp0E_object
-	ldx zp1A_item_place
-	cpx #carried_boxed
+	ldy zp1A_item_place
+	cpy #carried_boxed
 	beq @found
 	bcc :+
-	inc zp19_have_known
+	inc zp11_have_known
 :	clc
 	adc #01
-	dec zp11_count
+	dex
 	bne @next
 @not_found:
 	lda #$00
 @found:
 	rts
 
-
+; Input: A = item
 take_and_reveal:
-	sta zp0E_object
 	ldx #icmd_set_carried_known
 	bne taken
 
+; Input: zp13 = item
 take_boxed:
 	ldx #icmd_set_carried_boxed
 	.byte opcode_BIT	;trick to skip next ldx
@@ -1533,19 +1531,16 @@ take_if_space:
 	jsr item_cmd
 	lda zp19_count
 	cmp #inventory_max
-;	bcs FULL
-
 	bcc :+
 	lda #$99     ;Carrying the limit.
-take_print_and_return:
 	jmp print_to_line2
-;	bne take_print_and_return
-:
-	lda zp13_boxed_item
-	sta zp0E_object
+
+:	lda zp13_boxed_item
 	ldx zp11_action
 
+; X = set_carried_(flavor)
 taken:
+	sta zp0E_object
 	stx zp0F_action
 	jsr item_cmd
 	ldx #icmd_draw_inv
@@ -1605,7 +1600,7 @@ cmd_paint:
 	lda zp1A_item_place
 	cmp #carried_known
 	beq :+
-	jmp not_carried
+	jmp see_inventory
 
 :	ldx #noun_jar
 	stx zp0E_object

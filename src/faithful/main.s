@@ -3,11 +3,11 @@
 	.export game_over
 	.export main_game_loop
 	.export move_turn
-	.export not_carried
 	.export noun_to_item
 	.export play_again
 	.export print_timers
 	.export push_special_mode2
+	.export see_inventory
 	.export starved
 	.export update_view
 	.export vector_reset
@@ -295,7 +295,7 @@ noun_to_item:
 pop_not_carried:
 	pla
 	pla
-not_carried:
+see_inventory:
 	lda #$7b     ;Check your inventory!
 print_return:
 	jsr print_to_line2

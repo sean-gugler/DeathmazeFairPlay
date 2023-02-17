@@ -5,10 +5,10 @@
 	.export main_game_loop
 	.export move_turn
 	.export normal_input_handler
-	.export not_carried
 	.export noun_to_item
 	.export play_again
 	.export print_timers
+	.export see_inventory
 	.export starved
 	.export update_view
 	.export vector_reset
@@ -255,16 +255,15 @@ noun_to_item:
 	jsr item_cmd
 	lda zp1A_item_place
 	cmp #carried_unboxed
-	bpl noun_return	
+	bpl return
 pop_not_carried:
 	pla
 	pla
-not_carried:
+see_inventory:
 	lda #$7b     ;Check your inventory!
 print_return:
-	jsr print_to_line2
-noun_return:
-	rts
+	jmp print_to_line2
+	; rts
 
 multiples:
 	cmp #noun_food
