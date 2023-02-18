@@ -89,7 +89,7 @@ The game was originally written for the Z80 instruction set of the TRS-80 and po
 
 ## Development process
 
-Time spent: 8 weeks
+Time spent: 9 weeks
 
 I used [Regenerator 1.7](https://csdb.dk/release/?id=149429) to disassemble and hand-label the binary program.
 
