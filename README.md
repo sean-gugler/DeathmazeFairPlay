@@ -101,7 +101,7 @@ Andy's copy of the game appears to exactly match the retail "Rev1" I have, excep
 
 # Building from source
 
-https://github.com/sean-gugler/u4remasteredA2
+https://github.com/sean-gugler/DeathmazeFairPlay
 
 This source code has been reconstructed by disassembling and symbolicating the 1980 binary code released for Apple II series computers. It likely bears little resemblance to the original source, but it can be used by modern tools to build the same playable binaries.
 
