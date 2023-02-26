@@ -8,7 +8,7 @@
 	text_Unlit_ = $04
 	text_crystal_ball_ = $05
 	text_nice_banana_ = $06
-	text_paintbrush_used_by_Van_Gogh_ = $07
+	text_paintbrush_made_by_ACME_ = $07
 	text_calculator_with_10_buttons_ = $08
 	text_razor_sharp_dagger_ = $09
 	text_flute_ = $0a

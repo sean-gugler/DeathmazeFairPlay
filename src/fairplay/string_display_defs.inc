@@ -9,7 +9,7 @@
 	msbstring "Unlit:"
 	msbstring "crystal ball."
 	msbstring "nice banana."
-	msbstring "paintbrush used by Van Gogh."
+	msbstring "paintbrush made by ACME."
 	msbstring "calculator with 10 buttons."
 	msbstring "razor sharp dagger."
 	msbstring "flute."
