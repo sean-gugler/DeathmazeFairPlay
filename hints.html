@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Self-guided Hints for Deathmaze 5000 Fair Play edition</title>
+<style>
+/* Collapsible elements from
+ * https://www.w3schools.com/howto/howto_js_collapsible.asp
+ */
+
+.collapse-button {
+	background-color: #333;
+	color: white;
+	cursor: pointer;
+	padding: 6px 9px;
+	width: 100%;
+	border: none;
+	text-align: left;
+	outline: none;
+	font-size: 15px;	/* default font size for buttons is small */
+}
+
+.collapse-button:hover {
+	background-color: #558;
+}
+
+.collapse-button:before {
+	content: '\01F782';   /* U+01F782 right-pointing triangle */
+	color: white;
+	font-weight: bold;
+	float: left;
+	margin-right: 5px;
+}
+
+.collapse-isopen:before {
+	content: '\01F783';   /* U+01F783 down-pointing triangle */
+}
+
+.collapse-content {
+	padding: 0 0 0 18px;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.2s ease-out;
+}
+</style>
+</head>
+
+<body>
+<div id="main">
+
+<h1>Self-guided Hints for Deathmaze 5000 Fair Play edition</h1>
+
+<p>2023-02-24 revision by Sean Gugler</p>
+
+<h2>For the 2023.02 release</h2>
+<p>These hints are layered to gently reveal suggestions with minimal spoilers. Hints marked "(!)" give explicit answers.</p>
+
+<button class="collapse-button">
+I keep starving
+</button>
+<div class="collapse-content">
+<p>There is food to be found.</p>
+
+	<button class="collapse-button">
+	Where?
+	</button>
+	<div class="collapse-content">
+	<p>Not on level 1.</p>
+
+		<button class="collapse-button">
+		(!) No, really - where and how many?
+		</button>
+		<div class="collapse-content">
+		<p>Each level (except 1) has one food.</p>
+		<hr/>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+There is a season
+</button>
+<div class="collapse-content">
+<p>Don't give up too soon. This is a tricky puzzle.</p>
+
+	<button class="collapse-button">
+	Is this a reference to something I should know?
+	</button>
+	<div class="collapse-content">
+	<p>These are lyrics to a song by <a href="https://en.wikipedia.org/wiki/The_Byrds">The Byrds</a>.</p>
+
+		<button class="collapse-button">
+		(!) Does that matter?
+		</button>
+		<div class="collapse-content">
+		<p>Only the words quoted in the game are needed to solve the puzzle.</p>
+		<hr/>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	Have I done everything I need to do first?
+	</button>
+	<div class="collapse-content">
+	<p>Probably.</p>
+
+		<button class="collapse-button">
+		(!) What exactly do I need to bring or do first?
+		</button>
+		<div class="collapse-content">
+		<p>This puzzle is self-contained. Everything needed to escape the trap is in there.</p>
+		<hr/>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	Am I missing some information?
+	</button>
+	<div class="collapse-content">
+	<p>Spinning in place may feel pointless, but it does advance the game clock.</p>
+
+		<button class="collapse-button">
+		(!) How does spinning help?
+		</button>
+		<div class="collapse-content">
+		<p>If you spin long enough, you get more complete song lyrics.</p>
+		<hr/>
+		</div>
+
+	<p>Also, remember the general advice in the intro! Type <span>HELP</span> to re-read it.</p>
+		<button class="collapse-button">
+		(!) What specifically in the intro is relevant?
+		</button>
+		<div class="collapse-content">
+		<p>The suggested verbs are helpful. Make sure to <span>LOOK CALCULATOR</span>.</p>
+		<hr/>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	I have everything, I'm just stumped. Give me a nudge.
+	</button>
+	<div class="collapse-content">
+	<p>The calculator displays 3 digits and the song lyrics mention "TURN, TURN, TURN".</p>
+
+		<button class="collapse-button">
+		I need a bigger hint!
+		</button>
+		<div class="collapse-content">
+		<p>One common type of <a href="https://simple.wikipedia.org/wiki/Combination_lock#/media/File:Masterpadlock.jpg">combination lock</a> has a dial. The dial is turned three times, in opposing directions, to the sequence of numbers required to open the lock.</p>
+
+			<button class="collapse-button">
+			(!) Please tell me exactly what to do.
+			</button>
+			<div class="collapse-content">
+			<p><span>LOOK CALCULATOR</span> displays "317". Turn yourself to the <span>RIGHT</span> three times, then to the <span>LEFT</span> one time, then to the <span>RIGHT</span> seven times.</p>
+			<p>If you make a mistake, reset by moving forward into any wall then start the sequence again.</p>
+			<hr/>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	Are you laughing at me?
+	</button>
+	<div class="collapse-content">
+	<p>If you hear a cruel laugh, then good job! You figured out how to operate the trap.</p>
+	<p>But those aren't the right numbers.</p>
+
+		<button class="collapse-button">
+		The phrase after the laugh makes no sense!
+		</button>
+		<div class="collapse-content">
+		<p>The game is set in 1980. Calculators in that day used <a href="https://en.wikipedia.org/wiki/Seven-segment_display">"7-segment" LED displays</a>. Telephones had either <a href="https://en.wikipedia.org/wiki/Rotary_dial">rotary dials</a> or <a href="https://en.wikipedia.org/wiki/Push-button_telephone#/media/File:AT&T_push_button_telephone_western_electric_model_2500_dmg_black.jpg">key pads</a>.</p>
+
+			<button class="collapse-button">
+			How do I use that information for the puzzle?
+			</button>
+			<div class="collapse-content">
+			<p>Reading the calculator display upside-down (inverted) makes the numbers look like letters.</p>
+			<p>Each number on a telephone has letters also.</p>
+
+				<button class="collapse-button">
+				(!) Just tell me the answer.
+				</button>
+				<div class="collapse-content">
+				<p>Imagine the calculator in an inverted position; the numbers 317 would look like the letters LIE.</p>
+				<p>Next look up those letters on a telephone to find the numbers 543.</p>
+				<p>Use that combination lock sequence to escape the trap.</p>
+				<hr/>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+I keep getting beheaded
+</button>
+<div class="collapse-content">
+<p>There is only one guillotine on level 1 and it doesn't move. Try making a map so you know where it is.</p>
+
+	<button class="collapse-button">
+	(!) How do I get past the guillotine?
+	</button>
+	<div class="collapse-content">
+	<p>There is no way to safely go through it. The only way to get to the other side is by going around it. Find another path through the maze.</p>
+	<hr/>
+	</div>
+</div>
+
+<button class="collapse-button">
+I can't get past level 1
+</button>
+<div class="collapse-content">
+<p>You need to find a specific item to reach level 2.</p>
+
+	<button class="collapse-button">
+	(!) Which item?
+	</button>
+	<div class="collapse-content">
+	<p>The hat.</p>
+	</div>
+
+	<button class="collapse-button">
+	How do I use it?
+	</button>
+	<div class="collapse-content">
+	<p>Check the general advice in the intro. Type <span>HELP</span> to re-read it.</p>
+
+		<button class="collapse-button">
+		(!) What specifically in the intro is relevant?
+		</button>
+		<div class="collapse-content">
+		<p>The suggested verbs are helpful. Make sure to <span>LOOK</span> at the item.</p>
+		<hr/>
+		</div>
+
+		<button class="collapse-button">
+		(!) I know what to do but can't get it to work. What should I type?
+		</button>
+		<div class="collapse-content">
+		<p><span>WEAR HAT</span>. Then face the wall you suspect can be knocked down, and type <span>CHARGE</span>.</p>
+		</hr>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	(!) Where do I use it?
+	</button>
+	<div class="collapse-content">
+	<p>In the dead end where you picked it up, turn around to face the way you came in. Then follow the directions.</p>
+	</div>
+</div>
+
+<button class="collapse-button">
+My torch went out
+</button>
+<div class="collapse-content">
+<p>You need a source of heat to light a torch. Make sure you light the new one before the old one dies.</p>
+
+	<button class="collapse-button">
+	What if it goes out before it dies?
+	</button>
+	<div class="collapse-content">
+	<p>In that case, you have to find some other heat source.</p>
+
+		<button class="collapse-button">
+		Do you mean a place or an item?
+		</button>
+		<div class="collapse-content">
+		<p>There is an item that can help. Remember to LOOK at your items!</p>
+
+			<button class="collapse-button">
+			Which item is it?
+			</button>
+			<div class="collapse-content">
+			<p>Did you notice the ring is dusty?</p>
+
+				<button class="collapse-button">
+				(!) How does that help?
+				</button>
+				<div class="collapse-content">
+				<p><span>RUB RING</span>. It glows for one turn, giving you just enough time to <span>LIGHT TORCH</span>.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+A vicious dog
+</button>
+<div class="collapse-content">
+<p>You get one chance to defeat the dog. Choose your action carefully.</p>
+
+	<button class="collapse-button">
+	Do I need an item?
+	</button>
+	<div class="collapse-content">
+	<p>Yes. Something from level 1. Make sure you have found all the items up there.</p>
+
+		<button class="collapse-button">
+		Can you describe it?
+		</button>
+		<div class="collapse-content">
+		<p>It can be used as a weapon.</p>
+
+			<button class="collapse-button">
+			I don't think I'm using it right.
+			</button>
+			<div class="collapse-content">
+			<p>There are three lethal items, actually. But two of them get you killed as well.</p>
+
+				<button class="collapse-button">
+				(!) Tell me what to do.
+				</button>
+				<div class="collapse-content">
+				<p>With the dagger in your inventory, <span>KILL DOG</span>.</p>
+
+					<button class="collapse-button">
+					But the dagger breaks! Is that bad?
+					</button>
+					<div class="collapse-content">
+					<p>Well, there is another way ...</p>
+
+						<button class="collapse-button">
+						You mean without violence?
+						</button>
+						<div class="collapse-content">
+						<p>Have you ever played "fetch" with a dog? They like to chase things.</p>
+
+							<button class="collapse-button">
+							(!) Which item and how do I use it?
+							</button>
+							<div class="collapse-content">
+							<p><span>THROW SNEAKER</span>. I promise he won't bring it back.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	(!) He won't stay gone!
+	</button>
+	<div class="collapse-content">
+	<p>Actually, there are two dogs. One roams the halls, the other sits on guard duty.</p>
+	<hr/>
+	</div>
+</div>
+
+<button class="collapse-button">
+Pits
+</button>
+<div class="collapse-content">
+
+	<button class="collapse-button">
+	Going down?
+	</button>
+	<div class="collapse-content">
+	<p>Just walk forward into a pit to descend.</p>
+
+		<button class="collapse-button">
+		But my stuff breaks
+		</button>
+		<div class="collapse-content">
+		<p>Have you found any items that help with climbing?</p>
+
+			<button class="collapse-button">
+			(!) Tell me how
+			</button>
+			<div class="collapse-content">
+			<p>Sorry, there is no safer way down. The hat always breaks, there is no way to save it.</p>
+			<hr/>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	Going up?
+	</button>
+	<div class="collapse-content">
+	<p>The walls are too sheer to climb.</p>
+
+		<button class="collapse-button">
+		So there's no way back up?
+		</button>
+		<div class="collapse-content">
+		<p>Actually, with the right charm, it is possible.</p>
+
+			<button class="collapse-button">
+			Which item do I need?
+			</button>
+			<div class="collapse-content">
+			<p>Two items, actually. Ever heard of snake charming?</p>
+
+				<button class="collapse-button">
+				No, what's that?
+				</button>
+				<div class="collapse-content">
+				<p>Street performers in some countries will play music to make snakes rise slowly out of their basket.</p>
+				<hr/>
+				</div>
+				<button class="collapse-button">
+				That snake bites!
+				</button>
+				<div class="collapse-content">
+				<p>There is a way to carry it around safely.</p>
+
+					<button class="collapse-button">
+					(!) How?
+					</button>
+					<div class="collapse-content">
+					<p>Do not open the snake box. <span>GET BOX</span> and carry it where you need it to be, then <span>DROP BOX</span>.</p>
+					<hr/>
+					</div>
+				</div>
+
+				<button class="collapse-button">
+				What's the other item?
+				</button>
+				<div class="collapse-content">
+				<p>You will need a musical instrument. You might have to solve a different puzzle before you find it.</p>
+
+					<button class="collapse-button">
+					(!) Where is it?
+					</button>
+					<div class="collapse-content">
+					<p>It's in the box across the pit on level 2.</p>
+					</div>
+				</div>
+
+				<button class="collapse-button">
+				(!) Teach me how
+				</button>
+				<div class="collapse-content">
+				<p>Do not open the snake box. Stand in the same square as it, so you cannot see it anymore, and <span>PLAY FLUTE</span>.</p>
+				<hr/>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	Getting across?
+	</button>
+	<div class="collapse-content">
+	<p>There's no way to jump. You'll have to be more creative.</p>
+
+		<button class="collapse-button">
+		I've tried everything I can think of!
+		</button>
+		<div class="collapse-content">
+		<p>You could go around. If you can't get past the guard, see the main hint section for that guard.</p>
+
+			<button class="collapse-button">
+			So there's no way directly across?
+			</button>
+			<div class="collapse-content">
+			<p>Actually, there is a way.</p>
+
+				<button class="collapse-button">
+				Do I need an item?
+				</button>
+				<div class="collapse-content">
+				<p>Eating well gives you the energy!</p>
+
+					<button class="collapse-button">
+					(!) Tell me what to type.
+					</button>
+					<div class="collapse-content">
+					<p><span>FART</span></p>
+					<hr/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+Doors
+</button>
+<div class="collapse-content">
+
+	<button class="collapse-button">
+	How do I ride an elevator?
+	</button>
+	<div class="collapse-content">
+	<p>Don't overthink it. Try the obvious things.</p>
+
+		<button class="collapse-button">
+		(!) Show me
+		</button>
+		<div class="collapse-content">
+		<p>Face the elevator. <span>OPEN DOOR</span>. Move forward.</p>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	Do I need to learn magic?
+	</button>
+	<div class="collapse-content">
+	<p>Sort of. One door - you'll know which one when you see it - has a magic reaction to ordinary actions.</p>
+
+		<button class="collapse-button">
+		What kind of actions?
+		</button>
+		<div class="collapse-content">
+		<p>Think about comedy tropes from vintage cartoons. Two items are needed to get through this door.</p>
+
+			<button class="collapse-button">
+			Which two items?
+			</button>
+			<div class="collapse-content">
+			<p>The paint brush and the jar.</p>
+
+				<button class="collapse-button">
+				(!) I think I know what to do, but it isn't working.
+				</button>
+				<div class="collapse-content">
+				<p>Face the wall labeled "Magic Door" on level 3. <span>PAINT DOOR</span> then OPEN DOOR.</p>
+				<hr/>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	I can't get out!
+	</button>
+	<div class="collapse-content">
+	<p>Some doors are traps. Once you enter, you're done for.</p>
+
+		<button class="collapse-button">
+		Is there a point?
+		</button>
+		<div class="collapse-content">
+		<p>It's not called Deathmaze for nothing.</p>
+		<p>However, there is a way to destroy them, if you're feeling vengeful.</p>
+
+			<button class="collapse-button">
+			How?
+			</button>
+			<div class="collapse-content">
+			<p>Find something explosive.</p>
+
+				<button class="collapse-button">
+				(!) What do I do with it?
+				</button>
+				<div class="collapse-content">
+				<p><span>OPEN DOOR</span> then <span>THROW BALL</span>.</p>
+				<hr/>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+That darn monster
+</button>
+<div class="collapse-content">
+<p>The monster lurks in the dark, rarely coming out by light.</p>
+
+	<button class="collapse-button">
+	Is there any way to survive?
+	</button>
+	<div class="collapse-content">
+	<p>There is! But the conditions have to be just right.</p>
+
+		<button class="collapse-button">
+		Do I have everything I need?
+		</button>
+		<div class="collapse-content">
+		<p>Have you been through the magic door?</p>
+
+			<button class="collapse-button">
+			No, what door?
+			</button>
+			<div class="collapse-content">
+			<p>Keep exploring. You have to get through the magic door before you can defeat the monster. See the hints for that topic if necessary.</p>
+			</div>
+
+			<button class="collapse-button">
+			Yes. Now what?
+			</button>
+			<div class="collapse-content">
+			<p>Think about how the unique item found there would have been used in old-time comedies.</p>
+
+				<button class="collapse-button">
+				(!) Am I using it wrong?
+				</button>
+				<div class="collapse-content">
+				<p>Did you <span>EAT BANANA</span> first?</p>
+
+					<button class="collapse-button">
+					How does that help?
+					</button>
+					<div class="collapse-content">
+					<p>Check your inventory after eating.</p>
+
+						<button class="collapse-button">
+						(!) I don't see anything special.
+						</button>
+						<div class="collapse-content">
+						<p>After you peel the banana and eat it, you still have the <span>PEEL</span>.</p>
+						<hr/>
+						</div>
+					</div>
+
+					<button class="collapse-button">
+					(!) Yes, but I can't make it work.
+					</button>
+					<div class="collapse-content">
+					<p>Wait until the odor fills the hallway. Then <span>THROW PEEL</span>.</p>
+
+						<button class="collapse-button">
+						I still can't get away in time!
+						</button>
+						<div class="collapse-content">
+						<p>There's no peaceful solution; you'll have to use violence. See the section below about weaponry.</p>
+						<hr/>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		<p>Do you have a suitable weapon?</p>
+			<button class="collapse-button">
+			Yes but I die anyway.
+			</button>
+			<div class="collapse-content">
+			<p>The monster is too quick on his feet, you're no match for him. You have to find some way to slow him down.</p>
+
+				<button class="collapse-button">
+				(!) Ok, how?
+				</button>
+				<div class="collapse-content">
+				<p>See the section above about the magic door.</p>
+				</div>
+
+				<button class="collapse-button">
+				(!) I did, but he still gets me.
+				</button>
+				<div class="collapse-content">
+				<p>You need a bladed weapon to <span>KILL MONSTER</span>. And it only works after you trip him.</p>
+				</div>
+			</div>
+		</div>
+
+		<button class="collapse-button">
+		Is there somewhere special I need to be?
+		</button>
+		<div class="collapse-content">
+		<p>The monster cannot be defeated in the dark. You have to catch him in the light.</p>
+
+			<button class="collapse-button">
+			(!) How?
+			</button>
+			<div class="collapse-content">
+			<p>Wait for him to show himself on level 4. Make sure your torch doesn't run out.</p>
+			<hr/>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+Van Gogh
+</button>
+<div class="collapse-content">
+<p>So, did you find a paint brush?</p>
+
+	<button class="collapse-button">
+	Yes. What is it for?
+	</button>
+	<div class="collapse-content">
+	<p>There is paint somewhere. Keep looking if you haven't found it yet.</p>
+
+		<button class="collapse-button">
+		(!) Where is the paint?
+		</button>
+		<div class="collapse-content">
+		<p><span>LOOK JAR</span>. It's on level 4.</p>
+		<hr/>
+		</div>
+
+		<button class="collapse-button">
+		What should I paint?
+		</button>
+		<div class="collapse-content">
+		<p>Have you found anything bright-colored that would be significantly changed by a coat of black paint?</p>
+
+			<button class="collapse-button">
+			Not really.
+			</button>
+			<div class="collapse-content">
+			<p>What if I told you it's MAGIC paint?</p>
+
+				<button class="collapse-button">
+				(!) I think I know what to do, but it isn't working.
+				</button>
+				<div class="collapse-content">
+				<p>Face the wall labeled "Magic Door" on level 3. <span>PAINT DOOR</span> then OPEN DOOR.</p>
+				<p>Having a painting become real is an old comedy trope memorably used by vintage cartoons.</p>
+				<hr/>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	What do I need to know about Van Gogh?
+	</button>
+	<div class="collapse-content">
+	<p>He was a famous painter.</p>
+
+		<button class="collapse-button">
+		(!) Anything else, specifically?
+		</button>
+		<div class="collapse-content">
+		<p>No.</p>
+		<hr/>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+Ow, my blood
+</button>
+<div class="collapse-content">
+<p>Having trouble with a bat?</p>
+
+	<button class="collapse-button">
+	Yes, how do I defeat him?
+	</button>
+	<div class="collapse-content">
+	<p>You'll have to kill him.</p>
+
+		<button class="collapse-button">
+		I've tried!
+		</button>
+		<div class="collapse-content">
+		<p>He's too fast for a blade. He sure is thirsty, though ... maybe you can poison him.</p>
+
+			<button class="collapse-button">
+			With what?
+			</button>
+			<div class="collapse-content">
+			<p>These are poisonous if you drink them. They'd be poisonous to the bat, too.</p>
+
+				<button class="collapse-button">
+				Black paint
+				</button>
+				<div class="collapse-content">
+				<p>Having trouble getting the paint to the bat?</p>
+
+					<button class="collapse-button">
+					(!) Yes, how do I get the order of actions right?
+					</button>
+					<div class="collapse-content">
+					<p>You don't. There's no way to reach the bat until you've already used up the black paint.</p>
+					</div>
+				</div>
+
+				<button class="collapse-button">
+				Toxic blood
+				</button>
+				<div class="collapse-content">
+				<p>Apart from your own, where else have you seen blood?</p>
+
+					<button class="collapse-button">
+					I don't remember
+					</button>
+					<div class="collapse-content">
+					<p>The monster choked on his own when he died.</p>
+
+						<button class="collapse-button">
+						But how do I collect it?
+						</button>
+						<div class="collapse-content">
+						<p>You'll have to cut his head off.</p>
+
+							<button class="collapse-button">
+							I can't
+							</button>
+							<div class="collapse-content">
+							<p>Your weapon won't work. There is another sharp item that's been known to cut heads off, though.</p>
+
+								<button class="collapse-button">
+								(!) Please walk me through this
+								</button>
+								<div class="collapse-content">
+								<p>Right after you <span>KILL MONSTER</span>, <span>THROW FRISBEE</span> and much blood will be spilled.</p>
+
+									<button class="collapse-button">
+									(!) But how do I get the blood?
+									</button>
+									<div class="collapse-content">
+									<p><span>FILL JAR</span>. It is empty after you use the black paint in it.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<button class="collapse-button">
+			How?
+			</button>
+			<div class="collapse-content">
+			<p>You have to get aggressive with the poison.</p>
+
+				<button class="collapse-button">
+				(!) Tell me what to do
+				</button>
+				<div class="collapse-content">
+				<p><span>THROW JAR</span> and it will shatter. The bat will drink the contents.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+Here we go again
+</button>
+<div class="collapse-content">
+<p>The ground begins to shake?</p>
+
+	<button class="collapse-button">
+	Yes!
+	</button>
+	<div class="collapse-content">
+	<p>What happens next?</p>
+
+		<button class="collapse-button">
+		I'm the next meal
+		</button>
+		<div class="collapse-content">
+		<p>See the main hint section about the monster, please.</p>
+		<hr/>
+		</div>
+
+		<button class="collapse-button">
+		I get ripped to shreds
+		</button>
+		<div class="collapse-content">
+		<p>Ah, I see you've met the other monster.</p>
+
+			<button class="collapse-button">
+			Is there any way to survive?
+			</button>
+			<div class="collapse-content">
+			<p>There is! As with the first monster, the conditions have to be just right.</p>
+
+				<button class="collapse-button">
+				Do I have everything I need?
+				</button>
+				<div class="collapse-content">
+				<p>Do you have a suitable weapon?</p>
+
+					<button class="collapse-button">
+					No, it broke after killing the monster.
+					</button>
+					<div class="collapse-content">
+					<p>There is another blade.</p>
+
+						<button class="collapse-button">
+						(!) Where?
+						</button>
+						<div class="collapse-content">
+						<p>On level 4, there is a hole in the ceiling. It's up there.</p>
+						<p>See the main hint topic for Pits for help getting in.</p>
+						<hr/>
+						</div>
+					</div>
+
+					<button class="collapse-button">
+					Yes, but I don't get any chance to use it.
+					</button>
+					<div class="collapse-content">
+					<p>You'll have to slow her down first.</p>
+
+						<button class="collapse-button">
+						But I'm all out of banana peels!
+						</button>
+						<div class="collapse-content">
+						<p>Is there something she does differently than her son?</p>
+
+							<button class="collapse-button">
+							Like what?
+							</button>
+							<div class="collapse-content">
+							<p>She screeches deafeningly. You'll need something to deafen her in reply.</p>
+
+								<button class="collapse-button">
+								(!) What do I need?
+								</button>
+								<div class="collapse-content">
+								<p>One of the oldest instruments in history is a ram's <a href="https://simple.wikipedia.org/wiki/Horn_(anatomy)">horn</a>.</p>
+
+									<button class="collapse-button">
+									(!) Where do I find one?
+									</button>
+									<div class="collapse-content">
+									<p>Pick up the one that broke off your hat.</p>
+
+										<button class="collapse-button">
+										(!) How do I use it?
+										</button>
+										<div class="collapse-content">
+										<p><span>BLOW HORN</span></p>
+										<hr/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<button class="collapse-button">
+					Yes, but she always sees me coming.
+					</button>
+					<div class="collapse-content">
+					<p>You'll need something to blind her.</p>
+
+						<button class="collapse-button">
+						How?
+						</button>
+						<div class="collapse-content">
+						<p>Did you find anything that can hit someone in the eye?</p>
+
+							<button class="collapse-button">
+							(!) No, what do I do?
+							</button>
+							<div class="collapse-content">
+							<p><span>THROW YOYO</span>. Usually it returns and you hit yourself in the eye, but when she is that close to you, it will hit her first.</p>
+							<hr/>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<button class="collapse-button">
+				Is there somewhere special I need to be?
+				</button>
+				<div class="collapse-content">
+				<p>Like her son, mother cannot be defeated in the dark. You have to catch her in the light.</p>
+
+					<button class="collapse-button">
+					(!) How?
+					</button>
+					<div class="collapse-content">
+					<p>Spend some more time on level 5. She will eventually show herself. Make sure your torch doesn't run out.</p>
+					<hr/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+It's locked
+</button>
+<div class="collapse-content">
+<p>You'll need a key.</p>
+
+	<button class="collapse-button">
+	Where is it?
+	</button>
+	<div class="collapse-content">
+	<p>There isn't one. You'll have to make one.</p>
+
+		<button class="collapse-button">
+		With what?
+		</button>
+		<div class="collapse-content">
+		<p>If you can activate the magic lightning rod, it can fuse gold.</p>
+
+			<button class="collapse-button">
+			How do I activate it?
+			</button>
+			<div class="collapse-content">
+			<p>You need an item that can create lightning.</p>
+
+				<button class="collapse-button">
+				Which item is it?
+				</button>
+				<div class="collapse-content">
+				<p>The magic staff.</p>
+
+					<button class="collapse-button">
+					How do I use it?
+					</button>
+					<div class="collapse-content">
+					<p>A sharp impact will jolt electricity from the staff.</p>
+
+						<button class="collapse-button">
+						(!) Can you be more specific?
+						</button>
+						<div class="collapse-content">
+						<p><span>STRIKE STAFF</span></p>
+						</div>
+					</div>
+
+					<button class="collapse-button">
+					Where do I use it?
+					</button>
+					<div class="collapse-content">
+					<p>Move forward to stand directly under the rod, where you can't see it anymore.</p>
+
+						<button class="collapse-button">
+						(!) I need more help.
+						</button>
+						<div class="collapse-content">
+						<p>If the sparks don't reach, <span>RAISE STAFF</span> before using it.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<button class="collapse-button">
+			Where do I get gold?
+			</button>
+			<div class="collapse-content">
+			<p>Gold can be found in the maze if you search thoroughly.</p>
+
+				<button class="collapse-button">
+				(!) How do I know if something is made of gold?
+				</button>
+				<div class="collapse-content">
+				<p>The item will be described as "golden". If it doesn't say so, it isn't gold.</p>
+				<hr/>
+				</div>
+			</div>
+
+			<button class="collapse-button">
+			What do I do with the gold?
+			</button>
+			<div class="collapse-content">
+			<p>Just carry it. The different shapes are just the different parts of a key that has been split apart.</p>
+			<hr/>
+			</div>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	I have one.
+	</button>
+	<div class="collapse-content">
+	<p>Then what's the problem?</p>
+
+		<button class="collapse-button">
+		It doesn't fit.
+		</button>
+		<div class="collapse-content">
+		<p>You didn't have all the gold pieces, then.</p>
+
+			<button class="collapse-button">
+			Where are the others?
+			</button>
+			<div class="collapse-content">
+			<p>The pieces are on levels 2, 3, and 5.</p>
+
+				<button class="collapse-button">
+				I'm still missing one!
+				</button>
+				<div class="collapse-content">
+				<p>The piece on level 3 can only be reached by teleport.</p>
+
+					<button class="collapse-button">
+					(!) How?
+					</button>
+					<div class="collapse-content">
+					<p><span>PRESS SIX</span> on the calculator. If you move forward and turn around, you'll see that you arrived on top of a box.</p>
+					</div>
+				</div>
+			</div>
+
+			<button class="collapse-button">
+			(!) How many are there?
+			</button>
+			<div class="collapse-content">
+			<p>Four.</p>
+			</div>
+		</div>
+
+		<button class="collapse-button">
+		Something kills me.
+		</button>
+		<div class="collapse-content">
+		<p>Only one of the five locked doors leads to freedom. The others all lead to certain doom.</p>
+
+			<button class="collapse-button">
+			How do I know which one?
+			</button>
+			<div class="collapse-content">
+			<p>Trial and error won't help. It's a different door every time. You'll have to find something that indicates which door is correct.</p>
+
+				<button class="collapse-button">
+				Where should I look?
+				</button>
+				<div class="collapse-content">
+				<p>One of the death traps in the maze provides a vital clue.</p>
+
+					<button class="collapse-button">
+					What level is it on?
+					</button>
+					<div class="collapse-content">
+					<p>Level 5.</p>
+
+						<button class="collapse-button">
+						Which door?
+						</button>
+						<div class="collapse-content">
+						<p>The one that isn't locked.</p>
+
+							<button class="collapse-button">
+							But they're all locked!
+							</button>
+							<div class="collapse-content">
+							<p>Try the elevator.</p>
+
+								<button class="collapse-button">
+								How is that helpful?
+								</button>
+								<div class="collapse-content">
+								<p><span>OPEN DOOR</span> but do not go in. Look at the punctuation marks on the third line.</p>
+
+									<button class="collapse-button">
+									(!) I don't get it
+									</button>
+									<div class="collapse-content">
+									<p>There are 4 question marks (?) and one exclamation mark (!). The position of the exclamation mark tells you which of the 5 locked doors is safe.</p>
+									<p>For example, <span>?!???</span> would mean that the second door from the left, as you face the doors in the long hallway, is one you should open.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+It's ticking
+</button>
+<div class="collapse-content">
+<p>Turns out, it's a time bomb!</p>
+
+	<button class="collapse-button">
+	How do I defuse it?
+	</button>
+	<div class="collapse-content">
+	<p>Use it on another lock. That will defuse it.</p>
+
+		<button class="collapse-button">
+		Which lock?
+		</button>
+		<div class="collapse-content">
+		<p>Are you sure you have tried EVERY lock?</p>
+
+			<button class="collapse-button">
+			Yes, I'm sure
+			</button>
+			<div class="collapse-content">
+			<p>There is a sixth lock that only appears once the bomb starts ticking.</p>
+
+				<button class="collapse-button">
+				(!) Where is it?
+				</button>
+				<div class="collapse-content">
+				<p>Turn to the right when the ticking starts. Go forward to the end of the hall and turn left.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<button class="collapse-button">
+Exit
+</button>
+<div class="collapse-content">
+
+	<button class="collapse-button">
+	Don't look back?
+	</button>
+	<div class="collapse-content">
+	<p>Do not turn to face the direction you came from.</p>
+
+		<button class="collapse-button">
+		(!) Why not?
+		</button>
+		<div class="collapse-content">
+		<p>You will suffer the same fate as <a href="https://simple.wikipedia.org/wiki/Lot_(biblical_person)">Lot's wife</a> in the Judeo-Christian Bible. She was instructed not to look back and paid a price for disobeying.</p>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	How do I avoid the salt?
+	</button>
+	<div class="collapse-content">
+	<p>Don't look back.</p>
+
+		<button class="collapse-button">
+		But I didn't press the "turn around" key.
+		</button>
+		<div class="collapse-content">
+		<p>Repeatedly turning left or right will still face you back the way you came. That leads to punishment no matter which key you pressed.</p>
+		<hr/>
+		</div>
+
+		<button class="collapse-button">
+		(!) How do I stay alive?
+		</button>
+		<div class="collapse-content">
+		<p>Keep moving forward. Beyond this point, there's nothing you need where you came from.</p>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	I can't read the whole thing
+	</button>
+	<div class="collapse-content">
+	<p>You'll have to disarm the trap first.</p>
+
+		<button class="collapse-button">
+		(!) How?
+		</button>
+		<div class="collapse-content">
+		<p>See the main hint section on the topic of "doors".</p>
+		</div>
+	</div>
+
+	<button class="collapse-button">
+	I can read it, but I don't understand it
+	</button>
+	<div class="collapse-content">
+
+		<button class="collapse-button">
+		What is the name of the monster?
+		</button>
+		<div class="collapse-content">
+		<p>The sword knows.</p>
+
+			<button class="collapse-button">
+			(!) How do I ask it?
+			</button>
+			<div class="collapse-content">
+			<p><span>LOOK SWORD</span></p>
+			</div>
+
+			<button class="collapse-button">
+			The sword told me but it didn't work.
+			</button>
+			<div class="collapse-content">
+			<p>Make sure you are using the name properly. See the hint about breaking the seal.</p>
+
+				<button class="collapse-button">
+				I am, but it just prints the name and nothing else happens.
+				</button>
+				<div class="collapse-content">
+				<p><a href="https://simple.wikipedia.org/wiki/Beowulf_(hero)"><span>BEOWULF</span></a> is the name of a legendary hero. You need the name of the monster he defeated.</p>
+
+					<button class="collapse-button">
+					(!) Ok just tell me.
+					</button>
+					<div class="collapse-content">
+					<p>The monster's name is <span>GRENDEL</span>.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<button class="collapse-button">
+		How do I break the seal?
+		</button>
+		<div class="collapse-content">
+		<p>Try disobeying it.</p>
+
+			<button class="collapse-button">
+			What do you mean?
+			</button>
+			<div class="collapse-content">
+			<p>Speak aloud the name of the monster.</p>
+
+				<button class="collapse-button">
+				(!) How?
+				</button>
+				<div class="collapse-content">
+				<p>Type <span>SAY</span> followed by the monster's name.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>  <!-- main -->
+
+<script>
+/* maxHeight technique courtesy of Andy McFadden https://6502disassembly.com/a2-deathmaze/hints.html */
+/* nested elements and parent adjustments by Sean Gugler */
+var coll = document.getElementsByClassName("collapse-button");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+	coll[i].addEventListener("click", function() {
+		this.classList.toggle("collapse-isopen");
+		var content = this.nextElementSibling;
+		if (content.style.maxHeight) {
+			content.style.maxHeight = null;
+		} else {
+			var height = 0
+			while (content.id != "main") {
+				height += content.scrollHeight;
+				content.style.maxHeight = height + "px";
+				content = content.parentElement;
+			}
+		}
+	});
+}
+</script>
+</body>
+</html>
