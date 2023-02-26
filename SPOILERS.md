@@ -47,6 +47,8 @@ There is now a reason for the brush to exist, and for the verb "paint" to exist.
 
 Instead, it is now a "magic door" and the jar comes pre-filled with black paint. Painting the door turns it into a real one. This references a trope from early comedy cartoons. Even if the player is not familiar with the trope, the hints of calling it a "magic door", coloring it brightly, and finding black paint should be enough to make the solution fairly discoverable.
 
+The name on the brush has been changed to ACME in order to suggest this line of thinking to players familiar with the cartoons. I have no idea what significance Van Gogh had to the original author. It seems irrelevant to the game except for maybe a thematic coherence with suffering and death. I've moved his name into a generic response when the player attempts painting anything besides a door. This way he's still present in the game but hopefully less likely to mislead.
+
 * DRINK verb
 
 Since the jar can be full of liquid, I added the verb "drink". It's just another death trap, though.

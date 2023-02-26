@@ -83,7 +83,7 @@ Lit:
 Unlit:
 crystal ball.
 nice banana.
-paintbrush used by Van Gogh.
+paintbrush made by ACME.
 calculator with 10 buttons.
 razor sharp dagger.
 flute.
@@ -308,5 +308,5 @@ NEVER BE SPOKEN
 "             Good Luck!                 "
 "                                        "
 "1980 design by Med Systems Software     "
-"2023.02 Fair Play edition by S.Gugler "
+"2023.03 Fair Play edition by S.Gugler "
 
