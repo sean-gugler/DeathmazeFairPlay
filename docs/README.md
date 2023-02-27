@@ -3,10 +3,14 @@
 *A fan mod by Sean Gugler*
 
 You can play online right now:
-1. Download `deathmaze.dsk` from https://github.com/sean-gugler/DeathmazeFairPlay/releases
-2. Visit https://www.scullinsteel.com/apple2/ and click the "open folder" icon (tip: F2 toggles full-screen)
+1. Download `deathmaze.dsk` from <https://github.com/sean-gugler/DeathmazeFairPlay/releases>
+2. Visit <https://www.scullinsteel.com/apple2/> and click the "open folder" icon (tip: F2 toggles full-screen)
 
 When the disk boots, choose option 4 to play the Fair Play edition.
+
+## Hints
+
+Stuck? Try the self-guided, minimal-spoiler [hint](https://sean-gugler.github.io/DeathmazeFairPlay/hints.html) page.
 
 # About the game
 
@@ -77,19 +81,24 @@ The original game required saving to slot 6, drive 1. The Fair Play edition will
 
 The earlier release has been in my own collection since 1980. It is not an official retail disk, so I have no way of knowing for sure if it was cracked or if the original was not protected. There is no evidence of any vanity vandalism typically inserted by crackers, though.
 
-The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work in situ; it relies on standard DOS, and that disk has "Beautiful Boot" installed. It works fine when the entire program file is transplanted to a standard DOS disk, though. I have no other information on its provenance, such as whether it was cracked or the original was just not protected.
+The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work in situ; it relies on standard DOS, but that disk uses "Beautiful Boot" instead. When I transplanted the entire program file to a standard DOS disk, I found that saving worked fine. I have no other information on this edition's provenance but forensic analysis suggests it was an official update. There are many jump-offset changes which typically result from recompiling source rather than hacking.
 
 ## Observations
 
 The original authors used 1-based indexing ubiquitously, rather than machine-friendly 0-based indexing. In many cases this means setting up data table pointers to the address one entry earlier than where the table actually starts.
 
-The original authors used the assembly code instructions BPL and BMI after CMP, rather than the customary BCS and BCC. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at http://www.6502.org/tutorials/compare_beyond.html)
+The original authors used the assembly code instructions `bpl` and `bmi` after `cmp`, rather than the customary `bcs` and `bcc`. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at <http://www.6502.org/tutorials/compare_beyond.html>)
 
-The game was originally written for the Z80 instruction set of the TRS-80 and ported to 6502 for the Apple II. This could explain certain anomalies, such as always using indirect addressing with indexing (`lda (ptr),y`) rather than simple indexing (`lda addr,x`) where it would be more compact, or why the `A` register is used as an intermediary for loading values into `X` and `Y` rather than using `ldx` and `ldy`.
+The game was originally written for the Z80 instruction set of the TRS-80 and ported to 6502 for the Apple II. This could explain certain anomalies, such as always using indirect addressing with indexing (`lda (ptr),y`) rather than absolute indexing (`lda addr,x`) where possible, or why the `A` register is used as an intermediary for loading values into `X` and `Y` rather than using `ldx` and `ldy`.
 
 ## Development process
 
-Time spent: 9 weeks
+Time spent: 10 weeks
+* 2 weeks: disassembly and annotation
+* 1 week: organized into buildable project
+* 5 weeks: modifications for Fair Play
+* 1 week: bug fixes
+* 1 week: hint page
 
 I used [Regenerator 1.7](https://csdb.dk/release/?id=149429) to disassemble and hand-label the binary program.
 
@@ -97,11 +106,11 @@ I used [Regenerator 1.7](https://csdb.dk/release/?id=149429) to disassemble and 
 
 Literally one hour after I first published my work to github I coincidentally discovered Andy McFadden's excellent [disassembly listing](https://6502disassembly.com/a2-deathmaze/Deathmaze5000.html). From there I also discovered his tool SourceGen. I probably could have finished this project a few weeks sooner had I known about those. Oh well.
 
-Andy's copy of the game appears to exactly match the retail "Rev1" I have, except for one curiosity: his edition saves the game to Track 2 Sector F. I'm inclined to think that was a fan hack made at some point along the way. It lacks the modifications present in "Rev2" which clearly required recompiling from source ... yet Rev2 still saves to Track 3 Sector 0 same as Rev1.
+Andy's copy of the game appears to exactly match the retail "Rev1" I have, except for one curiosity: his edition saves the game to Track 2 Sector F. This change is not present in "Rev2", it still saves to Track 3 Sector 0. Since Rev2 is clearly an official release, having changes that could only result from recompiling from source, I'm inclined to think Andy's edition is a fan hack of Rev1 made to protect the saved game against conflicts with the file storage area of the disk.
 
 # Building from source
 
-https://github.com/sean-gugler/DeathmazeFairPlay
+<https://github.com/sean-gugler/DeathmazeFairPlay>
 
 This source code has been reconstructed by disassembling and symbolicating the 1980 binary code released for Apple II series computers. It likely bears little resemblance to the original source, but it can be used by modern tools to build the same playable binaries.
 
