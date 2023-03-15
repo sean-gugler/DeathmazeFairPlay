@@ -89,7 +89,7 @@ OBJS = $(patsubst %,$(build_dir)/%.o,$(CODE) $(DATA))
 $(build_dir)/%.o: $(src_dir)/%.s | $(build_dir)
 	$(AS65) $(AS65FLAGS) $(DEFINES) $< -o $@
 
-$(PROGRAM): $(build_dir)/loadaddr.o $(OBJS) deathmaze_fixed.cfg
+$(PROGRAM): $(build_dir)/loadaddr.o $(OBJS) deathmaze_fixed.cfg | $(output_dir)
 	$(LD65) -m $(build_dir)/$(@F).map -C $(filter %.cfg,$^) -Ln $(build_dir)/$(@F).lab \
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 

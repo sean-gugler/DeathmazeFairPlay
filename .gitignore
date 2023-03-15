@@ -11,3 +11,4 @@
 *.~*
 /regenerator/Regenerator*
 /regenerator/Config/Systems
+!/files/RESERVED.prg
