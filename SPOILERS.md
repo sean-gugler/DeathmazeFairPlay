@@ -81,25 +81,27 @@ It never made sense that the wool disappears when you climb the snake into the m
 
 The intended purpose for the wool is also not intuitive. Wool is used for keeping things warm, or spinning into yarn, or protecting fragile items against breakage. Maybe even soaking and squeezing the dye out of it - why else is it specifically "blue"? Throwing wool at a monster to entangle and trip it is not a well-known trope. If it's a reference to something, I'm not aware of it. There's no tie-in to the Grendel story, which would have at least been fair if obscure. This solution felt discoverable only by trying everything possible, by exhausting the verb/noun combinations. That's an unfortunately common but unpleasant trait of games from this era.
 
-So what item can trip up a monster and would be stolen by a freed snake? How about a banana? True, real snakes won't eat bananas, but you can't climb a real snake charmed by a flute either. At least slipping on a banana peel is a much more well-known trope than getting tangled in wool. 
+I didn't want to just remove the wool because I admire the interlocking progression gates at the core of the original puzzle design:
 
-I didn't want to just remove the wool because I admire the solid logic chain at the core of the original puzzle design:
-
-1. The player cannot reach the exit until the monster is dead.
-2. The monster's mother guards the exit.
-3. The sword is needed to defeat the monster's mother.
+1. The player cannot reach the exit level until the monster is dead.
+2. Our everyman player is no match for the monster unless it is made vulnerable first.
+3. The ITEM (wool) that makes it vulnerable must be used before the snake is freed.
 4. The snake is needed to reach the sword.
-5. The roaming dog will be encountered on the way to fetching the snake.
 
-If the dagger is used to defeat the dog, and the sword to defeat both the monster and its mother, then the sneaker would be superfluous. To make the sneaker mandatory, the sword must be prevented from being used against the monster. The designers achieved this with an additional, related dependency chain:
+Thus the sword cannot be used to kill the monster; some other weapon must be used. Furthermore:
 
-1. Our everyman player is no match for the monster unless it is made vulnerable first.
-2. The item that makes it vulnerable vanishes when the snake is freed.
+1. The monster's mother guards the exit.
+2. The sword is needed to defeat the monster's mother.
 3. The snake is needed to reach the sword.
+4. The roaming dog will be encountered on the way to fetching the snake.(*)
 
-Thus the player may experiment with skipping the dog or using the dagger against it, but will be unable to reach the exit unless the sneaker is used on the dog.
+The dagger can only be used once. It works against the dog, but that leaves nothing to defeat the monster with. Thus the player may experiment with skipping the dog (and the snake) or using the dagger against it, but will be unable to reach the exit unless the sneaker is used on the dog. These possibility branches provide a more satisfying puzzle structure than a simple linear chain of gates; they also make sure the sneaker has a mandatory purpose that cannot be bypassed.
 
-All I changed was the identity of the item to feel more sensible. I also improved some of the text responses to account for locations of the various items. For example, if you have the banana with you when the snake is freed, it eats it immediately and leaves. If you don't have it with you, the snake simply leaves ... and re-appears if you try to open the box that contains the banana.
+So to retain the structure, all I changed was the identity of the ITEM to feel more sensible. Now what can trip up a monster and would be stolen by a freed snake? How about a banana? True, real snakes won't eat bananas, but you can't climb a real snake charmed by a flute either. At least slipping on a banana peel is a much more well-known trope than getting tangled in wool. 
+
+I also improved some of the text responses to account for locations of the various items. For example, if you have the banana with you when the snake is freed, it eats it immediately and leaves. If you don't have it with you, the snake simply leaves ... and re-appears if you try to open the box that contains the banana.
+
+(*)Since writing this, I have discovered it is possible to win without encountering any dogs. Just skip getting the torch on level 2. I haven't decided whether to "fix" that or to let speed runners feel smart for finding an alternate solution. One easy fix is to swap the snake and torch locations.
 
 * CALCULATOR expanded
 
@@ -125,13 +127,13 @@ The staff is now on level 4 - although not where the flute was. I've put somethi
 
 The original game relied on smoke and mirrors to fake the existence of that pit. Now it becomes visible like any other pit once it has been exposed. This is more than just cosmetic; it is practical since the hat has been changed from re-usable to single-use.
 
-I also now allow climbing from level 2 back up to 1 with the snake. This scenario is possible even in retail with use of the calculator, but you would disappointingly ram your head against the ceiling.
+I also now allow climbing from level 2 back up to 1 with the snake. In retail you could attempt this by using the calculator to bring the flute up to level 2, but you would disappointingly ram your head against the ceiling even through the opening above is plainly visible.
 
 * Timing of monster tightened
 
-To raise the tension on level 4 and enhance excitement, I've placed the jar where the flute was and reduced the monster timer so that it now appears in precisely the number of moves it takes to reach the jar and return to the elevator. The player is able to barely escape his clutches in the nick of time. This is a guaranteed experience because the jar is necessary to obtain the banana, which is required to defeat the monster.
+To raise the tension on level 4 and enhance excitement, I've placed the jar where the flute was and reduced the monster timer so that it now arrives in precisely the number of moves it takes to reach the jar and return to the elevator. The player is able to barely escape his clutches in the nick of time. This is a guaranteed experience because the jar is necessary to obtain the banana, which is required to defeat the monster.
 
-The timing of the mother has also been tightened to make it just possible to obtain the golden hook but not escape alive with it. The mother must be defeated before the hook can be obtained. This guarantees the mother cannot be bypassed in solving the game, which was possible in the retail edition.
+The timing of the mother has also been tightened to make it just possible to obtain the golden hook but not escape alive with it. The mother must be defeated before the hook can be carried off. This guarantees the mother cannot be bypassed in solving the game, which was possible in the retail edition.
 
 Since the jar's original location is now vacant, I placed one of the pieces of the golden key there.
 
@@ -139,7 +141,7 @@ Since the jar's original location is now vacant, I placed one of the pieces of t
 
 The disappointing elevator trap on level 5 (fool me once, etc.) now has a purpose. Opening the doors reveals a hint regarding which keyhole is the correct one. But the way I phrased it can also be read as a simple taunt, daring the player to enter, when of course it's yet another deathtrap.
 
-It came in handy later to re-use the new code mechanic of revealing something behind opening doors, too. (see below)
+It came in handy later to re-use this new code that reveals something interesting behind opening doors, too. (see end game and finale below)
 
 * Random keyhole
 
@@ -149,7 +151,7 @@ The behaviors of the locked doors are no longer predictable. In the original gam
 
 There was a ton of custom code to manage the end game sequence. Most of that was probably to disallow behaviors they hadn't or didn't want to fully test. I ripped it all out and pared down that special mode to its bare minimum.
 
-I retained the "pillar of salt", but invoked it only if the player turned back towards the keyhole entrance, rather than for taking any action that deviated from the tightly-scripted final sequence of moves. The elevator is now a one-unit chamber containing the final riddle. Instead of a weirdly-personified narrator asking the question, which was inconsistent with the rest of the game's voice, I wrote the riddle on the wall. And instead of making the answer a custom verb, I employed the otherwise-unused "Say" mechanic.
+I retained the "pillar of salt", but invoked it only if the player turned back towards the keyhole entrance, rather than for taking any action that deviated from the tightly-scripted final sequence of moves, to allow a little more leeway in experimentation. The elevator is now a one-unit chamber containing the final riddle. Instead of a weirdly-personified narrator asking the question, which was inconsistent with the rest of the game's voice, I wrote the riddle on the wall. And instead of making the answer a custom verb, I employed the otherwise-unused "Say" mechanic.
 
 * Finale artwork
 
@@ -163,13 +165,13 @@ Finally, instead of locking up the machine upon winning, I exit back to the oper
 
 There are times when the game deliberately waits a short time and goes unresponsive. This is probably to make sure the player doesn't miss out on important text, such as when a random dog attacks. It also enables narrative pacing during events like falling down a pit.
 
-I added visual "spinner" in the corner for two reasons: the player knows the game is stalling, not crashed; and the player knows immediately when the time is up. I always hated guessing when it was ok to start typing again after a dog attacked me. I also let the spacebar, Enter, and Esc keys interrupt the wait.
+I added a visual "spinner" in the corner for two reasons: the player knows the game is stalling, not crashed; and the player knows immediately when the time is up. I always hated guessing when it was ok to start typing again after a dog attacked me. I also let the spacebar, Enter, and Esc keys interrupt the wait.
 
 * Full words required
 
 This might feel like a step backward to some players. The original parser only checked the first four letters of words you entered. I've changed it to require typing out the full word.
 
-Partly this is to avoid the frustration of "aliased" words, like thinking the game recognizes the verb "strip" (alias "strike") or the noun "thread" (alias "three"). But my alteration turns out to use *fewer* total bytes, even with the extra string data. Most parsers of the era that limited word length did so to save on storage - if the limit is not serving that purpose, that's one more reason to remove it.
+Partly this is to avoid the frustration of "aliased" words, like thinking the game recognizes the verb "strip" (alias "strike") or the noun "thread" (alias "three"). But also, to my delighted suprise, my alteration turns out to use *fewer* total bytes, even with the extra string data. Most parsers that limited word length back in those days did so to save on storage - if the limit is not serving that purpose, that's one more reason to remove it.
 
 Another benefit is that short words with fewer than four letters are no longer padded in the string table with spaces. This makes them display more nicely without extraneous spaces when the game prints them. For example: `The Jar  sails around the corner`.
 
@@ -199,7 +201,7 @@ There is a situation where this verb is a perfectly reasonable thing to try. So 
 
 * SWORD weight made reasonable
 
-90 pounds is absurd. The heaviest real swords weigh about 7 (see link below). The weight is purely cosmetic, it doesn't affect game play at all. May as well retain player immersion better by demanding less suspension of disbelief. I removed the number and simply describe the sword as "heavy".
+90 pounds is absurd. The heaviest real swords weigh about 7 (see link below). Since the weight has no importance nor significance to gameplay, only to enrich the world description, I may as well improve player immersion by demanding less suspension of disbelief. I removed the number and simply describe the sword as "heavy".
 
 https://swordscorner.com/how-much-do-swords-weigh-full-analysis-table-lbs-kgs/
 
@@ -215,7 +217,7 @@ In the dog encounter, PLAY BALL is now recognized. So is THROW BALL. You still d
 
 * BALL works anywhere
 
-The crystal ball can now be used to destroy any open door, not just the final one. This allows earlier discovery of its purpose. The destroyed door looks visibly altered as well.
+The crystal ball can now be used to destroy any open door, not just the final one, without harming the player. This allows earlier discovery of its purpose. The destroyed door looks visibly altered as well.
 
 * GET responses more nuanced
 
