@@ -51,6 +51,7 @@ text_game_number:
 
 save_filename:
 	Pstring "DEATHMAZE.SAVE0"
+save_number = * - 1
 
 prodos_buffer = $9000
 
@@ -88,6 +89,7 @@ close_params:
 
 save_disk_or_tape:
 	jsr prompt_game_number
+	beq resume_game
 
 	jsr P8_MLI
 	.byte P8_CREATE
@@ -114,6 +116,7 @@ resume_game:
 load_disk_or_tape:
 	inc signature
 	jsr prompt_game_number
+	beq load_abort
 	lda #P8_READ
 	jsr do_file
 	bcs load_failed
@@ -145,6 +148,7 @@ check_signature:
 
 load_failed:
 	jsr print_prodos_error
+load_abort:
 	pla
 	pla
 	jmp cold_start
@@ -159,8 +163,17 @@ prompt_game_number:
 	ldx #>text_game_number
 	stx zp0C_string_ptr+1
 	jsr print_string
-;	jsr input_char
-
+	jsr input_char
+	lda hw_KEYBOARD
+	and #$7f
+	cmp #$1b  ;ESC
+	beq @done
+	cmp #'0'
+	bcc prompt_game_number
+	cmp #'9' + 1
+	bcs prompt_game_number
+	sta save_number
+@done:
 	rts
 
 do_file:
