@@ -57,6 +57,9 @@ fixed:
 fairplay:
 	$(MAKE) -C versions/fairplay
 
+fairplay_prodos:
+	$(MAKE) -C versions/fairplay_prodos
+
 VERSIONS = rev1 rev2 fixed fairplay
 
 
@@ -66,6 +69,7 @@ clean_versions:
 	$(MAKE) clean -C versions/rev2
 	$(MAKE) clean -C versions/fixed
 	$(MAKE) clean -C versions/fairplay
+	$(MAKE) clean -C versions/fairplay_prodos
 
 # Generated directories
 
@@ -87,7 +91,7 @@ ATTR = files/DOS_attributes.txt
 
 DOS = files/DOS.bin
 
-DISK = $(output_dir)/deathmaze.dsk
+DISK = $(output_dir)/deathmaze.do
 
 $(DISK): $(FILES) $(DOS) | $(output_dir)
 	@echo "Creating $@"
