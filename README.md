@@ -79,9 +79,13 @@ The original game required saving to slot 6, drive 1. The Fair Play edition will
 
 ## Retail editions
 
-The earlier release has been in my own collection since 1980. It is not an official retail disk, so I have no way of knowing for sure if it was cracked or if the original was not protected. There is no evidence of any vanity vandalism typically inserted by crackers, though.
+The later edition comes from the most authentically preserved release I've encountered, in the [woz-a-day](https://archive.org/details/wozaday_Deathmaze_5000) collection. That collection rarely mentions provenance, but it seems to deal exclusively with original pressings, not copies. While the disks it works from are not always factory-pristine and may be "contaminated" by save games or high score tables, this one looks clean.
 
-The later release was found on Asimov, bundled on a disk with some other games. The "save game to disk" feature does not work in situ; it relies on standard DOS, but that disk uses "Beautiful Boot" instead. When I transplanted the entire program file to a standard DOS disk, I found that saving worked fine. I have no other information on this edition's provenance but forensic analysis suggests it was an official update. There are many jump-offset changes which typically result from recompiling source rather than hacking.
+An identical copy of that game file can be found at [Asimov](https://www.apple.asimov.net/images/games/file_based/ankh_crimewave_deathmaze5000_starmaze.dsk) on a disk captured many years earlier, bundled with some other games. Incidentally, that disk uses "Beautiful Boot" instead of standard DOS, which prevents the "save game to disk" feature from working. Transplanting the program file to a standard DOS disk allows saving to work normally.
+
+The earlier edition of the game has been in my own collection since 1980. It is not an official retail disk, yet for several reasons I feel confident my file came unmodified from one. There is no evidence of any vanity vandalism typically inserted by crackers. The woz disk isn't copy protected, so this one probably wasn't either. There are some minor bugs not present in the woz edition. Forensic analysis of the two files show rippled jump-offset changes which typically result from recompiling source rather than hacking.
+
+See also "Fadden listing" below.
 
 ## Observations
 
@@ -106,7 +110,7 @@ I used [Regenerator 1.7](https://csdb.dk/release/?id=149429) to disassemble and 
 
 Literally one hour after I first published my work to github I coincidentally discovered Andy McFadden's excellent [disassembly listing](https://6502disassembly.com/a2-deathmaze/Deathmaze5000.html). From there I also discovered his tool SourceGen. I probably could have finished this project a few weeks sooner had I known about those. Oh well.
 
-Andy's copy of the game appears to exactly match the retail "Rev1" I have, except for one curiosity: his edition saves the game to Track 2 Sector F. This change is not present in "Rev2", it still saves to Track 3 Sector 0. Since Rev2 is clearly an official release, having changes that could only result from recompiling from source, I'm inclined to think Andy's edition is a fan hack of Rev1 made to protect the saved game against conflicts with the file storage area of the disk.
+Andy's copy of the game appears to exactly match the retail "Rev1" I have, except for one curiosity: his edition saves the game to Track 2 Sector F. This moves the saved game out of the file storage area of the disk, which protects it from being overwritten by other files. Since this change is not present in Rev2, which still saves to Track 3 Sector 0 same as Rev1, I'm inclined to think it is a fan hack and not indicative of a unique official release.
 
 # Building from source
 
