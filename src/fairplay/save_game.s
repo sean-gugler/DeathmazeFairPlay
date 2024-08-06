@@ -25,7 +25,6 @@
 	.include "game_state.i"
 	.include "item_commands.i"
 	.include "msbstring.i"
-	.include "pstring.i"
 
 error_write_protect = $01
 error_volume_mismatch = $02

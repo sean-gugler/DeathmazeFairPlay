@@ -15,7 +15,7 @@
 	.import item_cmd
 	.import input_char
 	.import print_to_line2
-	.import load_disk_or_tape
+	.import load_game
 	.import input_Y_or_N
 	.import print_display_string
 	.import get_rowcol_addr
@@ -62,7 +62,7 @@ new_session:
 	jsr input_Y_or_N
 	cmp #'Y'
 	bne new_game
-	jsr load_disk_or_tape
+	jsr load_game
 	lda #$96     ;Press any key
 .if REVISION < 100 ;RETAIL
 	nop

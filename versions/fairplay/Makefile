@@ -19,7 +19,7 @@ FOLDERS += \
 # Custom settings
 
 PROGRAM = $(output_dir)/deathmaze_fairplay.prg
-DEFINES = -DREVISION=101 -DPRODOS=0
+DEFINES = -DREVISION=101
 
 
 # For .include "file.i" directives,

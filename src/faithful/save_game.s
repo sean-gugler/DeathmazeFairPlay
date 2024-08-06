@@ -1,6 +1,6 @@
 	.export check_signature
-	.export load_disk_or_tape
-	.export save_disk_or_tape
+	.export load_game
+	.export save_game
 
 	.import cold_start
 	.import input_char
@@ -59,7 +59,7 @@ text_load_device:
 
 .endif
 
-load_disk_or_tape:
+load_game:
 	jsr clear_hgr2
 	ldx #$00
 	stx zp_col
@@ -80,7 +80,7 @@ prompt_tape:
 	jsr print_to_line1
 	rts
 
-save_disk_or_tape:
+save_game:
 	jsr clear_hgr2
 	ldx #$00
 	stx zp_col

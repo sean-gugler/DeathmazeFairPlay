@@ -11,7 +11,7 @@
 	.import clear_hgr2
 	.import play_again
 	.import input_char
-	.import save_disk_or_tape
+	.import save_game
 	.import input_Y_or_N
 	.import check_special_position
 	.import starved
@@ -1853,7 +1853,7 @@ ask_save_game:
 	beq :+
 	jmp clear_status_lines
 
-:	jmp save_disk_or_tape
+:	jmp save_game
 
 save_to_tape:
 	lda #$95     ;Prepare cassette

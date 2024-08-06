@@ -7,9 +7,9 @@ include ../common/Makefile
 
 base_dir = ../..
 
-src_dir = $(base_dir)/src/fairplay
+src_dir = $(base_dir)/src/faithful
 tools_dir = $(base_dir)/tools
-build_dir = $(base_dir)/build/fairplay_prodos
+build_dir = $(base_dir)/build/fixed_prodos
 output_dir = $(base_dir)/output
 
 FOLDERS += \
@@ -18,8 +18,8 @@ FOLDERS += \
 
 # Custom settings
 
-PROGRAM = $(output_dir)/deathmaze_fairplay_prodos.prg
-DEFINES = -DREVISION=101
+PROGRAM = $(output_dir)/deathmaze_fixed_prodos.prg
+DEFINES = -DREVISION=100
 
 
 # For .include "file.i" directives,
@@ -43,7 +43,7 @@ STRING_DEF = $(patsubst %,%_defs.inc,$(STRING_STEMS))
 STRINGS = $(STRING_DECL) $(STRING_DEF)
 
 $(STRINGS): $(tools_dir)/build_strings.py $(src_dir)/strings.txt
-	$^ $(STRING_STEMS) --full
+	$^ $(STRING_STEMS)
 
 GENERATED += $(STRINGS)
 
@@ -89,7 +89,7 @@ OBJS = $(patsubst %,$(build_dir)/%.o,$(CODE) $(DATA))
 $(build_dir)/%.o: $(src_dir)/%.s | $(build_dir)
 	$(AS65) $(AS65FLAGS) $(DEFINES) $< -o $@
 
-$(PROGRAM): $(build_dir)/loadaddr.o $(OBJS) deathmaze_fairplay.cfg | $(output_dir)
+$(PROGRAM): $(build_dir)/loadaddr.o $(OBJS) deathmaze_fixed.cfg | $(output_dir)
 	$(LD65) -m $(build_dir)/$(@F).map -C $(filter %.cfg,$^) -Ln $(build_dir)/$(@F).lab \
 		-o $@ $(LD65FLAGS) $(filter %.o,$^) || (rm -f $@ && exit 1)
 
