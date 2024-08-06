@@ -60,7 +60,7 @@ fairplay:
 fairplay_prodos:
 	$(MAKE) -C versions/fairplay_prodos
 
-VERSIONS = rev1 rev2 fixed fairplay
+VERSIONS = rev1 rev2 fixed fairplay fairplay_prodos
 
 
 CLEAN += clean_versions

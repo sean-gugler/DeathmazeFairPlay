@@ -82,7 +82,7 @@ DATA = \
 	vocab \
 	strings \
 	intro \
-	save_game
+	save_game_prodos
 
 OBJS = $(patsubst %,$(build_dir)/%.o,$(CODE) $(DATA))
 
