@@ -308,5 +308,5 @@ NEVER BE SPOKEN
 "             Good Luck!                 "
 "                                        "
 "1980 design by Med Systems Software     "
-"2023.03 Fair Play edition by S.Gugler "
+"2024.01 Fair Play edition by S.Gugler "
 
