@@ -3,7 +3,7 @@
 *A fan mod by Sean Gugler*
 
 You can play online right now:
-1. Download `deathmaze.dsk` from <https://github.com/sean-gugler/DeathmazeFairPlay/releases>
+1. Download `deathmaze.do` from <https://github.com/sean-gugler/DeathmazeFairPlay/releases>
 2. Visit <https://www.scullinsteel.com/apple2/> and click the "open folder" icon (tip: F2 toggles full-screen)
 
 When the disk boots, choose option 4 to play the Fair Play edition.
@@ -28,15 +28,17 @@ This project builds four editions of the game:
 3. Original game, with more bugs fixed by the Fair Play author
 4. Fair Play fan release
 
-All four are included in the provided disk image for easy comparison.
+All four are included in the provided DOS 3.3 disk image for easy comparison.
+
+The latter two are also included in a ProDOS disk image. These versions remove support for saving to cassette, but can now manage up to 10 simultaneous save files.
 
 ## Saved Game file
 
 WARNING: The original game (editions 1 through 3) saves the game directly to track 3, sector 0. This is safe on the provided disk because I've allocated a "RESERVED" file to protect that sector. The same may not be true if you copy the files to another disk, so be careful! The safest (though wasteful) thing to do is use a completely blank disk for saved games.
 
-The **Fair Play** edition saves the game to a proper DOS file through ordinary catalog allocation. This edition and its save file are safe to transport by ordinary means to any other disk. Probably won't work in ProDOS, though.
+The DOS 3.3 **Fair Play** edition and all ProDOS editions save the game to a proper file through ordinary catalog allocation. These editions and their save files are safe to transport by ordinary means to any other disk.
 
-The original game required saving to slot 6, drive 1. The Fair Play edition will save to the same slot and drive the game was launched from.
+The original game required saving to slot 6, drive 1. The Fair Play edition will save to the same disk the game was launched from. On ProDOS, if you move the game files to a subfolder, be sure to edit the STARTUP program to adjust the PREFIX accordingly, or else save files may be stored in the root of the device volume.
 
 ## Bugs fixed in later retail
 * Breaking an item now clears it from the inventory display.
@@ -79,30 +81,31 @@ The original game required saving to slot 6, drive 1. The Fair Play edition will
 
 ## Retail editions
 
-The later edition comes from the most authentically preserved release I've encountered, in the [woz-a-day](https://archive.org/details/wozaday_Deathmaze_5000) collection. That collection rarely mentions provenance, but it seems to deal exclusively with original pressings, not copies. While the disks it works from are not always factory-pristine and may be "contaminated" by save games or high score tables, this one looks clean.
+The **later edition** comes from the most authentically preserved release I've encountered, in the [woz-a-day](https://archive.org/details/wozaday_Deathmaze_5000) collection. That collection rarely mentions provenance, but it seems to deal exclusively with original pressings, not copies. While the disks it works from are not always factory-pristine and may be "contaminated" by game saves or high score tables, this one looks clean.
 
-An identical copy of that game file can be found at [Asimov](https://www.apple.asimov.net/images/games/file_based/ankh_crimewave_deathmaze5000_starmaze.dsk) on a disk captured many years earlier, bundled with some other games. Incidentally, that disk uses "Beautiful Boot" instead of standard DOS, which prevents the "save game to disk" feature from working. Transplanting the program file to a standard DOS disk allows saving to work normally.
+Corrroborating its authenticity, an identical copy of that game file can be found at [Asimov](https://www.apple.asimov.net/images/games/file_based/ankh_crimewave_deathmaze5000_starmaze.dsk) bundled with some other games on a disk captured many years earlier. Incidentally, that disk uses "Beautiful Boot" instead of standard DOS, which prevents the "save game to disk" feature from working. Transplanting the program file to a standard DOS disk allows saving to work normally.
 
-The earlier edition of the game has been in my own collection since 1980. It is not an official retail disk, yet for several reasons I feel confident my file came unmodified from one. There is no evidence of any vanity vandalism typically inserted by crackers. The woz disk isn't copy protected, so this one probably wasn't either. There are some minor bugs not present in the woz edition. Forensic analysis of the two files show rippled jump-offset changes which typically result from recompiling source rather than hacking.
+The **earlier edition** of the game has been in my own collection since 1980. It is not an official retail disk, yet for several reasons I feel confident my file came unmodified from one. There is no evidence of any vanity vandalism typically inserted by crackers. The woz disk isn't copy protected, so this one probably wasn't either. There are some minor bugs not present in the woz edition. Forensic analysis of the two files show rippled jump-offset changes which typically result from recompiling source rather than hacking.
 
 See also "Fadden listing" below.
 
 ## Observations
 
+The game was originally written for the Z80 instruction set of the TRS-80 and ported to 6502 for the Apple II. This could explain certain anomalies, such as always using indirect addressing with indexing (`lda (ptr),y`) rather than absolute indexing (`lda addr,x`) where possible, or why the `A` register is used as an intermediary for loading values into `X` and `Y` rather than using `ldx` and `ldy`.
+
 The original authors used 1-based indexing ubiquitously, rather than machine-friendly 0-based indexing. In many cases this means setting up data table pointers to the address one entry earlier than where the table actually starts.
 
 The original authors used the assembly code instructions `bpl` and `bmi` after `cmp`, rather than the customary `bcs` and `bcc`. In the general case this is bad practice, but it works in Deathmaze because the numbers being compared are always unsigned 7-bit values (in the range 0 <= A <= 127). (Read more about 6502 comparison logic at <http://www.6502.org/tutorials/compare_beyond.html>)
 
-The game was originally written for the Z80 instruction set of the TRS-80 and ported to 6502 for the Apple II. This could explain certain anomalies, such as always using indirect addressing with indexing (`lda (ptr),y`) rather than absolute indexing (`lda addr,x`) where possible, or why the `A` register is used as an intermediary for loading values into `X` and `Y` rather than using `ldx` and `ldy`.
-
 ## Development process
 
-Time spent: 10 weeks
+Time spent: 11 weeks
 * 2 weeks: disassembly and annotation
 * 1 week: organized into buildable project
 * 5 weeks: modifications for Fair Play
 * 1 week: bug fixes
 * 1 week: hint page
+* 1 week: adapt for ProDOS
 
 I used [Regenerator 1.7](https://csdb.dk/release/?id=149429) to disassemble and hand-label the binary program.
 
@@ -124,6 +127,13 @@ To build from the source you need this software:
 * Python 3.8
 * GNU Make 4.2
 
+To build the ProDOS disk you also need:
+
+* [cadius](https://github.com/mach-kernel/cadius)
+* a disk image with (any version of) [ProDOS](https://prodos8.com/) itself on it, along with BASIC.SYSTEM, placed at `files/prodos.po`
+
 My development environment is Windows Subsystem for Linux, Ubuntu flavor ... although any Linux should do.
 
-Type `make all` to produce a DOS 3.3 disk image in the `output` folder.
+Type `make all` to produce both ProDOS and DOS 3.3 disk images in the `output` folder.
+
+Type `make dos` to produce only a DOS 3.3 disk image in the `output` folder.
