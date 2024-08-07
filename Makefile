@@ -19,10 +19,12 @@ clean_tempfiles:
 
 output_dir = output
 extras_dir = extras
+build_prodos = build/prodos
 
 FOLDERS += \
 	$(output_dir) \
-	$(extras_dir)
+	$(extras_dir) \
+	$(build_prodos)
 
 
 # Extra files, not part of the game.
@@ -81,7 +83,7 @@ $(FOLDERS):
 	mkdir -p $@
 
 
-# Disk image
+# DOS 3.3 Disk image
 
 FILES = \
 	files/HELLO.bas \
@@ -103,11 +105,52 @@ $(DISK): $(FILES) $(DOS) | $(output_dir)
 	tools/dos33.py --sector-write --track 0 --sector 0 $@ $(DOS)  || (rm -f $@ && exit 1)
 	tools/dos33.py --write --caps --attr $(ATTR) $@ $(FILES) || (rm -f $@ && exit 1)
 
-disk: $(DISK)
+dos: $(DISK)
 
-CLEAN += clean_disk
-clean_disk:
+CLEAN += clean_dos
+clean_dos:
 	rm -f $(DISK)
+
+
+# ProDOS Disk image
+
+PRODOS = files/prodos.po
+
+PRODOS_FILES = \
+	$(PRODOS) \
+	files/STARTUP.bas \
+	$(output_dir)/deathmaze_fixed_prodos.prg \
+	$(output_dir)/deathmaze_fairplay_prodos.prg
+
+
+PRODISK = $(output_dir)/deathmaze.po
+
+CADIUS = cadius
+PYTHON = python3
+
+# cadius requires absolute paths when extracting, so we have to detect volume of the PRODOS disk
+GET_VOLUME = $(shell cadius CATALOG $(PRODOS) | $(PYTHON) -c 'import sys;print(list(sys.stdin)[3])')
+# cadius appends attribute string to filename on extract, which we'll match with a wildcard
+GEN_PRODOS = $(wildcard $(build_prodos)/PRODOS*)
+GEN_BASIC  = $(wildcard $(build_prodos)/BASIC.SYSTEM*)
+
+$(PRODISK): $(PRODOS_FILES)
+	@echo "Creating $@"
+	cadius CREATEVOLUME $@ DEATHMAZE 140kb
+	$(eval VOLUME = $(GET_VOLUME))
+	cadius EXTRACTFILE $(PRODOS) $(VOLUME)PRODOS $(build_prodos)
+	cadius EXTRACTFILE $(PRODOS) $(VOLUME)BASIC.SYSTEM $(build_prodos)
+	cp files/STARTUP.bas $(build_prodos)/STARTUP#fc0801
+	cp $(output_dir)/deathmaze_fixed_prodos.prg $(build_prodos)/ORIGINAL#060803
+	cp $(output_dir)/deathmaze_fairplay_prodos.prg $(build_prodos)/FAIRPLAY#060803
+	cadius ADDFOLDER $@ /DEATHMAZE/ $(build_prodos)
+
+prodos: $(PRODISK)
+
+CLEAN += clean_prodos
+clean_prodos:
+	rm -f $(PRODISK)
+	rm -rf $(build_prodos)
 
 
 # Targets that are not explicit files
@@ -126,4 +169,4 @@ clean: $(CLEAN)
 
 distclean: $(DISTCLEAN)
 
-all: $(VERSIONS) disk
+all: $(VERSIONS) dos prodos
