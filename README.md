@@ -2,11 +2,9 @@
 
 *A fan mod by Sean Gugler*
 
-You can play online right now:
-1. Download `deathmaze.do` from <https://github.com/sean-gugler/DeathmazeFairPlay/releases>
-2. Visit <https://www.scullinsteel.com/apple2/> and click the "open folder" icon (tip: F2 toggles full-screen)
+[Play](https://apple2ts.com/?color=white&appmode=game#https://github.com/sean-gugler/DeathmazeFairPlay/releases/download/v2024.01/deathmaze.do) online! Click on the game screen to activate keyboard input, then type "4" to play the Fair Play edition. Wait a few moments while the game loads.
 
-When the disk boots, choose option 4 to play the Fair Play edition.
+Or [Download](https://github.com/sean-gugler/DeathmazeFairPlay/releases) `deathmaze.do` to play in your favorite emulator or transfer to a physical floppy disk.
 
 ## Hints
 
